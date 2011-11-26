@@ -10,7 +10,12 @@
     
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.11/jquery-ui.min.js" type="text/javascript"></script>
+
     <script src="js/neon.js" type="text/javascript"></script>
+    
+    <!-- fabric includes -->
+    <script src="libs/fabric_all.min.js"></script>
+
     <script type="text/javascript">
     $(document).ready(function() {
         $('#neon-wrapper').neon({
@@ -19,11 +24,59 @@
 
         var neon = $('#neon-wrapper').data('neon');
         neon.publicMethod();
+
+        var canvas = new fabric.Canvas('canvas');
+
+        function makeLine(coords) {
+            return new fabric.Line(coords, {
+            fill: 'black',
+            strokeWidth: 1,
+            selectable: false
+            });
+        }
+
+        var s1 = makeLine([50, 50, 800, 50]),
+            s2 = makeLine([50, 70, 800, 70]),
+            s3 = makeLine([50, 90, 800, 90]),
+            s4 = makeLine([50, 110, 800, 110]);
+        canvas.add(s1,s2,s3,s4);
+        
+        fabric.loadSVGFromURL('images/neumes.svg', function(objects) {
+
+          var punctum = objects[0].scale(0.07).set({left:90, top: 76, opacity: 0.5});
+          var cclef = objects[1].scale(0.07).set({left:64, top: 62});
+          punctum.hasControls = punctum.hasBorders = false;
+          cclef.selectable = false;
+          canvas.add(punctum,cclef);
+
+          canvas.observe('mouse:move', function(e) {
+
+            var p = canvas.getPointer(e.memo.e);
+            var curLeft = p.x;
+            var curTop = p.y + 15;
+            punctum.set({left: curLeft, top: curTop});
+           
+            canvas.renderAll();
+          });
+
+          canvas.observe('mouse:down', function(e) {
+              console.log("click");
+            var p = canvas.getPointer(e.memo.e);
+            var curLeft = p.x;
+            var curTop = p.y + 15;
+            var newPunctum = punctum.clone().scale(0.07).set({left: curLeft, top: curTop, opacity: 1});
+
+            canvas.add(newPunctum);
+            canvas.renderAll();
+          });
+        });    
+    
     });
     </script>
 </head>
 <body>
     <h1>Neon.js Demo</h1>
+    <canvas id="canvas" width="1000" height="1500" style="outline:#000000 solid 2px"></canvas>
     <div id="neon-wrapper">
     </div>
 </body>
