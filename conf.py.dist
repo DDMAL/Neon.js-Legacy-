@@ -1,0 +1,8 @@
+# Path where neon will read/write MEI files from.
+MEI_DIRECTORY = ""
+
+# The absolute path to where this app will sit on a server. e.g. "/" or "/neon"
+APP_ROOT = "/"
+
+# Tornado server debug
+DEBUG = True
