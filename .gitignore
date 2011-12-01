@@ -1,0 +1,4 @@
+conf.py
+*.pyc
+static/js/neon.js
+.DS_Store
