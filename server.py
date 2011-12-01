@@ -13,8 +13,35 @@ import pymei.Export.meitojson
 import conf
 
 class RootHandler(tornado.web.RequestHandler):
+    def get_files(self):
+        dir = os.path.abspath(conf.MEI_DIRECTORY)
+        files = os.listdir(dir)
+        newfiles = []
+        for f in files:
+            try:
+                mei = pymei.Import.xmltomei.xmltomei(os.path.join(dir, f))
+                newfiles.append(f)
+            except Exception, e:
+                pass
+        return newfiles
+
     def get(self):
-        self.render("templates/index.html")
+        self.render("templates/index.html", files=self.get_files(), errors="")
+
+    def post(self):
+        mei = self.request.files.get("mei", [])
+        errors = ""
+        if len(mei):
+            fn = mei[0]["filename"]
+            contents = mei[0]["body"]
+            dir = os.path.abspath(conf.MEI_DIRECTORY)
+            if os.path.exists(os.path.join(dir, fn)):
+                errors = "file already exists"
+            else:
+                fp = open(os.path.join(dir, fn), "w")
+                fp.write(contents)
+                fp.close()
+        self.render("templates/index.html", files=self.get_files(), errors=errors)
 
 class EditorHandler(tornado.web.RequestHandler):
     def get(self, page):
