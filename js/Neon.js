@@ -25,8 +25,8 @@ THE SOFTWARE.
     var Neon = function(element, options)
     {
         var elem = $(element);
-        var obj = this;
         var f_canvas;
+        var glyphs;
        
         // These are variables which can be overridden upon instantiation
         var defaults = {
@@ -59,6 +59,28 @@ THE SOFTWARE.
         /******************************
          *      PRIVATE FUNCTIONS     *
          ******************************/
+        var loadGlyphs = function() {
+            console.log("loading svg glyphs ...");
+            glyphs = new Object();
+
+            $.ajax({
+                type: "GET",
+                url: "static/img/neumes_concat.svg",
+                dataType: "xml",
+                success: function(svg) {
+                    // for each glyph, load it into fabric
+                    $(svg).find("svg").each(function() {
+                        // http://stackoverflow.com/questions/652763/jquery-object-to-string
+                        var svgRoot = $(this);
+                        var rawSVG = $("<lol>").append(svgRoot.clone()).remove().html();
+                        fabric.loadSVGFromString(rawSVG, function(objects) {
+                            glyphs[svgRoot.find("path").attr("id")] = objects[0].scale(0.5);
+                        });
+                    });
+                }
+            });
+        };
+        
         var init = function() {
             // add canvas element to the element tied to the jQuery plugin
             var canvas = document.createElement("canvas");
@@ -71,10 +93,14 @@ THE SOFTWARE.
             elem.prepend(canvas);
 
             f_canvas = new fabric.Canvas("canvas");
+
+            loadGlyphs();
         };
 
         // Call the init function when this object is created.
         init();
+        
+        
     };
 
     $.fn.neon = function(options)
