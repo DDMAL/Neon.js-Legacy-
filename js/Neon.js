@@ -26,6 +26,7 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var obj = this;
+        var f_canvas;
        
         // These are variables which can be overridden upon instantiation
         var defaults = {
@@ -44,19 +45,36 @@ THE SOFTWARE.
         /******************************
          *      PUBLIC FUNCTIONS      *
          ******************************/
-        this.publicMethod = function()
+        this.importFile = function()
         {
-            console.log('public method called!');
-            privateMethod();
+            console.log('importing MEI in JSON format ...');
         };
+
+        this.exportFile = function()
+        {
+            console.log("exporting JSON ...");
+        }
+
 
         /******************************
          *      PRIVATE FUNCTIONS     *
          ******************************/
-        var privateMethod = function()
-        {
-            console.log('private method called!');
+        var init = function() {
+            // add canvas element to the element tied to the jQuery plugin
+            var canvas = document.createElement("canvas");
+            canvas.setAttribute("id", "canvas");
+            
+            // TODO: getPageWidth and getPageHeight parse from JSONified MEI file
+            canvas.setAttribute("width", 1000);
+            canvas.setAttribute("height", 1000);
+            
+            elem.prepend(canvas);
+
+            f_canvas = new fabric.Canvas("canvas");
         };
+
+        // Call the init function when this object is created.
+        init();
     };
 
     $.fn.neon = function(options)
