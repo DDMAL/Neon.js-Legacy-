@@ -11,7 +11,10 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
-        $('#neon-wrapper').neon();
+        $('#neon-wrapper').neon({
+          autoLoad: true,
+          filename: "{{page}}"
+        });
     });
     </script>
 </head>

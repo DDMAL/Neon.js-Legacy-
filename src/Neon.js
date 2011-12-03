@@ -83,6 +83,12 @@ THE SOFTWARE.
             });
         };
 
+        var loadPage = function(fileName) {
+            $.get("/"+fileName+"/mei", function(data) {
+                console.debug(data);
+            });
+        };
+
         var init = function() {
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
@@ -101,7 +107,9 @@ THE SOFTWARE.
 
         // Call the init function when this object is created.
         init();
-
+        if (settings.autoLoad) {
+            loadPage(settings.filename);
+        }
 
     };
 
