@@ -65,21 +65,16 @@ THE SOFTWARE.
         var loadGlyphs = function() {
             console.log("loading svg glyphs ...");
             glyphs = new Object();
-
-            $.ajax({
-                type: "GET",
-                url: "/static/img/neumes_concat.svg",
-                dataType: "xml",
-                success: function(svg) {
-                    // for each glyph, load it into fabric
-                    $(svg).find("svg").each(function(it, el) {
-                        // http://stackoverflow.com/questions/652763/jquery-object-to-string
-                        var rawSVG = $("<lol>").append($(el).clone()).remove().html();
-                        fabric.loadSVGFromString(rawSVG, function(objects) {
-                            glyphs[$(el).find("path").attr("id")] = objects[0].scale(0.5);
-                        });
+            
+            $.get("/static/img/neumes_concat.svg", function(svg) {
+                // for each glyph, load it into fabric
+                $(svg).find("svg").each(function(it, el) {
+                    // http://stackoverflow.com/questions/652763/jquery-object-to-string
+                    var rawSVG = $("<lol>").append($(el).clone()).remove().html();
+                    fabric.loadSVGFromString(rawSVG, function(objects) {
+                        glyphs[$(el).find("path").attr("id")] = objects[0].scale(0.5);
                     });
-                }
+                });
             });
         };
 
