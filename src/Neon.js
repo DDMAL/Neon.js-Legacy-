@@ -96,16 +96,24 @@ THE SOFTWARE.
 
             f_canvas = new fabric.Canvas(settings.canvasid);
 
+            // load neume glyphs from svg file
             loadGlyphs();
-
+            
+            // load MEI file from server
+            if (settings.autoLoad) {
+                loadPage(settings.filename);
+            }
         };
 
         // Call the init function when this object is created.
         init();
-        if (settings.autoLoad) {
-            loadPage(settings.filename);
+
+        // handler for when ajax calls have been completed
+        var loaded = function() {
+            console.log("Load successful. Neon.js ready.");
         }
 
+        elem.ajaxStop(loaded);
     };
 
     $.fn.neon = function(options)
