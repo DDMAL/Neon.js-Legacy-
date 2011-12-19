@@ -54,10 +54,14 @@ class MeiFileHandler(tornado.web.RequestHandler):
         if not os.path.exists(os.path.abspath(fullpath)):
             self.send_error(403)
         else:
-            mei = pymei.Import.xmltomei.xmltomei(fullpath)
-            response = pymei.Export.meitojson.meitojson(mei, prettyprint=False)
-            self.set_header("Content-Type", "application/json")
-            self.write(response)
+			fp = open(fullpath, "r")
+			response = fp.read()
+			self.set_header("Content-Type", "text/xml")
+			self.write(response)
+			# to serve JSON instead of xml
+			#response = pymei.Export.meitojson.meitojson(mei, prettyprint=False)
+			#self.set_header("Content-Type", "application/json")
+			#self.write(response)
 
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),

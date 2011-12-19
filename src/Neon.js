@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2011 by Gregory Burlet
+Copyright (C) 2011 by Gregory Burlet, Alastair Porter
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var f_canvas;
+		var page;
         var glyphs;
 
         // These are variables which can be overridden upon instantiation
@@ -48,22 +49,28 @@ THE SOFTWARE.
         /******************************
          *      PUBLIC FUNCTIONS      *
          ******************************/
-        this.importFile = function()
-        {
-            console.log('importing MEI in JSON format ...');
-        };
-
-        this.exportFile = function()
-        {
-            console.log("exporting JSON ...");
-        }
-
+		// placeholder
 
         /******************************
          *      PRIVATE FUNCTIONS     *
          ******************************/
+		var init = function() {
+            // load neume glyphs from svg file
+            loadGlyphs();
+            
+			// create page
+   			page = new Toe.Page();
+            if (settings.autoLoad) {
+				// load MEI file from server
+                loadPage(settings.filename, page);
+            }
+			else {
+				page.setDimensions(settings.width, settings.height);
+			}
+        };
+
         var loadGlyphs = function() {
-            console.log("loading svg glyphs ...");
+            console.log("loading SVG glyphs ...");
             glyphs = new Object();
             
             $.get("/static/img/neumes_concat.svg", function(svg) {
@@ -78,40 +85,38 @@ THE SOFTWARE.
             });
         };
 
-        var loadPage = function(fileName) {
-            $.get("/"+fileName+"/mei", function(data) {
-                console.debug(data);
+        var loadPage = function(fileName, page) {
+            $.get("/"+fileName+"/mei", function(mei) {
+				console.log("loading MEI file ...");
+
+				// set page dimensions
+				page.calcDimensions($(mei).find("zone"));	
             });
         };
 
-        var init = function() {
-            // add canvas element to the element tied to the jQuery plugin
+        // handler for when ajax calls have been completed
+        var loaded = function() {
+			// add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
-            // TODO: getPageWidth and getPageHeight parse from JSONified MEI file
-            canvas.attr("width", settings.width);
-            canvas.attr("height", settings.height);
+			// sanity check
+			if (!page.width || !page.height) {
+				throw new Error("Page dimensions have not been set.");
+			}
+
+			// make canvas dimensions the size of the page 
+           	canvas.attr("width", page.width);
+           	canvas.attr("height", page.height);
 
             elem.prepend(canvas);
 
             f_canvas = new fabric.Canvas(settings.canvasid);
 
-            // load neume glyphs from svg file
-            loadGlyphs();
-            
-            // load MEI file from server
-            if (settings.autoLoad) {
-                loadPage(settings.filename);
-            }
-        };
-
-        // Call the init function when this object is created.
-        init();
-
-        // handler for when ajax calls have been completed
-        var loaded = function() {
             console.log("Load successful. Neon.js ready.");
         }
+		
+		// Call the init function when this object is created.
+        init();
 
         elem.ajaxStop(loaded);
     };
