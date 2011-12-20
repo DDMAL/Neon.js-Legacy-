@@ -24,12 +24,8 @@ THE SOFTWARE.
  * Creates a new page
  * @requires Toe
  * @class Represents a page of music
- * @param {jQuery Wrapped Element Set} meiZones bounding boxes from facsimile data from an MEI document
  */
 Toe.Page = function() {
-	this.width = undefined;
-	this.height = undefined;
-
 	// initialize staves
 	this.staves = new Array();
 }
