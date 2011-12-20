@@ -26,7 +26,7 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var f_canvas;
-		var page;
+        var page;
         var glyphs;
 
         // These are variables which can be overridden upon instantiation
@@ -49,29 +49,29 @@ THE SOFTWARE.
         /******************************
          *      PUBLIC FUNCTIONS      *
          ******************************/
-		// placeholder
+        // placeholder
 
         /******************************
          *      PRIVATE FUNCTIONS     *
          ******************************/
-		var init = function() {
+        var init = function() {
             // load neume glyphs from svg file
             loadGlyphs();
             
-			// create page
-   			page = new Toe.Page();
+            // create page
+            page = new Toe.Page();
             if (settings.autoLoad) {
-				// load MEI file from server
+                // load MEI file from server
                 loadPage(settings.filename, page);
             }
-			else {
-				page.setDimensions(settings.width, settings.height);
-			}
+            else {
+                page.setDimensions(settings.width, settings.height);
+            }
         };
 
         var loadGlyphs = function() {
             console.log("loading SVG glyphs ...");
-            glyphs = new Object();
+            glyphs = new Array();
             
             $.get("/static/img/neumes_concat.svg", function(svg) {
                 // for each glyph, load it into fabric
@@ -79,7 +79,11 @@ THE SOFTWARE.
                     // http://stackoverflow.com/questions/652763/jquery-object-to-string
                     var rawSVG = $("<lol>").append($(el).clone()).remove().html();
                     fabric.loadSVGFromString(rawSVG, function(objects) {
-                        glyphs[$(el).find("path").attr("id")] = objects[0].scale(0.5);
+                        // keep svg bounding box information
+                        gWidth = $(el).attr("width");
+                        gHeight = $(el).attr("height");
+                        gID = $(el).find("path").attr("id");
+                        glyphs[gID] = new Toe.Glyph(gID, objects[0], [gWidth, gHeight]);
                     });
                 });
             });
@@ -87,26 +91,26 @@ THE SOFTWARE.
 
         var loadPage = function(fileName, page) {
             $.get("/"+fileName+"/mei", function(mei) {
-				console.log("loading MEI file ...");
+                console.log("loading MEI file ...");
 
-				// set page dimensions
-				page.calcDimensions($(mei).find("zone"));	
+                // set page dimensions
+                page.calcDimensions($(mei).find("zone"));   
             });
         };
 
         // handler for when ajax calls have been completed
         var loaded = function() {
-			// add canvas element to the element tied to the jQuery plugin
+            // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
-			// sanity check
-			if (!page.width || !page.height) {
-				throw new Error("Page dimensions have not been set.");
-			}
+            // sanity check
+            if (!page.width || !page.height) {
+                throw new Error("Page dimensions have not been set.");
+            }
 
-			// make canvas dimensions the size of the page 
-           	canvas.attr("width", page.width);
-           	canvas.attr("height", page.height);
+            // make canvas dimensions the size of the page 
+            canvas.attr("width", page.width);
+            canvas.attr("height", page.height);
 
             elem.prepend(canvas);
 
@@ -114,8 +118,8 @@ THE SOFTWARE.
 
             console.log("Load successful. Neon.js ready.");
         }
-		
-		// Call the init function when this object is created.
+        
+        // Call the init function when this object is created.
         init();
 
         elem.ajaxStop(loaded);
