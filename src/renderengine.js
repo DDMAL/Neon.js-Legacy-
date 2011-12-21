@@ -21,21 +21,47 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
  * @requires Toe
- * @class Represents a glyph
+ * @class 
  * 
  */
-Toe.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
+Toe.RenderEngine = function(options) {
+    this.options = {
+        globScale: 0.08
+    };
 
-    this.centre = [this.width/2, this.height/2];
+    $.extend(this.options, options);
 }
 
-Toe.Glyph.prototype.constructor = Toe.Glyph;
+Toe.RenderEngine.prototype.constructor = Toe.RenderEngine;
 
-// wrapper
-Toe.Glyph.prototype.clone = function() {
-    return this.obj.clone();
+Toe.RenderEngine.prototype.setGlyphs = function(glyphs) {
+    this.glyphs = glyphs;
+}
+
+Toe.RenderEngine.prototype.setCanvas = function(f_canvas) {
+    this.canvas = f_canvas;
+}
+
+Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
+    return this.glyphs[svgKey];
+}
+
+Toe.RenderEngine.prototype.draw = function(elements, modify) {
+    if (modify) {
+        elements = this.preprocess(elements);
+    }
+
+    for(var i = 0; i < elements.length; i++) {
+        this.canvas.add(elements[i]);
+    }
+}
+
+Toe.RenderEngine.prototype.preprocess = function(elements) {
+    // global transformations go here (ie., global scale, translation, rotation)
+    for (var i = 0; i < elements.length; i++) {
+        elements[i] = elements[i].scale(this.options.globScale);
+    }
+
+    return elements;
 }

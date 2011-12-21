@@ -26,8 +26,8 @@ THE SOFTWARE.
  * @class Represents a page of music
  */
 Toe.Page = function() {
-	// initialize staves
-	this.staves = new Array();
+    // initialize staves
+    this.staves = new Array();
 }
 
 Toe.Page.prototype.constructor = Toe.Page;
@@ -42,38 +42,57 @@ Toe.Page.prototype.constructor = Toe.Page;
  */
 
 Toe.Page.prototype.setDimensions = function(width, height) {
-	this.width = width;
-	this.height = height;
+    this.width = width;
+    this.height = height;
 }
 
 /**
  * Calculate dimensions of page from bounding boxes within facsimile data in MEI file
  * 
- * (.) <ulx,uly>		(.)
+ * (.) <ulx,uly>        (.)
  *
  *
- * (.) 		  <lrx,lry> (.)
+ * (.)        <lrx,lry> (.)
  *
  * @param {jQuery Wrapped Element Set} meiZones bounding boxes from facsimile data from an MEI document
  * @property {Number} width Width of the canvas 
  * @property {Number} height Height of the canvas
  */
 Toe.Page.prototype.calcDimensions = function(meiZones) {
-	var max_x = 0;
-	var max_y = 0;
+    var max_x = 0;
+    var max_y = 0;
 
-	$(meiZones).each(function(it, el) {
-		var lrx = parseInt($(el).attr("lrx"));
-		var lry = parseInt($(el).attr("lry"));
-		if (lrx > max_x) {
-			max_x = lrx;
-		}
-		if (lry > max_y) {
-			max_y = lry;
-		}
-	});
-	
-	// set page properties
-	this.width = max_x;
-	this.height = max_y;
+    $(meiZones).each(function(it, el) {
+        var lrx = parseInt($(el).attr("lrx"));
+        var lry = parseInt($(el).attr("lry"));
+        if (lrx > max_x) {
+            max_x = lrx;
+        }
+        if (lry > max_y) {
+            max_y = lry;
+        }
+    });
+    
+    // set page properties
+    this.width = max_x;
+    this.height = max_y;
+}
+
+Toe.Page.prototype.addStaves = function(staff) {
+    for (var i = 0; i < arguments.length; i++) {
+        // check argument is a staff
+        if (!(staff instanceof Toe.Staff)) {
+            continue;
+        }
+
+        this.staves.push(arguments[i]);
+    }
+    return this;
+}
+ 
+Toe.Page.prototype.render = function() {   
+    // render staves
+    for (var i = 0; i < this.staves.length; i++) {
+        this.staves[i].render();
+    }
 }

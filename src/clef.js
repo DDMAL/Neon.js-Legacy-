@@ -21,21 +21,53 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a clef
  * @requires Toe
- * @class Represents a glyph
+ * @class Represents a clef
  * 
  */
-Toe.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
+Toe.Clef = function(clefType, rendEng, options) {
+    clefType = clefType.toLowerCase();
 
-    this.centre = [this.width/2, this.height/2];
+    this.clefInfo = Toe.Clef.types[clefType];
+    if (this.clefInfo == undefined) {
+        throw new Error("Clef: undefined clef type: '" + clefType + "'");
+    }
+
+    this.rendEng = rendEng;
+
+    this.props = {
+        staffLine: 2,
+        interact: false
+    };
+
+    $.extend(this.props, options);
 }
 
-Toe.Glyph.prototype.constructor = Toe.Glyph;
+Toe.Clef.types = {
+    "c": {
+        svgKey: "c_clef"
+    },
+    "f": {
+        svgKey: "f_clef"
+    }
+};
 
-// wrapper
-Toe.Glyph.prototype.clone = function() {
-    return this.obj.clone();
+Toe.Clef.prototype.constructor = Toe.Clef;
+
+Toe.Clef.prototype.setPosition = function(pos) {
+    this.x = pos[0];
+    this.y = pos[1];
+}
+
+Toe.Clef.prototype.render = function() {
+    if (!this.rendEng) {
+        throw new Error("Clef: Invalid render context");
+    }
+
+    var clef = this.rendEng.getGlyph(this.clefInfo.svgKey);
+    var glyphClef = clef.clone().set({left: this.x, top: this.y});
+    glyphClef.selectable = this.props.interact;
+
+    this.rendEng.draw([glyphClef], true);
 }

@@ -25,9 +25,8 @@ THE SOFTWARE.
     var Neon = function(element, options)
     {
         var elem = $(element);
-        var f_canvas;
         var page;
-        var glyphs;
+        var rendEng;
 
         // These are variables which can be overridden upon instantiation
         var defaults = {
@@ -55,8 +54,11 @@ THE SOFTWARE.
          *      PRIVATE FUNCTIONS     *
          ******************************/
         var init = function() {
+            // initialize rendering engine
+            rendEng = new Toe.RenderEngine();
+
             // load neume glyphs from svg file
-            loadGlyphs();
+            loadGlyphs(rendEng);
             
             // create page
             page = new Toe.Page();
@@ -69,23 +71,22 @@ THE SOFTWARE.
             }
         };
 
-        var loadGlyphs = function() {
+        var loadGlyphs = function(rendEng) {
             console.log("loading SVG glyphs ...");
-            glyphs = new Array();
             
             $.get("/static/img/neumes_concat.svg", function(svg) {
+                var glyphs = new Object();
+
                 // for each glyph, load it into fabric
                 $(svg).find("svg").each(function(it, el) {
                     // http://stackoverflow.com/questions/652763/jquery-object-to-string
                     var rawSVG = $("<lol>").append($(el).clone()).remove().html();
                     fabric.loadSVGFromString(rawSVG, function(objects) {
-                        // keep svg bounding box information
-                        gWidth = $(el).attr("width");
-                        gHeight = $(el).attr("height");
                         gID = $(el).find("path").attr("id");
-                        glyphs[gID] = new Toe.Glyph(gID, objects[0], [gWidth, gHeight]);
+                        glyphs[gID] = new Toe.Glyph(gID, objects[0]);
                     });
                 });
+                rendEng.setGlyphs(glyphs);
             });
         };
 
@@ -94,7 +95,7 @@ THE SOFTWARE.
                 console.log("loading MEI file ...");
 
                 // set page dimensions
-                page.calcDimensions($(mei).find("zone"));   
+                page.calcDimensions($(mei).find("zone"));
             });
         };
 
@@ -114,8 +115,12 @@ THE SOFTWARE.
 
             elem.prepend(canvas);
 
-            f_canvas = new fabric.Canvas(settings.canvasid);
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid));
 
+            // first system
+            var s1 = new Toe.Staff([190, 302, 1450, 406], rendEng);
+            page.addStaves(s1).render();
+            
             console.log("Load successful. Neon.js ready.");
         }
         
