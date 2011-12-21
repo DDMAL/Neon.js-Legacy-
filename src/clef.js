@@ -23,8 +23,11 @@ THE SOFTWARE.
 /**
  * Creates a clef
  * @requires Toe
+ * @requires Toe.RenderEngine
  * @class Represents a clef
- * 
+ * @param {String} clefType clef type: c or f
+ * @param {Toe.RenderEngine} drawing engine
+ * @param {Object} options staffline {Number}, interact {Boolean}
  */
 Toe.Clef = function(clefType, rendEng, options) {
     clefType = clefType.toLowerCase();
@@ -44,6 +47,10 @@ Toe.Clef = function(clefType, rendEng, options) {
     $.extend(this.props, options);
 }
 
+/**
+ * Types of clefs and their lookup keys
+ * @constant
+ */
 Toe.Clef.types = {
     "c": {
         svgKey: "c_clef"
@@ -55,11 +62,18 @@ Toe.Clef.types = {
 
 Toe.Clef.prototype.constructor = Toe.Clef;
 
+/**
+ * Sets the position of the clef on the page
+ * @param {Array} [x,y]
+ */
 Toe.Clef.prototype.setPosition = function(pos) {
     this.x = pos[0];
     this.y = pos[1];
 }
 
+/**
+ * Renders the clef on the canvas
+ */
 Toe.Clef.prototype.render = function() {
     if (!this.rendEng) {
         throw new Error("Clef: Invalid render context");

@@ -21,6 +21,6 @@ THE SOFTWARE.
 */
 
 /**
- * Neon namespace: the table of elements
+ * @namespace Neon namespace: the table of elements
  */
 Toe = {}

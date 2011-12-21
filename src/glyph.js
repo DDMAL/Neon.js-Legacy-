@@ -23,14 +23,14 @@ THE SOFTWARE.
 /**
  * Creates a glyph
  * @requires Toe
- * @class Represents a glyph
+ * @class Represents a glyph imported from SVG
  * 
  */
 Toe.Glyph = function(svgKey, fabricObj) {
     this.key = svgKey;
     this.obj = fabricObj;
 
-    this.centre = [this.width/2, this.height/2];
+    this.centre = [this.obj.width/2, this.obj.height/2];
 }
 
 Toe.Glyph.prototype.constructor = Toe.Glyph;

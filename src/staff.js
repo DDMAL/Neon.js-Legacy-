@@ -23,13 +23,18 @@ THE SOFTWARE.
 /**
  * Creates a staff
  * @requires Toe
+ * @requires Toe.Clef
+ * @requires Toe.RenderEngine
  * @class Represents a Staff
  * 
- * bounding box:
+ * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
  * (.) <ulx,uly>        (.)
  *
  *
  * (.)        <lrx,lry> (.)
+ *
+ * @param {Toe.RenderEngine} rendEng drawing engine
+ * @param {Object} options [numlines {Number}, clefType {String}, clefIndent (px) {Number}, interact {Boolean}]
  */
 Toe.Staff = function(bb, rendEng, options) {
     // set position
@@ -57,6 +62,11 @@ Toe.Staff = function(bb, rendEng, options) {
 
 Toe.Staff.prototype.constructor = Toe.Staff;
 
+/**
+ * Sets the clef for the staff on the given staff line
+ * @param {String} clef c or f clef
+ * @param {Number} staffLine staffline the clef is on
+ */
 Toe.Staff.prototype.setClef = function(clef, staffLine) {
     if (staffLine > this.props.numLines) {
         throw new Error("Invalid clef position.");
@@ -69,6 +79,7 @@ Toe.Staff.prototype.setClef = function(clef, staffLine) {
 }
 
 /**
+ * Renders the staff according to the following scheme:
  *  <ulx,uly> =======
  *            ------- (line 1)
  *            ------- (line 2)

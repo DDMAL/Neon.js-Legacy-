@@ -21,9 +21,10 @@ THE SOFTWARE.
 */
 
 /**
+ * Rendering engine for canvas objects and glyphs
  * @requires Toe
- * @class 
- * 
+ * @class Rendering engine
+ * @param {Object} options globScale {Number}
  */
 Toe.RenderEngine = function(options) {
     this.options = {
@@ -35,18 +36,35 @@ Toe.RenderEngine = function(options) {
 
 Toe.RenderEngine.prototype.constructor = Toe.RenderEngine;
 
+/**
+ * Set the glyph set for the rendering engine
+ * @param {Object} glyphs Dictionary set of Toe.Glyph objects imported from SVG
+ */
 Toe.RenderEngine.prototype.setGlyphs = function(glyphs) {
     this.glyphs = glyphs;
 }
 
+/**
+ * Set the context to draw on
+ * @param {Object} f_canvas The Fabric.js canvas
+ */
 Toe.RenderEngine.prototype.setCanvas = function(f_canvas) {
     this.canvas = f_canvas;
 }
 
+/**
+ * Getter for glyph accesses from musical elements
+ * @param {String} svgKey lookup key to attain the glyph
+ */
 Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
+/**
+ * Draws the elements to the Fabric.js canvas and applies any global transformations
+ * @param {Array} elements Array of fabric objects to draw
+ * @param {Boolean} modify Perform global transformations on this element set
+ */
 Toe.RenderEngine.prototype.draw = function(elements, modify) {
     if (modify) {
         elements = this.preprocess(elements);
@@ -57,8 +75,12 @@ Toe.RenderEngine.prototype.draw = function(elements, modify) {
     }
 }
 
+/**
+ * Perform global transformations (ie., scale, translation, rotation) to element set
+ * @param {Array} elements Array of fabric objects to transform
+ */
 Toe.RenderEngine.prototype.preprocess = function(elements) {
-    // global transformations go here (ie., global scale, translation, rotation)
+    // global transformations go here 
     for (var i = 0; i < elements.length; i++) {
         elements[i] = elements[i].scale(this.options.globScale);
     }

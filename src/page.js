@@ -33,7 +33,7 @@ Toe.Page = function() {
 Toe.Page.prototype.constructor = Toe.Page;
 
 /**
- * Set canvas width and height
+ * Set canvas width and height directly
  *
  * @param {Number} width Width of the page
  * @param {Number} height Height of the page
@@ -78,6 +78,11 @@ Toe.Page.prototype.calcDimensions = function(meiZones) {
     this.height = max_y;
 }
 
+/**
+ * Adds a given number of staves to the page
+ * @function
+ * @param {Toe.Staff} any number of staves, seperated by commas as arguments
+ */
 Toe.Page.prototype.addStaves = function(staff) {
     for (var i = 0; i < arguments.length; i++) {
         // check argument is a staff
@@ -89,7 +94,11 @@ Toe.Page.prototype.addStaves = function(staff) {
     }
     return this;
 }
- 
+
+/**
+ * Renders the page and all staves attached to the page
+ * @function
+ */
 Toe.Page.prototype.render = function() {   
     // render staves
     for (var i = 0; i < this.staves.length; i++) {
