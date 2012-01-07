@@ -26,6 +26,7 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var page;
+        var mei;
         var rendEng;
 
         // These are variables which can be overridden upon instantiation
@@ -91,11 +92,14 @@ THE SOFTWARE.
         };
 
         var loadPage = function(fileName, page) {
-            $.get("/"+fileName+"/mei", function(mei) {
+            $.get("/"+fileName+"/mei", function(data) {
                 console.log("loading MEI file ...");
 
                 // set page dimensions
-                page.calcDimensions($(mei).find("zone"));
+                page.calcDimensions($(data).find("zone"));
+
+                // save mei data
+                mei = data;
             });
         };
 
@@ -116,6 +120,9 @@ THE SOFTWARE.
             elem.prepend(canvas);
 
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid));
+
+            // set global scale
+            rendEng.calcScaleFromStaff("c_clef", 20.8);
 
             // first system
             var s1 = new Toe.Staff([190, 302, 1450, 406], rendEng);
