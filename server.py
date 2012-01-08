@@ -12,18 +12,13 @@ import pymei.Export.meitojson
 
 import conf
 
+assert tornado.version_info > (2, 0, 0)
+
 class RootHandler(tornado.web.RequestHandler):
     def get_files(self):
         dir = os.path.abspath(conf.MEI_DIRECTORY)
         files = os.listdir(dir)
-        newfiles = []
-        for f in files:
-            try:
-                mei = pymei.Import.xmltomei.xmltomei(os.path.join(dir, f))
-                newfiles.append(f)
-            except Exception, e:
-                pass
-        return newfiles
+        return files
 
     def get(self):
         self.render("templates/index.html", files=self.get_files(), errors="")
@@ -34,13 +29,18 @@ class RootHandler(tornado.web.RequestHandler):
         if len(mei):
             fn = mei[0]["filename"]
             contents = mei[0]["body"]
-            dir = os.path.abspath(conf.MEI_DIRECTORY)
-            if os.path.exists(os.path.join(dir, fn)):
-                errors = "file already exists"
-            else:
-                fp = open(os.path.join(dir, fn), "w")
-                fp.write(contents)
-                fp.close()
+            try:
+                mei = pymei.Import.xmltomei.xmlstrtomei(contents)
+                dir = os.path.abspath(conf.MEI_DIRECTORY)
+                if os.path.exists(os.path.join(dir, fn)):
+                    errors = "file already exists"
+                else:
+                    fp = open(os.path.join(dir, fn), "w")
+                    fp.write(contents)
+                    fp.close()
+            except Exception, e:
+                errors = "invalid mei file"
+
         self.render("templates/index.html", files=self.get_files(), errors=errors)
 
 class EditorHandler(tornado.web.RequestHandler):
