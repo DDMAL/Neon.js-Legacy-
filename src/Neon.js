@@ -131,11 +131,15 @@ THE SOFTWARE.
             var s1 = new Toe.Staff([190, 302, 1450, 406], rendEng);
             s1.setClef("c", 1);
 
+            /* test
             var n1 = new Toe.Neume(rendEng);
             var ndata = $(mei).find("neume")[0];
             n1.neumeFromMei(ndata, $(mei).find("zone[xml\\:id=" + $(ndata).attr("facs") + "]")[0]);
-            //<zone lry="635" lrx="1447" xml:id="m-148e5db0-8f9b-49de-ba1b-9fdec93ec173" uly="534" ulx="22"/>
-            var s2 = new Toe.Staff([22,534,1447,635], rendEng);
+            */
+            
+            // second system
+            // <zone lry="635" lrx="1447" xml:id="m-148e5db0-8f9b-49de-ba1b-9fdec93ec173" uly="534" ulx="22"/>
+            var s2 = new Toe.Staff([22, 534, 1447, 635], rendEng);
             s2.setClef("c", 1);
 
             page.addStaves(s1, s2).render();

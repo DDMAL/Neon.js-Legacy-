@@ -87,6 +87,15 @@ Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
 	return scale;
 }
 
+// [x1, y1, x2, y2]
+Toe.RenderEngine.prototype.createLine = function(coords, interact) {
+	return new fabric.Line(coords, {
+		fill: 'black',
+        strokeWidth: 1,
+        selectable: interact
+    });
+}
+
 /**
  * Draws the elements to the Fabric.js canvas and applies any global transformations
  * @param {Array} elements Array of fabric objects to draw

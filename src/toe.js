@@ -24,3 +24,9 @@ THE SOFTWARE.
  * @namespace Neon namespace: the table of elements
  */
 Toe = {}
+
+/**
+ * Musical information
+ * May eventually be moved to a musical methods class
+ */
+Toe.neumaticChroma = ["a", "b", "c", "d", "e", "f", "g"];
