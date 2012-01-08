@@ -60,17 +60,20 @@ Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
-Toe.RenderEngine.prototype.calcScaleFromStaff = function(clefSvgKey, height, options) {
+Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
 	opts = {
 		overwrite: false
 	};
 
 	$.extend(opts, options);
 
-	// clef spans 2 stafflines with 4 pixel verticle buffer	
+	var delta_y = parseInt($(sysFacs).attr("lry")) - parseInt($(sysFacs).attr("uly"));
+	var height = delta_y / 5;
+ 
+	// clef spans 2 stafflines with 4 pixel verticle buffer
 	height = (height * 2) - 4;
 
-	var glyph = this.getGlyph(clefSvgKey).clone();
+	var glyph = this.getGlyph("c_clef").clone();
 	var glyphHeight = glyph.height;
 
 	scale = Math.abs(height / glyphHeight);
