@@ -332,23 +332,26 @@ Toe.Neume.prototype.deriveName = function() {
     }
 
     var diffs = this.getDifferences();
+
     // convert to ups and downs
-    $.map(diffs, function(x, i) {
-        if (x > 0) {
-            return 1;
+    var prevDiff = diffs[0];
+    diffs = $.map(diffs, function(x, i) {
+        var relation = 0;
+        if (x > prevDiff) {
+            relation = 1;
         }
-        else if (x < 0) {
-            return -1;
+        else if (x < prevDiff) {
+            relation = -1;
         }
-        else {
-            return 0;
-        }
+        
+        prevDiff = x;
+        return relation;
     });
 
     // linear search for now
     var neumeName = "unknown"
     $.each(Toe.Neume.Type, function(key, val) {        
-        if($.arraysEqual(diff, val.melodicMove)) {
+        if($.arraysEqual(diffs, val.melodicMove)) {
             neumeName = val.name;
             return false; // break
         }
