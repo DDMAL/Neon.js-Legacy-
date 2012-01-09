@@ -31,56 +31,28 @@ Toe = {};
 
 /**
  * Custom jQuery utility function
- * key frequency based linear comparison with type checking
- * m+n instead of m*n 
- * modified from http://bytes.com/topic/javascript/insights/699379-optimize-loops-compare-two-arrays
+ * Returns true if arrays are equal
  */
 (function($) {
-	$.arraysEqual = function(arr1, arr2) {
-		var temp = new Array();
-			
-		if (!$.isArray(arr1) || !$.isArray(arr2)) {
-			return false;
-		}
-		if (arr1.length != arr2.length) {
-			return false;
-		}
+    $.arraysEqual = function(arr1, arr2) {
+        if (arr1.length != arr2.length) {
+            return false;
+        }
 
-		// put all elements into tagged array
-		for (var i = 0; i < arr1.length; i++) {
-			var key = (typeof arr1[i]) + "_" + arr1[i];
-			// update frequencies
-			if (temp[key]) {
-				temp[key]++;
-			}
-			else {
-				temp[key] = 1;
-			}
-		}
+        var isEqual = true;
+        $.each(arr1, function(i, val) {
+            if (val != arr2[i]) {
+                isEqual = false;
+                return false;
+            }
+        });
 
-		// go through second array
-		for (var i = 0; i < arr2.length; i++) {
-			var key = (typeof arr2[i]) + "_" + arr2[i];
-			if (temp[key]) {
-				if (temp[key] == 0) {
-					return false;
-				}
-				else {
-					temp[key]--;
-				}
-			} 
-			else {
-				return false;
-			}
-		}
-	
-		// arrays are equal if we made it this far
-		return true;
-	}
+        return isEqual;
+    }
 })(jQuery);
 
 /**
  * Musical information
  * May eventually be moved to a musical methods class
  */
-Toe.neumaticChroma = ["a", "b", "c", "d", "e", "f", "g"];
+Toe.neumaticChroma = ["b", "c", "d", "e", "f", "g", "a"];
