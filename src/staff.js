@@ -39,10 +39,10 @@ THE SOFTWARE.
 Toe.Staff = function(bb, rendEng, options) {
     // set position
     this.zone = new Object();
-    this.zone.ulx = bb[0];
-    this.zone.uly = bb[1];
-    this.zone.lrx = bb[2];
-    this.zone.lry = bb[3];
+    this.zone.ulx = parseInt(bb[0]);
+    this.zone.uly = parseInt(bb[1]);
+    this.zone.lrx = parseInt(bb[2]);
+    this.zone.lry = parseInt(bb[3]);
 
     this.rendEng = rendEng;
 
@@ -92,15 +92,6 @@ Toe.Staff.prototype.render = function() {
         throw new Error("Staff: Invalid render context");
     }
 
-    // private helper function
-    var makeStaffLine = function(coords, interact) {
-        return new fabric.Line(coords, {
-            fill: 'black',
-            strokeWidth: 1,
-            selectable: interact
-        });
-    }
-
     var elements = new Array();
     
     var delta_y = Math.abs(this.zone.lry - this.zone.uly);
@@ -109,7 +100,7 @@ Toe.Staff.prototype.render = function() {
     // render staff lines
     for (var li = 1; li <= this.props.numLines; li++) {
         var yval = this.zone.uly+(li*partition);
-        elements.push(makeStaffLine([this.zone.ulx, yval, this.zone.lrx, yval], this.props.interact));
+        elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], this.props.interact));
     }
     
     // render clef
@@ -118,3 +109,5 @@ Toe.Staff.prototype.render = function() {
         
     this.rendEng.draw(elements, false);
 }
+
+// staff has list of neumes on the staff

@@ -60,6 +60,42 @@ Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
+Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
+	opts = {
+		overwrite: false
+	};
+
+	$.extend(opts, options);
+
+	var delta_y = parseInt($(sysFacs).attr("lry")) - parseInt($(sysFacs).attr("uly"));
+	var height = delta_y / 5;
+ 
+	// clef spans 2 stafflines with 4 pixel verticle buffer
+	height = (height * 2) - 4;
+
+	var glyph = this.getGlyph("c_clef").clone();
+	var glyphHeight = glyph.height;
+
+	scale = Math.abs(height / glyphHeight);
+
+	if (opts.overwrite) {
+		this.options.globScale = scale;
+	}
+	
+	console.log("setting global scale: " + this.options.globScale);
+
+	return scale;
+}
+
+// [x1, y1, x2, y2]
+Toe.RenderEngine.prototype.createLine = function(coords, interact) {
+	return new fabric.Line(coords, {
+		fill: 'black',
+        strokeWidth: 1,
+        selectable: interact
+    });
+}
+
 /**
  * Draws the elements to the Fabric.js canvas and applies any global transformations
  * @param {Array} elements Array of fabric objects to draw

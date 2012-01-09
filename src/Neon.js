@@ -26,6 +26,7 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var page;
+        var mei;
         var rendEng;
 
         // These are variables which can be overridden upon instantiation
@@ -91,11 +92,14 @@ THE SOFTWARE.
         };
 
         var loadPage = function(fileName, page) {
-            $.get("/"+fileName+"/mei", function(mei) {
+            $.get("/"+fileName+"/mei", function(data) {
                 console.log("loading MEI file ...");
 
                 // set page dimensions
-                page.calcDimensions($(mei).find("zone"));
+                page.calcDimensions($(data).find("zone"));
+
+                // save mei data
+                mei = data;
             });
         };
 
@@ -117,9 +121,28 @@ THE SOFTWARE.
 
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid));
 
+            // set global scale
+            var sb1ref = $($(mei).find("sb")[0]).attr("systemref");
+            var sys1facsid = $($(mei).find("system[xml\\:id=" + sb1ref + "]")[0]).attr("facs");
+            var sysFacs = $(mei).find("zone[xml\\:id=" + sys1facsid + "]")[0];
+            rendEng.calcScaleFromStaff(sysFacs, {overwrite: true});
+
             // first system
             var s1 = new Toe.Staff([190, 302, 1450, 406], rendEng);
-            page.addStaves(s1).render();
+            s1.setClef("c", 1);
+
+            /* test
+            var n1 = new Toe.Neume(rendEng);
+            var ndata = $(mei).find("neume")[0];
+            n1.neumeFromMei(ndata, $(mei).find("zone[xml\\:id=" + $(ndata).attr("facs") + "]")[0]);
+            */
+            
+            // second system
+            // <zone lry="635" lrx="1447" xml:id="m-148e5db0-8f9b-49de-ba1b-9fdec93ec173" uly="534" ulx="22"/>
+            var s2 = new Toe.Staff([22, 534, 1447, 635], rendEng);
+            s2.setClef("c", 1);
+
+            page.addStaves(s1, s2).render();
             
             console.log("Load successful. Neon.js ready.");
         }
@@ -150,4 +173,3 @@ THE SOFTWARE.
         });
     };
 })(jQuery);
-
