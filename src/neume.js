@@ -97,7 +97,7 @@ Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
         //DEBUG: console.log("note diff: " + diff);
 
         // TODO: get type of nc from mei
-        theNeume.components.push(new Toe.NeumeComponent(diff, theNeume.rendEng, {type: "punctum"}));
+        this.addComponent("punctum", diff);
     });
 
     // for chaining
@@ -105,7 +105,7 @@ Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
 }
 
 // neumePos is index 0 based
-Toe.Neume.prototype.addComponent = function(svgkey, diff, options) {
+Toe.Neume.prototype.addComponent = function(type, diff, options) {
     opts = {
         neumePos: null
     };
