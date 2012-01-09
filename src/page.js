@@ -86,7 +86,7 @@ Toe.Page.prototype.calcDimensions = function(meiZones) {
 Toe.Page.prototype.addStaves = function(staff) {
     for (var i = 0; i < arguments.length; i++) {
         // check argument is a staff
-        if (!(staff instanceof Toe.Staff)) {
+        if (!(arguments[i] instanceof Toe.Staff)) {
             continue;
         }
 

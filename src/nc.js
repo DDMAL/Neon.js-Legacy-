@@ -29,28 +29,44 @@ Toe.NeumeComponent = function(diff, rendEng, options) {
     this.rendEng = rendEng;
 
     this.props = {
-        type: Toe.NeumeComponent.Type.punctum,
+        type: "punctum",
         ornament: Toe.NeumeComponent.Ornament.NONE,
         interact: true
     };
 
     $.extend(this.props, options);
 
-    // sanity check
+    // check valid type
     this.props.type.toLowerCase();
-    if (Toe.NeumeComponent.Type[this.props.type] == undefined) {
+    this.props.type = Toe.NeumeComponent.Type[this.props.type];
+    if (this.props.type == undefined) {
         throw new Error("NeumeComponent: undefined neume component type");
     }
 }
 
 Toe.NeumeComponent.prototype.constructor = Toe.NeumeComponent;
 
-// name to svgkey
 Toe.NeumeComponent.Type = {
-    punctum: "Punctum",
-    whitepunct: "White Punctum",
-    diamond: "Inclinatum",
-    quilisma: "Quilisma"
+    punctum: {
+        name: "Punctum",
+        svgkey: "punctum"
+    },
+    whitepunct: {
+        name: "White Punctum",
+        svgkey: "whitepunct"
+    },
+    inclinatum: {
+        name: "Punctum Inclinatum",
+        svgkey: "diamond"
+    },
+    smallinclinatum: {
+        name: "Punctum Inclinatum Parvum",
+        svgkey: "smalldiamond"
+    },
+    quilisma: {
+        name: "Quilisma",
+        svgkey: "quilisma"
+    }
 };
 
 Toe.NeumeComponent.Ornament = {

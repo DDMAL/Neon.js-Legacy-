@@ -38,17 +38,17 @@ Toe.Neume = function(rendEng, options) {
     this.props = {
         name: null,
         rootNote: {
-            rootPitch: "c",
-            rootOct: 3
+            pitch: "c",
+            octave: 3
         },
         modifier: null,
         interact: true
     };
 
+    $.extend(this.props, options);
+
     // initialize neume component array
     this.components = new Array();
-
-    $.extend(this.props, options);
 }
 
 Toe.Neume.prototype.constructor = Toe.Neume;
@@ -57,7 +57,7 @@ Toe.Neume.prototype.constructor = Toe.Neume;
 Toe.Neume.Type = {
     punctum: {
         name: "Punctum",
-        melodicMove: [0],
+        melodicMove: [0]
     },
     virga: {
         name: "Virga",
@@ -227,7 +227,7 @@ Toe.Neume.Type = {
         name: "Torculus resupinus 4",
         melodicMove: [0, 1, -1, 1, -1, -1, -1]
     }
-}
+};
 
 Toe.Neume.prototype.setBoundingBox = function(bb) {
     // set position
@@ -237,9 +237,14 @@ Toe.Neume.prototype.setBoundingBox = function(bb) {
     this.zone.lry = bb[3];
 }
 
+Toe.Neume.prototype.setRootNote = function(pname, oct) {
+    this.props.rootNote.pitch = pname;
+    this.props.rootNote.octave = oct;
+}
+
 Toe.Neume.prototype.getPitchDifference = function(pname, oct) {
     var numChroma = Toe.neumaticChroma.length;
-    var rootNum = (this.props.rootNote.rootOct * numChroma) + $.inArray(this.props.rootNote.rootPitch, Toe.neumaticChroma);
+    var rootNum = (this.props.rootNote.octave * numChroma) + $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
     
     var ncNum = (oct * numChroma) + $.inArray(pname, Toe.neumaticChroma);
     
@@ -247,7 +252,17 @@ Toe.Neume.prototype.getPitchDifference = function(pname, oct) {
 }
 
 Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
+    // check the DOM element is in fact a neume
+    if (neumeData.nodeName.toLowerCase() != "neume") {
+        throw new Error("neumeFromMei: invalid neume data");
+    }
+
     this.props.name = $(neumeData).attr("name");
+    this.type = Toe.Neume.Type[this.props.name];
+    // if neume is unknown
+    if (this.type == undefined) {
+        this.type = "unknown";
+    }
     
     // set bounding box
     var ulx = parseInt($(facs).attr("ulx"));
@@ -264,16 +279,21 @@ Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
         var oct = parseInt($(el).attr("oct"));
         //DEBUG: console.log("nc: " + pname + ", " + oct);
 
+        // set root note
         if (theNeume.components.length == 0) {
-            theNeume.props.rootNote.rootPitch = pname;
-            theNeume.props.rootNote.rootOct = oct;
+            theNeume.props.rootNote.pitch = pname;
+            theNeume.props.rootNote.octave = oct;
         }
  
         var diff = theNeume.getPitchDifference(pname, oct);
         //DEBUG: console.log("note diff: " + diff);
 
-        // TODO: get type of nc from mei
-        this.addComponent("punctum", diff);
+        var ncType = "punctum";
+        if ($(this).parent().attr("inclinatum") == "true") {
+            ncType = "inclinatum";
+        }
+
+        theNeume.addComponent(ncType, diff);
     });
 
     // for chaining
@@ -288,7 +308,7 @@ Toe.Neume.prototype.addComponent = function(type, diff, options) {
 
     $.extend(opts, options);
 
-    var nc = new Toe.NeumeComponent(svgkey, diff, this.rendEng);
+    var nc = new Toe.NeumeComponent(diff, this.rendEng);
 
     if (!opts.neumePos || opts.neumePos > this.components.length || opts.neumePos < 0) {
         this.components.push(nc);
@@ -298,10 +318,43 @@ Toe.Neume.prototype.addComponent = function(type, diff, options) {
     }
 }
 
+Toe.Neume.prototype.getDifferences = function() {
+    var diffs = new Array();
+    for(var i = 0; i < this.components.length; i++) {
+        diffs.push(this.components[i].diff);
+    }
+    return diffs;
+}
+
 Toe.Neume.prototype.deriveName = function() { 
     if (this.components.length == 0) {
         return "unknown";
     }
+
+    var diffs = this.getDifferences();
+    // convert to ups and downs
+    $.map(diffs, function(x, i) {
+        if (x > 0) {
+            return 1;
+        }
+        else if (x < 0) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    });
+
+    // linear search for now
+    var neumeName = "unknown"
+    $.each(Toe.Neume.Type, function(key, val) {        
+        if($.arraysEqual(diff, val.melodicMove)) {
+            neumeName = val.name;
+            return false; // break
+        }
+    });
+
+    return neumeName;
 }
 
 Toe.Neume.prototype.render = function() {

@@ -35,6 +35,8 @@ THE SOFTWARE.
  *
  * @param {Toe.RenderEngine} rendEng drawing engine
  * @param {Object} options [numlines {Number}, clefType {String}, clefIndent (px) {Number}, interact {Boolean}]
+ *
+ * The staff has list of neumes on the staff
  */
 Toe.Staff = function(bb, rendEng, options) {
     // set position
@@ -58,6 +60,8 @@ Toe.Staff = function(bb, rendEng, options) {
 
     // default c clef on line 2
     this.clef = new Toe.Clef(this.props.clefType, this.rendEng);
+
+	this.neumes = new Array();
 }
 
 Toe.Staff.prototype.constructor = Toe.Staff;
@@ -78,13 +82,27 @@ Toe.Staff.prototype.setClef = function(clef, staffLine) {
     return this;
 }
 
+Toe.Staff.prototype.addNeumes = function(neumes) {
+	for (var i = 0; i < arguments.length; i++) {
+        // check argument is a neume
+        if (!(arguments[i] instanceof Toe.Neume)) {
+            continue;
+        }
+
+        this.neumes.push(arguments[i]);
+    }
+	
+	// for chaining
+    return this;
+}
+
 /**
  * Renders the staff according to the following scheme:
  *  <ulx,uly> =======
- *            ------- (line 1)
- *            ------- (line 2)
- *            ------- ...
  *            ------- (line numLines)
+ *            ------- (line numLines-1)
+ *            ------- ...
+ *            ------- (line 1)
  *            ======= <lrx,lry>
  */
 Toe.Staff.prototype.render = function() {
@@ -104,10 +122,8 @@ Toe.Staff.prototype.render = function() {
     }
     
     // render clef
-    this.clef.setPosition([this.zone.ulx+this.props.clefIndent, this.zone.uly+(this.clef.props.staffLine*partition)]);
+    this.clef.setPosition([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine+1)*partition)]);
     this.clef.render();    
         
     this.rendEng.draw(elements, false);
 }
-
-// staff has list of neumes on the staff
