@@ -33,14 +33,23 @@ Toe.Clef = function(clefType, rendEng, options) {
     clefType = clefType.toLowerCase();
 
     this.clefInfo = Toe.Clef.types[clefType];
+	var clefLine = null;
     if (this.clefInfo == undefined) {
         throw new Error("Clef: undefined clef type: '" + clefType + "'");
     }
+	else if (clefType == "c") {
+		// default staffline from pp. 17 Liber Usualis
+		clefLine = 4;
+	}
+	else if (clefType == "f") {
+		// default staffline from pp. 17 Liber Usualis
+		clefLine = 3;
+	}
 
     this.rendEng = rendEng;
 
     this.props = {
-        staffLine: 2,
+        staffLine: clefLine,
         interact: false
     };
 
@@ -53,9 +62,11 @@ Toe.Clef = function(clefType, rendEng, options) {
  */
 Toe.Clef.types = {
     "c": {
+		name: "Doh Clef",
         svgKey: "c_clef"
     },
     "f": {
+		name: "Fah Clef",
         svgKey: "f_clef"
     }
 };
