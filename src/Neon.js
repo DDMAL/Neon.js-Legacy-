@@ -72,6 +72,64 @@ THE SOFTWARE.
             }
         };
 
+        // helper function
+        var parseBoundingBox = function(zoneFacs) {
+            var ulx = parseInt($(zoneFacs).attr("ulx"));
+            var uly = parseInt($(zoneFacs).attr("uly"));
+            var lrx = parseInt($(zoneFacs).attr("lrx"));
+            var lry = parseInt($(zoneFacs).attr("lry"));
+            
+            return [ulx, uly, lrx, lry];
+        };
+
+        var loadMeiPage = function() {
+            // for each system
+            $(mei).find("sb").each(function(sit, sel) {
+                // get facs data
+                var sbref = $(sel).attr("systemref");
+                var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
+                var sysFacs = $(mei).find("zone[xml\\:id=" + sysfacsid + "]")[0];
+                
+                // set global scale using staff from first system
+                if(sit == 0) {
+                    rendEng.calcScaleFromStaff(sysFacs, {overwrite: true});
+                }
+
+                // create staff
+                var s_bb = parseBoundingBox(sysFacs);
+                rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
+                var s = new Toe.Staff(s_bb, rendEng);
+
+                // set clef
+                var clef = $(this).nextUntil("sb", "clef");
+                var clefShape = $(clef).attr("shape");
+                var clefLine = parseInt($(clef).attr("line"));
+            
+                var clefFacsId = $(clef).attr("facs");
+                var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
+                var c_bb = parseBoundingBox(clefFacs);
+                rendEng.outlineBoundingBox(c_bb, {fill: "red"});
+
+                s.setClef(clefShape, clefLine, {zone: c_bb});
+
+                page.addStaves(s);
+
+                // load all neumes in section
+                $(this).nextUntil("sb", "neume").each(function(nit, nel) {
+                    var neume = new Toe.Neume(rendEng);
+                    var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
+                    var n_bb = parseBoundingBox(neumeFacs);
+                    rendEng.outlineBoundingBox(n_bb, {fill: "green"});
+
+                    neume.neumeFromMei(nel, $(neumeFacs));
+                    console.log("neume type: " + neume.deriveName());
+                    s.addNeumes(neume);
+                });
+            });
+
+            page.render();
+        };
+
         var loadGlyphs = function(rendEng) {
             console.log("loading SVG glyphs ...");
             
@@ -116,34 +174,20 @@ THE SOFTWARE.
             // make canvas dimensions the size of the page 
             canvas.attr("width", page.width);
             canvas.attr("height", page.height);
+            canvas.attr("style", "border: 4px black solid;");
 
             elem.prepend(canvas);
 
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid));
-
-            // set global scale
-            var sb1ref = $($(mei).find("sb")[0]).attr("systemref");
-            var sys1facsid = $($(mei).find("system[xml\\:id=" + sb1ref + "]")[0]).attr("facs");
-            var sysFacs = $(mei).find("zone[xml\\:id=" + sys1facsid + "]")[0];
-            rendEng.calcScaleFromStaff(sysFacs, {overwrite: true});
-
-            // first system
-            var s1 = new Toe.Staff([190, 302, 1450, 406], rendEng);
-            s1.setClef("c", 4);
-
-            /* test */
-            //var n1 = new Toe.Neume(rendEng);
-            //var ndata = $(mei).find("neume")[0];
-            //n1.neumeFromMei(ndata, $(mei).find("zone[xml\\:id=" + $(ndata).attr("facs") + "]")[0]);
             
-            // second system
-            var s2 = new Toe.Staff([22, 534, 1447, 635], rendEng);
-            s2.setClef("c", 4);
-
-            page.addStaves(s1, s2).render();
+            if (settings.autoLoad && mei) {
+                loadMeiPage();
+            }
             
+            // <zone lry="331" lrx="208" xml:id="m-5ff17ad0-6396-4f4b-9c99-de55e140ee97" uly="278" ulx="190"/>
+            //rendEng.outlineBoundingBox([190,278,208,331]);
             console.log("Load successful. Neon.js ready.");
-        }
+        };
         
         // Call the init function when this object is created.
         init();

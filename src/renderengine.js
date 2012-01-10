@@ -60,6 +60,7 @@ Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
+// TODO: instead of sysfacs, pass in first Toe.Staff
 Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
 	opts = {
 		overwrite: false
@@ -88,12 +89,43 @@ Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
 }
 
 // [x1, y1, x2, y2]
-Toe.RenderEngine.prototype.createLine = function(coords, interact) {
+Toe.RenderEngine.prototype.createLine = function(coords, options) {
+	var opts = {
+		fill: "rgb(0,0,0)",
+		strokeWidth: 1,
+		interact: false
+	};
+	$.extend(opts, options);
+
 	return new fabric.Line(coords, {
-		fill: 'black',
-        strokeWidth: 1,
-        selectable: interact
+		fill: opts.fill,
+        strokeWidth: opts.strokeWidth,
+        selectable: opts.interact
     });
+}
+
+// [ulx, uly, lrx, lry]
+Toe.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
+	var opts = {
+		fill: "rgb(0,255,0)",
+		opacity: 0.65,
+		interact: false
+	};
+	$.extend(opts, options);
+
+	var width = bb[2] - bb[0];
+	var height = bb[3] - bb[1];
+	var bb = new fabric.Rect({
+		width: width, 
+		height: height, 
+		left: bb[0] + (width/2), // weird fabric bug
+		top: bb[1] + (height/2), // weird fabric bug
+		fill: opts.fill, 
+		opacity: opts.opacity, 
+		selectable: opts.interact
+	});
+
+	this.draw([bb], false);
 }
 
 /**

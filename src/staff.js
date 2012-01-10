@@ -58,7 +58,7 @@ Toe.Staff = function(bb, rendEng, options) {
 
     $.extend(this.props, options);
 
-    // default c clef on line 2
+    // default c clef on line 4
     this.clef = new Toe.Clef(this.props.clefType, this.rendEng);
 
 	this.neumes = new Array();
@@ -67,16 +67,35 @@ Toe.Staff = function(bb, rendEng, options) {
 Toe.Staff.prototype.constructor = Toe.Staff;
 
 /**
- * Sets the clef for the staff on the given staff line
+ * Sets the clef for the staff on the given staff line.
+ * Enforces clef is placed within the staff
  * @param {String} clef c or f clef
  * @param {Number} staffLine staffline the clef is on
+ * @param {Object} options {zone: {Array} [ulx, uly, lrx, lry]}
  */
-Toe.Staff.prototype.setClef = function(clef, staffLine) {
+Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
     if (staffLine > this.props.numLines) {
         throw new Error("Invalid clef position.");
     }
 
-    this.clef = new Toe.Clef(clef, this.rendEng, {"staffLine": staffLine});
+	var opts = {
+		zone: null
+	};
+	$.extend(opts, options);
+
+    this.clef = new Toe.Clef(clefShape, this.rendEng, {"staffLine": staffLine});
+
+	// set bounding box if it exists
+	if (opts.zone) {
+		this.clef.setBoundingBox(opts.zone);
+	}
+	else {
+		// set top left coordinates based on staffline the clef is on
+		var delta_y = Math.abs(this.zone.lry - this.zone.uly);
+    	var partition = delta_y / (this.props.numLines+1);
+
+		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-staffLine+1)*partition), null, null]);
+	}
 
     // for chaining
     return this;
@@ -118,11 +137,10 @@ Toe.Staff.prototype.render = function() {
     // render staff lines
     for (var li = 1; li <= this.props.numLines; li++) {
         var yval = this.zone.uly+(li*partition);
-        elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], this.props.interact));
+        elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], {interact: this.props.interact}));
     }
     
     // render clef
-    this.clef.setPosition([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine+1)*partition)]);
     this.clef.render();    
         
     this.rendEng.draw(elements, false);

@@ -245,9 +245,8 @@ Toe.Neume.prototype.setRootNote = function(pname, oct) {
 Toe.Neume.prototype.getPitchDifference = function(pname, oct) {
     var numChroma = Toe.neumaticChroma.length;
     var rootNum = (this.props.rootNote.octave * numChroma) + $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
-    
+ 
     var ncNum = (oct * numChroma) + $.inArray(pname, Toe.neumaticChroma);
-    
     return ncNum - rootNum;
 }
 
@@ -332,6 +331,7 @@ Toe.Neume.prototype.deriveName = function() {
     }
 
     var diffs = this.getDifferences();
+    //DEBUG: console.log("diffs: " + diffs.toString());
 
     // convert to ups and downs
     var prevDiff = diffs[0];
@@ -347,6 +347,7 @@ Toe.Neume.prototype.deriveName = function() {
         prevDiff = x;
         return relation;
     });
+    //DEBUG: console.log("ups&downs: " + diffs.toString());
 
     // linear search for now
     var neumeName = "unknown"

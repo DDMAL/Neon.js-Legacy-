@@ -54,6 +54,9 @@ Toe.Clef = function(clefType, rendEng, options) {
     };
 
     $.extend(this.props, options);
+
+	// initialize bounding box
+    this.zone = new Object();
 }
 
 /**
@@ -73,13 +76,13 @@ Toe.Clef.types = {
 
 Toe.Clef.prototype.constructor = Toe.Clef;
 
-/**
- * Sets the position of the clef on the page
- * @param {Array} [x,y]
- */
-Toe.Clef.prototype.setPosition = function(pos) {
-    this.x = pos[0];
-    this.y = pos[1];
+// [ulx, uly, lrx, lry]
+// if bounding box not known, set ulx and uly to set position manually
+Toe.Clef.prototype.setBoundingBox = function(bb) {
+    this.zone.ulx = parseInt(bb[0]);
+    this.zone.uly = parseInt(bb[1]);
+    this.zone.lrx = parseInt(bb[2]);
+    this.zone.lry = parseInt(bb[3]);
 }
 
 /**
@@ -91,7 +94,7 @@ Toe.Clef.prototype.render = function() {
     }
 
     var clef = this.rendEng.getGlyph(this.clefInfo.svgKey);
-    var glyphClef = clef.clone().set({left: this.x, top: this.y});
+    var glyphClef = clef.clone().set({left: this.zone.ulx + ((this.zone.lrx-this.zone.ulx)/2), top: this.zone.uly + ((this.zone.lry-this.zone.uly)/2)});
     glyphClef.selectable = this.props.interact;
 
     this.rendEng.draw([glyphClef], true);
