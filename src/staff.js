@@ -59,7 +59,7 @@ Toe.Staff = function(bb, rendEng, options) {
     $.extend(this.props, options);
 
     // default c clef on line 4
-    this.clef = new Toe.Clef(this.props.clefType, this.rendEng);
+    //this.clef = new Toe.Clef(this.props.clefType, this.rendEng);
 
 	this.neumes = new Array();
 }
@@ -94,7 +94,7 @@ Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
 		var delta_y = Math.abs(this.zone.lry - this.zone.uly);
     	var partition = delta_y / (this.props.numLines+1);
 
-		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-staffLine+1)*partition), null, null]);
+		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine+1)*partition), null, null]);
 	}
 
     // for chaining
@@ -141,7 +141,8 @@ Toe.Staff.prototype.render = function() {
     }
     
     // render clef
-    this.clef.render();    
+	this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine+1)*partition)]);
+    this.clef.render();
         
     this.rendEng.draw(elements, false);
 }

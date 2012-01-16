@@ -76,13 +76,20 @@ Toe.Clef.types = {
 
 Toe.Clef.prototype.constructor = Toe.Clef;
 
+/**
+ * @param pos {Array} [x,y]
+ */
+Toe.Clef.prototype.setPosition = function(pos) {
+	this.x = pos[0];
+	this.y = pos[1];
+}
+
 // [ulx, uly, lrx, lry]
-// if bounding box not known, set ulx and uly to set position manually
 Toe.Clef.prototype.setBoundingBox = function(bb) {
-    this.zone.ulx = parseInt(bb[0]);
-    this.zone.uly = parseInt(bb[1]);
-    this.zone.lrx = parseInt(bb[2]);
-    this.zone.lry = parseInt(bb[3]);
+    this.zone.ulx = bb[0];
+    this.zone.uly = bb[1];
+    this.zone.lrx = bb[2];
+    this.zone.lry = bb[3];
 }
 
 /**
@@ -94,7 +101,7 @@ Toe.Clef.prototype.render = function() {
     }
 
     var clef = this.rendEng.getGlyph(this.clefInfo.svgKey);
-    var glyphClef = clef.clone().set({left: this.zone.ulx + ((this.zone.lrx-this.zone.ulx)/2), top: this.zone.uly + ((this.zone.lry-this.zone.uly)/2)});
+    var glyphClef = clef.clone().set({left: this.x+(clef.obj.width*this.rendEng.options.globScale/2), top: this.y}); // offset centre
     glyphClef.selectable = this.props.interact;
 
     this.rendEng.draw([glyphClef], true);
