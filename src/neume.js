@@ -276,7 +276,6 @@ Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
     $(neumeData).find("note").each(function(it, el) {
         var pname = $(el).attr("pname");
         var oct = parseInt($(el).attr("oct"));
-        //DEBUG: console.log("nc: " + pname + ", " + oct);
 
         // set root note
         if (theNeume.components.length == 0) {
@@ -285,7 +284,6 @@ Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
         }
  
         var diff = theNeume.getPitchDifference(pname, oct);
-        //DEBUG: console.log("note diff: " + diff);
 
         var ncType = "punctum";
         if ($(this).parent().attr("inclinatum") == "true") {
@@ -331,7 +329,6 @@ Toe.Neume.prototype.deriveName = function() {
     }
 
     var diffs = this.getDifferences();
-    //DEBUG: console.log("diffs: " + diffs.toString());
 
     // convert to ups and downs
     var prevDiff = diffs[0];
@@ -347,7 +344,6 @@ Toe.Neume.prototype.deriveName = function() {
         prevDiff = x;
         return relation;
     });
-    //DEBUG: console.log("ups&downs: " + diffs.toString());
 
     // linear search for now
     var neumeName = "unknown"
@@ -363,6 +359,18 @@ Toe.Neume.prototype.deriveName = function() {
 
 Toe.Neume.prototype.render = function() {
     if (!this.rendEng) {
-        throw new Error("Clef: Invalid render context");
+        throw new Error("Neume: Invalid render context");
     }
+
+    /*var name = this.deriveName();
+
+    // render punctum
+    if (name == "Punctum") {
+        var punct = this.rendEng.getGlyph("punctum");
+        var glyphPunct = punct.clone().set({left: this.zone.ulx+(this.zone.lrx-this.zone.ulx)/2, top: this.zone.uly+(this.zone.lry-this.zone.uly)/2});
+        glyphPunct.selectable = this.props.interact;
+        glyphPunct.hasControls = false;
+
+        this.rendEng.draw([glyphPunct], true);
+    }*/
 }

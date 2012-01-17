@@ -94,7 +94,7 @@ Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
 		var delta_y = Math.abs(this.zone.lry - this.zone.uly);
     	var partition = delta_y / (this.props.numLines+1);
 
-		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine+1)*partition), null, null]);
+		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*partition), null, null]);
 	}
 
     // for chaining
@@ -132,17 +132,22 @@ Toe.Staff.prototype.render = function() {
     var elements = new Array();
     
     var delta_y = Math.abs(this.zone.lry - this.zone.uly);
-    var partition = delta_y / (this.props.numLines+1);
+    var partition = delta_y / (this.props.numLines-1);
 
     // render staff lines
-    for (var li = 1; li <= this.props.numLines; li++) {
+    for (var li = 0; li < this.props.numLines; li++) {
         var yval = this.zone.uly+(li*partition);
         elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], {interact: this.props.interact}));
     }
     
     // render clef
-	this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine+1)*partition)]);
+	this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*partition)]);
     this.clef.render();
-        
+    
+	// render neumes
+	$.each(this.neumes, function(it, el) {
+		el.render();
+	});
+
     this.rendEng.draw(elements, false);
 }

@@ -60,19 +60,18 @@ Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
-// TODO: instead of sysfacs, pass in first Toe.Staff
-Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
+Toe.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 	opts = {
 		overwrite: false
 	};
 
 	$.extend(opts, options);
 
-	var delta_y = parseInt($(sysFacs).attr("lry")) - parseInt($(sysFacs).attr("uly"));
-	var height = delta_y / 5;
+	var delta_y = staff.zone.lry - staff.zone.uly;
+	var height = delta_y / (staff.props.numLines-1);
  
-	// clef spans 2 stafflines with 4 pixel verticle buffer
-	height = (height * 2) - 4;
+	// clef spans 2 stafflines with 40% height (pixels) verticle buffer, 20% on each space
+	height = (height * 2) - (0.4*height);
 
 	var glyph = this.getGlyph("c_clef").clone();
 	var glyphHeight = glyph.height;
@@ -92,7 +91,7 @@ Toe.RenderEngine.prototype.calcScaleFromStaff = function(sysFacs, options) {
 Toe.RenderEngine.prototype.createLine = function(coords, options) {
 	var opts = {
 		fill: "rgb(0,0,0)",
-		strokeWidth: 1,
+		strokeWidth: 3,
 		interact: false
 	};
 	$.extend(opts, options);
@@ -151,6 +150,10 @@ Toe.RenderEngine.prototype.preprocess = function(elements) {
     // global transformations go here 
     for (var i = 0; i < elements.length; i++) {
         elements[i] = elements[i].scale(this.options.globScale);
+		
+		// set current width & height
+		elements[i].currentWidth = elements[i].currentWidth*this.options.globScale;
+		elements[i].currentHeight = elements[i].currentHeight*this.options.globScale;
     }
 
     return elements;

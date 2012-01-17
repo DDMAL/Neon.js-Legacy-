@@ -34,7 +34,8 @@ THE SOFTWARE.
             width: 1000,
             height: 1000,
             autoLoad: false,
-            filename: ""
+            filename: "",
+            backgroundImage: ""
         };
 
         var settings = $.extend({}, defaults, options);
@@ -82,7 +83,7 @@ THE SOFTWARE.
             return [ulx, uly, lrx, lry];
         };
 
-        var loadMeiPage = function() {
+        var loadMeiPage = function(displayZones) {
             // for each system
             $(mei).find("sb").each(function(sit, sel) {
                 // get facs data
@@ -90,15 +91,17 @@ THE SOFTWARE.
                 var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
                 var sysFacs = $(mei).find("zone[xml\\:id=" + sysfacsid + "]")[0];
                 
-                // set global scale using staff from first system
-                if(sit == 0) {
-                    rendEng.calcScaleFromStaff(sysFacs, {overwrite: true});
-                }
-
                 // create staff
                 var s_bb = parseBoundingBox(sysFacs);
-                rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
+                if (displayZones) {
+                    rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
+                }
                 var s = new Toe.Staff(s_bb, rendEng);
+
+                // set global scale using staff from first system
+                if(sit == 0) {
+                    rendEng.calcScaleFromStaff(s, {overwrite: true});
+                }
 
                 // set clef
                 var clef = $(this).nextUntil("sb", "clef");
@@ -108,7 +111,9 @@ THE SOFTWARE.
                 var clefFacsId = $(clef).attr("facs");
                 var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
                 var c_bb = parseBoundingBox(clefFacs);
-                rendEng.outlineBoundingBox(c_bb, {fill: "red"});
+                if (displayZones) {
+                    rendEng.outlineBoundingBox(c_bb, {fill: "red"});
+                }
 
                 s.setClef(clefShape, clefLine, {zone: c_bb});
 
@@ -119,7 +124,9 @@ THE SOFTWARE.
                     var neume = new Toe.Neume(rendEng);
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
-                    rendEng.outlineBoundingBox(n_bb, {fill: "green"});
+                    if (displayZones) {
+                        rendEng.outlineBoundingBox(n_bb, {fill: "green"});
+                    }
 
                     neume.neumeFromMei(nel, $(neumeFacs));
                     console.log("neume type: " + neume.deriveName());
@@ -178,14 +185,12 @@ THE SOFTWARE.
 
             elem.prepend(canvas);
 
-            rendEng.setCanvas(new fabric.Canvas(settings.canvasid));
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: settings.backgroundImage}));
             
             if (settings.autoLoad && mei) {
-                loadMeiPage();
+                loadMeiPage(true, true);
             }
-            
-            // <zone lry="331" lrx="208" xml:id="m-5ff17ad0-6396-4f4b-9c99-de55e140ee97" uly="278" ulx="190"/>
-            //rendEng.outlineBoundingBox([190,278,208,331]);
+
             console.log("Load successful. Neon.js ready.");
         };
         

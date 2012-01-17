@@ -40,7 +40,6 @@ Toe.Page.prototype.constructor = Toe.Page;
  * @property {Number} width Width of the canvas 
  * @property {Number} height Height of the canvas
  */
-
 Toe.Page.prototype.setDimensions = function(width, height) {
     this.width = width;
     this.height = height;
@@ -99,7 +98,7 @@ Toe.Page.prototype.addStaves = function(staff) {
  * Renders the page and all staves attached to the page
  * @function
  */
-Toe.Page.prototype.render = function() {   
+Toe.Page.prototype.render = function() {
     // render staves
     for (var i = 0; i < this.staves.length; i++) {
         this.staves[i].render();
