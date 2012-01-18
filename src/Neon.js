@@ -28,11 +28,12 @@ THE SOFTWARE.
         var page;
         var mei;
         var rendEng;
+        var loadNum = 0;
 
         // These are variables which can be overridden upon instantiation
         var defaults = {
-            width: 1000,
-            height: 1000,
+            width: 800,
+            height: 600,
             autoLoad: false,
             filename: "",
             backgroundImage: ""
@@ -64,12 +65,16 @@ THE SOFTWARE.
             
             // create page
             page = new Toe.Page();
+
             if (settings.autoLoad) {
-                // load MEI file from server
-                loadPage(settings.filename, page);
-            }
-            else {
-                page.setDimensions(settings.width, settings.height);
+                if (settings.filename) {
+                    // load MEI file from server
+                    loadPage(settings.filename, page);
+                }
+                if (settings.backgroundImage) {
+                    // load background image and get canvas dimensions from it
+                    handleBackgroundImage(settings.backgroundImage);
+                }
             }
         };
 
@@ -120,7 +125,7 @@ THE SOFTWARE.
                 page.addStaves(s);
 
                 // load all neumes in section
-                $(this).nextUntil("sb", "neume").each(function(nit, nel) {
+                /*$(this).nextUntil("sb", "neume").each(function(nit, nel) {
                     var neume = new Toe.Neume(rendEng);
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
@@ -131,7 +136,7 @@ THE SOFTWARE.
                     neume.neumeFromMei(nel, $(neumeFacs));
                     console.log("neume type: " + neume.deriveName());
                     s.addNeumes(neume);
-                });
+                });*/
             });
 
             page.render();
@@ -156,36 +161,67 @@ THE SOFTWARE.
             });
         };
 
-        var loadPage = function(fileName, page) {
-            $.get("/"+fileName+"/mei", function(data) {
-                console.log("loading MEI file ...");
+        var handleBackgroundImage = function(filename) {
+            fabric.Image.fromURL("/"+filename+"/file", function(img) {
+                if (img.width > settings.width) {
+                    settings.width = img.width;
+                }
+                if (img.height > settings.height) {
+                    settings.height = img.height;
+                }
 
-                // set page dimensions
-                page.calcDimensions($(data).find("zone"));
+                loadNum++;
+                console.log("ESCAPE");
+            });
+        };
+
+        var loadPage = function(fileName, page) {
+            var dims;
+            $.get("/"+fileName+"/file", function(data) {
+                console.log("loading MEI file ...");
 
                 // save mei data
                 mei = data;
             });
+            return dims;
         };
 
         // handler for when ajax calls have been completed
         var loaded = function() {
+            // wait for other asynchronous loads
+            var clincher = 0;
+            while (clincher < 3000 && loadNum < 1) {
+                console.log("WAITING!"); 
+                clincher++;
+            }
+
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
-            // sanity check
-            if (!page.width || !page.height) {
-                throw new Error("Page dimensions have not been set.");
+            var canvasDims = [settings.width, settings.height];
+            if (settings.autoLoad) {
+                // derive canvas dimensions from mei facs
+                canvasDims = page.calcDimensions($(mei).find("zone"));
+                console.log("mei dimensions: width = " + canvasDims[0] + ", height = " + canvasDims[1]);
+                
+                if (canvasDims[0] < settings.width) {
+                    canvasDims[0] = settings.width;
+                }
+                if (canvasDims[1] < settings.height) {
+                    canvasDims[1] = settings.height;
+                }
             }
+            console.log("setting canvas dimensions: width = " + canvasDims[0] + ", height = " + canvasDims[1]);
+            page.setDimensions(canvasDims[0], canvasDims[1]);
 
-            // make canvas dimensions the size of the page 
+            // make canvas dimensions the size of the page
             canvas.attr("width", page.width);
             canvas.attr("height", page.height);
             canvas.attr("style", "border: 4px black solid;");
 
             elem.prepend(canvas);
 
-            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: settings.backgroundImage}));
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: "/"+settings.backgroundImage+"/file"}));
             
             if (settings.autoLoad && mei) {
                 loadMeiPage(true, true);

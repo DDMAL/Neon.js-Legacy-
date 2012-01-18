@@ -72,9 +72,13 @@ Toe.Page.prototype.calcDimensions = function(meiZones) {
         }
     });
     
-    // set page properties
-    this.width = max_x;
-    this.height = max_y;
+	// return page properties
+    return [max_x, max_y];
+}
+
+Toe.Page.prototype.setDimensions = function(width, height) {
+	this.width = width;
+	this.height = height;
 }
 
 /**
