@@ -125,7 +125,7 @@ THE SOFTWARE.
                 page.addStaves(s);
 
                 // load all neumes in section
-                /*$(this).nextUntil("sb", "neume").each(function(nit, nel) {
+                $(this).nextUntil("sb", "neume").each(function(nit, nel) {
                     var neume = new Toe.Neume(rendEng);
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
@@ -136,7 +136,7 @@ THE SOFTWARE.
                     neume.neumeFromMei(nel, $(neumeFacs));
                     console.log("neume type: " + neume.deriveName());
                     s.addNeumes(neume);
-                });*/
+                });
             });
 
             page.render();
@@ -145,7 +145,7 @@ THE SOFTWARE.
         var loadGlyphs = function(rendEng) {
             console.log("loading SVG glyphs ...");
             
-            $.get("/static/img/neumes_concat.svg", function(svg) {
+            $.get(settings.prefix+"/static/img/neumes_concat.svg", function(svg) {
                 var glyphs = new Object();
 
                 // for each glyph, load it into fabric
@@ -162,7 +162,7 @@ THE SOFTWARE.
         };
 
         var handleBackgroundImage = function(filename) {
-            fabric.Image.fromURL("/"+filename+"/file", function(img) {
+            fabric.Image.fromURL(settings.prefix+"/"+filename+"/file", function(img) {
                 if (img.width > settings.width) {
                     settings.width = img.width;
                 }
@@ -177,7 +177,7 @@ THE SOFTWARE.
 
         var loadPage = function(fileName, page) {
             var dims;
-            $.get("/"+fileName+"/file", function(data) {
+            $.get(settings.prefix+"/"+fileName+"/file", function(data) {
                 console.log("loading MEI file ...");
 
                 // save mei data
@@ -221,7 +221,7 @@ THE SOFTWARE.
 
             elem.prepend(canvas);
 
-            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: "/"+settings.backgroundImage+"/file"}));
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file"}));
             
             if (settings.autoLoad && mei) {
                 loadMeiPage(true, true);
