@@ -59,23 +59,27 @@ THE SOFTWARE.
         var init = function() {
             // initialize rendering engine
             rendEng = new Toe.RenderEngine();
-
-            // load neume glyphs from svg file
-            loadGlyphs(rendEng);
             
             // create page
             page = new Toe.Page();
 
-            if (settings.autoLoad) {
-                if (settings.filename) {
-                    // load MEI file from server
-                    loadPage(settings.filename, page);
-                }
-                if (settings.backgroundImage) {
-                    // load background image and get canvas dimensions from it
-                    handleBackgroundImage(settings.backgroundImage);
-                }
-            }
+            /*
+             * Start asynchronous function calls
+             * Get promises and wait for queued functions to finish
+             * 1) load neume glyphs from svg file
+             * 2) load MEI file from server
+             * 3) load background image and get canvas dimensions from it
+             * on success (all done): continue processing
+             * on failure, print error message
+             */
+            $.when(loadGlyphs(rendEng),
+                   loadPage(settings.filename),
+                   handleBackgroundImage(settings.backgroundImage)
+            ).then(loadSuccess, 
+                   function() { 
+                       console.log("Failure to load the mei file, glyphs, or background image");
+                   }
+            );
         };
 
         // helper function
@@ -134,7 +138,7 @@ THE SOFTWARE.
                     }
 
                     neume.neumeFromMei(nel, $(neumeFacs));
-                    console.log("neume type: " + neume.deriveName());
+                    //console.log("neume type: " + neume.deriveName());
                     s.addNeumes(neume);
                 });
             });
@@ -142,10 +146,12 @@ THE SOFTWARE.
             page.render();
         };
 
+        // asynchronous function
         var loadGlyphs = function(rendEng) {
             console.log("loading SVG glyphs ...");
             
-            $.get(settings.prefix+"/static/img/neumes_concat.svg", function(svg) {
+            // return deferred promise
+            return $.get(settings.prefix+"/static/img/neumes_concat.svg", function(svg) {
                 var glyphs = new Object();
 
                 // for each glyph, load it into fabric
@@ -161,40 +167,57 @@ THE SOFTWARE.
             });
         };
 
+        // asynchronous function
         var handleBackgroundImage = function(filename) {
-            fabric.Image.fromURL(settings.prefix+"/"+filename+"/file", function(img) {
-                if (img.width > settings.width) {
-                    settings.width = img.width;
-                }
-                if (img.height > settings.height) {
-                    settings.height = img.height;
-                }
+            console.log("loading background image ...");
+            var dfd = $.Deferred();
 
-                loadNum++;
-                console.log("ESCAPE");
-            });
-        };
+            if (settings.autoLoad && settings.backgroundImage) {
+                fabric.Image.fromURL(settings.prefix+"/"+filename+"/file", function(img) {
+                    if (img.width > settings.width) {
+                        settings.width = img.width;
+                    }
+                    if (img.height > settings.height) {
+                        settings.height = img.height;
+                    }
 
-        var loadPage = function(fileName, page) {
-            var dims;
-            $.get(settings.prefix+"/"+fileName+"/file", function(data) {
-                console.log("loading MEI file ...");
-
-                // save mei data
-                mei = data;
-            });
-            return dims;
-        };
-
-        // handler for when ajax calls have been completed
-        var loaded = function() {
-            // wait for other asynchronous loads
-            var clincher = 0;
-            while (clincher < 3000 && loadNum < 1) {
-                console.log("WAITING!"); 
-                clincher++;
+                    dfd.resolve();
+                });
+            }
+            else {
+                // immediately resolve
+                dfd.resolve();
             }
 
+            // return promise
+            return dfd.promise();
+        };
+
+        // asynchronous function
+        var loadPage = function(fileName) {
+            var dfd = $.Deferred();
+            
+            if (settings.autoLoad && settings.filename) {
+                $.get(settings.prefix+"/"+fileName+"/file", function(data) {
+                    console.log("loading MEI file ...");
+
+                    // save mei data
+                    mei = data;
+
+                    dfd.resolve();
+                });
+            }
+            else {
+                // immediately resolve
+                dfd.resolve();
+            }
+
+            // return promise
+            return dfd.promise();
+        };
+
+        // handler for when asynchronous calls have been completed
+        var loadSuccess = function() {
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
@@ -224,7 +247,7 @@ THE SOFTWARE.
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file"}));
             
             if (settings.autoLoad && mei) {
-                loadMeiPage(true, true);
+                loadMeiPage(true);
             }
 
             console.log("Load successful. Neon.js ready.");
@@ -232,8 +255,6 @@ THE SOFTWARE.
         
         // Call the init function when this object is created.
         init();
-
-        elem.ajaxStop(loaded);
     };
 
     $.fn.neon = function(options)
