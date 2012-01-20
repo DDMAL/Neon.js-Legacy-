@@ -246,10 +246,12 @@ THE SOFTWARE.
 
             elem.prepend(canvas);
 
-            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, 
-                                               {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
-                                                backgroundOpacity: settings.backgroundOpacity,
-                                                renderOnAddition: false}));
+            var canvasOpts = {renderOnAddition: false};
+            if (settings.backgroundImage) {
+                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
+                                      backgroundOpacity: settings.backgroundOpacity});
+            }
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts)); 
             
             if (settings.autoLoad && mei) {
                 loadMeiPage(true);
