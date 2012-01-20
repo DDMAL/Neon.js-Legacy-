@@ -28,7 +28,7 @@ THE SOFTWARE.
         var page;
         var mei;
         var rendEng;
-        var loadNum = 0;
+        var startTime;
 
         // These are variables which can be overridden upon instantiation
         var defaults = {
@@ -36,7 +36,8 @@ THE SOFTWARE.
             height: 600,
             autoLoad: false,
             filename: "",
-            backgroundImage: ""
+            backgroundImage: "",
+            backgroundOpacity: 0.60
         };
 
         var settings = $.extend({}, defaults, options);
@@ -57,6 +58,9 @@ THE SOFTWARE.
          *      PRIVATE FUNCTIONS     *
          ******************************/
         var init = function() {
+            // start time
+            startTime = new Date();
+            
             // initialize rendering engine
             rendEng = new Toe.RenderEngine();
             
@@ -138,7 +142,7 @@ THE SOFTWARE.
                     }
 
                     neume.neumeFromMei(nel, $(neumeFacs));
-                    //console.log("neume type: " + neume.deriveName());
+                    console.log("neume type: " + neume.deriveName());
                     s.addNeumes(neume);
                 });
             });
@@ -225,7 +229,6 @@ THE SOFTWARE.
             if (settings.autoLoad) {
                 // derive canvas dimensions from mei facs
                 canvasDims = page.calcDimensions($(mei).find("zone"));
-                console.log("mei dimensions: width = " + canvasDims[0] + ", height = " + canvasDims[1]);
                 
                 if (canvasDims[0] < settings.width) {
                     canvasDims[0] = settings.width;
@@ -234,7 +237,6 @@ THE SOFTWARE.
                     canvasDims[1] = settings.height;
                 }
             }
-            console.log("setting canvas dimensions: width = " + canvasDims[0] + ", height = " + canvasDims[1]);
             page.setDimensions(canvasDims[0], canvasDims[1]);
 
             // make canvas dimensions the size of the page
@@ -244,13 +246,18 @@ THE SOFTWARE.
 
             elem.prepend(canvas);
 
-            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file"}));
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, 
+                                               {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
+                                                backgroundOpacity: settings.backgroundOpacity,
+                                                renderOnAddition: false}));
             
             if (settings.autoLoad && mei) {
                 loadMeiPage(true);
             }
 
             console.log("Load successful. Neon.js ready.");
+            var runTime = new Date() - startTime;
+            console.log("loadtime: " + runTime + "ms");
         };
         
         // Call the init function when this object is created.
