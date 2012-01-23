@@ -97,8 +97,18 @@ THE SOFTWARE.
         };
 
         var loadMeiPage = function(displayZones) {
+            var neumeList = $("neume, sb", mei);
+            // calculate sb indices
+            // precomputing will render better performance than a filter operation in the loops
+            var sbInd = new Array();
+            $(neumeList).each(function(nit, nel)  {
+                if ($(nel).is("sb")) {
+                    sbInd.push(nit);
+                }
+            });
+
             // for each system
-            $(mei).find("sb").each(function(sit, sel) {
+            $("sb", mei).each(function(sit, sel) {
                 // get facs data
                 var sbref = $(sel).attr("systemref");
                 var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
@@ -117,7 +127,7 @@ THE SOFTWARE.
                 }
 
                 // set clef
-                var clef = $(this).nextUntil("sb", "clef");
+                var clef = $("~ clef", this);
                 var clefShape = $(clef).attr("shape");
                 var clefLine = parseInt($(clef).attr("line"));
             
@@ -132,8 +142,8 @@ THE SOFTWARE.
 
                 page.addStaves(s);
 
-                // load all neumes in section
-                $(this).nextUntil("sb", "neume").each(function(nit, nel) {
+                // load all neumes in system
+                $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
                     var neume = new Toe.Neume(rendEng);
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
@@ -249,9 +259,11 @@ THE SOFTWARE.
             var canvasOpts = {renderOnAddition: false};
             if (settings.backgroundImage) {
                 $.extend(canvasOpts, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
-                                      backgroundOpacity: settings.backgroundOpacity});
+                                      backgroundOpacity: settings.backgroundOpacity,
+                                      backgroundStretch: false});
+
             }
-            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts)); 
+            rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
             
             if (settings.autoLoad && mei) {
                 loadMeiPage(true);
