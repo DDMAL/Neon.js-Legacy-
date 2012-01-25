@@ -52,6 +52,15 @@ Toe.RenderEngine.prototype.setCanvas = function(f_canvas) {
     this.canvas = f_canvas;
 }
 
+Toe.RenderEngine.prototype.setGlobalScale = function(scale) {
+	this.options.globScale = scale;
+
+	// update glyph dimension caches
+	$.each(this.glyphs, function(it, el) {
+		el.centre = [el.centre[0]*scale, el.centre[1]*scale];
+	});
+}
+
 /**
  * Getter for glyph accesses from musical elements
  * @param {String} svgKey lookup key to attain the glyph
@@ -71,7 +80,7 @@ Toe.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 	var height = delta_y / (staff.props.numLines-1);
  
 	// clef spans 2 stafflines with 40% height (pixels) verticle buffer, 20% on each space
-	height = (height * 2) - (0.4*height);
+	height = (height * 2) - (0.65*height);
 
 	var glyph = this.getGlyph("c_clef").clone();
 	var glyphHeight = glyph.height;
@@ -79,7 +88,7 @@ Toe.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 	scale = Math.abs(height / glyphHeight);
 
 	if (opts.overwrite) {
-		this.options.globScale = scale;
+		this.setGlobalScale(scale);
 	}
 	
 	console.log("setting global scale: " + this.options.globScale);
@@ -124,7 +133,7 @@ Toe.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
 		selectable: opts.interact
 	});
 
-	this.draw([bb], false);
+	this.draw([bb], {modify: false});
 }
 
 /**
@@ -132,14 +141,29 @@ Toe.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
  * @param {Array} elements Array of fabric objects to draw
  * @param {Boolean} modify Perform global transformations on this element set
  */
-Toe.RenderEngine.prototype.draw = function(elements, modify) {
-    if (modify) {
+Toe.RenderEngine.prototype.draw = function(elements, options) {
+	var opts = {
+		modify: true,
+		repaint: false
+	};
+
+	$.extend(opts, options);
+
+    if (opts.modify) {
         elements = this.preprocess(elements);
     }
 
     for(var i = 0; i < elements.length; i++) {
         this.canvas.add(elements[i]);
     }
+
+	if (opts.repaint) {
+		this.repaint();
+	}
+}
+
+Toe.RenderEngine.prototype.repaint = function() {
+	this.canvas.renderAll();
 }
 
 /**
