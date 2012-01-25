@@ -31,10 +31,6 @@ Toe.Glyph = function(svgKey, fabricObj) {
     this.obj = fabricObj;
 
     this.centre = [this.obj.width/2, this.obj.height/2];
-
-	// append current width/height for scale transformations
-	this.currentWidth = this.obj.width;
-	this.currentHeight = this.obj.height;
 }
 
 Toe.Glyph.prototype.constructor = Toe.Glyph;

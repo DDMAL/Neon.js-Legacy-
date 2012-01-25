@@ -58,8 +58,11 @@ Toe.Staff = function(bb, rendEng, options) {
 
     $.extend(this.props, options);
 
+	// cache delta y
+	this.delta_y = Math.abs(this.zone.lry - this.zone.uly);
+
     // default c clef on line 4
-    //this.clef = new Toe.Clef(this.props.clefType, this.rendEng);
+    //this.clef = this.setClef(this.props.clefType, 4);
 
 	this.neumes = new Array();
 }
@@ -91,8 +94,7 @@ Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
 	}
 	else {
 		// set top left coordinates based on staffline the clef is on
-		var delta_y = Math.abs(this.zone.lry - this.zone.uly);
-    	var partition = delta_y / (this.props.numLines+1);
+    	var partition = this.delta_y / (this.props.numLines+1);
 
 		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*partition), null, null]);
 	}
@@ -131,8 +133,7 @@ Toe.Staff.prototype.render = function() {
 
     var elements = new Array();
     
-    var delta_y = Math.abs(this.zone.lry - this.zone.uly);
-    var partition = delta_y / (this.props.numLines-1);
+    var partition = this.delta_y / (this.props.numLines-1);
 
     // render staff lines
     for (var li = 0; li < this.props.numLines; li++) {
@@ -145,8 +146,9 @@ Toe.Staff.prototype.render = function() {
     this.clef.render();
     
 	// render neumes
+	var theStaff = this;
 	$.each(this.neumes, function(it, el) {
-		el.render();
+		el.render(theStaff);
 	});
 
     this.rendEng.draw(elements, false);

@@ -50,7 +50,7 @@ Toe.Clef = function(clefType, rendEng, options) {
 
     this.props = {
         staffLine: clefLine,
-        interact: false
+        interact: true
     };
 
     $.extend(this.props, options);
