@@ -380,14 +380,31 @@ Toe.Neume.prototype.render = function(staff) {
         this.deriveName();
     }
 
+    var elements = new Array();
+
     // render punctum
-    if (this.props.key == "punctum") {
+    if (this.props.type == Toe.Neume.Type.punctum) {
         // look into neume component for more drawing details
         var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
         var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: this.zone.uly+(this.zone.lry-this.zone.uly)/2});
         glyphPunct.selectable = this.props.interact;
         glyphPunct.hasControls = false;
 
-        this.rendEng.draw([glyphPunct]);
+        elements.push(glyphPunct);
     }
+    if (this.props.type == Toe.Neume.Type.virga) {
+        var punct = this.rendEng.getGlyph("punctum");
+        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: this.zone.uly+punct.centre[1]});
+        glyphPunct.selectable = this.props.interact;
+        glyphPunct.hasControls = false;
+
+        elements.push(glyphPunct);
+
+        // draw left line coming off punctum
+        var lx = glyphPunct.left+punct.centre[0]-2;
+        var line = this.rendEng.createLine([lx, glyphPunct.top, lx, this.zone.lry], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+    }
+
+    this.rendEng.draw(elements);
 }
