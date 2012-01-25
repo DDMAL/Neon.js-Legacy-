@@ -141,6 +141,8 @@ Toe.Staff.prototype.render = function() {
         elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], {interact: this.props.interact}));
     }
     
+	this.rendEng.draw(elements, {modify: false});
+
     // render clef
 	this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*partition)]);
     this.clef.render();
@@ -150,6 +152,4 @@ Toe.Staff.prototype.render = function() {
 	$.each(this.neumes, function(it, el) {
 		el.render(theStaff);
 	});
-
-    this.rendEng.draw(elements, false);
 }

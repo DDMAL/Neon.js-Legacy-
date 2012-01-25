@@ -388,6 +388,6 @@ Toe.Neume.prototype.render = function(staff) {
         glyphPunct.selectable = this.props.interact;
         glyphPunct.hasControls = false;
 
-        this.rendEng.draw([glyphPunct], true);
+        this.rendEng.draw([glyphPunct]);
     }
 }

@@ -65,7 +65,7 @@ THE SOFTWARE.
             rendEng = new Toe.RenderEngine();
             
             // create page
-            page = new Toe.Page();
+            page = new Toe.Page(rendEng);
 
             /*
              * Start asynchronous function calls

@@ -25,7 +25,9 @@ THE SOFTWARE.
  * @requires Toe
  * @class Represents a page of music
  */
-Toe.Page = function() {
+Toe.Page = function(rendEng) {
+	this.rendEng = rendEng;
+
     // initialize staves
     this.staves = new Array();
 }
@@ -107,4 +109,6 @@ Toe.Page.prototype.render = function() {
     for (var i = 0; i < this.staves.length; i++) {
         this.staves[i].render();
     }
+
+	this.rendEng.repaint();
 }

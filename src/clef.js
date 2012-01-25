@@ -104,5 +104,5 @@ Toe.Clef.prototype.render = function() {
     var glyphClef = clef.clone().set({left: this.x+(clef.obj.width*this.rendEng.options.globScale/2), top: this.y}); // offset centre
     glyphClef.selectable = this.props.interact;
 
-    this.rendEng.draw([glyphClef], true);
+    this.rendEng.draw([glyphClef]);
 }
