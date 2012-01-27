@@ -37,7 +37,7 @@ THE SOFTWARE.
             autoLoad: false,
             filename: "",
             backgroundImage: "",
-            backgroundOpacity: 0.60
+            backgroundImageOpacity: 0.60
         };
 
         var settings = $.extend({}, defaults, options);
@@ -152,7 +152,6 @@ THE SOFTWARE.
                     }
 
                     neume.neumeFromMei(nel, $(neumeFacs));
-                    console.log("neume type: " + neume.props.type.name);
                     s.addNeumes(neume);
                 });
             });
@@ -259,8 +258,8 @@ THE SOFTWARE.
             var canvasOpts = {renderOnAddition: false};
             if (settings.backgroundImage) {
                 $.extend(canvasOpts, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
-                                      backgroundOpacity: settings.backgroundOpacity,
-                                      backgroundStretch: false});
+                                      backgroundImageOpacity: settings.backgroundImageOpacity,
+                                      backgroundImageStretch: false});
 
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));

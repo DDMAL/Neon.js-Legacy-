@@ -230,10 +230,6 @@ Toe.Neume.Type = {
     }
 };
 
-Toe.Neume.prototype.setType = function(type) {
-    this.p
-}
-
 Toe.Neume.prototype.setBoundingBox = function(bb) {
     // set position
     this.zone.ulx = bb[0];
@@ -371,6 +367,22 @@ Toe.Neume.prototype.deriveName = function() {
     return this.props.type.name;
 }
 
+Toe.Neume.prototype.getRootDifference = function(staff) {
+    // get clef pos
+    var sl = staff.clef.props.staffLine;
+    var c_type = staff.clef.clefInfo.shape;
+
+    var numChroma = Toe.neumaticChroma.length;
+    
+    // make root note search in relation to the clef index
+    var iClef = $.inArray(c_type, Toe.neumaticChroma);
+    var iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
+
+    // 4 is no magic number! clef position corresponds to fourth octave
+    var diff = Math.abs(iRoot - iClef) + numChroma*(this.props.rootNote.octave - 4);
+    return diff;
+}
+ 
 Toe.Neume.prototype.render = function(staff) {
     if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
@@ -380,13 +392,18 @@ Toe.Neume.prototype.render = function(staff) {
         this.deriveName();
     }
 
+    var rootDiff = this.getRootDifference(staff);
+    var rootDiffPixels = ~rootDiff + 1;
+    var clef_y = staff.clef.y;
+
+    // then derive subsequent notes through diff * delta_y
     var elements = new Array();
 
     // render punctum
     if (this.props.type == Toe.Neume.Type.punctum) {
         // look into neume component for more drawing details
         var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
-        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: this.zone.uly+(this.zone.lry-this.zone.uly)/2});
+        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: clef_y + (rootDiffPixels*staff.delta_y/2)});
         glyphPunct.selectable = this.props.interact;
         glyphPunct.hasControls = false;
 

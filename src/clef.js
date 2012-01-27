@@ -29,19 +29,19 @@ THE SOFTWARE.
  * @param {Toe.RenderEngine} drawing engine
  * @param {Object} options staffline {Number}, interact {Boolean}
  */
-Toe.Clef = function(clefType, rendEng, options) {
-    clefType = clefType.toLowerCase();
+Toe.Clef = function(clefShape, rendEng, options) {
+    clefShape = clefShape.toLowerCase();
 
-    this.clefInfo = Toe.Clef.types[clefType];
+    this.clefInfo = Toe.Clef.types[clefShape];
 	var clefLine = null;
     if (this.clefInfo == undefined) {
-        throw new Error("Clef: undefined clef type: '" + clefType + "'");
+        throw new Error("Clef: undefined clef type: '" + clefShape + "'");
     }
-	else if (clefType == "c") {
+	else if (clefShape == "c") {
 		// default staffline from pp. 17 Liber Usualis
 		clefLine = 4;
 	}
-	else if (clefType == "f") {
+	else if (clefShape == "f") {
 		// default staffline from pp. 17 Liber Usualis
 		clefLine = 3;
 	}
@@ -64,12 +64,14 @@ Toe.Clef = function(clefType, rendEng, options) {
  * @constant
  */
 Toe.Clef.types = {
-    "c": {
+    c: {
 		name: "Doh Clef",
+		shape: "c",
         svgKey: "c_clef"
     },
-    "f": {
+    f: {
 		name: "Fah Clef",
+		shape: "f",
         svgKey: "f_clef"
     }
 };
