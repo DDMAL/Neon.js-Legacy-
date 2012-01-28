@@ -393,21 +393,23 @@ Toe.Neume.prototype.render = function(staff) {
     }
 
     var rootDiff = this.getRootDifference(staff);
-    var rootDiffPixels = ~rootDiff + 1; //negate
     var clef_y = staff.clef.y;
 
-    /*console.log("rootDiff: " + rootDiff);
-    for(var i = 1; i < this.components.length; i++) {
-        console.log("nc" + i + "Diff: " + this.components[i].diff);
-    }*/
-    // then derive subsequent notes through diff * delta_y
+    // derive positions of neume components
+    var nc_y = new Array();
+    // set root note y pos
+    nc_y.push(clef_y + ((~rootDiff + 1) * staff.delta_y / 2));
+    for (var i = 1; i < this.components.length; i++) {
+        nc_y.push(nc_y[i-1] + ((~this.components[i].diff + 1) * staff.delta_y/2));
+    }
+
     var elements = new Array();
 
     // render punctum
     if (this.props.type == Toe.Neume.Type.punctum) {
         // look into neume component for more drawing details
         var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
-        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: clef_y + (rootDiffPixels*staff.delta_y/2)});
+        var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
         glyphPunct.selectable = this.props.interact;
         glyphPunct.hasControls = false;
 
@@ -415,7 +417,7 @@ Toe.Neume.prototype.render = function(staff) {
     }
     if (this.props.type == Toe.Neume.Type.virga) {
         var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: clef_y + (rootDiffPixels*staff.delta_y/2)});
+        var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
         glyphPunct.selectable = this.props.interact;
         glyphPunct.hasControls = false;
 
@@ -423,13 +425,13 @@ Toe.Neume.prototype.render = function(staff) {
 
         // draw right line coming off punctum
         var rx = glyphPunct.left+punct.centre[0]-1;
-        var line = this.rendEng.createLine([rx, glyphPunct.top, rx, this.zone.lry], {strokeWidth: 2, interact: true});
+        var line = this.rendEng.createLine([rx, nc_y[0], rx, this.zone.lry], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
     }
     if (this.props.type == Toe.Neume.Type.clivis) {
         // first punctum
         var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct1 = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: clef_y + (rootDiffPixels*staff.delta_y/2)});
+        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
         glyphPunct1.selectable = this.props.interact;
         glyphPunct1.hasControls = false;
 
@@ -437,12 +439,11 @@ Toe.Neume.prototype.render = function(staff) {
 
         // draw left line coming off first punctum
         var lx = glyphPunct1.left-punct.centre[0]+1;
-        var line = this.rendEng.createLine([lx, glyphPunct1.top, lx, this.zone.lry], {strokeWidth: 2, interact: true});
+        var line = this.rendEng.createLine([lx, nc_y[0], lx, this.zone.lry], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
 
         // second punctum
-        var nc2pos = clef_y + (((~this.components[1].diff+1) + rootDiffPixels) * staff.delta_y/2);
-        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc2pos});
+        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc_y[1]});
         glyphPunct2.selectable = this.props.interact;
         glyphPunct2.hasControls = false;
 
@@ -450,7 +451,7 @@ Toe.Neume.prototype.render = function(staff) {
 
         // draw right line coming off punctum
         var rx = glyphPunct1.left+punct.centre[0];
-        var line = this.rendEng.createLine([rx, glyphPunct1.top, rx, nc2pos], {strokeWidth: 2, interact: true});
+        var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
     }
     
