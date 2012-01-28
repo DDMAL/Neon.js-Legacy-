@@ -475,9 +475,15 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct3);
     }
     if (this.props.type == Toe.Neume.Type.podatus) {
-         // first punctum
+        // if punctums are right on top of each other, spread them out a bit
+        if (Math.abs(this.components[1].diff) == 1) {
+            nc_y[0] += 3;
+            nc_y[1] -= 3;
+        }
+
+        // first punctum
         var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
+        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0], angle: 180});
 
         elements.push(glyphPunct1);
 
