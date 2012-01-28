@@ -477,22 +477,23 @@ Toe.Neume.prototype.render = function(staff) {
     if (this.props.type == Toe.Neume.Type.podatus) {
         // if punctums are right on top of each other, spread them out a bit
         if (Math.abs(this.components[1].diff) == 1) {
-            nc_y[0] += 3;
-            nc_y[1] -= 3;
+            nc_y[0] += 1;
+            nc_y[1] -= 1;
         }
 
         // first punctum
-        var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0], angle: 180});
+        var punct1 = this.rendEng.getGlyph("pes");
+        var glyphPunct1 = punct1.clone().set({left: this.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2});
 
         elements.push(glyphPunct1);
 
         // draw right line connecting two punctum
-        var rx = glyphPunct1.left+punct.centre[0]-1;
+        var rx = glyphPunct1.left + punct1.centre[0] - 1;
         var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
 
         // second punctum
+        var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct2 = punct.clone().set({left: glyphPunct1.left, top: nc_y[1]});
 
         elements.push(glyphPunct2);

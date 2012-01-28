@@ -154,7 +154,7 @@ THE SOFTWARE.
                     }
 
                     neume.neumeFromMei(nel, $(neumeFacs));
-                    console.log("neume name: " + neume.props.type.name);
+                    console.log("neume: " + neume.props.type.name);
                     s.addNeumes(neume);
                 });
             });
