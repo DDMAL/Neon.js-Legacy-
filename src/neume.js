@@ -400,7 +400,7 @@ Toe.Neume.prototype.render = function(staff) {
     // set root note y pos
     nc_y.push(clef_y + ((~rootDiff + 1) * staff.delta_y / 2));
     for (var i = 1; i < this.components.length; i++) {
-        nc_y.push(nc_y[i-1] + ((~this.components[i].diff + 1) * staff.delta_y/2));
+        nc_y.push(nc_y[0] + ((~this.components[i].diff + 1) * staff.delta_y/2));
     }
 
     var elements = new Array();
@@ -410,16 +410,12 @@ Toe.Neume.prototype.render = function(staff) {
         // look into neume component for more drawing details
         var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
         var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-        glyphPunct.selectable = this.props.interact;
-        glyphPunct.hasControls = false;
 
         elements.push(glyphPunct);
     }
     if (this.props.type == Toe.Neume.Type.virga) {
         var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-        glyphPunct.selectable = this.props.interact;
-        glyphPunct.hasControls = false;
 
         elements.push(glyphPunct);
 
@@ -432,8 +428,6 @@ Toe.Neume.prototype.render = function(staff) {
         // first punctum
         var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-        glyphPunct1.selectable = this.props.interact;
-        glyphPunct1.hasControls = false;
 
         elements.push(glyphPunct1);
 
@@ -442,18 +436,66 @@ Toe.Neume.prototype.render = function(staff) {
         var line = this.rendEng.createLine([lx, nc_y[0], lx, this.zone.lry], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
 
-        // second punctum
-        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc_y[1]});
-        glyphPunct2.selectable = this.props.interact;
-        glyphPunct2.hasControls = false;
-
-        elements.push(glyphPunct2);
-
         // draw right line coming off punctum
         var rx = glyphPunct1.left+punct.centre[0];
         var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
+
+        // second punctum
+        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc_y[1]});
+
+        elements.push(glyphPunct2);
+
+    }
+    if (this.props.type == Toe.Neume.Type.torculus) {
+        // first punctum
+        var punct = this.rendEng.getGlyph("punctum");
+        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
+
+        elements.push(glyphPunct1);
+
+        // draw right line coming off punctum1
+        var rx = glyphPunct1.left+punct.centre[0];
+        var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+
+        // second punctum
+        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc_y[1]});
+
+        elements.push(glyphPunct2);
+
+        // draw right line coming off punctum2
+        var rx = glyphPunct2.left+punct.centre[0];
+        var line = this.rendEng.createLine([rx, nc_y[1], rx, nc_y[2]], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+
+        // third punctum
+        var glyphPunct3 = punct.clone().set({left: glyphPunct2.left+(2*punct.centre[0]), top: nc_y[2]});
+
+        elements.push(glyphPunct3);
+    }
+    if (this.props.type == Toe.Neume.Type.podatus) {
+         // first punctum
+        var punct = this.rendEng.getGlyph("punctum");
+        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
+
+        elements.push(glyphPunct1);
+
+        // draw right line connecting two punctum
+        var rx = glyphPunct1.left+punct.centre[0]-1;
+        var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+
+        // second punctum
+        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left, top: nc_y[1]});
+
+        elements.push(glyphPunct2);
     }
     
+    for (i = 0; i < elements.length; i++) {
+        elements[i].selectable = this.props.interact;
+        elements[i].hasControls = false;
+    }
+
     this.rendEng.draw(elements);
 }
