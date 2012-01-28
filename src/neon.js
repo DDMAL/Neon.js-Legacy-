@@ -35,6 +35,7 @@ THE SOFTWARE.
             width: 800,
             height: 600,
             autoLoad: false,
+            debug: false,
             filename: "",
             backgroundImage: "",
             backgroundImageOpacity: 0.60
@@ -109,6 +110,7 @@ THE SOFTWARE.
 
             // for each system
             $("sb", mei).each(function(sit, sel) {
+                console.log("system " + (sit+1));
                 // get facs data
                 var sbref = $(sel).attr("systemref");
                 var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
@@ -152,6 +154,7 @@ THE SOFTWARE.
                     }
 
                     neume.neumeFromMei(nel, $(neumeFacs));
+                    console.log("neume name: " + neume.props.type.name);
                     s.addNeumes(neume);
                 });
             });
@@ -264,8 +267,19 @@ THE SOFTWARE.
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
             
+            if (settings.debug) {
+                // add FPS debug element
+                var fpsDebug = $("<div>").attr("id", "fps");
+                fpsDebug.attr("style", "color: red; font-size: 200%");
+                elem.prepend(fpsDebug);
+
+                rendEng.canvas.onFpsUpdate = function(fps) {
+                    $(fpsDebug).html('FPS: ' + fps);
+                };
+            }
+
             if (settings.autoLoad && mei) {
-                loadMeiPage(true);
+                loadMeiPage(settings.debug);
             }
 
             console.log("Load successful. Neon.js ready.");

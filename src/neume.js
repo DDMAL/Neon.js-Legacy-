@@ -393,9 +393,13 @@ Toe.Neume.prototype.render = function(staff) {
     }
 
     var rootDiff = this.getRootDifference(staff);
-    var rootDiffPixels = ~rootDiff + 1;
+    var rootDiffPixels = ~rootDiff + 1; //negate
     var clef_y = staff.clef.y;
 
+    /*console.log("rootDiff: " + rootDiff);
+    for(var i = 1; i < this.components.length; i++) {
+        console.log("nc" + i + "Diff: " + this.components[i].diff);
+    }*/
     // then derive subsequent notes through diff * delta_y
     var elements = new Array();
 
@@ -411,17 +415,44 @@ Toe.Neume.prototype.render = function(staff) {
     }
     if (this.props.type == Toe.Neume.Type.virga) {
         var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: this.zone.uly+punct.centre[1]});
+        var glyphPunct = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: clef_y + (rootDiffPixels*staff.delta_y/2)});
         glyphPunct.selectable = this.props.interact;
         glyphPunct.hasControls = false;
 
         elements.push(glyphPunct);
 
-        // draw left line coming off punctum
-        var lx = glyphPunct.left+punct.centre[0]-2;
-        var line = this.rendEng.createLine([lx, glyphPunct.top, lx, this.zone.lry], {strokeWidth: 2, interact: true});
+        // draw right line coming off punctum
+        var rx = glyphPunct.left+punct.centre[0]-1;
+        var line = this.rendEng.createLine([rx, glyphPunct.top, rx, this.zone.lry], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
     }
+    if (this.props.type == Toe.Neume.Type.clivis) {
+        // first punctum
+        var punct = this.rendEng.getGlyph("punctum");
+        var glyphPunct1 = punct.clone().set({left: this.zone.ulx+(punct.centre[0]), top: clef_y + (rootDiffPixels*staff.delta_y/2)});
+        glyphPunct1.selectable = this.props.interact;
+        glyphPunct1.hasControls = false;
 
+        elements.push(glyphPunct1);
+
+        // draw left line coming off first punctum
+        var lx = glyphPunct1.left-punct.centre[0]+1;
+        var line = this.rendEng.createLine([lx, glyphPunct1.top, lx, this.zone.lry], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+
+        // second punctum
+        var nc2pos = clef_y + (((~this.components[1].diff+1) + rootDiffPixels) * staff.delta_y/2);
+        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc2pos});
+        glyphPunct2.selectable = this.props.interact;
+        glyphPunct2.hasControls = false;
+
+        elements.push(glyphPunct2);
+
+        // draw right line coming off punctum
+        var rx = glyphPunct1.left+punct.centre[0];
+        var line = this.rendEng.createLine([rx, glyphPunct1.top, rx, nc2pos], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+    }
+    
     this.rendEng.draw(elements);
 }

@@ -55,4 +55,4 @@ Toe = {};
  * Musical information
  * May eventually be moved to a musical methods class
  */
-Toe.neumaticChroma = ["b", "c", "d", "e", "f", "g", "a"];
+Toe.neumaticChroma = ["c", "d", "e", "f", "g", "a", "b"];
