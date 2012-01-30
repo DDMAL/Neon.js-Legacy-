@@ -513,7 +513,12 @@ Toe.Neume.prototype.render = function(staff) {
 
         // draw left line coming off swoosh
         var lx = glyphSwoosh.left - swoosh.centre[0] + 1;
-        var line = this.rendEng.createLine([lx, nc_y[0], lx, this.zone.lry], {strokeWidth: 2, interact: true});
+        var ly = this.zone.lry;
+        var swooshBot = glyphSwoosh.top + swoosh.centre[1];
+        if (this.zone.lry < glyphSwoosh.top + swooshBot) {
+            ly = swooshBot;
+        }
+        var line = this.rendEng.createLine([lx, nc_y[0], lx, ly], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
 
         // draw punctum
