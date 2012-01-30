@@ -392,6 +392,8 @@ Toe.Neume.prototype.render = function(staff) {
         this.deriveName();
     }
 
+    var ncOverlap_x = 1; // (pixels)
+
     var rootDiff = this.getRootDifference(staff);
     var clef_y = staff.clef.y;
 
@@ -405,7 +407,7 @@ Toe.Neume.prototype.render = function(staff) {
 
     var elements = new Array();
 
-    // render punctum
+    /* PUNCTUM */
     if (this.props.type == Toe.Neume.Type.punctum) {
         // look into neume component for more drawing details
         var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
@@ -413,6 +415,7 @@ Toe.Neume.prototype.render = function(staff) {
 
         elements.push(glyphPunct);
     }
+    /* VIRGA */
     if (this.props.type == Toe.Neume.Type.virga) {
         var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
@@ -424,6 +427,7 @@ Toe.Neume.prototype.render = function(staff) {
         var line = this.rendEng.createLine([rx, nc_y[0], rx, this.zone.lry], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
     }
+    /* CLIVIS */
     if (this.props.type == Toe.Neume.Type.clivis) {
         // first punctum
         var punct = this.rendEng.getGlyph("punctum");
@@ -447,6 +451,7 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct2);
 
     }
+    /* TORCULUS */
     if (this.props.type == Toe.Neume.Type.torculus) {
         // first punctum
         var punct = this.rendEng.getGlyph("punctum");
@@ -455,25 +460,26 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct1);
 
         // draw right line coming off punctum1
-        var rx = glyphPunct1.left+punct.centre[0];
+        var rx = glyphPunct1.left+punct.centre[0]-1;
         var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
 
         // second punctum
-        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc_y[1]});
+        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0])-ncOverlap_x, top: nc_y[1]});
 
         elements.push(glyphPunct2);
 
         // draw right line coming off punctum2
-        var rx = glyphPunct2.left+punct.centre[0];
+        var rx = glyphPunct2.left+punct.centre[0]-1;
         var line = this.rendEng.createLine([rx, nc_y[1], rx, nc_y[2]], {strokeWidth: 2, interact: true});
         this.rendEng.draw([line], {modify: false});
 
         // third punctum
-        var glyphPunct3 = punct.clone().set({left: glyphPunct2.left+(2*punct.centre[0]), top: nc_y[2]});
+        var glyphPunct3 = punct.clone().set({left: glyphPunct2.left+(2*punct.centre[0])-ncOverlap_x, top: nc_y[2]});
 
         elements.push(glyphPunct3);
     }
+    /* PODATUS */
     if (this.props.type == Toe.Neume.Type.podatus) {
         // if punctums are right on top of each other, spread them out a bit
         if (Math.abs(this.components[1].diff) == 1) {
@@ -497,6 +503,29 @@ Toe.Neume.prototype.render = function(staff) {
         var glyphPunct2 = punct.clone().set({left: glyphPunct1.left, top: nc_y[1]});
 
         elements.push(glyphPunct2);
+    }
+    /* PORRECTUS */
+    if (this.props.type == Toe.Neume.Type.porrectus) {
+        // draw swoosh
+        var swoosh = this.rendEng.getGlyph("porrect_1");
+        var glyphSwoosh = swoosh.clone().set({left: this.zone.ulx + swoosh.centre[0], top: nc_y[0] + swoosh.centre[1]/2});
+        elements.push(glyphSwoosh);
+
+        // draw left line coming off swoosh
+        var lx = glyphSwoosh.left - swoosh.centre[0] + 1;
+        var line = this.rendEng.createLine([lx, nc_y[0], lx, this.zone.lry], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+
+        // draw punctum
+        var punct = this.rendEng.getGlyph("punctum");
+        var glyphPunct = punct.clone().set({left: glyphSwoosh.left + swoosh.centre[0] - punct.centre[0], top: nc_y[2]});
+
+        // draw right line connecting swoosh and punctum
+        var rx = glyphPunct.left + punct.centre[0] - 1;
+        var line = this.rendEng.createLine([rx, nc_y[2], rx, nc_y[1]], {strokeWidth: 2, interact: true});
+        this.rendEng.draw([line], {modify: false});
+
+        elements.push(glyphPunct);
     }
     
     for (i = 0; i < elements.length; i++) {

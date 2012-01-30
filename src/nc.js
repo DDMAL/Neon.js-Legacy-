@@ -30,7 +30,7 @@ Toe.NeumeComponent = function(diff, rendEng, options) {
 
     this.props = {
         type: "punctum",
-        ornament: Toe.NeumeComponent.Ornament.NONE,
+        ornament: null,
         interact: true
     };
 
@@ -70,10 +70,14 @@ Toe.NeumeComponent.Type = {
 };
 
 Toe.NeumeComponent.Ornament = {
-    HE: "Horizontal Episema",
-    VE: "Vertical Episema",
-    DOT: "Dot",
-    NONE: "None"
+    EPISEMA: {
+        name: "Episema",
+        form: null
+    },
+    DOT: {
+        name: "Dot",
+        form: null
+    }
 };
 
 Toe.NeumeComponent.prototype.setPosition = function(pos) {
