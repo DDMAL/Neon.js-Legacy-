@@ -69,8 +69,12 @@ class RootHandler(tornado.web.RequestHandler):
 
 class EditorHandler(tornado.web.RequestHandler):
     def get(self, page):
-        print page
-        self.render("templates/neon.html", page=page, prefix=conf.APP_ROOT.rstrip("/"))
+        debug = self.get_argument("debug", None)
+        if debug:
+            dstr = "true"
+        else:
+            dstr = "false"
+        self.render("templates/neon.html", page=page, prefix=conf.APP_ROOT.rstrip("/"), debug=dstr)
 
 class FileHandler(tornado.web.RequestHandler):
     mimetypes.add_type("text/xml", ".mei")
