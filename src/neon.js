@@ -282,6 +282,17 @@ THE SOFTWARE.
                 loadMeiPage(settings.debug);
             }
 
+            if (settings.backgroundImage) {
+                // set to initial opacity
+                $("#ui_bgImgOpacity").slider("value", settings.backgroundImageOpacity);
+                // bind event to background image opacity slider
+                $("#ui_bgImgOpacity").bind("slide", function(event, ui) {
+                    settings.backgroundImageOpacity = ui.value;
+                    rendEng.canvas.backgroundImageOpacity = settings.backgroundImageOpacity;
+                    rendEng.repaint();
+                });
+            }
+
             console.log("Load successful. Neon.js ready.");
             var runTime = new Date() - startTime;
             console.log("loadtime: " + runTime + "ms");
