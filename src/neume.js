@@ -532,6 +532,49 @@ Toe.Neume.prototype.render = function(staff) {
 
         elements.push(glyphPunct);
     }
+    /* SCANDICUS */
+    if (this.props.type == Toe.Neume.Type.scandicus) {
+        // draw podatuses
+        
+        var pes = this.rendEng.getGlyph("pes");
+        var punct = this.rendEng.getGlyph("punctum");
+        var lastX = this.zone.ulx - punct.centre[0];
+        for (var i = 0; i < this.components.length-1; i+=2) {
+            // draw podatuses
+            
+            // if punctums are right on top of each other, spread them out a bit
+            if (Math.abs(this.components[i+1].diff - this.components[i].diff) == 1) {
+                nc_y[i] += 1;
+                nc_y[i+1] -= 1;
+            }
+
+            // pes
+            lastX += 2*punct.centre[0] - ncOverlap_x;
+            var glyphPes = pes.clone().set({left: lastX, top: nc_y[i] - pes.centre[1]/2});
+            elements.push(glyphPes);
+
+            // draw right line connecting two punctum
+            var rx1 = lastX + pes.centre[0] - 1;
+            var line1 = this.rendEng.createLine([rx1, nc_y[i], rx1, nc_y[i+1]], {strokeWidth: 2, interact: true});
+            this.rendEng.draw([line1], {modify: false});
+
+            // second punctum
+            var glyphPunct2 = punct.clone().set({left: lastX, top: nc_y[i+1]});
+            elements.push(glyphPunct2);
+        }
+
+        if (this.components.length % 2 == 1) {
+            // draw virga
+            lastX += 2*punct.centre[0] - ncOverlap_x;
+            var glyphPunct3 = punct.clone().set({left: lastX, top: nc_y[this.components.length-1]});
+            elements.push(glyphPunct3);
+
+            // draw right line coming off punctum
+            var rx2 = lastX + punct.centre[0] - 2;
+            var line2 = this.rendEng.createLine([rx2, nc_y[this.components.length-1], rx2, this.zone.lry - ((this.zone.lry - this.zone.uly)/2)], {strokeWidth: 2, interact: true});
+            this.rendEng.draw([line2], {modify: false});
+        }
+    }
     
     for (i = 0; i < elements.length; i++) {
         elements[i].selectable = this.props.interact;
