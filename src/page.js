@@ -25,14 +25,14 @@ THE SOFTWARE.
  * @requires Toe
  * @class Represents a page of music
  */
-Toe.Page = function(rendEng) {
+Toe.Model.Page = function(rendEng) {
 	this.rendEng = rendEng;
 
     // initialize staves
     this.staves = new Array();
 }
 
-Toe.Page.prototype.constructor = Toe.Page;
+Toe.Model.Page.prototype.constructor = Toe.Model.Page;
 
 /**
  * Set canvas width and height directly
@@ -42,7 +42,7 @@ Toe.Page.prototype.constructor = Toe.Page;
  * @property {Number} width Width of the canvas 
  * @property {Number} height Height of the canvas
  */
-Toe.Page.prototype.setDimensions = function(width, height) {
+Toe.Model.Page.prototype.setDimensions = function(width, height) {
     this.width = width;
     this.height = height;
 }
@@ -59,7 +59,7 @@ Toe.Page.prototype.setDimensions = function(width, height) {
  * @property {Number} width Width of the canvas 
  * @property {Number} height Height of the canvas
  */
-Toe.Page.prototype.calcDimensions = function(meiZones) {
+Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
     var max_x = 0;
     var max_y = 0;
 
@@ -78,7 +78,7 @@ Toe.Page.prototype.calcDimensions = function(meiZones) {
     return [max_x, max_y];
 }
 
-Toe.Page.prototype.setDimensions = function(width, height) {
+Toe.Model.Page.prototype.setDimensions = function(width, height) {
 	this.width = width;
 	this.height = height;
 }
@@ -86,17 +86,14 @@ Toe.Page.prototype.setDimensions = function(width, height) {
 /**
  * Adds a given number of staves to the page
  * @function
- * @param {Toe.Staff} any number of staves, seperated by commas as arguments
+ * @param {Toe.Model.Staff} staff the staff to add to the model
  */
-Toe.Page.prototype.addStaves = function(staff) {
-    for (var i = 0; i < arguments.length; i++) {
-        // check argument is a staff
-        if (!(arguments[i] instanceof Toe.Staff)) {
-            continue;
-        }
+Toe.Model.Page.prototype.addStaff = function(staff) {
+    this.staves.push(staff);
 
-        this.staves.push(arguments[i]);
-    }
+	// update view
+	$(this).trigger("vRenderStaff", [staff]);
+
     return this;
 }
 
@@ -104,7 +101,7 @@ Toe.Page.prototype.addStaves = function(staff) {
  * Renders the page and all staves attached to the page
  * @function
  */
-Toe.Page.prototype.render = function() {
+Toe.Model.Page.prototype.render = function() {
     // render staves
     for (var i = 0; i < this.staves.length; i++) {
         this.staves[i].render();

@@ -29,7 +29,7 @@ THE SOFTWARE.
  * @requires Toe
  * @class Neume
  */
-Toe.Neume = function(rendEng, options) {
+Toe.Model.Neume = function(rendEng, options) {
     // initialize bounding box
     this.zone = new Object();
 
@@ -37,7 +37,7 @@ Toe.Neume = function(rendEng, options) {
 
     this.props = {
         key: "punctum",
-        type: Toe.Neume.Type.punctum,
+        type: Toe.Model.Neume.Type.punctum,
         rootNote: {
             pitch: "c",
             octave: 3
@@ -52,10 +52,10 @@ Toe.Neume = function(rendEng, options) {
     this.components = new Array();
 }
 
-Toe.Neume.prototype.constructor = Toe.Neume;
+Toe.Model.Neume.prototype.constructor = Toe.Model.Neume;
 
 // Neumes encoded from the Fundamental Neumes Board in Medieval Finale
-Toe.Neume.Type = {
+Toe.Model.Neume.Type = {
     punctum: {
         name: "Punctum",
         melodicMove: [0]
@@ -230,7 +230,7 @@ Toe.Neume.Type = {
     }
 };
 
-Toe.Neume.prototype.setBoundingBox = function(bb) {
+Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
     // set position
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
@@ -238,12 +238,12 @@ Toe.Neume.prototype.setBoundingBox = function(bb) {
     this.zone.lry = bb[3];
 }
 
-Toe.Neume.prototype.setRootNote = function(pname, oct) {
+Toe.Model.Neume.prototype.setRootNote = function(pname, oct) {
     this.props.rootNote.pitch = pname;
     this.props.rootNote.octave = oct;
 }
 
-Toe.Neume.prototype.getPitchDifference = function(pname, oct) {
+Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
     var numChroma = Toe.neumaticChroma.length;
     var rootNum = (this.props.rootNote.octave * numChroma) + $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
  
@@ -251,14 +251,14 @@ Toe.Neume.prototype.getPitchDifference = function(pname, oct) {
     return ncNum - rootNum;
 }
 
-Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
+Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs) {
     // check the DOM element is in fact a neume
     if (neumeData.nodeName.toLowerCase() != "neume") {
         throw new Error("neumeFromMei: invalid neume data");
     }
 
     this.props.key = $(neumeData).attr("name");
-    this.props.type = Toe.Neume.Type[this.props.key];
+    this.props.type = Toe.Model.Neume.Type[this.props.key];
     // if neume is unknown
     if (this.props.type == undefined) {
         this.props.type = "unknown";
@@ -299,14 +299,14 @@ Toe.Neume.prototype.neumeFromMei = function(neumeData, facs) {
 }
 
 // neumePos is index 0 based
-Toe.Neume.prototype.addComponent = function(type, diff, options) {
+Toe.Model.Neume.prototype.addComponent = function(type, diff, options) {
     opts = {
         neumePos: null
     };
 
     $.extend(opts, options);
 
-    var nc = new Toe.NeumeComponent(diff, this.rendEng, {type: type});
+    var nc = new Toe.Model.NeumeComponent(diff, this.rendEng, {type: type});
 
     if (!opts.neumePos || opts.neumePos > this.components.length || opts.neumePos < 0) {
         this.components.push(nc);
@@ -316,7 +316,7 @@ Toe.Neume.prototype.addComponent = function(type, diff, options) {
     }
 }
 
-Toe.Neume.prototype.getDifferences = function() {
+Toe.Model.Neume.prototype.getDifferences = function() {
     var diffs = new Array();
     for(var i = 0; i < this.components.length; i++) {
         diffs.push(this.components[i].diff);
@@ -324,7 +324,7 @@ Toe.Neume.prototype.getDifferences = function() {
     return diffs;
 }
 
-Toe.Neume.prototype.deriveName = function() {
+Toe.Model.Neume.prototype.deriveName = function() {
     // checks
     if (this.components.length == 0) {
         return "unknown";
@@ -351,10 +351,10 @@ Toe.Neume.prototype.deriveName = function() {
     });
 
     // linear search for now
-    $.each(Toe.Neume.Type, function(key, val) {        
+    $.each(Toe.Model.Neume.Type, function(key, val) {        
         if($.arraysEqual(diffs, val.melodicMove)) {
             this.props.key = key;
-            this.props.type = Toe.Neume.Type[key];
+            this.props.type = Toe.Model.Neume.Type[key];
             // if neume is unknown
             if (this.props.type == undefined) {
                 this.props.type = "unknown";
@@ -367,7 +367,7 @@ Toe.Neume.prototype.deriveName = function() {
     return this.props.type.name;
 }
 
-Toe.Neume.prototype.getRootDifference = function(staff) {
+Toe.Model.Neume.prototype.getRootDifference = function(staff) {
     // get clef pos
     var sl = staff.clef.props.staffLine;
     var c_type = staff.clef.clefInfo.shape;
@@ -383,7 +383,7 @@ Toe.Neume.prototype.getRootDifference = function(staff) {
     return diff;
 }
  
-Toe.Neume.prototype.render = function(staff) {
+Toe.Model.Neume.prototype.render = function(staff) {
     if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
     }
@@ -408,7 +408,7 @@ Toe.Neume.prototype.render = function(staff) {
     var elements = new Array();
 
     /* PUNCTUM */
-    if (this.props.type == Toe.Neume.Type.punctum) {
+    if (this.props.type == Toe.Model.Neume.Type.punctum) {
         // look into neume component for more drawing details
         var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
         var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
@@ -416,7 +416,7 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct);
     }
     /* VIRGA */
-    if (this.props.type == Toe.Neume.Type.virga) {
+    if (this.props.type == Toe.Model.Neume.Type.virga) {
         var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
 
@@ -428,7 +428,7 @@ Toe.Neume.prototype.render = function(staff) {
         this.rendEng.draw([line], {modify: false});
     }
     /* CLIVIS */
-    if (this.props.type == Toe.Neume.Type.clivis) {
+    if (this.props.type == Toe.Model.Neume.Type.clivis) {
         // first punctum
         var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
@@ -452,7 +452,7 @@ Toe.Neume.prototype.render = function(staff) {
 
     }
     /* TORCULUS */
-    if (this.props.type == Toe.Neume.Type.torculus) {
+    if (this.props.type == Toe.Model.Neume.Type.torculus) {
         // first punctum
         var punct = this.rendEng.getGlyph("punctum");
         var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
@@ -480,7 +480,7 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct3);
     }
     /* PODATUS */
-    if (this.props.type == Toe.Neume.Type.podatus) {
+    if (this.props.type == Toe.Model.Neume.Type.podatus) {
         // if punctums are right on top of each other, spread them out a bit
         if (Math.abs(this.components[1].diff) == 1) {
             nc_y[0] += 1;
@@ -505,7 +505,7 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct2);
     }
     /* PORRECTUS */
-    if (this.props.type == Toe.Neume.Type.porrectus) {
+    if (this.props.type == Toe.Model.Neume.Type.porrectus) {
         // draw swoosh
         var swoosh = this.rendEng.getGlyph("porrect_1");
         var glyphSwoosh = swoosh.clone().set({left: this.zone.ulx + swoosh.centre[0], top: nc_y[0] + swoosh.centre[1]/2});
@@ -533,7 +533,7 @@ Toe.Neume.prototype.render = function(staff) {
         elements.push(glyphPunct);
     }
     /* SCANDICUS */
-    if (this.props.type == Toe.Neume.Type.scandicus) {
+    if (this.props.type == Toe.Model.Neume.Type.scandicus) {
         // draw podatuses
         
         var pes = this.rendEng.getGlyph("pes");

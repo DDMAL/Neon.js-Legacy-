@@ -23,16 +23,16 @@ THE SOFTWARE.
 /**
  * Creates a clef
  * @requires Toe
- * @requires Toe.RenderEngine
+ * @requires Toe.Model.RenderEngine
  * @class Represents a clef
  * @param {String} clefType clef type: c or f
- * @param {Toe.RenderEngine} drawing engine
+ * @param {Toe.Model.RenderEngine} drawing engine
  * @param {Object} options staffline {Number}, interact {Boolean}
  */
-Toe.Clef = function(clefShape, rendEng, options) {
+Toe.Model.Clef = function(clefShape, rendEng, options) {
     clefShape = clefShape.toLowerCase();
 
-    this.clefInfo = Toe.Clef.types[clefShape];
+    this.clefInfo = Toe.Model.Clef.types[clefShape];
 	var clefLine = null;
     if (this.clefInfo == undefined) {
         throw new Error("Clef: undefined clef type: '" + clefShape + "'");
@@ -63,7 +63,7 @@ Toe.Clef = function(clefShape, rendEng, options) {
  * Types of clefs and their lookup keys
  * @constant
  */
-Toe.Clef.types = {
+Toe.Model.Clef.types = {
     c: {
 		name: "Doh Clef",
 		shape: "c",
@@ -76,18 +76,18 @@ Toe.Clef.types = {
     }
 };
 
-Toe.Clef.prototype.constructor = Toe.Clef;
+Toe.Model.Clef.prototype.constructor = Toe.Model.Clef;
 
 /**
  * @param pos {Array} [x,y]
  */
-Toe.Clef.prototype.setPosition = function(pos) {
+Toe.Model.Clef.prototype.setPosition = function(pos) {
 	this.x = pos[0];
 	this.y = pos[1];
 }
 
 // [ulx, uly, lrx, lry]
-Toe.Clef.prototype.setBoundingBox = function(bb) {
+Toe.Model.Clef.prototype.setBoundingBox = function(bb) {
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];
@@ -97,7 +97,7 @@ Toe.Clef.prototype.setBoundingBox = function(bb) {
 /**
  * Renders the clef on the canvas
  */
-Toe.Clef.prototype.render = function() {
+Toe.Model.Clef.prototype.render = function() {
     if (!this.rendEng) {
         throw new Error("Clef: Invalid render context");
     }

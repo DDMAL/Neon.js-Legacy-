@@ -63,10 +63,10 @@ THE SOFTWARE.
             startTime = new Date();
             
             // initialize rendering engine
-            rendEng = new Toe.RenderEngine();
+            rendEng = new Toe.View.RenderEngine();
             
             // create page
-            page = new Toe.Page(rendEng);
+            page = new Toe.Model.Page(rendEng);
 
             /*
              * Start asynchronous function calls
@@ -121,7 +121,7 @@ THE SOFTWARE.
                 if (displayZones) {
                     rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
                 }
-                var s = new Toe.Staff(s_bb, rendEng);
+                var s = new Toe.Model.Staff(s_bb, rendEng);
 
                 // set global scale using staff from first system
                 if(sit == 0) {
@@ -142,11 +142,11 @@ THE SOFTWARE.
 
                 s.setClef(clefShape, clefLine, {zone: c_bb});
 
-                page.addStaves(s);
+                page.addStaff(s);
 
                 // load all neumes in system
                 $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
-                    var neume = new Toe.Neume(rendEng);
+                    var neume = new Toe.Model.Neume(rendEng);
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
                     if (displayZones) {
@@ -158,8 +158,7 @@ THE SOFTWARE.
                     s.addNeumes(neume);
                 });
             });
-
-            page.render();
+            rendEng.repaint();
         };
 
         // asynchronous function
@@ -176,7 +175,7 @@ THE SOFTWARE.
                     var rawSVG = $("<lol>").append($(el).clone()).remove().html();
                     fabric.loadSVGFromString(rawSVG, function(objects) {
                         gID = $(el).find("path").attr("id");
-                        glyphs[gID] = new Toe.Glyph(gID, objects[0]);
+                        glyphs[gID] = new Toe.Model.Glyph(gID, objects[0]);
                     });
                 });
                 rendEng.setGlyphs(glyphs);
@@ -278,6 +277,15 @@ THE SOFTWARE.
                 };
             }
 
+            /***************************
+             * Instantiate MVC classes *
+             ***************************/
+            // VIEWS
+            var pView = new Toe.View.PageView(rendEng);
+
+            // CONTROLLERS
+            var pCtrl = new Toe.Ctrl.PageController(page, pView);
+            
             if (settings.autoLoad && mei) {
                 loadMeiPage(settings.debug);
             }

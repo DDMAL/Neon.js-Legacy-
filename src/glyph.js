@@ -26,16 +26,16 @@ THE SOFTWARE.
  * @class Represents a glyph imported from SVG
  * 
  */
-Toe.Glyph = function(svgKey, fabricObj) {
+Toe.Model.Glyph = function(svgKey, fabricObj) {
     this.key = svgKey;
     this.obj = fabricObj;
 
     this.centre = [this.obj.width/2, this.obj.height/2];
 }
 
-Toe.Glyph.prototype.constructor = Toe.Glyph;
+Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
 
 // wrapper
-Toe.Glyph.prototype.clone = function() {
+Toe.Model.Glyph.prototype.clone = function() {
     return this.obj.clone();
 }

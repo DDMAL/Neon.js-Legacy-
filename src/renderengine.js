@@ -26,7 +26,7 @@ THE SOFTWARE.
  * @class Rendering engine
  * @param {Object} options globScale {Number}
  */
-Toe.RenderEngine = function(options) {
+Toe.View.RenderEngine = function(options) {
     this.options = {
         globScale: 0.08
     };
@@ -34,13 +34,13 @@ Toe.RenderEngine = function(options) {
     $.extend(this.options, options);
 }
 
-Toe.RenderEngine.prototype.constructor = Toe.RenderEngine;
+Toe.View.RenderEngine.prototype.constructor = Toe.View.RenderEngine;
 
 /**
  * Set the glyph set for the rendering engine
- * @param {Object} glyphs Dictionary set of Toe.Glyph objects imported from SVG
+ * @param {Object} glyphs Dictionary set of Toe.View.Glyph objects imported from SVG
  */
-Toe.RenderEngine.prototype.setGlyphs = function(glyphs) {
+Toe.View.RenderEngine.prototype.setGlyphs = function(glyphs) {
     this.glyphs = glyphs;
 }
 
@@ -48,11 +48,11 @@ Toe.RenderEngine.prototype.setGlyphs = function(glyphs) {
  * Set the context to draw on
  * @param {Object} f_canvas The Fabric.js canvas
  */
-Toe.RenderEngine.prototype.setCanvas = function(f_canvas) {
+Toe.View.RenderEngine.prototype.setCanvas = function(f_canvas) {
     this.canvas = f_canvas;
 }
 
-Toe.RenderEngine.prototype.setGlobalScale = function(scale) {
+Toe.View.RenderEngine.prototype.setGlobalScale = function(scale) {
 	this.options.globScale = scale;
 
 	// update glyph dimension caches
@@ -65,11 +65,11 @@ Toe.RenderEngine.prototype.setGlobalScale = function(scale) {
  * Getter for glyph accesses from musical elements
  * @param {String} svgKey lookup key to attain the glyph
  */
-Toe.RenderEngine.prototype.getGlyph = function(svgKey) {
+Toe.View.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
-Toe.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
+Toe.View.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 	opts = {
 		overwrite: false
 	};
@@ -97,7 +97,7 @@ Toe.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 }
 
 // [x1, y1, x2, y2]
-Toe.RenderEngine.prototype.createLine = function(coords, options) {
+Toe.View.RenderEngine.prototype.createLine = function(coords, options) {
 	var opts = {
 		fill: "rgb(0,0,0)",
 		strokeWidth: 3,
@@ -113,7 +113,7 @@ Toe.RenderEngine.prototype.createLine = function(coords, options) {
 }
 
 // [ulx, uly, lrx, lry]
-Toe.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
+Toe.View.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
 	var opts = {
 		fill: "rgb(0,255,0)",
 		opacity: 0.65,
@@ -141,7 +141,7 @@ Toe.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
  * @param {Array} elements Array of fabric objects to draw
  * @param {Boolean} modify Perform global transformations on this element set
  */
-Toe.RenderEngine.prototype.draw = function(elements, options) {
+Toe.View.RenderEngine.prototype.draw = function(elements, options) {
 	var opts = {
 		modify: true,
 		repaint: false
@@ -162,7 +162,7 @@ Toe.RenderEngine.prototype.draw = function(elements, options) {
 	}
 }
 
-Toe.RenderEngine.prototype.repaint = function() {
+Toe.View.RenderEngine.prototype.repaint = function() {
 	this.canvas.renderAll();
 }
 
@@ -170,7 +170,7 @@ Toe.RenderEngine.prototype.repaint = function() {
  * Perform global transformations (ie., scale, translation, rotation) to element set
  * @param {Array} elements Array of fabric objects to transform
  */
-Toe.RenderEngine.prototype.preprocess = function(elements) {
+Toe.View.RenderEngine.prototype.preprocess = function(elements) {
     // global transformations go here 
     for (var i = 0; i < elements.length; i++) {
         elements[i] = elements[i].scale(this.options.globScale);

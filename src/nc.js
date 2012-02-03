@@ -24,7 +24,7 @@ THE SOFTWARE.
  * @requires Toe
  * @class Neume Component
  */
-Toe.NeumeComponent = function(diff, rendEng, options) {
+Toe.Model.NeumeComponent = function(diff, rendEng, options) {
     this.diff = diff;
     this.rendEng = rendEng;
 
@@ -38,15 +38,15 @@ Toe.NeumeComponent = function(diff, rendEng, options) {
 
     // check valid type
     this.props.type.toLowerCase();
-    this.props.type = Toe.NeumeComponent.Type[this.props.type];
+    this.props.type = Toe.Model.NeumeComponent.Type[this.props.type];
     if (this.props.type == undefined) {
         throw new Error("NeumeComponent: undefined neume component type");
     }
 }
 
-Toe.NeumeComponent.prototype.constructor = Toe.NeumeComponent;
+Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 
-Toe.NeumeComponent.Type = {
+Toe.Model.NeumeComponent.Type = {
     punctum: {
         name: "Punctum",
         svgkey: "punctum"
@@ -69,7 +69,7 @@ Toe.NeumeComponent.Type = {
     }
 };
 
-Toe.NeumeComponent.Ornament = {
+Toe.Model.NeumeComponent.Ornament = {
     EPISEMA: {
         name: "Episema",
         form: null
@@ -80,12 +80,12 @@ Toe.NeumeComponent.Ornament = {
     }
 };
 
-Toe.NeumeComponent.prototype.setPosition = function(pos) {
+Toe.Model.NeumeComponent.prototype.setPosition = function(pos) {
     this.x = pos[0];
     this.y = pos[1];
 }
 
-Toe.NeumeComponent.prototype.render = function() {
+Toe.Model.NeumeComponent.prototype.render = function() {
     if (!this.rendEng) {
         throw new Error("Clef: Invalid render context");
     }

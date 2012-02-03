@@ -23,8 +23,8 @@ THE SOFTWARE.
 /**
  * Creates a staff
  * @requires Toe
- * @requires Toe.Clef
- * @requires Toe.RenderEngine
+ * @requires Toe.Model.Clef
+ * @requires Toe.Model.RenderEngine
  * @class Represents a Staff
  * 
  * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
@@ -33,12 +33,12 @@ THE SOFTWARE.
  *
  * (.)        <lrx,lry> (.)
  *
- * @param {Toe.RenderEngine} rendEng drawing engine
+ * @param {Toe.Model.RenderEngine} rendEng drawing engine
  * @param {Object} options [numlines {Number}, clefType {String}, clefIndent (px) {Number}, interact {Boolean}]
  *
  * The staff has list of neumes on the staff
  */
-Toe.Staff = function(bb, rendEng, options) {
+Toe.Model.Staff = function(bb, rendEng, options) {
     // set position
     this.zone = new Object();
     this.zone.ulx = parseInt(bb[0]);
@@ -67,7 +67,7 @@ Toe.Staff = function(bb, rendEng, options) {
 	this.neumes = new Array();
 }
 
-Toe.Staff.prototype.constructor = Toe.Staff;
+Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
 
 /**
  * Sets the clef for the staff on the given staff line.
@@ -76,7 +76,7 @@ Toe.Staff.prototype.constructor = Toe.Staff;
  * @param {Number} staffLine staffline the clef is on
  * @param {Object} options {zone: {Array} [ulx, uly, lrx, lry]}
  */
-Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
+Toe.Model.Staff.prototype.setClef = function(clefShape, staffLine, options) {
     if (staffLine > this.props.numLines) {
         throw new Error("Invalid clef position.");
     }
@@ -86,7 +86,7 @@ Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
 	};
 	$.extend(opts, options);
 
-    this.clef = new Toe.Clef(clefShape, this.rendEng, {"staffLine": staffLine});
+    this.clef = new Toe.Model.Clef(clefShape, this.rendEng, {"staffLine": staffLine});
 
 	// set bounding box if it exists
 	if (opts.zone) {
@@ -101,10 +101,10 @@ Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
     return this;
 }
 
-Toe.Staff.prototype.addNeumes = function(neumes) {
+Toe.Model.Staff.prototype.addNeumes = function(neumes) {
 	for (var i = 0; i < arguments.length; i++) {
         // check argument is a neume
-        if (!(arguments[i] instanceof Toe.Neume)) {
+        if (!(arguments[i] instanceof Toe.Model.Neume)) {
             continue;
         }
 
@@ -113,6 +113,20 @@ Toe.Staff.prototype.addNeumes = function(neumes) {
 	
 	// for chaining
     return this;
+}
+
+Toe.Model.Staff.prototype.calcScaleFromStaff = function(clefGlyph, options) {
+	var delta_y = this.zone.lry - this.zone.uly;
+	var height = delta_y / (this.props.numLines-1);
+ 
+	// clef spans 2 stafflines with 40% height (pixels) verticle buffer, 20% on each space
+	height = (height * 2) - (0.65*height);
+
+	var glyphHeight = clefGlyph.height;
+
+	scale = Math.abs(height / glyphHeight);
+
+	return scale;
 }
 
 /**
@@ -124,7 +138,7 @@ Toe.Staff.prototype.addNeumes = function(neumes) {
  *            ------- (line 1)
  *            ======= <lrx,lry>
  */
-Toe.Staff.prototype.render = function() {
+Toe.Model.Staff.prototype.render = function() {
     if (!this.rendEng) {
         throw new Error("Staff: Invalid render context");
     }

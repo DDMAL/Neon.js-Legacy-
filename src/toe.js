@@ -26,6 +26,15 @@ THE SOFTWARE.
 Toe = {};
 
 /**
+ * @namespace Neon MVC namespaces
+ */
+Toe.Model = {};
+
+Toe.Ctrl = {};
+
+Toe.View = {};
+
+/**
  * Utility Functions
  */
 
