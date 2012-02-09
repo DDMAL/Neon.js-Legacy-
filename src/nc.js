@@ -36,36 +36,21 @@ Toe.Model.NeumeComponent = function(diff, options) {
     $.extend(this.props, options);
 
     // check valid type
-    this.props.type.toLowerCase();
-    this.props.type = Toe.Model.NeumeComponent.Type[this.props.type];
-    if (this.props.type == undefined) {
-        throw new Error("NeumeComponent: undefined neume component type");
+    this.props.type = this.props.type.toLowerCase();
+    this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
+    if (this.props.name == undefined) {
+        throw new Error("NeumeComponent: undefined neume component");
     }
 }
 
 Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 
 Toe.Model.NeumeComponent.Type = {
-    punctum: {
-        name: "Punctum",
-        svgkey: "punctum"
-    },
-    whitepunct: {
-        name: "White Punctum",
-        svgkey: "whitepunct"
-    },
-    inclinatum: {
-        name: "Punctum Inclinatum",
-        svgkey: "diamond"
-    },
-    smallinclinatum: {
-        name: "Punctum Inclinatum Parvum",
-        svgkey: "smalldiamond"
-    },
-    quilisma: {
-        name: "Quilisma",
-        svgkey: "quilisma"
-    }
+    punctum: "Punctum",
+    whitepunct: "White Punctum",
+    inclinatum: "Punctum Inclinatum",
+    smallinclinatum: "Punctum Inclinatum Parvum",
+    quilisma: "Quilisma"
 };
 
 Toe.Model.NeumeComponent.Ornament = {

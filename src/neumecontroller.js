@@ -7,6 +7,11 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
      * Listen to the model
      */
     $(nModel).bind("vRenderNeume", function(event, neume, staff) {
+        // make sure neume type is known for it to be drawn properly
+        if (!neume.props.type) {
+            neume.deriveName();
+        }
+
         var rootDiff = neume.getRootDifference(staff);
         var clef_y = staff.clef.y;
 
