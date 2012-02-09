@@ -4,7 +4,7 @@ Toe.View.NeumeView = function(renderEngine) {
 
 Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
 
-Toe.View.NeumeView.prototype.renderNeume = function(neume, staff) {
+Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
     if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
     }
@@ -14,17 +14,6 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, staff) {
     }
 
     var ncOverlap_x = 1; // (pixels)
-
-    var rootDiff = neume.getRootDifference(staff);
-    var clef_y = staff.clef.y;
-
-    // derive positions of neume components
-    var nc_y = new Array();
-    // set root note y pos
-    nc_y.push(clef_y + ((~rootDiff + 1) * staff.delta_y / 2));
-    for (var i = 1; i < neume.components.length; i++) {
-        nc_y.push(nc_y[0] + ((~neume.components[i].diff + 1) * staff.delta_y/2));
-    }
 
     var elements = new Array();
 
