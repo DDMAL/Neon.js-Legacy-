@@ -21,8 +21,10 @@ THE SOFTWARE.
 */
 
 /**
- * @requires Toe
- * @class Neume Component
+ * Creates a new neume component
+ *
+ * @class Represents a neume component
+ * @param {Number} diff Difference from root note
  */
 Toe.Model.NeumeComponent = function(diff, options) {
     this.diff = diff;
@@ -45,6 +47,13 @@ Toe.Model.NeumeComponent = function(diff, options) {
 
 Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 
+/**
+ * Known types of neume components
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.NeumeComponent
+ */
 Toe.Model.NeumeComponent.Type = {
     punctum: "Punctum",
     whitepunct: "White Punctum",
@@ -53,6 +62,13 @@ Toe.Model.NeumeComponent.Type = {
     quilisma: "Quilisma"
 };
 
+/**
+ * Known ornaments for neume components
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.NeumeComponent
+ */
 Toe.Model.NeumeComponent.Ornament = {
     EPISEMA: {
         name: "Episema",
@@ -64,6 +80,12 @@ Toe.Model.NeumeComponent.Ornament = {
     }
 };
 
+/**
+ * Sets the position of the neume component
+ * 
+ * @methodOf Toe.Model.NeumeComponent
+ * @param {Array} pos [x,y]
+ */
 Toe.Model.NeumeComponent.prototype.setPosition = function(pos) {
     this.x = pos[0];
     this.y = pos[1];

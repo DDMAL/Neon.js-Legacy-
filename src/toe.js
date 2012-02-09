@@ -21,17 +21,23 @@ THE SOFTWARE.
 */
 
 /**
- * @namespace Neon namespace: the table of elements
+ * @namespace Neon namespace: the table of elements.
  */
 Toe = {};
 
 /**
- * @namespace Neon MVC namespaces
+ * @namespace Neon model namespace.
  */
 Toe.Model = {};
 
+/**
+ * @namespace Neon controller namespace.
+ */
 Toe.Ctrl = {};
 
+/**
+ * @namespace Neon view namespace.
+ */
 Toe.View = {};
 
 /**

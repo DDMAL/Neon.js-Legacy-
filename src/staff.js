@@ -22,9 +22,6 @@ THE SOFTWARE.
 
 /**
  * Creates a staff
- * @requires Toe
- * @requires Toe.Model.Clef
- * @requires Toe.Model.RenderEngine
  * @class Represents a Staff
  * 
  * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
@@ -33,7 +30,6 @@ THE SOFTWARE.
  *
  * (.)        <lrx,lry> (.)
  *
- * @param {Toe.Model.RenderEngine} rendEng drawing engine
  * @param {Object} options [numlines {Number}, clefType {String}, clefIndent (px) {Number}, interact {Boolean}]
  *
  * The staff has list of neumes on the staff
@@ -66,6 +62,13 @@ Toe.Model.Staff = function(bb, options) {
 
 Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
 
+/**
+ * Mounts the clef on the staff
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Toe.Model.Clef} clef The clef to mount
+ * @returns {Toe.Model.Staff} pointer to this staff for chaining
+ */
 Toe.Model.Staff.prototype.setClef = function(clef) {
     if (!(clef instanceof Toe.Model.Clef)) {
         throw new Error("Staff: Invalid clef");
@@ -86,6 +89,13 @@ Toe.Model.Staff.prototype.setClef = function(clef) {
     return this;
 }
 
+/**
+ * Mounts a neume on the staff
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Toe.Model.Neume} neume The neume to mount
+ * @returns {Toe.Model.Staff} Pointer to this staff for chaining
+ */
 Toe.Model.Staff.prototype.addNeume = function(neume) {
     // check argument is a neume
     if (!(neume instanceof Toe.Model.Neume)) {

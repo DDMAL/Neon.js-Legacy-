@@ -22,9 +22,10 @@ THE SOFTWARE.
 
 /**
  * Creates a glyph
- * @requires Toe
+ *
  * @class Represents a glyph imported from SVG
- * 
+ * @param {string} svgKey svg lookup id
+ * @param {fabric.js.Object} corresponding fabric.js object
  */
 Toe.Model.Glyph = function(svgKey, fabricObj) {
     this.key = svgKey;
@@ -35,7 +36,10 @@ Toe.Model.Glyph = function(svgKey, fabricObj) {
 
 Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
 
-// wrapper
+/**
+ * Wrapper function to clone the internal canvas object
+ * @methodOf Toe.Model.Glyph
+ */
 Toe.Model.Glyph.prototype.clone = function() {
     return this.obj.clone();
 }

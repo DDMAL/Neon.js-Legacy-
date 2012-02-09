@@ -1,9 +1,45 @@
+/*
+Copyright (C) 2011 by Gregory Burlet, Alastair Porter
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+/**
+ * Creates a new neume view
+ *
+ * @class View for the neume
+ * @param {Toe.View.RenderEngine} renderEngine The rendering engine
+ */
 Toe.View.NeumeView = function(renderEngine) {
     this.rendEng = renderEngine;
 }
 
 Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
 
+
+/**
+ * Renders the neume on the canvas
+ * 
+ * @methodOf Toe.View.NeumeView
+ * @param {Toe.Model.Neume} neume Neume to render
+ * @param {Array} nc_y The y positions of each neume component within the neume
+ */
 Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
     if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
@@ -42,6 +78,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
         case Toe.Model.Neume.Type.punctum:
             var glyphPunct = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
             elements.push(glyphPunct);
+            console.log("new punctum");
             break;
 
         // VIRGA

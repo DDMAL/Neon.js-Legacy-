@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 /**
  * Creates a new page
- * @requires Toe
+ *
  * @class Represents a page of music
  */
 Toe.Model.Page = function() {
@@ -35,10 +35,9 @@ Toe.Model.Page.prototype.constructor = Toe.Model.Page;
 /**
  * Set canvas width and height directly
  *
+ * @methodOf Toe.Model.Page
  * @param {Number} width Width of the page
  * @param {Number} height Height of the page
- * @property {Number} width Width of the canvas 
- * @property {Number} height Height of the canvas
  */
 Toe.Model.Page.prototype.setDimensions = function(width, height) {
     this.width = width;
@@ -53,9 +52,9 @@ Toe.Model.Page.prototype.setDimensions = function(width, height) {
  *
  * (.)        <lrx,lry> (.)
  *
+ * @methodOf Toe.Model.Page
  * @param {jQuery Wrapped Element Set} meiZones bounding boxes from facsimile data from an MEI document
- * @property {Number} width Width of the canvas 
- * @property {Number} height Height of the canvas
+ * @returns {Array} dimensions [width, height] of the canvas 
  */
 Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
     var max_x = 0;
@@ -76,15 +75,12 @@ Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
     return [max_x, max_y];
 }
 
-Toe.Model.Page.prototype.setDimensions = function(width, height) {
-	this.width = width;
-	this.height = height;
-}
-
 /**
  * Adds a given number of staves to the page
- * @function
+ *
+ * @methodOf Toe.Model.Page
  * @param {Toe.Model.Staff} staff the staff to add to the model
+ * @returns {Toe.Model.Page} pointer to the current page for chaining
  */
 Toe.Model.Page.prototype.addStaff = function(staff) {
     this.staves.push(staff);

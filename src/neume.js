@@ -20,14 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-// Implementation Notes
-// Each neume has:
-// name, root pitch, list of neume elements, each element has difference from root pitch (int)
-// modifier (liquescence etc.) - alt, shift, ctrl, ctrl+shift
-
 /**
- * @requires Toe
+ * Creates a neume
+ * Each neume has: name, root pitch, list of neume elements, each element has difference from root pitch (int)
+ *                 modifier (liquescence etc.) - alt, shift, ctrl, ctrl+shift
  * @class Neume
+ * @param {Object} options key {string}, type {Toe.Model.Neume.Type}, rootNote.pitch {string}, 
+ *                 rootNote.octave {number}, modifier {Toe.Model.Neume.Modifier}, interact {Boolean}
  */
 Toe.Model.Neume = function(options) {
     // initialize bounding box
@@ -52,7 +51,13 @@ Toe.Model.Neume = function(options) {
 
 Toe.Model.Neume.prototype.constructor = Toe.Model.Neume;
 
-// Neumes encoded from the Fundamental Neumes Board in Medieval Finale
+/**
+ * Neumes encoded from the Fundamental Neumes Board in Medieval Finale
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.Neume
+ */
 Toe.Model.Neume.Type = {
     punctum: {
         name: "Punctum",
@@ -228,6 +233,12 @@ Toe.Model.Neume.Type = {
     }
 };
 
+/**
+ * Sets the bounding box of the neume
+ *
+ * @methodOf Toe.Model.Neume
+ * @param {Array} bb [ulx, uly, lrx, lry]
+ */
 Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
     // set position
     this.zone.ulx = bb[0];
@@ -236,11 +247,26 @@ Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
     this.zone.lry = bb[3];
 }
 
+/**
+ * Sets the root note of the neume
+ *
+ * @param {string} pname root pitch
+ * @param {number} oct root octave
+ */
 Toe.Model.Neume.prototype.setRootNote = function(pname, oct) {
     this.props.rootNote.pitch = pname;
     this.props.rootNote.octave = oct;
 }
 
+/**
+ * Computes the numerical difference in pitch from the given pitch/oct
+ * compared to the root note of the neume
+ *
+ * @methodOf Toe.Model.Neume
+ * @param {string} pname root pitch
+ * @param {number} oct root octave
+ * @return {number} the pitch difference
+ */
 Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
     var numChroma = Toe.neumaticChroma.length;
     var rootNum = (this.props.rootNote.octave * numChroma) + $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
@@ -249,6 +275,35 @@ Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
     return ncNum - rootNum;
 }
 
+/**
+ * Gets the root pitch difference with respect to the position of the clef
+ *
+ * @methodOf Toe.Model.Neume
+ * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
+ */
+Toe.Model.Neume.prototype.getRootDifference = function(staff) {
+    // get clef pos
+    var sl = staff.clef.props.staffLine;
+    var c_type = staff.clef.shape;
+
+    var numChroma = Toe.neumaticChroma.length;
+    
+    // make root note search in relation to the clef index
+    var iClef = $.inArray(c_type, Toe.neumaticChroma);
+    var iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
+
+    // 4 is no magic number! clef position corresponds to fourth octave
+    var diff = Math.abs(iRoot - iClef) + numChroma*(this.props.rootNote.octave - 4);
+    return diff;
+}
+
+/**
+ * Fills the neume with data from an MEI neume element
+ *
+ * @methodOf Toe.Model.Neume
+ * @param {jQuery wrapped element set} neumeData the MEI neume data
+ * @param {jQuery wrapped element set} facs the MEI facs data for the provided neume
+ */
 Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs) {
     // check the DOM element is in fact a neume
     if (neumeData.nodeName.toLowerCase() != "neume") {
@@ -296,7 +351,15 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs) {
     return this;
 }
 
-// neumePos is index 0 based
+/**
+ * Adds a neume component to the neume
+ * neumePos is index 0 based
+ *
+ * @methodOf Toe.Model.Neume
+ * @param {string} Neume component type
+ * @diff {number} pitch difference from the root
+ * @options {Object} options neumePos {number}
+ */
 Toe.Model.Neume.prototype.addComponent = function(type, diff, options) {
     opts = {
         neumePos: null
@@ -314,6 +377,12 @@ Toe.Model.Neume.prototype.addComponent = function(type, diff, options) {
     }
 }
 
+/**
+ * Gets the pitch differences for each component
+ *
+ * @methodOf Toe.Model.Neume
+ * @returns {Array} array of pitch differences for each neume component
+ */
 Toe.Model.Neume.prototype.getDifferences = function() {
     var diffs = new Array();
     for(var i = 0; i < this.components.length; i++) {
@@ -322,6 +391,13 @@ Toe.Model.Neume.prototype.getDifferences = function() {
     return diffs;
 }
 
+/**
+ * Derives the name of the neume using the pitch differences
+ * and sets the name on the model.
+ * 
+ * @methodOf Toe.Model.Neume
+ * @returns {string} neume name
+ */
 Toe.Model.Neume.prototype.deriveName = function() {
     // checks
     if (this.components.length == 0) {
@@ -363,221 +439,4 @@ Toe.Model.Neume.prototype.deriveName = function() {
     });
 
     return this.props.type.name;
-}
-
-Toe.Model.Neume.prototype.getRootDifference = function(staff) {
-    // get clef pos
-    var sl = staff.clef.props.staffLine;
-    var c_type = staff.clef.shape;
-
-    var numChroma = Toe.neumaticChroma.length;
-    
-    // make root note search in relation to the clef index
-    var iClef = $.inArray(c_type, Toe.neumaticChroma);
-    var iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
-
-    // 4 is no magic number! clef position corresponds to fourth octave
-    var diff = Math.abs(iRoot - iClef) + numChroma*(this.props.rootNote.octave - 4);
-    return diff;
-}
- 
-Toe.Model.Neume.prototype.render = function(staff) {
-    if (!this.rendEng) {
-        throw new Error("Neume: Invalid render context");
-    }
-
-    if (!this.props.type) {
-        this.deriveName();
-    }
-
-    var ncOverlap_x = 1; // (pixels)
-
-    var rootDiff = this.getRootDifference(staff);
-    var clef_y = staff.clef.y;
-
-    // derive positions of neume components
-    var nc_y = new Array();
-    // set root note y pos
-    nc_y.push(clef_y + ((~rootDiff + 1) * staff.delta_y / 2));
-    for (var i = 1; i < this.components.length; i++) {
-        nc_y.push(nc_y[0] + ((~this.components[i].diff + 1) * staff.delta_y/2));
-    }
-
-    var elements = new Array();
-
-    /* PUNCTUM */
-    if (this.props.type == Toe.Model.Neume.Type.punctum) {
-        // look into neume component for more drawing details
-        var punct = this.rendEng.getGlyph(this.components[0].props.type.svgkey);
-        var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-
-        elements.push(glyphPunct);
-    }
-    /* VIRGA */
-    if (this.props.type == Toe.Model.Neume.Type.virga) {
-        var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-
-        elements.push(glyphPunct);
-
-        // draw right line coming off punctum
-        var rx = glyphPunct.left+punct.centre[0]-1;
-        var line = this.rendEng.createLine([rx, nc_y[0], rx, this.zone.lry], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-    }
-    /* CLIVIS */
-    if (this.props.type == Toe.Model.Neume.Type.clivis) {
-        // first punctum
-        var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-
-        elements.push(glyphPunct1);
-
-        // draw left line coming off first punctum
-        var lx = glyphPunct1.left-punct.centre[0]+1;
-        var line = this.rendEng.createLine([lx, nc_y[0], lx, this.zone.lry], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        // draw right line coming off punctum
-        var rx = glyphPunct1.left+punct.centre[0];
-        var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        // second punctum
-        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0]), top: nc_y[1]});
-
-        elements.push(glyphPunct2);
-
-    }
-    /* TORCULUS */
-    if (this.props.type == Toe.Model.Neume.Type.torculus) {
-        // first punctum
-        var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct1 = punct.clone().set({left: this.zone.ulx + punct.centre[0], top: nc_y[0]});
-
-        elements.push(glyphPunct1);
-
-        // draw right line coming off punctum1
-        var rx = glyphPunct1.left+punct.centre[0]-1;
-        var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        // second punctum
-        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left+(2*punct.centre[0])-ncOverlap_x, top: nc_y[1]});
-
-        elements.push(glyphPunct2);
-
-        // draw right line coming off punctum2
-        var rx = glyphPunct2.left+punct.centre[0]-1;
-        var line = this.rendEng.createLine([rx, nc_y[1], rx, nc_y[2]], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        // third punctum
-        var glyphPunct3 = punct.clone().set({left: glyphPunct2.left+(2*punct.centre[0])-ncOverlap_x, top: nc_y[2]});
-
-        elements.push(glyphPunct3);
-    }
-    /* PODATUS */
-    if (this.props.type == Toe.Model.Neume.Type.podatus) {
-        // if punctums are right on top of each other, spread them out a bit
-        if (Math.abs(this.components[1].diff) == 1) {
-            nc_y[0] += 1;
-            nc_y[1] -= 1;
-        }
-
-        // first punctum
-        var punct1 = this.rendEng.getGlyph("pes");
-        var glyphPunct1 = punct1.clone().set({left: this.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2});
-
-        elements.push(glyphPunct1);
-
-        // draw right line connecting two punctum
-        var rx = glyphPunct1.left + punct1.centre[0] - 1;
-        var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        // second punctum
-        var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct2 = punct.clone().set({left: glyphPunct1.left, top: nc_y[1]});
-
-        elements.push(glyphPunct2);
-    }
-    /* PORRECTUS */
-    if (this.props.type == Toe.Model.Neume.Type.porrectus) {
-        // draw swoosh
-        var swoosh = this.rendEng.getGlyph("porrect_1");
-        var glyphSwoosh = swoosh.clone().set({left: this.zone.ulx + swoosh.centre[0], top: nc_y[0] + swoosh.centre[1]/2});
-        elements.push(glyphSwoosh);
-
-        // draw left line coming off swoosh
-        var lx = glyphSwoosh.left - swoosh.centre[0] + 1;
-        var ly = this.zone.lry;
-        var swooshBot = glyphSwoosh.top + swoosh.centre[1];
-        if (this.zone.lry < glyphSwoosh.top + swooshBot) {
-            ly = swooshBot;
-        }
-        var line = this.rendEng.createLine([lx, nc_y[0], lx, ly], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        // draw punctum
-        var punct = this.rendEng.getGlyph("punctum");
-        var glyphPunct = punct.clone().set({left: glyphSwoosh.left + swoosh.centre[0] - punct.centre[0], top: nc_y[2]});
-
-        // draw right line connecting swoosh and punctum
-        var rx = glyphPunct.left + punct.centre[0] - 1;
-        var line = this.rendEng.createLine([rx, nc_y[2], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-        this.rendEng.draw([line], {modify: false});
-
-        elements.push(glyphPunct);
-    }
-    /* SCANDICUS */
-    if (this.props.type == Toe.Model.Neume.Type.scandicus) {
-        // draw podatuses
-        
-        var pes = this.rendEng.getGlyph("pes");
-        var punct = this.rendEng.getGlyph("punctum");
-        var lastX = this.zone.ulx - punct.centre[0];
-        for (var i = 0; i < this.components.length-1; i+=2) {
-            // draw podatuses
-            
-            // if punctums are right on top of each other, spread them out a bit
-            if (Math.abs(this.components[i+1].diff - this.components[i].diff) == 1) {
-                nc_y[i] += 1;
-                nc_y[i+1] -= 1;
-            }
-
-            // pes
-            lastX += 2*punct.centre[0] - ncOverlap_x;
-            var glyphPes = pes.clone().set({left: lastX, top: nc_y[i] - pes.centre[1]/2});
-            elements.push(glyphPes);
-
-            // draw right line connecting two punctum
-            var rx1 = lastX + pes.centre[0] - 1;
-            var line1 = this.rendEng.createLine([rx1, nc_y[i], rx1, nc_y[i+1]], {strokeWidth: 2, interact: true});
-            this.rendEng.draw([line1], {modify: false});
-
-            // second punctum
-            var glyphPunct2 = punct.clone().set({left: lastX, top: nc_y[i+1]});
-            elements.push(glyphPunct2);
-        }
-
-        if (this.components.length % 2 == 1) {
-            // draw virga
-            lastX += 2*punct.centre[0] - ncOverlap_x;
-            var glyphPunct3 = punct.clone().set({left: lastX, top: nc_y[this.components.length-1]});
-            elements.push(glyphPunct3);
-
-            // draw right line coming off punctum
-            var rx2 = lastX + punct.centre[0] - 2;
-            var line2 = this.rendEng.createLine([rx2, nc_y[this.components.length-1], rx2, this.zone.lry - ((this.zone.lry - this.zone.uly)/2)], {strokeWidth: 2, interact: true});
-            this.rendEng.draw([line2], {modify: false});
-        }
-    }
-    
-    for (i = 0; i < elements.length; i++) {
-        elements[i].selectable = this.props.interact;
-        elements[i].hasControls = false;
-    }
-
-    this.rendEng.draw(elements);
 }

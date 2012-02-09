@@ -22,11 +22,9 @@ THE SOFTWARE.
 
 /**
  * Creates a clef
- * @requires Toe
- * @requires Toe.Model.RenderEngine
+ *
  * @class Represents a clef
- * @param {String} clefType clef type: c or f
- * @param {Toe.Model.RenderEngine} drawing engine
+ * @param {String} clefShape clef shape: c or f
  * @param {Object} options staffline {Number}, interact {Boolean}
  */
 Toe.Model.Clef = function(clefShape, options) {
@@ -59,7 +57,10 @@ Toe.Model.Clef = function(clefShape, options) {
 
 /**
  * Known clef types
+ *
  * @constant
+ * @public
+ * @fieldOf Toe.Model.Clef
  */
 Toe.Model.Clef.Type = {
     c: "Doh Clef",
@@ -69,6 +70,9 @@ Toe.Model.Clef.Type = {
 Toe.Model.Clef.prototype.constructor = Toe.Model.Clef;
 
 /**
+ * Sets the position of the clef
+ *
+ * @methodOf Toe.Model.Clef
  * @param pos {Array} [x,y]
  */
 Toe.Model.Clef.prototype.setPosition = function(pos) {
@@ -76,8 +80,13 @@ Toe.Model.Clef.prototype.setPosition = function(pos) {
     this.y = pos[1];
 }
 
-// [ulx, uly, lrx, lry]
-Toe.Model.Clef.prototype.setBoundingBox = function(bb) {
+/**
+ * Sets the bounding box of the clef
+ *
+ * @methodOf Toe.Model.Clef
+ * @param {Array} bb [ulx, uly, lrx, lry]
+ */
+ Toe.Model.Clef.prototype.setBoundingBox = function(bb) {
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];
