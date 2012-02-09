@@ -152,16 +152,22 @@ THE SOFTWARE.
 
                 // load all neumes in system
                 $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
-                    var neume = new Toe.Model.Neume(rendEng);
+                    var nModel = new Toe.Model.Neume(rendEng);
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
                     if (displayZones) {
                         rendEng.outlineBoundingBox(n_bb, {fill: "green"});
                     }
 
-                    neume.neumeFromMei(nel, $(neumeFacs));
-                    console.log("neume: " + neume.props.type.name);
-                    sModel.addNeumes(neume);
+                    nModel.neumeFromMei(nel, $(neumeFacs));
+                    // instantiate neume view and controller
+                    var nView = new Toe.View.NeumeView(rendEng);
+                    var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+                    // mount neume on the staff
+                    sModel.addNeume(nModel);
+
+                    console.log("neume: " + nModel.props.type.name);
                 });
             });
             rendEng.repaint();

@@ -4,6 +4,15 @@ Toe.View.StaffView = function(renderEngine) {
 
 Toe.View.StaffView.prototype.constructor = Toe.View.StaffView;
 
+/**
+ * Renders the staff according to the following scheme:
+ *  <ulx,uly> =======
+ *            ------- (line numLines)
+ *            ------- (line numLines-1)
+ *            ------- ...
+ *            ------- (line 1)
+ *            ======= <lrx,lry>
+ */
 Toe.View.StaffView.prototype.renderStaff = function(staff) {
     if (!this.rendEng) {
         throw new Error("Staff: Invalid render context");

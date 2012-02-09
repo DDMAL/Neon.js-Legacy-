@@ -83,20 +83,3 @@ Toe.Model.Clef.prototype.setBoundingBox = function(bb) {
     this.zone.lrx = bb[2];
     this.zone.lry = bb[3];
 }
-
-/**
- * Renders the clef on the canvas
- */
-Toe.Model.Clef.prototype.render = function() {
-/*
-    if (!this.rendEng) {
-        throw new Error("Clef: Invalid render context");
-    }
-
-    var clef = this.rendEng.getGlyph(this.clefInfo.svgKey);
-    var glyphClef = clef.clone().set({left: this.x+(clef.obj.width*this.rendEng.options.globScale/2), top: this.y}); // offset centre
-    glyphClef.selectable = this.props.interact;
-
-    this.rendEng.draw([glyphClef]);
-*/
-}

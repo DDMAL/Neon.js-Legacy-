@@ -29,11 +29,9 @@ THE SOFTWARE.
  * @requires Toe
  * @class Neume
  */
-Toe.Model.Neume = function(rendEng, options) {
+Toe.Model.Neume = function(options) {
     // initialize bounding box
     this.zone = new Object();
-
-    this.rendEng = rendEng;
 
     this.props = {
         key: "punctum",
@@ -306,7 +304,7 @@ Toe.Model.Neume.prototype.addComponent = function(type, diff, options) {
 
     $.extend(opts, options);
 
-    var nc = new Toe.Model.NeumeComponent(diff, this.rendEng, {type: type});
+    var nc = new Toe.Model.NeumeComponent(diff, {type: type});
 
     if (!opts.neumePos || opts.neumePos > this.components.length || opts.neumePos < 0) {
         this.components.push(nc);
@@ -370,7 +368,7 @@ Toe.Model.Neume.prototype.deriveName = function() {
 Toe.Model.Neume.prototype.getRootDifference = function(staff) {
     // get clef pos
     var sl = staff.clef.props.staffLine;
-    var c_type = staff.clef.clefInfo.shape;
+    var c_type = staff.clef.shape;
 
     var numChroma = Toe.neumaticChroma.length;
     

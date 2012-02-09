@@ -24,9 +24,8 @@ THE SOFTWARE.
  * @requires Toe
  * @class Neume Component
  */
-Toe.Model.NeumeComponent = function(diff, rendEng, options) {
+Toe.Model.NeumeComponent = function(diff, options) {
     this.diff = diff;
-    this.rendEng = rendEng;
 
     this.props = {
         type: "punctum",
@@ -83,10 +82,4 @@ Toe.Model.NeumeComponent.Ornament = {
 Toe.Model.NeumeComponent.prototype.setPosition = function(pos) {
     this.x = pos[0];
     this.y = pos[1];
-}
-
-Toe.Model.NeumeComponent.prototype.render = function() {
-    if (!this.rendEng) {
-        throw new Error("Clef: Invalid render context");
-    }
 }
