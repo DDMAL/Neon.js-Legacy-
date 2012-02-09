@@ -36,16 +36,19 @@ THE SOFTWARE.
  */
 Toe.Model.Staff = function(bb, options) {
     // set position
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Staff: invalid bounding box");
+    }
+
     this.zone = new Object();
-    this.zone.ulx = parseInt(bb[0]);
-    this.zone.uly = parseInt(bb[1]);
-    this.zone.lrx = parseInt(bb[2]);
-    this.zone.lry = parseInt(bb[3]);
+    this.zone.ulx = bb[0];
+    this.zone.uly = bb[1];
+    this.zone.lrx = bb[2];
+    this.zone.lry = bb[3];
 
     // default 4 stafflines
     this.props = {
         numLines: 4,
-        clefType: "c",
         interact: false
     };
 
@@ -54,13 +57,21 @@ Toe.Model.Staff = function(bb, options) {
     // cache delta y: pixels between stafflines
     this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
 
-    // default c clef on line 4
-    //this.clef = this.setClef(this.props.clefType, 4);
-
     this.neumes = new Array();
 }
 
 Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
+
+Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Staff: invalid bounding box");
+    }
+    
+    this.zone.ulx = bb[0];
+    this.zone.uly = bb[1];
+    this.zone.lrx = bb[2];
+    this.zone.lry = bb[3];
+}
 
 /**
  * Mounts the clef on the staff
@@ -78,7 +89,11 @@ Toe.Model.Staff.prototype.setClef = function(clef) {
     }
 
     // set clef position given the staffline
-    clef.setPosition([clef.zone.ulx, this.zone.uly+((this.props.numLines-clef.props.staffLine)*this.delta_y)]);
+    var x = this.zone.ulx;
+    if (clef.zone.ulx) {
+        x = clef.zone.ulx;
+    }
+    clef.setPosition([x, this.zone.uly+((this.props.numLines-clef.props.staffLine)*this.delta_y)]);
 
     // update view
     $(clef).trigger("vRenderClef", [clef]);

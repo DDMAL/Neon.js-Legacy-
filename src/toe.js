@@ -66,6 +66,10 @@ Toe.View = {};
     }
 })(jQuery);
 
+Toe.validBoundingBox = function(bb) {
+    return bb[0] <= bb[2] && bb[1] <= bb[3];
+}
+
 /**
  * Musical information
  * May eventually be moved to a musical methods class
