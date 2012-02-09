@@ -200,7 +200,7 @@ THE SOFTWARE.
             var dfd = $.Deferred();
 
             if (settings.autoLoad && settings.backgroundImage) {
-                fabric.Image.fromURL(settings.prefix+"/"+filename+"/file", function(img) {
+                fabric.Image.fromURL(settings.prefix+"/"+filename+"/meifile", function(img) {
                     if (img.width > settings.width) {
                         settings.width = img.width;
                     }
@@ -225,7 +225,7 @@ THE SOFTWARE.
             var dfd = $.Deferred();
             
             if (settings.autoLoad && settings.filename) {
-                $.get(settings.prefix+"/"+fileName+"/file", function(data) {
+                $.get(settings.prefix+"/"+fileName+"/meifile", function(data) {
                     console.log("loading MEI file ...");
 
                     // save mei data
@@ -274,7 +274,7 @@ THE SOFTWARE.
 
             var canvasOpts = {renderOnAddition: false};
             if (settings.backgroundImage) {
-                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
+                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/meifile", 
                                       backgroundImageOpacity: settings.backgroundImageOpacity,
                                       backgroundImageStretch: false});
 
@@ -312,7 +312,7 @@ THE SOFTWARE.
                 $("#ui_bgImgOpacity").bind("slide", function(event, ui) {
                     settings.backgroundImageOpacity = ui.value;
                     rendEng.canvas.backgroundImageOpacity = settings.backgroundImageOpacity;
-                    rendEng.repaint();
+                    rendEng.repaint(); 
                 });
             }
 

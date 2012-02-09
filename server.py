@@ -76,7 +76,7 @@ class EditorHandler(tornado.web.RequestHandler):
             dstr = "false"
         self.render("templates/neon.html", page=page, prefix=conf.APP_ROOT.rstrip("/"), debug=dstr)
 
-class FileHandler(tornado.web.RequestHandler):
+class MeiFileHandler(tornado.web.RequestHandler):
     mimetypes.add_type("text/xml", ".mei")
 
     def get(self, filename):
@@ -87,12 +87,27 @@ class FileHandler(tornado.web.RequestHandler):
             fp = open(fullpath, "r")
             response = fp.read()
             # derive mime type from file for generic serving
-            self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0]);
+            self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0])
             self.write(response)
             # to serve JSON instead of xml
             #response = pymei.Export.meitojson.meitojson(mei, prettyprint=False)
             #self.set_header("Content-Type", "application/json")
             #self.write(response)
+
+class TestHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("test/neontest.html", prefix=conf.APP_ROOT.rstrip("/"))
+
+class GenericFileHandler(tornado.web.RequestHandler):
+    def get(self, filepath):
+        fullpath = os.path.join(conf.APP_ROOT.rstrip("/"), filepath)
+        if not os.path.exists(os.path.abspath(fullpath)):
+            self.send_error(403)
+        else:
+            fp = open(fullpath, "r")
+            response = fp.read()
+            self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0])
+            self.write(response)
 
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
@@ -108,7 +123,9 @@ def abs_path(relpath):
 application = tornado.web.Application([
     (abs_path(r"/?"), RootHandler),
     (abs_path(r"/(.*?)/edit"), EditorHandler),
-    (abs_path(r"/(.*?)/file"), FileHandler),
+    (abs_path(r"/test"), TestHandler),
+    (abs_path(r"/(.*?)/meifile"), MeiFileHandler),
+    (abs_path(r"/(.*?)/file"), GenericFileHandler),
     ], **settings)
 
 def main(port):
