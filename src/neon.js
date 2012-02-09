@@ -25,7 +25,6 @@ THE SOFTWARE.
     var Neon = function(element, options)
     {
         var elem = $(element);
-        var page;
         var mei;
         var rendEng;
         var startTime;
@@ -65,9 +64,6 @@ THE SOFTWARE.
             // initialize rendering engine
             rendEng = new Toe.View.RenderEngine();
             
-            // create page
-            page = new Toe.Model.Page(rendEng);
-
             /*
              * Start asynchronous function calls
              * Get promises and wait for queued functions to finish
@@ -97,7 +93,7 @@ THE SOFTWARE.
             return [ulx, uly, lrx, lry];
         };
 
-        var loadMeiPage = function(displayZones) {
+        var loadMeiPage = function(displayZones, page) {
             var neumeList = $("neume, sb", mei);
             // calculate sb indices
             // precomputing will render better performance than a filter operation in the loops
@@ -121,17 +117,17 @@ THE SOFTWARE.
                 if (displayZones) {
                     rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
                 }
-                var s = new Toe.Model.Staff(s_bb, rendEng);
-
+                var sModel = new Toe.Model.Staff(s_bb, rendEng);
+                
                 // set global scale using staff from first system
                 if(sit == 0) {
-                    rendEng.calcScaleFromStaff(s, {overwrite: true});
+                    rendEng.calcScaleFromStaff(sModel, {overwrite: true});
                 }
 
-                // set clef
+                // CLEF
                 var clef = $("~ clef", this);
                 var clefShape = $(clef).attr("shape");
-                var clefLine = parseInt($(clef).attr("line"));
+                var clefStaffLine = parseInt($(clef).attr("line"));
             
                 var clefFacsId = $(clef).attr("facs");
                 var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
@@ -140,9 +136,19 @@ THE SOFTWARE.
                     rendEng.outlineBoundingBox(c_bb, {fill: "red"});
                 }
 
-                s.setClef(clefShape, clefLine, {zone: c_bb});
+                var cModel = new Toe.Model.Clef(clefShape, {"staffLine": clefStaffLine});
+                cModel.setBoundingBox(c_bb);
+                // instantiate clef view and controller
+                var cView = new Toe.View.ClefView(rendEng);
+                var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
 
-                page.addStaff(s);
+                // mount clef on the staff
+                sModel.setClef(cModel);
+
+                // instantiate staff view and controller
+                var sView = new Toe.View.StaffView(rendEng);
+                var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
+                page.addStaff(sModel);
 
                 // load all neumes in system
                 $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
@@ -155,7 +161,7 @@ THE SOFTWARE.
 
                     neume.neumeFromMei(nel, $(neumeFacs));
                     console.log("neume: " + neume.props.type.name);
-                    s.addNeumes(neume);
+                    sModel.addNeumes(neume);
                 });
             });
             rendEng.repaint();
@@ -233,6 +239,9 @@ THE SOFTWARE.
 
         // handler for when asynchronous calls have been completed
         var loadSuccess = function() {
+            // create page
+            var page = new Toe.Model.Page();
+
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
@@ -287,7 +296,7 @@ THE SOFTWARE.
             var pCtrl = new Toe.Ctrl.PageController(page, pView);
             
             if (settings.autoLoad && mei) {
-                loadMeiPage(settings.debug);
+                loadMeiPage(settings.debug, page);
             }
 
             if (settings.backgroundImage) {

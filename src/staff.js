@@ -38,7 +38,7 @@ THE SOFTWARE.
  *
  * The staff has list of neumes on the staff
  */
-Toe.Model.Staff = function(bb, rendEng, options) {
+Toe.Model.Staff = function(bb, options) {
     // set position
     this.zone = new Object();
     this.zone.ulx = parseInt(bb[0]);
@@ -46,28 +46,42 @@ Toe.Model.Staff = function(bb, rendEng, options) {
     this.zone.lrx = parseInt(bb[2]);
     this.zone.lry = parseInt(bb[3]);
 
-    this.rendEng = rendEng;
-
     // default 4 stafflines
     this.props = {
         numLines: 4,
         clefType: "c",
-        clefIndent: 5,   // in px
         interact: false
     };
 
     $.extend(this.props, options);
 
-	// cache delta y: pixels between stafflines
-	this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
+    // cache delta y: pixels between stafflines
+    this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
 
     // default c clef on line 4
     //this.clef = this.setClef(this.props.clefType, 4);
 
-	this.neumes = new Array();
+    this.neumes = new Array();
 }
 
 Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
+
+Toe.Model.Staff.prototype.setClef = function(clef) {
+    if (clef.props.staffLine > this.props.numLines) {
+        throw new Error("Staff: Invalid clef position");
+    }
+
+    // set clef position given the staffline
+    clef.setPosition([clef.zone.ulx, this.zone.uly+((this.props.numLines-clef.props.staffLine)*this.delta_y)]);
+
+    // update view
+    $(clef).trigger("vRenderClef", [clef]);
+    
+    this.clef = clef;
+
+    // for chaining
+    return this;
+}
 
 /**
  * Sets the clef for the staff on the given staff line.
@@ -76,33 +90,35 @@ Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
  * @param {Number} staffLine staffline the clef is on
  * @param {Object} options {zone: {Array} [ulx, uly, lrx, lry]}
  */
-Toe.Model.Staff.prototype.setClef = function(clefShape, staffLine, options) {
+/*Toe.Model.Staff.prototype.setClef = function(clefShape, staffLine, options) {
     if (staffLine > this.props.numLines) {
         throw new Error("Invalid clef position.");
     }
 
-	var opts = {
-		zone: null
-	};
-	$.extend(opts, options);
+    var opts = {
+        zone: null
+    };
+    $.extend(opts, options);
 
-    this.clef = new Toe.Model.Clef(clefShape, this.rendEng, {"staffLine": staffLine});
+    this.clef = new Toe.Model.Clef(clefShape, {"staffLine": staffLine});
 
-	// set bounding box if it exists
-	if (opts.zone) {
-		this.clef.setBoundingBox(opts.zone);
-	}
-	else {
-		// set top left coordinates based on staffline the clef is on
-		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*this.delta_y), null, null]);
-	}
+    // set bounding box if it exists
+    if (opts.zone) {
+        this.clef.setBoundingBox(opts.zone);
+    }
+    else {
+        // set top left coordinates based on staffline the clef is on
+        this.clef.setBoundingBox([this.zone.ulx, this.zone.uly+((this.props.numLines-staffLine)*this.delta_y), null, null]);
+    }
+
+    
 
     // for chaining
     return this;
-}
+}*/
 
 Toe.Model.Staff.prototype.addNeumes = function(neumes) {
-	for (var i = 0; i < arguments.length; i++) {
+    for (var i = 0; i < arguments.length; i++) {
         // check argument is a neume
         if (!(arguments[i] instanceof Toe.Model.Neume)) {
             continue;
@@ -110,23 +126,9 @@ Toe.Model.Staff.prototype.addNeumes = function(neumes) {
 
         this.neumes.push(arguments[i]);
     }
-	
-	// for chaining
+    
+    // for chaining
     return this;
-}
-
-Toe.Model.Staff.prototype.calcScaleFromStaff = function(clefGlyph, options) {
-	var delta_y = this.zone.lry - this.zone.uly;
-	var height = delta_y / (this.props.numLines-1);
- 
-	// clef spans 2 stafflines with 40% height (pixels) verticle buffer, 20% on each space
-	height = (height * 2) - (0.65*height);
-
-	var glyphHeight = clefGlyph.height;
-
-	scale = Math.abs(height / glyphHeight);
-
-	return scale;
 }
 
 /**
@@ -151,15 +153,15 @@ Toe.Model.Staff.prototype.render = function() {
         elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], {interact: this.props.interact}));
     }
     
-	this.rendEng.draw(elements, {modify: false});
+    this.rendEng.draw(elements, {modify: false});
 
     // render clef
-	this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*this.delta_y)]);
+    this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*this.delta_y)]);
     this.clef.render();
     
-	// render neumes
-	var theStaff = this;
-	$.each(this.neumes, function(it, el) {
-		el.render(theStaff);
-	});
+    // render neumes
+    var theStaff = this;
+    $.each(this.neumes, function(it, el) {
+        el.render(theStaff);
+    });
 }

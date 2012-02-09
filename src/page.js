@@ -25,9 +25,7 @@ THE SOFTWARE.
  * @requires Toe
  * @class Represents a page of music
  */
-Toe.Model.Page = function(rendEng) {
-	this.rendEng = rendEng;
-
+Toe.Model.Page = function() {
     // initialize staves
     this.staves = new Array();
 }
@@ -92,20 +90,7 @@ Toe.Model.Page.prototype.addStaff = function(staff) {
     this.staves.push(staff);
 
 	// update view
-	$(this).trigger("vRenderStaff", [staff]);
+	$(staff).trigger("vRenderStaff", [staff]);
 
     return this;
-}
-
-/**
- * Renders the page and all staves attached to the page
- * @function
- */
-Toe.Model.Page.prototype.render = function() {
-    // render staves
-    for (var i = 0; i < this.staves.length; i++) {
-        this.staves[i].render();
-    }
-
-	this.rendEng.repaint();
 }
