@@ -59,6 +59,8 @@
     test("Add Neume", function() {
         var numNeumes = 2;
         var sModel = new Toe.Model.Staff(bb);
+        var cModel = new Toe.Model.Clef("c");
+        sModel.setClef(cModel);
 
         for (var i = 0; i < numNeumes; i++) { 
             var nModel = new Toe.Model.Neume();

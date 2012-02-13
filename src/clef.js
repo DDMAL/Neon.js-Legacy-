@@ -87,6 +87,10 @@ Toe.Model.Clef.prototype.setPosition = function(pos) {
  * @param {Array} bb [ulx, uly, lrx, lry]
  */
  Toe.Model.Clef.prototype.setBoundingBox = function(bb) {
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Clef: invalid bounding box");
+    }
+
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];

@@ -62,6 +62,12 @@ Toe.Model.Staff = function(bb, options) {
 
 Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
 
+/**
+ * Sets the bounding box of the staff
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Array} bb [ulx,uly,lrx,lry]
+ */
 Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
     if(!Toe.validBoundingBox(bb)) {
         throw new Error("Staff: invalid bounding box");
@@ -71,6 +77,9 @@ Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];
     this.zone.lry = bb[3];
+
+    // update delta_y cache
+    this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
 }
 
 /**
@@ -117,10 +126,13 @@ Toe.Model.Staff.prototype.addNeume = function(neume) {
         throw new Error("Staff: Invalid neume");
     }
 
+    // update root note difference
+    neume.calcRootDifference(this);
+    
+    this.neumes.push(neume);
+
     // update view
     $(neume).trigger("vRenderNeume", [neume, this]);
-
-    this.neumes.push(neume);
     
     // for chaining
     return this;

@@ -34,7 +34,7 @@ Toe.Model.Neume = function(options) {
 
     this.props = {
         key: "punctum",
-        type: Toe.Model.Neume.Type.punctum,
+        type: null,
         rootNote: {
             pitch: "c",
             octave: 3
@@ -44,6 +44,18 @@ Toe.Model.Neume = function(options) {
     };
 
     $.extend(this.props, options);
+
+    this.props.key = this.props.key.toLowerCase();
+    this.props.type = Toe.Model.Neume.Type[this.props.key];
+
+    if (this.props.type == undefined) {
+        this.props.key = "compound";
+        this.props.type = Toe.Model.Neume.Type.compound;
+    }
+
+    // displacement from the clef - set later by the staff model
+    // when mounting the neume on the staff. Should not be manually set.
+    this.rootDiff = null;
 
     // initialize neume component array
     this.components = new Array();
@@ -230,6 +242,10 @@ Toe.Model.Neume.Type = {
     torculusresup4: {
         name: "Torculus resupinus 4",
         melodicMove: [0, 1, -1, 1, -1, -1, -1]
+    },
+    compound: {
+        name: "Compound neume",
+        melodicMove: []
     }
 };
 
@@ -240,6 +256,10 @@ Toe.Model.Neume.Type = {
  * @param {Array} bb [ulx, uly, lrx, lry]
  */
 Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Neume: invalid bounding box");
+    }
+
     // set position
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
@@ -276,25 +296,30 @@ Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
 }
 
 /**
- * Gets the root pitch difference with respect to the position of the clef
+ * Calculate the root pitch difference with respect to the position of the clef
  *
  * @methodOf Toe.Model.Neume
  * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
  */
-Toe.Model.Neume.prototype.getRootDifference = function(staff) {
+Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
     // get clef pos
     var sl = staff.clef.props.staffLine;
     var c_type = staff.clef.shape;
 
+    // ["c", "d", "e", "f", "g", "a", "b"];
     var numChroma = Toe.neumaticChroma.length;
     
     // make root note search in relation to the clef index
     var iClef = $.inArray(c_type, Toe.neumaticChroma);
     var iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
 
+    var offset = Math.abs(iRoot - iClef);
+    if (iClef - iRoot > 0) {
+        offset = numChroma + iRoot - iClef;
+    }
     // 4 is no magic number! clef position corresponds to fourth octave
-    var diff = Math.abs(iRoot - iClef) + numChroma*(this.props.rootNote.octave - 4);
-    return diff;
+    //var diff = Math.abs(iRoot - iClef) + numChroma*(this.props.rootNote.octave - 4);
+    this.rootDiff = numChroma*(this.props.rootNote.octave - 4) + offset;
 }
 
 /**
