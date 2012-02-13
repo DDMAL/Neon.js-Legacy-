@@ -19,6 +19,11 @@
 
         // test default properties
         ok(!cClefModel.props.interact);
+
+        // test invalid clef shape
+        raises(function() {
+            new Toe.Model.Clef("z");
+        });
     });
 
     test("Set Bounding Box", function() {
