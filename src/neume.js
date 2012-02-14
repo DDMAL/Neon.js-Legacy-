@@ -372,7 +372,7 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
 
         // set root note
         var diff = 0;
-        if (theNeume.components.length == 0) {
+        if (it == 0) {
             theNeume.setRootNote(pname, oct, {staff: staff});
         }
         else {
@@ -393,28 +393,25 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
 
 /**
  * Adds a neume component to the neume
- * neumePos is index 0 based
+ * nInd is index 0 based
  *
  * @methodOf Toe.Model.Neume
  * @param {string} Neume component type
  * @diff {number} pitch difference from the root
- * @options {Object} options neumePos {number}
+ * @options {Object} options neumeInd {number} index of where to insert the component in the neume
  */
 Toe.Model.Neume.prototype.addComponent = function(type, diff, options) {
     opts = {
-        neumePos: null
+        ncInd: this.components.length
     };
 
     $.extend(opts, options);
 
+    // TODO: check that diff corresponds with the neume melodic move
+
     var nc = new Toe.Model.NeumeComponent(diff, {type: type});
 
-    if (!opts.neumePos || opts.neumePos > this.components.length || opts.neumePos < 0) {
-        this.components.push(nc);
-    }
-    else {
-        this.components.splice(opts.neumePos, 0, nc);
-    }
+    this.components.splice(opts.ncInd, 0, nc);
 }
 
 /**
@@ -432,21 +429,13 @@ Toe.Model.Neume.prototype.getDifferences = function() {
 }
 
 /**
- * Derives the name of the neume using the pitch differences
- * and sets the name on the model.
- * 
+ * Converts neume component difference integers to basic up/downs in the form of
+ * 1 and -1, for up and down, respectively.
+ *
  * @methodOf Toe.Model.Neume
- * @returns {string} neume name
+ * @returns {Array} melodic movement in ups and downs
  */
-Toe.Model.Neume.prototype.deriveName = function() {
-    // checks
-    if (this.components.length == 0) {
-        return "unknown";
-    }
-    if (this.props.type) {
-        return this.props.type.name;
-    }
-
+Toe.Model.Neume.prototype.diffToMelodicMove = function() {
     var diffs = this.getDifferences();
 
     // convert to ups and downs
@@ -464,19 +453,44 @@ Toe.Model.Neume.prototype.deriveName = function() {
         return relation;
     });
 
+    return diffs;
+}
+
+/**
+ * Derives the name of the neume using the pitch differences
+ * and sets the name on the model.
+ * TODO: use binary search tree instead of linear search
+ * 
+ * @methodOf Toe.Model.Neume
+ * @returns {string} neume name
+ */
+Toe.Model.Neume.prototype.deriveName = function() {
+    // checks
+    if (this.components.length == 0) {
+        return "unknown";
+    }
+
+    var diffs = this.diffToMelodicMove();
+
     // linear search for now
-    $.each(Toe.Model.Neume.Type, function(key, val) {        
-        if($.arraysEqual(diffs, val.melodicMove)) {
+    var found = false;
+    for(var key in Toe.Model.Neume.Type) {
+        var melody = Toe.Model.Neume.Type[key].melodicMove;
+        console.log("key: " + key + ", melody: " + melody, ", diffs: " + diffs); 
+        if($.arraysEqual(diffs, melody)) {
             this.props.key = key;
             this.props.type = Toe.Model.Neume.Type[key];
-            // if neume is unknown
-            if (this.props.type == undefined) {
-                this.props.type = "unknown";
-            }
-
-            return false; // break
+            
+            found = true;
+            break;
         }
-    });
+    }
+
+    // if neume is not in the dictionary
+    if (!found) {
+        this.props.key = "compound";
+        this.props.type = Toe.Model.Neume.Type.compound;
+    }
 
     return this.props.type.name;
 }

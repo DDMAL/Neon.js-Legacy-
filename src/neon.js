@@ -167,8 +167,6 @@ THE SOFTWARE.
                     // mount neume on the staff
                     sModel.addNeume(nModel);
 
-                    console.log("rootNote: " + nModel.props.rootNote.pitch + ":" + nModel.props.rootNote.octave + ", rootDiff: " + nModel.rootDiff + ", pitchDiffs: " + nModel.getDifferences());
-
                     console.log("neume: " + nModel.props.type.name);
                 });
             });
