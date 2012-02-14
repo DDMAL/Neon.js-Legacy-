@@ -288,11 +288,15 @@ Toe.Model.Neume.prototype.setRootNote = function(pname, oct) {
  * @return {number} the pitch difference
  */
 Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
+    // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
-    var rootNum = (this.props.rootNote.octave * numChroma) + $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
- 
-    var ncNum = (oct * numChroma) + $.inArray(pname, Toe.neumaticChroma);
-    return ncNum - rootNum;
+    iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
+    iNeume = $.inArray(pname, Toe.neumaticChroma);
+
+    var rNum = (this.props.rootNote.octave * numChroma) + iRoot;
+    var ncNum = (oct * numChroma) + iNeume;
+
+    return ncNum - rNum;
 }
 
 /**
@@ -303,10 +307,9 @@ Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
  */
 Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
     // get clef pos
-    var sl = staff.clef.props.staffLine;
     var c_type = staff.clef.shape;
 
-    // ["c", "d", "e", "f", "g", "a", "b"];
+    // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
     
     // make root note search in relation to the clef index
@@ -314,7 +317,7 @@ Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
     var iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
 
     var offset = Math.abs(iRoot - iClef);
-    if (iClef - iRoot > 0) {
+    if (iClef > iRoot) {
         offset = numChroma + iRoot - iClef;
     }
     // 4 is no magic number! clef position corresponds to fourth octave

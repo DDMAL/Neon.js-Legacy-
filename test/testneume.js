@@ -66,11 +66,28 @@
         var sModel = new Toe.Model.Staff(sbb);
         var nModel = new Toe.Model.Neume();
 
-        // C CLEF: test notes above and below the clef for two clef positions
-        // differences should be the same regardless of clef positions
+        // C CLEF: test notes above and below the clef
+        // differences should be the same regardless of clef staffline
         var cModel = new Toe.Model.Clef("c", {staffLine: 4});
         sModel.setClef(cModel);
 
+        var numChroma = Toe.neumaticChroma.length;
+        var iOct = 0;
+        var octRange = 8;
+        var startDiff = -23;
+        for (var iChroma = 0; iOct <= octRange; iChroma++) {
+            iChroma %= numChroma;
+            if (Toe.neumaticChroma[iChroma] == "c") {
+                iOct++;
+            }
+
+            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct);
+            nModel.calcRootDifference(sModel);
+            equal(nModel.rootDiff, startDiff);
+            startDiff++;
+        }
+
+        /*
         // test below
         nModel.setRootNote("a", 3);
         nModel.calcRootDifference(sModel);
@@ -91,37 +108,29 @@
         nModel.setRootNote("c", 4);
         nModel.calcRootDifference(sModel);
         equal(nModel.rootDiff, 0);
+        */
 
-        // new clef position
-        cModel = new Toe.Model.Clef("c", {staffLine: 3});
-        sModel.setClef(cModel);
-
-        // test below
-        nModel.setRootNote("a", 3);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -2);
-        nModel.setRootNote("b", 2);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -8);
-
-        // test above
-        nModel.setRootNote("f", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 3);
-        nModel.setRootNote("e", 5);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 9);
-
-        // test same
-        nModel.setRootNote("c", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 0);
-
-        // F CLEF: test notes above and below the clef for two clef positions
-        // differences should be the same regardless of clef positions
+        // F CLEF: test notes above and below the clef
         cModel = new Toe.Model.Clef("f", {staffLine: 3});
         sModel.setClef(cModel);
 
+        var numChroma = Toe.neumaticChroma.length;
+        var iOct = 0;
+        var octRange = 8;
+        var startDiff = -26;
+        for (var iChroma = 0; iOct <= octRange; iChroma++) {
+            iChroma %= numChroma;
+            if (Toe.neumaticChroma[iChroma] == "f") {
+                iOct++;
+            }
+
+            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct);
+            nModel.calcRootDifference(sModel);
+            equal(nModel.rootDiff, startDiff);
+            startDiff++;
+        }
+
+        /*
         // test below
         nModel.setRootNote("b", 3);
         nModel.calcRootDifference(sModel);
@@ -142,29 +151,38 @@
         nModel.setRootNote("f", 4);
         nModel.calcRootDifference(sModel);
         equal(nModel.rootDiff, 0);
+        */
+    });
 
-        cModel = new Toe.Model.Clef("f", {staffLine: 4});
-        sModel.setClef(cModel);
+    test("Calculate Pitch Difference", function() {
+        var nModel = new Toe.Model.Neume();
 
-        // test below
-        nModel.setRootNote("b", 3);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -4);
-        nModel.setRootNote("e", 2);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -8);
+        nModel.setRootNote("a", 3);
 
-        // test above
-        nModel.setRootNote("a", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 2);
-        nModel.setRootNote("b", 5);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 10);
+        equal(nModel.getPitchDifference("g", 3), -1);
 
-        // test same
+        nModel.setRootNote("c", 4);
+
+        equal(nModel.getPitchDifference("c", 4), 0);
+        equal(nModel.getPitchDifference("f", 4), 3);
+        equal(nModel.getPitchDifference("a", 5), 12);
+        equal(nModel.getPitchDifference("a", 3), -2);
+        equal(nModel.getPitchDifference("d", 2), -13);
+
         nModel.setRootNote("f", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 0);
+
+        equal(nModel.getPitchDifference("f", 4), 0);
+        equal(nModel.getPitchDifference("b", 4), -4);
+        equal(nModel.getPitchDifference("a", 5), 9);
+        equal(nModel.getPitchDifference("e", 3), -1);
+        equal(nModel.getPitchDifference("d", 2), -9);
+
+        nModel.setRootNote("d", 2);
+
+        equal(nModel.getPitchDifference("d", 2), 0);
+        equal(nModel.getPitchDifference("g", 2), 3);
+        equal(nModel.getPitchDifference("f", 3), 9);
+        equal(nModel.getPitchDifference("b", 2), -2);
+        equal(nModel.getPitchDifference("c", 1), -1);
     });
 })();

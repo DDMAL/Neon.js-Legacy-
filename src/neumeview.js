@@ -78,7 +78,6 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
         case Toe.Model.Neume.Type.punctum:
             var glyphPunct = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
             elements.push(glyphPunct);
-            console.log("new punctum");
             break;
 
         // VIRGA

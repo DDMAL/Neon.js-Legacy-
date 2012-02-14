@@ -74,4 +74,4 @@ Toe.validBoundingBox = function(bb) {
  * Musical information
  * May eventually be moved to a musical methods class
  */
-Toe.neumaticChroma = ["c", "d", "e", "f", "g", "a", "b"];
+Toe.neumaticChroma = ["a", "b", "c", "d", "e", "f", "g"];
