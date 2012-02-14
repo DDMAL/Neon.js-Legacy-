@@ -125,10 +125,10 @@ Toe.Model.Staff.prototype.addNeume = function(neume) {
     if (!(neume instanceof Toe.Model.Neume)) {
         throw new Error("Staff: Invalid neume");
     }
-
-    // update root note difference
-    neume.calcRootDifference(this);
     
+    // update neume root note difference
+    neume.calcPitchDifference(this, neume.props.rootNote.pitch, neume.props.rootNote.octave);
+
     this.neumes.push(neume);
 
     // update view

@@ -60,6 +60,10 @@
 
         equal(nModel.props.rootNote.pitch, "g");
         equal(nModel.props.rootNote.octave, 3);
+
+        ok(!nModel.rootDiff)
+
+        // nModel.rootDiff calculation is tested in next test function
     });
 
     test("Calculate Root Note Difference", function() {
@@ -81,34 +85,10 @@
                 iOct++;
             }
 
-            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct);
-            nModel.calcRootDifference(sModel);
+            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct, {staff: sModel});
             equal(nModel.rootDiff, startDiff);
             startDiff++;
         }
-
-        /*
-        // test below
-        nModel.setRootNote("a", 3);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -2);
-        nModel.setRootNote("b", 2);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -8);
-
-        // test above
-        nModel.setRootNote("f", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 3);
-        nModel.setRootNote("e", 5);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 9);
-
-        // test same
-        nModel.setRootNote("c", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 0);
-        */
 
         // F CLEF: test notes above and below the clef
         cModel = new Toe.Model.Clef("f", {staffLine: 3});
@@ -124,65 +104,44 @@
                 iOct++;
             }
 
-            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct);
-            nModel.calcRootDifference(sModel);
+            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct, {staff: sModel});
             equal(nModel.rootDiff, startDiff);
             startDiff++;
         }
-
-        /*
-        // test below
-        nModel.setRootNote("b", 3);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -4);
-        nModel.setRootNote("e", 2);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, -8);
-
-        // test above
-        nModel.setRootNote("a", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 2);
-        nModel.setRootNote("b", 5);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 10);
-
-        // test same
-        nModel.setRootNote("f", 4);
-        nModel.calcRootDifference(sModel);
-        equal(nModel.rootDiff, 0);
-        */
     });
 
     test("Calculate Pitch Difference", function() {
         var nModel = new Toe.Model.Neume();
+        var sModel = new Toe.Model.Staff(sbb);
+        var cModel = new Toe.Model.Clef("c");
+        sModel.setClef(cModel);
 
-        nModel.setRootNote("a", 3);
+        nModel.setRootNote("a", 3, {staff: sModel});
 
-        equal(nModel.getPitchDifference("g", 3), -1);
+        equal(nModel.calcComponentDifference(sModel, "g", 3), -1);
 
-        nModel.setRootNote("c", 4);
+        nModel.setRootNote("c", 4, {staff: sModel});
 
-        equal(nModel.getPitchDifference("c", 4), 0);
-        equal(nModel.getPitchDifference("f", 4), 3);
-        equal(nModel.getPitchDifference("a", 5), 12);
-        equal(nModel.getPitchDifference("a", 3), -2);
-        equal(nModel.getPitchDifference("d", 2), -13);
+        equal(nModel.calcComponentDifference(sModel, "c", 4), 0);
+        equal(nModel.calcComponentDifference(sModel, "f", 4), 3);
+        equal(nModel.calcComponentDifference(sModel, "a", 5), 12);
+        equal(nModel.calcComponentDifference(sModel, "a", 3), -2);
+        equal(nModel.calcComponentDifference(sModel, "d", 2), -13);
 
-        nModel.setRootNote("f", 4);
+        nModel.setRootNote("f", 4, {staff: sModel});
 
-        equal(nModel.getPitchDifference("f", 4), 0);
-        equal(nModel.getPitchDifference("b", 4), -4);
-        equal(nModel.getPitchDifference("a", 5), 9);
-        equal(nModel.getPitchDifference("e", 3), -1);
-        equal(nModel.getPitchDifference("d", 2), -9);
+        equal(nModel.calcComponentDifference(sModel, "f", 4), 0);
+        equal(nModel.calcComponentDifference(sModel, "b", 4), 3);
+        equal(nModel.calcComponentDifference(sModel, "a", 5), 9);
+        equal(nModel.calcComponentDifference(sModel, "e", 3), -8);
+        equal(nModel.calcComponentDifference(sModel, "d", 2), -16);
 
-        nModel.setRootNote("d", 2);
+        nModel.setRootNote("d", 2, {staff: sModel});
 
-        equal(nModel.getPitchDifference("d", 2), 0);
-        equal(nModel.getPitchDifference("g", 2), 3);
-        equal(nModel.getPitchDifference("f", 3), 9);
-        equal(nModel.getPitchDifference("b", 2), -2);
-        equal(nModel.getPitchDifference("c", 1), -1);
+        equal(nModel.calcComponentDifference(sModel, "d", 2), 0);
+        equal(nModel.calcComponentDifference(sModel, "g", 2), 3);
+        equal(nModel.calcComponentDifference(sModel, "f", 3), 9);
+        equal(nModel.calcComponentDifference(sModel, "b", 2), 5);
+        equal(nModel.calcComponentDifference(sModel, "c", 1), -8);
     });
 })();

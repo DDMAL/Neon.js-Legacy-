@@ -268,44 +268,38 @@ Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
 }
 
 /**
- * Sets the root note of the neume
+ * Sets the root note of the neume.
+ * Staff is optional here to facilitate setting an arbitrary note and attaching it to a different staff
  *
  * @param {string} pname root pitch
  * @param {number} oct root octave
+ * @param {Object} options staff {Toe.Model.Staff}: Staff the neume is on to get the clef position information
  */
-Toe.Model.Neume.prototype.setRootNote = function(pname, oct) {
+Toe.Model.Neume.prototype.setRootNote = function(pname, oct, options) {
+    var opts = {
+        staff: null
+    };
+
+    $.extend(opts, options);
+
     this.props.rootNote.pitch = pname;
     this.props.rootNote.octave = oct;
+
+    // calculate pitch difference relative to the clef on the given staff
+    if (opts.staff) {
+        this.rootDiff = this.calcPitchDifference(opts.staff, pname, oct);
+    }
 }
 
 /**
- * Computes the numerical difference in pitch from the given pitch/oct
- * compared to the root note of the neume
- *
- * @methodOf Toe.Model.Neume
- * @param {string} pname root pitch
- * @param {number} oct root octave
- * @return {number} the pitch difference
- */
-Toe.Model.Neume.prototype.getPitchDifference = function(pname, oct) {
-    // ["a", "b", "c", "d", "e", "f", "g"]
-    var numChroma = Toe.neumaticChroma.length;
-    iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
-    iNeume = $.inArray(pname, Toe.neumaticChroma);
-
-    var rNum = (this.props.rootNote.octave * numChroma) + iRoot;
-    var ncNum = (oct * numChroma) + iNeume;
-
-    return ncNum - rNum;
-}
-
-/**
- * Calculate the root pitch difference with respect to the position of the clef
+ * Calculate the neume component pitch difference with respect to the position of the clef
  *
  * @methodOf Toe.Model.Neume
  * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
+ * @param {string} pitch neume component pitch
+ * @param {number} octave neume component octave
  */
-Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
+Toe.Model.Neume.prototype.calcPitchDifference = function(staff, pitch, octave) {
     // get clef pos
     var c_type = staff.clef.shape;
 
@@ -314,7 +308,7 @@ Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
     
     // make root note search in relation to the clef index
     var iClef = $.inArray(c_type, Toe.neumaticChroma);
-    var iRoot = $.inArray(this.props.rootNote.pitch, Toe.neumaticChroma);
+    var iRoot = $.inArray(pitch, Toe.neumaticChroma);
 
     var offset = Math.abs(iRoot - iClef);
     if (iClef > iRoot) {
@@ -322,7 +316,23 @@ Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
     }
     // 4 is no magic number! clef position corresponds to fourth octave
     //var diff = Math.abs(iRoot - iClef) + numChroma*(this.props.rootNote.octave - 4);
-    this.rootDiff = numChroma*(this.props.rootNote.octave - 4) + offset;
+    return numChroma*(octave - 4) + offset;
+}
+
+/**
+ * Calculates the neume component pitch difference with respect to the root note of the neume
+ * Requires that the root note has been set.
+ * @see Toe.Model.Neume.setRootNote()
+ *
+ * @methodOf Toe.Model.Neume
+ * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
+ * @param {string} pitch neume component pitch
+ * @param {number} octave neume component octave
+ */
+Toe.Model.Neume.prototype.calcComponentDifference = function(staff, pitch, octave) {
+    var ncClefDiff = this.calcPitchDifference(staff, pitch, octave);
+    
+    return ncClefDiff - this.rootDiff;
 }
 
 /**
@@ -331,8 +341,9 @@ Toe.Model.Neume.prototype.calcRootDifference = function(staff) {
  * @methodOf Toe.Model.Neume
  * @param {jQuery wrapped element set} neumeData the MEI neume data
  * @param {jQuery wrapped element set} facs the MEI facs data for the provided neume
+ * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
  */
-Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs) {
+Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
     // check the DOM element is in fact a neume
     if (neumeData.nodeName.toLowerCase() != "neume") {
         throw new Error("neumeFromMei: invalid neume data");
@@ -360,12 +371,13 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs) {
         var oct = parseInt($(el).attr("oct"));
 
         // set root note
+        var diff = 0;
         if (theNeume.components.length == 0) {
-            theNeume.props.rootNote.pitch = pname;
-            theNeume.props.rootNote.octave = oct;
+            theNeume.setRootNote(pname, oct, {staff: staff});
         }
- 
-        var diff = theNeume.getPitchDifference(pname, oct);
+        else {
+            diff = theNeume.calcComponentDifference(staff, pname, oct);
+        }
 
         var ncType = "punctum";
         if ($(this).parent().attr("inclinatum") == "true") {

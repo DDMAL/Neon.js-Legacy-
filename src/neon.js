@@ -159,7 +159,7 @@ THE SOFTWARE.
                         rendEng.outlineBoundingBox(n_bb, {fill: "green"});
                     }
 
-                    nModel.neumeFromMei(nel, $(neumeFacs));
+                    nModel.neumeFromMei(nel, $(neumeFacs), sModel);
                     // instantiate neume view and controller
                     var nView = new Toe.View.NeumeView(rendEng);
                     var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
