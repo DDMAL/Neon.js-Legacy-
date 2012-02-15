@@ -8,6 +8,7 @@ import tornado.web
 
 import conf
 import neonsrv.interface
+import neonsrv.api
 
 assert tornado.version_info > (2, 0, 0)
 
@@ -28,6 +29,7 @@ application = tornado.web.Application([
     (abs_path(r"/?"), neonsrv.interface.RootHandler),
     (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
     (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
+    (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNoteHandler),
     ], **settings)
 
 def main(port):
