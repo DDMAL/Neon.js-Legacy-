@@ -384,6 +384,9 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
             ncType = "inclinatum";
         }
 
+        // check for dot
+        //var dot = $("> dot", this).attr("form");
+
         theNeume.addComponent(ncType, diff);
     });
 
@@ -402,14 +405,15 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
  */
 Toe.Model.Neume.prototype.addComponent = function(type, diff, options) {
     opts = {
-        ncInd: this.components.length
+        ncInd: this.components.length,
+        ornaments: []
     };
 
     $.extend(opts, options);
 
     // TODO: check that diff corresponds with the neume melodic move
 
-    var nc = new Toe.Model.NeumeComponent(diff, {type: type});
+    var nc = new Toe.Model.NeumeComponent(diff, {type: type, ornaments: opts.ornaments});
 
     this.components.splice(opts.ncInd, 0, nc);
 }

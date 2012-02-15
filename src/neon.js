@@ -152,7 +152,7 @@ THE SOFTWARE.
 
                 // load all neumes in system
                 $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
-                    var nModel = new Toe.Model.Neume(rendEng);
+                    var nModel = new Toe.Model.Neume();
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
                     if (displayZones) {

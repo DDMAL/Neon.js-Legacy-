@@ -25,13 +25,15 @@ THE SOFTWARE.
  *
  * @class Represents a neume component
  * @param {Number} diff Difference from root note
+ * @param {Object} options type {string} corresponding to Toe.Model.NeumeComponent.Type
+ *                         ornaments {Array} list of Toe.Model.Ornaments
  */
 Toe.Model.NeumeComponent = function(diff, options) {
     this.diff = diff;
 
     this.props = {
         type: "punctum",
-        ornament: null,
+        ornaments: [],
         interact: true
     };
 
@@ -60,24 +62,6 @@ Toe.Model.NeumeComponent.Type = {
     inclinatum: "Punctum Inclinatum",
     smallinclinatum: "Punctum Inclinatum Parvum",
     quilisma: "Quilisma"
-};
-
-/**
- * Known ornaments for neume components
- *
- * @constant
- * @public
- * @fieldOf Toe.Model.NeumeComponent
- */
-Toe.Model.NeumeComponent.Ornament = {
-    EPISEMA: {
-        name: "Episema",
-        form: null
-    },
-    DOT: {
-        name: "Dot",
-        form: null
-    }
 };
 
 /**
