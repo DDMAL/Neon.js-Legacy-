@@ -1,14 +1,13 @@
 #!/usr/bin/python
 
+import os
+
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 
-import neonsrv.interface
-
-import os
-
 import conf
+import neonsrv.interface
 
 assert tornado.version_info > (2, 0, 0)
 
@@ -27,8 +26,8 @@ def abs_path(relpath):
 
 application = tornado.web.Application([
     (abs_path(r"/?"), neonsrv.interface.RootHandler),
-    (abs_path(r"/(.*?)/edit"), neonsrv.interface.EditorHandler),
-    (abs_path(r"/(.*?)/file"), neonsrv.interface.FileHandler),
+    (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
+    (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
     ], **settings)
 
 def main(port):

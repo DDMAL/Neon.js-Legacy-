@@ -189,7 +189,7 @@ THE SOFTWARE.
             var dfd = $.Deferred();
 
             if (settings.autoLoad && settings.backgroundImage) {
-                fabric.Image.fromURL(settings.prefix+"/"+filename+"/file", function(img) {
+                fabric.Image.fromURL(settings.prefix+"/file/"+filename, function(img) {
                     if (img.width > settings.width) {
                         settings.width = img.width;
                     }
@@ -214,7 +214,7 @@ THE SOFTWARE.
             var dfd = $.Deferred();
             
             if (settings.autoLoad && settings.filename) {
-                $.get(settings.prefix+"/"+fileName+"/file", function(data) {
+                $.get(settings.prefix+"/file/"+fileName, function(data) {
                     console.log("loading MEI file ...");
 
                     // save mei data
@@ -260,7 +260,7 @@ THE SOFTWARE.
 
             var canvasOpts = {renderOnAddition: false};
             if (settings.backgroundImage) {
-                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/"+settings.backgroundImage+"/file", 
+                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
                                       backgroundImageOpacity: settings.backgroundImageOpacity,
                                       backgroundImageStretch: false});
 
