@@ -384,10 +384,16 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
             ncType = "inclinatum";
         }
 
-        // check for dot
-        //var dot = $("> dot", this).attr("form");
+        // add note ornaments
+        var ornaments = new Array();
 
-        theNeume.addComponent(ncType, diff);
+        // check for dot
+        var dotForm = $("> dot", this).attr("form");
+        if (dotForm) {
+            ornaments.push(new Toe.Model.Ornament("dot", {form: dotForm}));
+        }
+
+        theNeume.addComponent(ncType, diff, {ornaments: ornaments});
     });
 
     // for chaining

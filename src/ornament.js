@@ -30,7 +30,7 @@ THE SOFTWARE.
 Toe.Model.Ornament = function(type, options) {
     // check valid type
     this.type = type.toLowerCase();
-    if (Toe.Model.NeumeComponent.Type[type] == undefined) {
+    if (Toe.Model.Ornament.Type[this.type] == undefined) {
         throw new Error("Ornament: undefined neume component");
     }
     else if (type == "episema") {
