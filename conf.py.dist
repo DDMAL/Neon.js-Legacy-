@@ -6,3 +6,6 @@ APP_ROOT = "/"
 
 # Tornado server debug
 DEBUG = True
+
+def get_prefix():
+    return APP_ROOT.rstrip("/")
