@@ -1,5 +1,6 @@
 conf.py
 *.pyc
-static/js/neon.js
+static/js/*.js
 .DS_Store
 docs/*
+*.swp
