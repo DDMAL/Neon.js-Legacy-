@@ -21,48 +21,57 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a new note ornament
+ * Creates a new division
  *
- * @class Represents a note ornament
- * @param {String} key Type of ornament
- * @see Toe.Model.Ornament.Type
+ * @class Represents a division, or breath mark
+ * @param {String} key Type of division
+ * @see Toe.Model.Division.Type
  */
-Toe.Model.Ornament = function(key, options) {
+Toe.Model.Division = function(key, options) {
     // check valid type
     this.key = key.toLowerCase();
-    this.type = Toe.Model.Ornament.Type[this.key];
+    this.type = Toe.Model.Division.Type[this.key];
     if (this.type == undefined) {
-        throw new Error("Ornament: undefined ornament type");
-    }
-    else if (key == "episema") {
-        oForm = "horizontal";
-    }
-    else if (key == "dot") {
-        oForm = "aug";
-    }
-    else {
-        oForm = null;
+        throw new Error("Division: undefined division type");
     }
 
     this.props = {
-        form: oForm,
         interact: false
     };
 
     $.extend(this.props, options);
 
+    
 }
 
-Toe.Model.Ornament.prototype.constructor = Toe.Model.Ornament;
+Toe.Model.Division.prototype.constructor = Toe.Model.Division;
 
 /**
- * Known ornaments for neume components
+ * Sets the bounding box of the division
+ *
+ * @methodOf Toe.Model.Division
+ * @param {Array} bb [ulx, uly, lrx, lry]
+ */
+Toe.Model.Division.prototype.setBoundingBox = function(bb) {
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Division: invalid bounding box");
+    }
+
+    this.zone.ulx = bb[0];
+    this.zone.uly = bb[1];
+    this.zone.lrx = bb[2];
+    this.zone.lry = bb[3];
+}
+
+/**
+ * Known division types
  *
  * @constant
  * @public
- * @fieldOf Toe.Model.Ornament
+ * @fieldOf Toe.Model.Division
  */
 Toe.Model.Ornament.Type = {
-    episema: "Episema",
-    dot: "Dot"
+    small: "Small Division",
+    minor: "Minor Division",
+    final: "Final Division"
 };
