@@ -24,22 +24,23 @@ THE SOFTWARE.
  * Creates a new note ornament
  *
  * @class Represents a note ornament
- * @param {String} type Type of ornament
+ * @param {String} key Type of ornament
  * @see Toe.Model.Ornament.Type
  */
-Toe.Model.Ornament = function(type, options) {
+Toe.Model.Ornament = function(key, options) {
     // check valid type
-    this.type = type.toLowerCase();
-    if (Toe.Model.Ornament.Type[this.type] == undefined) {
+    this.key = key.toLowerCase();
+    this.type = Toe.Model.Ornament.Type[this.key];
+    if (this.type == undefined) {
         throw new Error("Ornament: undefined neume component");
     }
-    else if (type == "episema") {
+    else if (key == "episema") {
         oForm = "horizontal";
     }
-    else if (type == "dot") {
+    else if (key == "dot") {
         oForm = "aug";
     }
-    else { // what form does a flat have?
+    else {
         oForm = null;
     }
 
@@ -63,6 +64,5 @@ Toe.Model.Ornament.prototype.constructor = Toe.Model.Ornament;
  */
 Toe.Model.Ornament.Type = {
     episema: "Episema",
-    dot: "Dot",
-    flat: "Flat"
+    dot: "Dot"
 };

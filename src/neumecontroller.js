@@ -54,7 +54,7 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
             nc_y.push(nc_y[0] + (-neume.components[i].diff * staff.delta_y / 2));
         }
 
-        nView.renderNeume(neume, nc_y);
+        nView.renderNeume(neume, nc_y, staff);
     });
 }
 
