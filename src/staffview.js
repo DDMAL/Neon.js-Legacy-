@@ -21,25 +21,41 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a new staff view
  *
- * @class Represents a glyph imported from SVG
- * @param {string} svgKey svg lookup id
- * @param {fabric.js.Object} corresponding fabric.js object
+ * @class View for the staff
+ * @param {Toe.View.RenderEngine} renderEngine The rendering engine
  */
-Toe.Model.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
-
-    this.centre = [this.obj.width/2, this.obj.height/2];
+Toe.View.StaffView = function(renderEngine) {
+    this.rendEng = renderEngine;
 }
 
-Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
+Toe.View.StaffView.prototype.constructor = Toe.View.StaffView;
 
 /**
- * Wrapper function to clone the internal canvas object
- * @methodOf Toe.Model.Glyph
+ * Renders the staff according to the following scheme:
+ *  <ulx,uly> =======
+ *            ------- (line numLines)
+ *            ------- (line numLines-1)
+ *            ------- ...
+ *            ------- (line 1)
+ *            ======= <lrx,lry>
+ * 
+ * @methodOf Toe.View.StaffView
+ * @param {Toe.Model.Staff} staff Staff to render
  */
-Toe.Model.Glyph.prototype.clone = function() {
-    return this.obj.clone();
+Toe.View.StaffView.prototype.renderStaff = function(staff) {
+    if (!this.rendEng) {
+        throw new Error("Staff: Invalid render context");
+    }
+
+    var elements = new Array();
+    
+    // render staff lines
+    for (var li = 0; li < staff.props.numLines; li++) {
+        var yval = staff.zone.uly+(li*staff.delta_y);
+        elements.push(this.rendEng.createLine([staff.zone.ulx, yval, staff.zone.lrx, yval], {interact: staff.props.interact}));
+    }
+    
+	this.rendEng.draw(elements, {modify: false});
 }

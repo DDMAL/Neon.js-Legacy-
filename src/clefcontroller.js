@@ -21,25 +21,25 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a new clef controller and listens to the model and the view
  *
- * @class Represents a glyph imported from SVG
- * @param {string} svgKey svg lookup id
- * @param {fabric.js.Object} corresponding fabric.js object
+ * @class Controller for the clef
+ * @param {Toe.Model.Clef} pModel The clef model
+ * @param {Toe.View.Clef} pView The clef view
  */
-Toe.Model.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
+Toe.Ctrl.ClefController = function(cModel, cView) {
+    // LISTEN TO THE VIEW
 
-    this.centre = [this.obj.width/2, this.obj.height/2];
+    // LISTEN TO THE MODEL
+    /** 
+     * @event
+     * event type: vRenderClef
+     * @param {Toe.Model.Clef} clef Clef to render
+     */
+    $(cModel).bind("vRenderClef", function(event, clef) {
+        cView.renderClef(clef);
+    });
+
 }
 
-Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
-
-/**
- * Wrapper function to clone the internal canvas object
- * @methodOf Toe.Model.Glyph
- */
-Toe.Model.Glyph.prototype.clone = function() {
-    return this.obj.clone();
-}
+Toe.Ctrl.ClefController.prototype.constructor = Toe.Ctrl.ClefController;

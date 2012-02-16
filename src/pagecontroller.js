@@ -21,25 +21,34 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a new page controller and listens to the model and the view
  *
- * @class Represents a glyph imported from SVG
- * @param {string} svgKey svg lookup id
- * @param {fabric.js.Object} corresponding fabric.js object
+ * @class Controller for the page
+ * @param {Toe.Model.Page} pModel The page model
+ * @param {Toe.View.Page} pView The page view
  */
-Toe.Model.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
+ Toe.Ctrl.PageController = function(pModel, pView) {
+    // LISTEN TO THE VIEW
+    /** 
+     * @event
+     * event type: mSetDimensions.ui
+     * @param {Number} width width of the page
+     * @param {Number} height height of the page
+     */
+    $(pView).bind("mSetDimensions.ui", function(event, width, height) {
+        pModel.setDimensions(width, height);
+    });
 
-    this.centre = [this.obj.width/2, this.obj.height/2];
+    // LISTEN TO THE MODEL
+    /** 
+     * @event
+     * event type: vSetDimensions
+     * @param {Number} width width of the page
+     * @param {Number} height height of the page
+     */
+    $(pModel).bind("vSetDimensions", function(event, width, height) {
+        pView.setDimensions(width, height);
+    });
 }
 
-Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
-
-/**
- * Wrapper function to clone the internal canvas object
- * @methodOf Toe.Model.Glyph
- */
-Toe.Model.Glyph.prototype.clone = function() {
-    return this.obj.clone();
-}
+Toe.Ctrl.PageController.prototype.constructor = Toe.Ctrl.PageController;

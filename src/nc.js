@@ -21,72 +21,56 @@ THE SOFTWARE.
 */
 
 /**
- * @requires Toe
- * @class Neume Component
+ * Creates a new neume component
+ *
+ * @class Represents a neume component
+ * @param {Number} diff Difference from root note
+ * @param {Object} options type {string} corresponding to Toe.Model.NeumeComponent.Type
+ *                         ornaments {Array} list of Toe.Model.Ornaments
  */
-Toe.NeumeComponent = function(diff, rendEng, options) {
+Toe.Model.NeumeComponent = function(diff, options) {
     this.diff = diff;
-    this.rendEng = rendEng;
 
     this.props = {
         type: "punctum",
-        ornament: null,
+        ornaments: [],
         interact: true
     };
 
     $.extend(this.props, options);
 
     // check valid type
-    this.props.type.toLowerCase();
-    this.props.type = Toe.NeumeComponent.Type[this.props.type];
-    if (this.props.type == undefined) {
-        throw new Error("NeumeComponent: undefined neume component type");
+    this.props.type = this.props.type.toLowerCase();
+    this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
+    if (this.props.name == undefined) {
+        throw new Error("NeumeComponent: undefined neume component");
     }
 }
 
-Toe.NeumeComponent.prototype.constructor = Toe.NeumeComponent;
+Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 
-Toe.NeumeComponent.Type = {
-    punctum: {
-        name: "Punctum",
-        svgkey: "punctum"
-    },
-    whitepunct: {
-        name: "White Punctum",
-        svgkey: "whitepunct"
-    },
-    inclinatum: {
-        name: "Punctum Inclinatum",
-        svgkey: "diamond"
-    },
-    smallinclinatum: {
-        name: "Punctum Inclinatum Parvum",
-        svgkey: "smalldiamond"
-    },
-    quilisma: {
-        name: "Quilisma",
-        svgkey: "quilisma"
-    }
+/**
+ * Known types of neume components
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.NeumeComponent
+ */
+Toe.Model.NeumeComponent.Type = {
+    punctum: "Punctum",
+    whitepunct: "White Punctum",
+    inclinatum: "Punctum Inclinatum",
+    smallinclinatum: "Punctum Inclinatum Parvum",
+    quilisma: "Quilisma"
 };
 
-Toe.NeumeComponent.Ornament = {
-    EPISEMA: {
-        name: "Episema",
-        form: null
-    },
-    DOT: {
-        name: "Dot",
-        form: null
-    }
-};
-
-Toe.NeumeComponent.prototype.setPosition = function(pos) {
+/**
+ * Sets the position of the neume component
+ * 
+ * @methodOf Toe.Model.NeumeComponent
+ * @param {Array} pos [x,y]
+ */
+Toe.Model.NeumeComponent.prototype.setPosition = function(pos) {
     this.x = pos[0];
     this.y = pos[1];
-}
-
-Toe.NeumeComponent.prototype.render = function() {
-    if (!this.rendEng) {
-        throw new Error("Clef: Invalid render context");
-    }
 }

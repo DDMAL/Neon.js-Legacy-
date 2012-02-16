@@ -22,31 +22,27 @@ THE SOFTWARE.
 
 /**
  * Creates a clef
- * @requires Toe
- * @requires Toe.RenderEngine
+ *
  * @class Represents a clef
- * @param {String} clefType clef type: c or f
- * @param {Toe.RenderEngine} drawing engine
+ * @param {String} clefShape clef shape: c or f
  * @param {Object} options staffline {Number}, interact {Boolean}
  */
-Toe.Clef = function(clefShape, rendEng, options) {
-    clefShape = clefShape.toLowerCase();
+Toe.Model.Clef = function(clefShape, options) {
+    this.shape = clefShape.toLowerCase();
+    this.name = Toe.Model.Clef.Type[this.shape];
 
-    this.clefInfo = Toe.Clef.types[clefShape];
-	var clefLine = null;
-    if (this.clefInfo == undefined) {
+    var clefLine = null;
+    if (this.name == undefined) {
         throw new Error("Clef: undefined clef type: '" + clefShape + "'");
     }
-	else if (clefShape == "c") {
-		// default staffline from pp. 17 Liber Usualis
-		clefLine = 4;
-	}
-	else if (clefShape == "f") {
-		// default staffline from pp. 17 Liber Usualis
-		clefLine = 3;
-	}
-
-    this.rendEng = rendEng;
+    else if (clefShape == "c") {
+        // default staffline from pp. 17 Liber Usualis
+        clefLine = 4;
+    }
+    else if (clefShape == "f") {
+        // default staffline from pp. 17 Liber Usualis
+        clefLine = 3;
+    }
 
     this.props = {
         staffLine: clefLine,
@@ -55,56 +51,48 @@ Toe.Clef = function(clefShape, rendEng, options) {
 
     $.extend(this.props, options);
 
-	// initialize bounding box
+    // initialize bounding box
     this.zone = new Object();
 }
 
 /**
- * Types of clefs and their lookup keys
+ * Known clef types
+ *
  * @constant
+ * @public
+ * @fieldOf Toe.Model.Clef
  */
-Toe.Clef.types = {
-    c: {
-		name: "Doh Clef",
-		shape: "c",
-        svgKey: "c_clef"
-    },
-    f: {
-		name: "Fah Clef",
-		shape: "f",
-        svgKey: "f_clef"
-    }
+Toe.Model.Clef.Type = {
+    c: "Doh Clef",
+    f: "Fah Clef"
 };
 
-Toe.Clef.prototype.constructor = Toe.Clef;
+Toe.Model.Clef.prototype.constructor = Toe.Model.Clef;
 
 /**
+ * Sets the position of the clef
+ *
+ * @methodOf Toe.Model.Clef
  * @param pos {Array} [x,y]
  */
-Toe.Clef.prototype.setPosition = function(pos) {
-	this.x = pos[0];
-	this.y = pos[1];
+Toe.Model.Clef.prototype.setPosition = function(pos) {
+    this.x = pos[0];
+    this.y = pos[1];
 }
 
-// [ulx, uly, lrx, lry]
-Toe.Clef.prototype.setBoundingBox = function(bb) {
+/**
+ * Sets the bounding box of the clef
+ *
+ * @methodOf Toe.Model.Clef
+ * @param {Array} bb [ulx, uly, lrx, lry]
+ */
+ Toe.Model.Clef.prototype.setBoundingBox = function(bb) {
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Clef: invalid bounding box");
+    }
+
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];
     this.zone.lry = bb[3];
-}
-
-/**
- * Renders the clef on the canvas
- */
-Toe.Clef.prototype.render = function() {
-    if (!this.rendEng) {
-        throw new Error("Clef: Invalid render context");
-    }
-
-    var clef = this.rendEng.getGlyph(this.clefInfo.svgKey);
-    var glyphClef = clef.clone().set({left: this.x+(clef.obj.width*this.rendEng.options.globScale/2), top: this.y}); // offset centre
-    glyphClef.selectable = this.props.interact;
-
-    this.rendEng.draw([glyphClef]);
 }

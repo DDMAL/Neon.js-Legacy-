@@ -22,9 +22,6 @@ THE SOFTWARE.
 
 /**
  * Creates a staff
- * @requires Toe
- * @requires Toe.Clef
- * @requires Toe.RenderEngine
  * @class Represents a Staff
  * 
  * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
@@ -33,119 +30,110 @@ THE SOFTWARE.
  *
  * (.)        <lrx,lry> (.)
  *
- * @param {Toe.RenderEngine} rendEng drawing engine
  * @param {Object} options [numlines {Number}, clefType {String}, clefIndent (px) {Number}, interact {Boolean}]
  *
  * The staff has list of neumes on the staff
  */
-Toe.Staff = function(bb, rendEng, options) {
+Toe.Model.Staff = function(bb, options) {
     // set position
-    this.zone = new Object();
-    this.zone.ulx = parseInt(bb[0]);
-    this.zone.uly = parseInt(bb[1]);
-    this.zone.lrx = parseInt(bb[2]);
-    this.zone.lry = parseInt(bb[3]);
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Staff: invalid bounding box");
+    }
 
-    this.rendEng = rendEng;
+    this.zone = new Object();
+    this.zone.ulx = bb[0];
+    this.zone.uly = bb[1];
+    this.zone.lrx = bb[2];
+    this.zone.lry = bb[3];
 
     // default 4 stafflines
     this.props = {
         numLines: 4,
-        clefType: "c",
-        clefIndent: 5,   // in px
         interact: false
     };
 
     $.extend(this.props, options);
 
-	// cache delta y: pixels between stafflines
-	this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
+    // cache delta y: pixels between stafflines
+    this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
 
-    // default c clef on line 4
-    //this.clef = this.setClef(this.props.clefType, 4);
-
-	this.neumes = new Array();
+    this.neumes = new Array();
 }
 
-Toe.Staff.prototype.constructor = Toe.Staff;
+Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
 
 /**
- * Sets the clef for the staff on the given staff line.
- * Enforces clef is placed within the staff
- * @param {String} clef c or f clef
- * @param {Number} staffLine staffline the clef is on
- * @param {Object} options {zone: {Array} [ulx, uly, lrx, lry]}
+ * Sets the bounding box of the staff
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Array} bb [ulx,uly,lrx,lry]
  */
-Toe.Staff.prototype.setClef = function(clefShape, staffLine, options) {
-    if (staffLine > this.props.numLines) {
-        throw new Error("Invalid clef position.");
+Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
+    if(!Toe.validBoundingBox(bb)) {
+        throw new Error("Staff: invalid bounding box");
+    }
+    
+    this.zone.ulx = bb[0];
+    this.zone.uly = bb[1];
+    this.zone.lrx = bb[2];
+    this.zone.lry = bb[3];
+
+    // update delta_y cache
+    this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
+}
+
+/**
+ * Mounts the clef on the staff
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Toe.Model.Clef} clef The clef to mount
+ * @returns {Toe.Model.Staff} pointer to this staff for chaining
+ */
+Toe.Model.Staff.prototype.setClef = function(clef) {
+    if (!(clef instanceof Toe.Model.Clef)) {
+        throw new Error("Staff: Invalid clef");
+    }
+    if (clef.props.staffLine > this.props.numLines) {
+        throw new Error("Staff: Invalid clef position");
     }
 
-	var opts = {
-		zone: null
-	};
-	$.extend(opts, options);
+    // set clef position given the staffline
+    var x = this.zone.ulx;
+    if (clef.zone.ulx) {
+        x = clef.zone.ulx;
+    }
+    clef.setPosition([x, this.zone.uly+((this.props.numLines-clef.props.staffLine)*this.delta_y)]);
 
-    this.clef = new Toe.Clef(clefShape, this.rendEng, {"staffLine": staffLine});
-
-	// set bounding box if it exists
-	if (opts.zone) {
-		this.clef.setBoundingBox(opts.zone);
-	}
-	else {
-		// set top left coordinates based on staffline the clef is on
-		this.clef.setBoundingBox([this.zone.ulx+this.props.clefIndent, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*this.delta_y), null, null]);
-	}
+    // update view
+    $(clef).trigger("vRenderClef", [clef]);
+    
+    this.clef = clef;
 
     // for chaining
     return this;
 }
 
-Toe.Staff.prototype.addNeumes = function(neumes) {
-	for (var i = 0; i < arguments.length; i++) {
-        // check argument is a neume
-        if (!(arguments[i] instanceof Toe.Neume)) {
-            continue;
-        }
-
-        this.neumes.push(arguments[i]);
-    }
-	
-	// for chaining
-    return this;
-}
-
 /**
- * Renders the staff according to the following scheme:
- *  <ulx,uly> =======
- *            ------- (line numLines)
- *            ------- (line numLines-1)
- *            ------- ...
- *            ------- (line 1)
- *            ======= <lrx,lry>
+ * Mounts a neume on the staff
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Toe.Model.Neume} neume The neume to mount
+ * @returns {Toe.Model.Staff} Pointer to this staff for chaining
  */
-Toe.Staff.prototype.render = function() {
-    if (!this.rendEng) {
-        throw new Error("Staff: Invalid render context");
-    }
-
-    var elements = new Array();
-    
-    // render staff lines
-    for (var li = 0; li < this.props.numLines; li++) {
-        var yval = this.zone.uly+(li*this.delta_y);
-        elements.push(this.rendEng.createLine([this.zone.ulx, yval, this.zone.lrx, yval], {interact: this.props.interact}));
+Toe.Model.Staff.prototype.addNeume = function(neume) {
+    // check argument is a neume
+    if (!(neume instanceof Toe.Model.Neume)) {
+        throw new Error("Staff: Invalid neume");
     }
     
-	this.rendEng.draw(elements, {modify: false});
+    // update neume root note difference
+    neume.calcPitchDifference(this, neume.props.rootNote.pitch, neume.props.rootNote.octave);
 
-    // render clef
-	this.clef.setPosition([this.clef.zone.ulx, this.zone.uly+((this.props.numLines-this.clef.props.staffLine)*this.delta_y)]);
-    this.clef.render();
+    this.neumes.push(neume);
+
+    // update view
+    $(neume).trigger("vRenderNeume", [neume, this]);
     
-	// render neumes
-	var theStaff = this;
-	$.each(this.neumes, function(it, el) {
-		el.render(theStaff);
-	});
+    // for chaining
+    return this;
 }

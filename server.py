@@ -12,6 +12,10 @@ import neonsrv.api
 
 assert tornado.version_info > (2, 0, 0)
 
+class TestHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("../test/neontest.html", prefix=conf.APP_ROOT.rstrip("/"))
+
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
@@ -25,12 +29,17 @@ def abs_path(relpath):
     root = conf.APP_ROOT.rstrip("/")
     return r"%s%s" % (root, relpath)
 
-application = tornado.web.Application([
+rules = [
     (abs_path(r"/?"), neonsrv.interface.RootHandler),
     (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
     (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
-    (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNoteHandler),
-    ], **settings)
+    (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNoteHandler)
+]
+
+if conf.DEBUG:
+    rules.append((abs_path(r"/test"), TestHandler))
+
+application = tornado.web.Application(rules, **settings)
 
 def main(port):
     server = tornado.httpserver.HTTPServer(application)

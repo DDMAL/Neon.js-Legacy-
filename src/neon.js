@@ -25,7 +25,6 @@ THE SOFTWARE.
     var Neon = function(element, options)
     {
         var elem = $(element);
-        var page;
         var mei;
         var rendEng;
         var startTime;
@@ -61,12 +60,9 @@ THE SOFTWARE.
         var init = function() {
             // start time
             startTime = new Date();
-            
+
             // initialize rendering engine
-            rendEng = new Toe.RenderEngine();
-            
-            // create page
-            page = new Toe.Page(rendEng);
+            rendEng = new Toe.View.RenderEngine();
 
             /*
              * Start asynchronous function calls
@@ -80,8 +76,8 @@ THE SOFTWARE.
             $.when(loadGlyphs(rendEng),
                    loadPage(settings.filename),
                    handleBackgroundImage(settings.backgroundImage)
-            ).then(loadSuccess, 
-                   function() { 
+            ).then(loadSuccess,
+                   function() {
                        console.log("Failure to load the mei file, glyphs, or background image");
                    }
             );
@@ -93,11 +89,11 @@ THE SOFTWARE.
             var uly = parseInt($(zoneFacs).attr("uly"));
             var lrx = parseInt($(zoneFacs).attr("lrx"));
             var lry = parseInt($(zoneFacs).attr("lry"));
-            
+
             return [ulx, uly, lrx, lry];
         };
 
-        var loadMeiPage = function(displayZones) {
+        var loadMeiPage = function(displayZones, page) {
             var neumeList = $("neume, sb", mei);
             // calculate sb indices
             // precomputing will render better performance than a filter operation in the loops
@@ -115,24 +111,24 @@ THE SOFTWARE.
                 var sbref = $(sel).attr("systemref");
                 var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
                 var sysFacs = $(mei).find("zone[xml\\:id=" + sysfacsid + "]")[0];
-                
+
                 // create staff
                 var s_bb = parseBoundingBox(sysFacs);
                 if (displayZones) {
                     rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
                 }
-                var s = new Toe.Staff(s_bb, rendEng);
+                var sModel = new Toe.Model.Staff(s_bb, rendEng);
 
                 // set global scale using staff from first system
                 if(sit == 0) {
-                    rendEng.calcScaleFromStaff(s, {overwrite: true});
+                    rendEng.calcScaleFromStaff(sModel, {overwrite: true});
                 }
 
-                // set clef
+                // CLEF
                 var clef = $("~ clef", this);
                 var clefShape = $(clef).attr("shape");
-                var clefLine = parseInt($(clef).attr("line"));
-            
+                var clefStaffLine = parseInt($(clef).attr("line"));
+
                 var clefFacsId = $(clef).attr("facs");
                 var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
                 var c_bb = parseBoundingBox(clefFacs);
@@ -140,32 +136,47 @@ THE SOFTWARE.
                     rendEng.outlineBoundingBox(c_bb, {fill: "red"});
                 }
 
-                s.setClef(clefShape, clefLine, {zone: c_bb});
+                var cModel = new Toe.Model.Clef(clefShape, {"staffLine": clefStaffLine});
+                cModel.setBoundingBox(c_bb);
+                // instantiate clef view and controller
+                var cView = new Toe.View.ClefView(rendEng);
+                var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
 
-                page.addStaves(s);
+                // mount clef on the staff
+                sModel.setClef(cModel);
+
+                // instantiate staff view and controller
+                var sView = new Toe.View.StaffView(rendEng);
+                var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
+                page.addStaff(sModel);
 
                 // load all neumes in system
                 $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
-                    var neume = new Toe.Neume(rendEng);
+                    var nModel = new Toe.Model.Neume();
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
                     if (displayZones) {
                         rendEng.outlineBoundingBox(n_bb, {fill: "green"});
                     }
 
-                    neume.neumeFromMei(nel, $(neumeFacs));
-                    console.log("neume: " + neume.props.type.name);
-                    s.addNeumes(neume);
+                    nModel.neumeFromMei(nel, $(neumeFacs), sModel);
+                    // instantiate neume view and controller
+                    var nView = new Toe.View.NeumeView(rendEng);
+                    var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+                    // mount neume on the staff
+                    sModel.addNeume(nModel);
+
+                    console.log("neume: " + nModel.props.type.name);
                 });
             });
-
-            page.render();
+            rendEng.repaint();
         };
 
         // asynchronous function
         var loadGlyphs = function(rendEng) {
             console.log("loading SVG glyphs ...");
-            
+
             // return deferred promise
             return $.get(settings.prefix+"/static/img/neumes_concat.svg", function(svg) {
                 var glyphs = new Object();
@@ -176,7 +187,7 @@ THE SOFTWARE.
                     var rawSVG = $("<lol>").append($(el).clone()).remove().html();
                     fabric.loadSVGFromString(rawSVG, function(objects) {
                         gID = $(el).find("path").attr("id");
-                        glyphs[gID] = new Toe.Glyph(gID, objects[0]);
+                        glyphs[gID] = new Toe.Model.Glyph(gID, objects[0]);
                     });
                 });
                 rendEng.setGlyphs(glyphs);
@@ -212,7 +223,7 @@ THE SOFTWARE.
         // asynchronous function
         var loadPage = function(fileName) {
             var dfd = $.Deferred();
-            
+
             if (settings.autoLoad && settings.filename) {
                 $.get(settings.prefix+"/file/"+fileName, function(data) {
                     console.log("loading MEI file ...");
@@ -234,6 +245,9 @@ THE SOFTWARE.
 
         // handler for when asynchronous calls have been completed
         var loadSuccess = function() {
+            // create page
+            var page = new Toe.Model.Page();
+
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
@@ -241,7 +255,7 @@ THE SOFTWARE.
             if (settings.autoLoad) {
                 // derive canvas dimensions from mei facs
                 canvasDims = page.calcDimensions($(mei).find("zone"));
-                
+
                 if (canvasDims[0] < settings.width) {
                     canvasDims[0] = settings.width;
                 }
@@ -266,7 +280,7 @@ THE SOFTWARE.
 
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
-            
+
             if (settings.debug) {
                 // add FPS debug element
                 var fpsDebug = $("<div>").attr("id", "fps");
@@ -278,8 +292,17 @@ THE SOFTWARE.
                 };
             }
 
+            /***************************
+             * Instantiate MVC classes *
+             ***************************/
+            // VIEWS
+            var pView = new Toe.View.PageView(rendEng);
+
+            // CONTROLLERS
+            var pCtrl = new Toe.Ctrl.PageController(page, pView);
+
             if (settings.autoLoad && mei) {
-                loadMeiPage(settings.debug);
+                loadMeiPage(settings.debug, page);
             }
 
             if (settings.backgroundImage) {
@@ -297,7 +320,7 @@ THE SOFTWARE.
             var runTime = new Date() - startTime;
             console.log("loadtime: " + runTime + "ms");
         };
-        
+
         // Call the init function when this object is created.
         init();
     };

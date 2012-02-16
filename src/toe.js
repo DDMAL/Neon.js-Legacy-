@@ -21,9 +21,24 @@ THE SOFTWARE.
 */
 
 /**
- * @namespace Neon namespace: the table of elements
+ * @namespace Neon namespace: the table of elements.
  */
 Toe = {};
+
+/**
+ * @namespace Neon model namespace.
+ */
+Toe.Model = {};
+
+/**
+ * @namespace Neon controller namespace.
+ */
+Toe.Ctrl = {};
+
+/**
+ * @namespace Neon view namespace.
+ */
+Toe.View = {};
 
 /**
  * Utility Functions
@@ -51,8 +66,12 @@ Toe = {};
     }
 })(jQuery);
 
+Toe.validBoundingBox = function(bb) {
+    return bb[0] <= bb[2] && bb[1] <= bb[3];
+}
+
 /**
  * Musical information
  * May eventually be moved to a musical methods class
  */
-Toe.neumaticChroma = ["c", "d", "e", "f", "g", "a", "b"];
+Toe.neumaticChroma = ["a", "b", "c", "d", "e", "f", "g"];

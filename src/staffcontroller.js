@@ -21,25 +21,24 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a new staff controller and listens to the model and the view
  *
- * @class Represents a glyph imported from SVG
- * @param {string} svgKey svg lookup id
- * @param {fabric.js.Object} corresponding fabric.js object
+ * @class Controller for the staff
+ * @param {Toe.Model.Staff} pModel The staff model
+ * @param {Toe.View.Staff} pView The staff view
  */
-Toe.Model.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
+Toe.Ctrl.StaffController = function(sModel, sView) {
+    // LISTEN TO THE VIEW
 
-    this.centre = [this.obj.width/2, this.obj.height/2];
+    // LISTEN TO THE MODEL
+    /** 
+     * @event
+     * event type: vRenderStaff
+     * @param {Toe.Model.Staff} staff Staff to render
+     */
+    $(sModel).bind("vRenderStaff", function(event, staff) {
+        sView.renderStaff(staff);
+    });
 }
 
-Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
-
-/**
- * Wrapper function to clone the internal canvas object
- * @methodOf Toe.Model.Glyph
- */
-Toe.Model.Glyph.prototype.clone = function() {
-    return this.obj.clone();
-}
+Toe.Ctrl.StaffController.prototype.constructor = Toe.Ctrl.StaffController;

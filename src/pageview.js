@@ -21,25 +21,24 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a new page view
  *
- * @class Represents a glyph imported from SVG
- * @param {string} svgKey svg lookup id
- * @param {fabric.js.Object} corresponding fabric.js object
+ * @class View for the page
+ * @param {Toe.View.RenderEngine} renderEngine The rendering engine
  */
-Toe.Model.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
-
-    this.centre = [this.obj.width/2, this.obj.height/2];
+Toe.View.PageView = function(renderEngine) {
+    this.rendEng = renderEngine; 
 }
 
-Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
+Toe.View.PageView.prototype.constructor = Toe.View.PageView;
 
 /**
- * Wrapper function to clone the internal canvas object
- * @methodOf Toe.Model.Glyph
+ * Sets the dimensions of the page
+ *
+ * @methodOf Toe.View.PageView
+ * @param {Number} width Width of the page
+ * @param {Number} height Height of the page
  */
-Toe.Model.Glyph.prototype.clone = function() {
-    return this.obj.clone();
+Toe.View.PageView.prototype.setDimensions = function(width, height) {
+    this.canvas.setDimensions({width: width, height: height});
 }

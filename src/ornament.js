@@ -21,25 +21,48 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a glyph
+ * Creates a new note ornament
  *
- * @class Represents a glyph imported from SVG
- * @param {string} svgKey svg lookup id
- * @param {fabric.js.Object} corresponding fabric.js object
+ * @class Represents a note ornament
+ * @param {String} type Type of ornament
+ * @see Toe.Model.Ornament.Type
  */
-Toe.Model.Glyph = function(svgKey, fabricObj) {
-    this.key = svgKey;
-    this.obj = fabricObj;
+Toe.Model.Ornament = function(type, options) {
+    // check valid type
+    this.type = type.toLowerCase();
+    if (Toe.Model.Ornament.Type[this.type] == undefined) {
+        throw new Error("Ornament: undefined neume component");
+    }
+    else if (type == "episema") {
+        oForm = "horizontal";
+    }
+    else if (type == "dot") {
+        oForm = "aug";
+    }
+    else { // what form does a flat have?
+        oForm = null;
+    }
 
-    this.centre = [this.obj.width/2, this.obj.height/2];
+    this.props = {
+        form: oForm,
+        interact: false
+    };
+
+    $.extend(this.props, options);
+
 }
 
-Toe.Model.Glyph.prototype.constructor = Toe.Glyph;
+Toe.Model.Ornament.prototype.constructor = Toe.Model.Ornament;
 
 /**
- * Wrapper function to clone the internal canvas object
- * @methodOf Toe.Model.Glyph
+ * Known ornaments for neume components
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.Ornament
  */
-Toe.Model.Glyph.prototype.clone = function() {
-    return this.obj.clone();
-}
+Toe.Model.Ornament.Type = {
+    episema: "Episema",
+    dot: "Dot",
+    flat: "Flat"
+};
