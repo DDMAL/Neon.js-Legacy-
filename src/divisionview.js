@@ -47,29 +47,28 @@ Toe.View.DivisionView.prototype.renderDivision = function(division, staff) {
     var elements = new Array();
     
     // render division lines
+    var x1 = division.zone.ulx;
+    var divProps = {interact: division.props.interact, strokeWidth: 4};
     switch (division.type) {
-        var x1 = division.zone.ulx;
-        
         case Toe.Model.Division.Type.small:
             var y1 = staff.zone.uly - staff.delta_y/2;
             var y2 = staff.zone.uly + staff.delta_y/2;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], {interact: division.props.interact}));
+            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.minor:
-            var x1 = division.zone.ulx;
             var y1 = staff.zone.uly + staff.delta_y/2;
             var y2 = y1 + 2*staff.delta_y;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], {interact: division.props.interact}));
+            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.final:
             var y1 = staff.zone.uly;
             var y2 = staff.zone.lry;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], {interact: division.props.interact}));
+            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
 
             var x2 = division.zone.lrx;
-            elements.push(this.rendEng.createLine([x2, y1, x2, y2], {interact: division.props.interact}));
+            elements.push(this.rendEng.createLine([x2, y1, x2, y2], divProps));
             break;
     }
     

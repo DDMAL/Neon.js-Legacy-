@@ -95,15 +95,24 @@ THE SOFTWARE.
 
         var loadMeiPage = function(displayZones, page) {
             var neumeList = $("neume, sb", mei);
-            // calculate sb indices
+            // calculate sb indices in the neume list
             // precomputing will render better performance than a filter operation in the loops
-            var sbInd = new Array();
+            var neume_sbInd = new Array();
             $(neumeList).each(function(nit, nel)  {
                 if ($(nel).is("sb")) {
-                    sbInd.push(nit);
+                    neume_sbInd.push(nit);
                 }
             });
 
+            var divList = $("division, sb", mei);
+            // calculate sb indices in the division list
+            var div_sbInd = new Array();
+            $(divList).each(function(dit, del) {
+                if ($(del).is("sb")) {
+                    div_sbInd.push(dit);
+                }
+            });
+    
             // for each system
             $("sb", mei).each(function(sit, sel) {
                 console.log("system " + (sit+1));
@@ -150,8 +159,8 @@ THE SOFTWARE.
                 var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
                 page.addStaff(sModel);
 
-                // load all neumes in system
-                $(neumeList).slice(sbInd[sit]+1, sbInd[sit+1]).each(function(nit, nel) {
+                // load all neumes in the system
+                $(neumeList).slice(neume_sbInd[sit]+1, neume_sbInd[sit+1]).each(function(nit, nel) {
                     var nModel = new Toe.Model.Neume();
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
@@ -168,6 +177,28 @@ THE SOFTWARE.
                     sModel.addNeume(nModel);
 
                     console.log("neume: " + nModel.props.type.name);
+                });
+
+                // load all divisions in the system
+                $(divList).slice(div_sbInd[sit]+1, div_sbInd[sit+1]).each(function(dit, del) {
+                    var divFacs = $(mei).find("zone[xml\\:id=" + $(del).attr("facs") + "]")[0];
+                    var d_bb = parseBoundingBox(divFacs);
+                    if (displayZones) {
+                        rendEng.outlineBoundingBox(d_bb, {fill: "yellow"});
+                    }
+
+                    var dType = $(del).attr("form");
+                    var dModel = new Toe.Model.Division(dType);
+                    dModel.setBoundingBox(d_bb);
+
+                    // instantiate division view and controller
+                    var dView = new Toe.View.DivisionView(rendEng);
+                    var dCtrl = new Toe.Ctrl.DivisionController(dModel, dView);
+        
+                    // mount the division on the staff
+                    sModel.addDivision(dModel);
+    
+                    console.log("division: " + dType);
                 });
             });
             rendEng.repaint();
