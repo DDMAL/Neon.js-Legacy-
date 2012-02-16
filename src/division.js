@@ -41,7 +41,8 @@ Toe.Model.Division = function(key, options) {
 
     $.extend(this.props, options);
 
-    
+    // initialize bounding box
+    this.zone = new Object();
 }
 
 Toe.Model.Division.prototype.constructor = Toe.Model.Division;
@@ -70,7 +71,7 @@ Toe.Model.Division.prototype.setBoundingBox = function(bb) {
  * @public
  * @fieldOf Toe.Model.Division
  */
-Toe.Model.Ornament.Type = {
+Toe.Model.Division.Type = {
     small: "Small Division",
     minor: "Minor Division",
     final: "Final Division"

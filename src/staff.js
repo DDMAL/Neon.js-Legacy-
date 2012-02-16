@@ -58,6 +58,7 @@ Toe.Model.Staff = function(bb, options) {
     this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
 
     this.neumes = new Array();
+	this.divisions = new Array();
 }
 
 Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
@@ -136,4 +137,19 @@ Toe.Model.Staff.prototype.addNeume = function(neume) {
     
     // for chaining
     return this;
+}
+
+Toe.Model.Staff.prototype.addDivision = function(division) {
+	// check argument is a division
+	if (!(division instanceof Toe.Model.Division)) {
+		throw new Error("Staff: invalid division");
+	}
+
+	this.divisions.push(division);
+
+	// update view
+	$(division).trigger("vRenderDivision", [division, this]);
+
+	// for chaining
+	return this;
 }
