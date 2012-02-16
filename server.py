@@ -12,10 +12,6 @@ import neonsrv.api
 
 assert tornado.version_info > (2, 0, 0)
 
-class TestHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render("../test/neontest.html", prefix=conf.APP_ROOT.rstrip("/"))
-
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
@@ -36,7 +32,15 @@ rules = [
     (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNoteHandler)
 ]
 
+# Set up tests if we're in debug mode
 if conf.DEBUG:
+    class TestHandler(tornado.web.RequestHandler):
+        def get(self):
+            self.render("../test/neontest.html", prefix=conf.APP_ROOT.rstrip("/"))
+    test_static = os.path.join(os.path.dirname(__file__), "test")
+    test_support = os.path.join(test_static, "support")
+    rules.append((abs_path(r"/test/support/(.*)"), tornado.web.StaticFileHandler, {"path": test_support}))
+    rules.append((abs_path(r"/test/(.*\.js)"), tornado.web.StaticFileHandler, {"path": test_static}))
     rules.append((abs_path(r"/test"), TestHandler))
 
 application = tornado.web.Application(rules, **settings)
