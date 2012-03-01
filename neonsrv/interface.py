@@ -2,8 +2,7 @@ import json
 import mimetypes
 import os
 
-import pymei.Import.xmltomei
-import pymei.Export.meitojson
+from pymei import XmlImport
 
 import tornado.web
 
@@ -32,7 +31,7 @@ class RootHandler(tornado.web.RequestHandler):
             mei_fn = mei[0]["filename"]
             contents = mei[0]["body"]
             try:
-                mei = pymei.Import.xmltomei.xmlstrtomei(contents)
+                mei = XmlImport.documentFromText(contents)
                 if os.path.exists(os.path.join(mei_directory, mei_fn)):
                     errors = "mei file already exists"
                 else:
@@ -83,6 +82,3 @@ class FileHandler(tornado.web.RequestHandler):
             # derive mime type from file for generic serving
             self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0]);
             self.write(response)
-            # to serve JSON instead of xml
-            #response = pymei.Export.meitojson.meitojson(mei, prettyprint=False)
-

@@ -1,7 +1,7 @@
 import os
 
-import pymei.Import.xmltomei
-import pymei.Export.meitoxml
+from pymei import XmlImport
+from pymei import XmlExport
 import tornado.web
 
 import conf
@@ -20,7 +20,7 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
-        mei = pymei.Import.xmltomei.xmltomei(fname)
+        mei = XmlImport.documentFromFile(fname)
         for i in todelete.split(","):
             note = mei.get_by_id(i)
             if note and note.name == "note":
@@ -40,7 +40,7 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
                         zone = mei.get_by_id(facsid)
                         if zone and zone.name == "zone":
                             zone.parent.remove_child(zone)
-        pymei.Export.meitoxml.meitoxml(mei, fname)
+        XmlExport.meiDocumentToFile(mei, fname)
 
         self.set_status(200)
 
