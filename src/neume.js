@@ -48,9 +48,16 @@ Toe.Model.Neume = function(options) {
     this.props.key = this.props.key.toLowerCase();
     this.props.type = Toe.Model.Neume.Type[this.props.key];
 
+    // check neume name is known
     if (this.props.type == undefined) {
         this.props.key = "compound";
         this.props.type = Toe.Model.Neume.Type.compound;
+    }
+
+    // check neume modifier is known
+    this.props.modifier = Toe.Model.Neume.Modifier[this.props.modifier];
+    if (this.props.modifier == undefined) {
+        this.props.modifier = null;
     }
 
     // displacement from the clef - set later by the staff model
@@ -62,6 +69,22 @@ Toe.Model.Neume = function(options) {
 }
 
 Toe.Model.Neume.prototype.constructor = Toe.Model.Neume;
+
+/**
+ * Types of neume variants: alt, shift, ctrl and ctrl_shift are the keyboard
+ * shortcuts used in the Medieval Finale plugin for selection neume variants.
+ * The major variant 'liquescence' occurs when the user holds down alt while 'neumifying'
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.Neume
+ */
+Toe.Model.Neume.Modifier = {
+    alt: "liquescence",
+    shift: "variant 2",
+    ctrl: "variant 3",
+    ctrl_shift: "variant 4"
+}
 
 /**
  * Neumes encoded from the Fundamental Neumes Board in Medieval Finale
@@ -349,7 +372,21 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
         throw new Error("neumeFromMei: invalid neume data");
     }
 
-    this.props.key = $(neumeData).attr("name");
+    var nName = $(neumeData).attr("name");
+    // perform neume -> neume & modifier transformations
+    // For example, in the current MEI neumes module, cephalicus and epiphonus are their
+    // own neumes. In the Medieval Finale plugin they are clivis and podatus neumes, respectively,
+    // with an alt (liquescence) modifier.
+    if (nName == "epiphonus") {
+        nName = "podatus";
+        this.props.modifier = Toe.Model.Neume.Modifier["alt"];
+    }
+    else if (nName == "cephalicus") {
+        nName = "clivis";
+        this.props.modifier = Toe.Model.Neume.Modifier["alt"];
+    }
+
+    this.props.key = nName;
     this.props.type = Toe.Model.Neume.Type[this.props.key];
     // if neume is unknown
     if (this.props.type == undefined) {
