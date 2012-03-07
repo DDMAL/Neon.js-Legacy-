@@ -71,6 +71,11 @@
 	l-7-5l-1,1v115C9.333,312.666,23.666,324,43,324z"/>
 </svg>
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="101px" height="324px" viewBox="0 0 101 324" enable-background="new 0 0 101 324" xml:space="preserve">
+<path id="liques_down" d="M0,34v115l1,1l7-5c10.666-13.333,23-20,37-20l8,1c18,1.333,27,7,27,17v180l1,1h19l1-1V23
+	C87.666,7.666,70,0,48,0h-5C23.666,0,9.333,11.334,0,34z"/>
+</svg>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="131px" height="563px" viewBox="0 0 131 563" enable-background="new 0 0 131 563" xml:space="preserve">
 <path id="natural" d="M111,340v152v71h20v-51V176L20,217v-84V0H0v379L111,340z M109,213v98l-89,31l-2-96L109,213z"/>
 </svg>
@@ -81,8 +86,8 @@
 </svg>
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="183px" height="231px" viewBox="0 0 183 231" enable-background="new 0 0 183 231" xml:space="preserve">
-<path id="podatus_ep" d="M36,231l22-1c24.667-2,39.666-4,45-6c46-12,72.666-22,80-30V4l-1-1h-6l-7,3C106.334,38,66.667,54,50,54
-	c-4,0-8.667-0.667-14-2c-10.667-4.667-16-14-16-28v-5c0-6.667,0.667-13,2-19H1L0,1v225C10,229.333,22,231,36,231z"/>
+<path id="podatus_ep" d="M183,226V1l-1-1h-21c1.333,6,2,12.333,2,19v5c0,14-5.333,23.333-16,28c-5.333,1.333-10,2-14,2
+	C116.333,54,76.666,38,14,6L7,3H1L0,4v190c7.334,8,34,18,80,30c5.334,2,20.333,4,45,6l22,1C161,231,173,229.333,183,226z"/>
 </svg>
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="509.615px" height="415px" viewBox="0 0 509.615 415" enable-background="new 0 0 509.615 415" xml:space="preserve">

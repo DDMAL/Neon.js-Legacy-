@@ -202,18 +202,19 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: nc_y[1]});
 
                 elements.push(glyphPunct2);
-
-                // render dots
-                $.each(neume.components, function(it,el) {
-                    if (el.hasOrnament('dot')) {
-                        // get best spot for one dot
-                        var bestDots = bestDotPlacements(nc_y, it);
-                        if (bestDots.length > 0) {
-                            elements.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
-                        }
-                    }
-                });
             }
+
+            // render dots
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = bestDotPlacements(nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            });
+
             break;
 
         // TORCULUS
@@ -264,27 +265,48 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
 
         // PODATUS
         case Toe.Model.Neume.Type.podatus:
-            // if punctums are right on top of each other, spread them out a bit
-            if (Math.abs(neume.components[1].diff) == 1) {
-                nc_y[0] += 1;
-                nc_y[1] -= 1;
+            // if podatus is the liquescence variant
+            if (neume.props.modifier == Toe.Model.Neume.Modifier.alt) {
+                // first punctum
+                var punct1 = this.rendEng.getGlyph("podatus_ep");
+                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0]});
+
+                elements.push(glyphPunct1);
+
+                // draw right line connecting two punctum
+                var rx = glyphPunct1.left + punct1.centre[0] - 2;
+                var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
+                this.rendEng.draw([line], {modify: false});
+
+                // second punctum
+                var punct2 = this.rendEng.getGlyph("liques_down");
+                var glyphPunct2 = punct2.clone().set({left: glyphPunct1.left + punct1.centre[0] - punct2.centre[0], top: nc_y[1] + punct2.centre[1]/2});
+
+                elements.push(glyphPunct2);
             }
+            else { // draw normally
+                // if punctums are right on top of each other, spread them out a bit
+                if (Math.abs(neume.components[1].diff) == 1) {
+                    nc_y[0] += 1;
+                    nc_y[1] -= 1;
+                }
 
-            // first punctum
-            var punct1 = this.rendEng.getGlyph("pes");
-            var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2});
+                // first punctum
+                var punct1 = this.rendEng.getGlyph("pes");
+                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2});
 
-            elements.push(glyphPunct1);
+                elements.push(glyphPunct1);
 
-            // draw right line connecting two punctum
-            var rx = glyphPunct1.left + punct1.centre[0] - 1;
-            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-            this.rendEng.draw([line], {modify: false});
+                // draw right line connecting two punctum
+                var rx = glyphPunct1.left + punct1.centre[0] - 1;
+                var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
+                this.rendEng.draw([line], {modify: false});
 
-            // second punctum
-            var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left, top: nc_y[1]});
+                // second punctum
+                var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left, top: nc_y[1]});
 
-            elements.push(glyphPunct2);
+                elements.push(glyphPunct2);
+            }
 
             // render dots
             $.each(neume.components, function(it,el) {
