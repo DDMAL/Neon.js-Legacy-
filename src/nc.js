@@ -74,3 +74,27 @@ Toe.Model.NeumeComponent.prototype.setPosition = function(pos) {
     this.x = pos[0];
     this.y = pos[1];
 }
+
+/**
+ * Check if the neume component has the specified ornament
+ *
+ * @methodOf Toe.Model.NeumeComponent
+ * @param {String} oType ornament type
+ * @return {Boolean} whether the neume component has the ornament of type oType
+ */
+Toe.Model.NeumeComponent.prototype.hasOrnament = function(oType) {
+    var oType = Toe.Model.Ornament.Type[oType];
+    if (oType == undefined || this.props.ornaments.length == 0) {
+        return false;    
+    }
+    
+    var hasOrnament = false;
+    $.each(this.props.ornaments, function(it,el) {
+        if (el.type == oType) {
+            hasOrnament = true;
+            return false;
+        }
+    });
+
+    return hasOrnament;
+}

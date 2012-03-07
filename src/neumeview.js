@@ -45,32 +45,48 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
         throw new Error("Neume: Invalid render context");
     }
 
-    var bestDotPlacements = function(ypos, numDots) {
+    var bestDotPlacements = function(nc_y, yposInd) {
         // corresponding to whether or not it is good to put a dot
-        // at the top, middle, or bottom of the neume component
+        // at the middle, top, or bottom of the neume component
         var bestDots = [false, false, false];
         var dotsy = new Array();
 
         var firstSpace = staff.zone.uly + staff.delta_y/2;
 
-        // try top
-        var topPos = ypos - staff.delta_y/2;
-        var k = Math.round(2*(topPos - firstSpace) / staff.delta_y);
-        if (k % 2 == 0 && dotsy.length < numDots) {
-            dotsy.push(topPos);
-        } 
+        ypos = nc_y[yposInd];
 
-        // try middle
+        // try middle first
         var midPos = ypos;
         k = Math.round(2*(midPos - firstSpace) / staff.delta_y);
-        if (k % 2 == 0 && dotsy.length < numDots) {
+        if (k % 2 == 0) {
             dotsy.push(midPos);
         } 
 
+        // try top next
+        var topPos = ypos - staff.delta_y/2;
+        var k = Math.round(2*(topPos - firstSpace) / staff.delta_y);
+
+        // check there isn't a note here
+        var isOccNote = false;
+        if (yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) {
+            isOccNote = true;
+        }
+
+        if (k % 2 == 0 && !isOccNote) {
+            dotsy.push(topPos);
+        }
+        
         // try bottom
         var botPos = ypos + staff.delta_y/2;
         k = Math.round(2*(botPos - firstSpace) / staff.delta_y);
-        if (k % 2 == 0 && dotsy.length < numDots) {
+
+        // check there isn't a note here
+        isOccNote = false;
+        if (yposInd+1 < nc_y.length && ypos + staff.delta_y/2 == nc_y[yposInd+1]) {
+            isOccNote = true;
+        }
+
+        if (k % 2 == 0 && !isOccNote) {
             dotsy.push(botPos);
         } 
 
@@ -104,21 +120,6 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
     }
 
     var glyphDot = this.rendEng.getGlyph("dot");
-
-    // check ornamentation
-    // it seems the position of the dot tag in MEI doesn't impact rendering
-    // just check whether any neume component has a dot
-    var dots = false;
-    $.each(neume.components, function(nit,nel) {
-        if (nel.props.ornaments.length > 0) {
-            $.each(nel.props.ornaments, function(oit, oel) {
-                if (oel.type == Toe.Model.Ornament.Type.dot) {
-                    dots = true;
-                }
-            });
-        }
-    });
-
     var elements = new Array();
 
     switch (neume.props.type) {
@@ -128,9 +129,9 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             elements.push(glyphPunct);
 
             // render dots
-            if (dots) {
+            if (neume.components[0].hasOrnament('dot')) {
                 // get best spot for one dot
-                var bestDots = bestDotPlacements(nc_y[0], 1);
+                var bestDots = bestDotPlacements(nc_y, 0);
                 elements.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
@@ -141,6 +142,13 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             var punct = this.rendEng.getGlyph("punctum");
             var glyphPunct = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
             elements.push(glyphPunct);
+
+            // render dots
+            if (neume.components[0].hasOrnament('dot')) {
+                // get best spot for one dot
+                var bestDots = bestDotPlacements(nc_y, 0);
+                elements.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
+            }
 
             // draw right line coming off punctum
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
@@ -171,21 +179,27 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             elements.push(glyphPunct2);
 
             // render dots
-            if (dots) {
-                // get best spot for one dot
-                var bestDots = bestDotPlacements(nc_y[1], 2);
-                if (bestDots.length == 2) {
-                    elements.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
-                    elements.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[1]}));
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = bestDotPlacements(nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
                 }
-            }
-
+            });
             break;
 
         // TORCULUS
         case Toe.Model.Neume.Type.torculus:
+            // derive x positions
+            var nc_x = new Array();
+            nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
+            nc_x.push(nc_x[0] + (2*ncGlyphs[0].centre[0])-ncOverlap_x);
+            nc_x.push(nc_x[1] + (2*ncGlyphs[1].centre[0])-ncOverlap_x);
+
             // first punctum
-            var glyphPunct1 = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
+            var glyphPunct1 = ncGlyphs[0].clone().set({left: nc_x[0], top: nc_y[0]});
 
             elements.push(glyphPunct1);
 
@@ -195,7 +209,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             this.rendEng.draw([line], {modify: false});
 
             // second punctum
-            var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0])-ncOverlap_x, top: nc_y[1]});
+            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1]});
 
             elements.push(glyphPunct2);
 
@@ -205,9 +219,21 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             this.rendEng.draw([line], {modify: false});
 
             // third punctum
-            var glyphPunct3 = ncGlyphs[2].clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0])-ncOverlap_x, top: nc_y[2]});
+            var glyphPunct3 = ncGlyphs[2].clone().set({left: nc_x[2], top: nc_y[2]});
 
             elements.push(glyphPunct3);
+
+            // render dots
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = bestDotPlacements(nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            });
+
             break;
 
         // PODATUS
@@ -235,15 +261,15 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             elements.push(glyphPunct2);
 
             // render dots
-            if (dots) {
-                // get best spot for one dot
-                var bestDots = bestDotPlacements(nc_y[1], 1);
-                elements.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
-
-                // get best spot for one dot
-                bestDots = bestDotPlacements(nc_y[0], 1);
-                elements.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
-            }
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = bestDotPlacements(nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            });
 
             break;
 
@@ -274,11 +300,13 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
 
             elements.push(glyphPunct);
 
-            // render dots
-            if (dots) {
-                // get best spot for one dot
-                bestDots = bestDotPlacements(nc_y[2], 1);
-                elements.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[2].centre[0]), top: bestDots[0]}));
+            // only check last note has a dot
+            if(neume.components[2].hasOrnament('dot')) {
+                // get best spot for the dot
+                var bestDots = bestDotPlacements(nc_y, 2);
+                if (bestDots.length > 0) {
+                    elements.push(glyphDot.clone().set({left: glyphPunct.left + (2*ncGlyphs[2].centre[0]), top: bestDots[0]}));
+                }
             }
 
             break;
@@ -313,12 +341,15 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 elements.push(glyphPunct2);
 
                 // render dots
-                if (i == 0 && dots) {
-                    // get best spot for one dot
-                    bestDots = bestDotPlacements(nc_y[i], 1);
-                    elements.push(glyphDot.clone().set({left: glyphPes.left+(2*pes.centre[0]), top: bestDots[0]}));
+                for (var ncInd = i; ncInd < i+2; ncInd++) {
+                    if (neume.components[ncInd].hasOrnament('dot')) {
+                        //get best spot for the dot
+                        var bestDots = bestDotPlacements(nc_y, ncInd);
+                        if (bestDots.length > 0) {
+                            elements.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[ncInd].centre[0]), top: bestDots[0]}));
+                        }
+                    }
                 }
-
             }
 
             if (neume.components.length % 2 == 1) {
@@ -326,6 +357,15 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 lastX += 2*ncGlyphs[numNC-1].centre[0] - ncOverlap_x;
                 var glyphPunct3 = ncGlyphs[numNC-1].clone().set({left: lastX, top: nc_y[numNC-1]});
                 elements.push(glyphPunct3);
+
+                // draw dots on stray virga if they exist
+                if(neume.components[numNC-1].hasOrnament('dot')) {
+                    // get best spot for the dot
+                    var bestDots = bestDotPlacements(nc_y, numNC-1);
+                    if (bestDots.length > 0) {
+                        elements.push(glyphDot.clone().set({left: glyphPunct3.left + (2*ncGlyphs[numNC-1].centre[0]), top: bestDots[0]}));
+                    }
+                }
 
                 // draw right line coming off punctum
                 var rx2 = lastX + ncGlyphs[numNC-1].centre[0] - 2;
