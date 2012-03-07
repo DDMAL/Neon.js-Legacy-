@@ -74,5 +74,6 @@ Toe.Model.Division.prototype.setBoundingBox = function(bb) {
 Toe.Model.Division.Type = {
     small: "Small Division",
     minor: "Minor Division",
+    major: "Major Division",
     final: "Final Division"
 };

@@ -62,6 +62,12 @@ Toe.View.DivisionView.prototype.renderDivision = function(division, staff) {
             elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
+        case Toe.Model.Division.Type.major:
+            var y1 = staff.zone.uly;
+            var y2 = staff.zone.lry;
+            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            break;
+
         case Toe.Model.Division.Type.final:
             var y1 = staff.zone.uly;
             var y2 = staff.zone.lry;
