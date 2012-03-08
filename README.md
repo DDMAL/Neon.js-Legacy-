@@ -32,3 +32,5 @@ Tests
 
 We're using qunit for tests. Load ```test/neontest.html``` in a browser to run them
 
+To run server tests, install [python-nose](https://github.com/nose-devs/nose) and run `nosetests`
+
