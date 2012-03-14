@@ -68,8 +68,13 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
 
         // check there isn't a note here
         // must also check note after (eg., podatus)
+        if (neume.props.type == Toe.Model.Neume.Type.podatus) {
+            var num = ypos - staff.delta_y/2;
+            console.log("test: " + num + ", nc+1:" +  nc_y[yposInd+1]);
+        }
+
         var isOccNote = false;
-        if (yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) {
+        if ((yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - staff.delta_y/2 == nc_y[yposInd+1])) {
             isOccNote = true;
         }
 
@@ -83,7 +88,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
 
         // check there isn't a note here
         isOccNote = false;
-        if (yposInd+1 < nc_y.length && ypos + staff.delta_y/2 == nc_y[yposInd+1]) {
+        if ((yposInd+1 < nc_y.length && ypos + staff.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + staff.delta_y/2 == nc_y[yposInd-1])) {
             isOccNote = true;
         }
 
@@ -290,14 +295,14 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             }
             else { // draw normally
                 // if punctums are right on top of each other, spread them out a bit
+                var yoffset = 0;
                 if (Math.abs(neume.components[1].diff) == 1) {
-                    nc_y[0] += 1;
-                    nc_y[1] -= 1;
+                    yoffset = 1;
                 }
 
                 // first punctum
                 var punct1 = this.rendEng.getGlyph("pes");
-                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2});
+                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2 + yoffset});
 
                 elements.modify.push(glyphPunct1);
 
@@ -307,7 +312,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 elements.static.push(line);
 
                 // second punctum
-                var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left, top: nc_y[1]});
+                var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left, top: nc_y[1] - yoffset});
 
                 elements.modify.push(glyphPunct2);
             }
@@ -317,6 +322,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
                     var bestDots = bestDotPlacements(nc_y, it);
+                    console.log(it + ", best dots: ", bestDots);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -373,14 +379,14 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             // draw podatuses
             for (var i = 0; i < numNC-1; i+=2) {
                 // if punctums are right on top of each other, spread them out a bit
+                yoffset = 0;
                 if (Math.abs(neume.components[i+1].diff - neume.components[i].diff) == 1) {
-                    nc_y[i] += 1;
-                    nc_y[i+1] -= 1;
+                    yoffset = 1
                 }
 
                 // pes
                 lastX += 2*pes.centre[0] - ncOverlap_x;
-                var glyphPes = pes.clone().set({left: lastX, top: nc_y[i] - pes.centre[1]/2});
+                var glyphPes = pes.clone().set({left: lastX, top: nc_y[i] - pes.centre[1]/2 + yoffset});
                 elements.modify.push(glyphPes);
 
                 // draw right line connecting two punctum
@@ -389,7 +395,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 elements.static.push(line1);
 
                 // second punctum
-                var glyphPunct2 = ncGlyphs[i+1].clone().set({left: lastX, top: nc_y[i+1]});
+                var glyphPunct2 = ncGlyphs[i+1].clone().set({left: lastX, top: nc_y[i+1] - yoffset});
                 elements.modify.push(glyphPunct2);
 
                 // render dots
