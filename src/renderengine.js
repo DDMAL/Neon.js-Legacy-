@@ -50,6 +50,28 @@ Toe.View.RenderEngine.prototype.setGlyphs = function(glyphs) {
  */
 Toe.View.RenderEngine.prototype.setCanvas = function(f_canvas) {
     this.canvas = f_canvas;
+    
+    // set canvas properties
+    this.canvas.HOVER_CURSOR = "pointer";
+
+    // example of accessing model information on view events
+    // click on a neume, print neume name
+    theCanvas = this.canvas;
+    this.canvas.observe({
+        'mouse:down': function(e) {
+            if (e.memo.target) {
+                console.log("Neume name: " + e.memo.target.ref.props.type.name);
+                e.memo.target.setFill('green');
+                theCanvas.renderAll();
+            }
+        },
+        'mouse:up': function(e) {
+            if (e.memo.target) {
+                e.memo.target.setFill('black');
+                theCanvas.renderAll();
+            }
+        }
+    });
 }
 
 Toe.View.RenderEngine.prototype.setGlobalScale = function(scale) {
@@ -129,11 +151,13 @@ Toe.View.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
 		left: bb[0] + (width/2), // weird fabric bug
 		top: bb[1] + (height/2), // weird fabric bug
 		fill: opts.fill, 
-		opacity: opts.opacity, 
-		selectable: opts.interact
+		opacity: opts.opacity 
 	});
 
-	this.draw([bb], {modify: false});
+    var elements = {static: new Array(), modify: new Array()};
+    elements.static.push(bb);
+
+	this.draw(elements, {selectable: opts.interact});
 }
 
 /**
@@ -144,19 +168,52 @@ Toe.View.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
 Toe.View.RenderEngine.prototype.draw = function(elements, options) {
 	var opts = {
 		modify: true,
-		repaint: false
+		repaint: false,
+        group: false,
+        selectable: true,
+        hasControls: false,
+        hasBorders: false,
+        ref: null
 	};
 
 	$.extend(opts, options);
 
-    if (opts.modify) {
-        elements = this.preprocess(elements);
+    // perform transformations
+    elements.modify = this.preprocess(elements.modify);
+
+    // merge transformed elements with static elements
+    elements = $.merge($.merge([],elements.modify), elements.static);
+
+    // make group if specified
+    if (opts.group) {
+        // apply control options to inner elements
+        $.map(elements, function(val, i) {
+            val.selectable = opts.selectable;
+            val.hasControls = opts.hasControls;
+            val.hasBorders = opts.hasBorders;
+            val.lockRotation = true;
+            val.lockScale = true;
+        });
+
+        elements = [new fabric.Group(elements)];
     }
 
+    // apply control options to outer container
+    $.map(elements, function(val, i) {
+        val.selectable = opts.selectable;
+        val.hasControls = opts.hasControls;
+        val.hasBorders = opts.hasBorders;
+        val.lockRotation = true;
+        val.lockScale = true;
+        val.ref = opts.ref
+    });
+
+    // add the elements to the canvas
     for(var i = 0; i < elements.length; i++) {
         this.canvas.add(elements[i]);
     }
 
+    // force repaint of canvas if necessary
 	if (opts.repaint) {
 		this.repaint();
 	}
