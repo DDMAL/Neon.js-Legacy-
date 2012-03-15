@@ -53,25 +53,6 @@ Toe.View.RenderEngine.prototype.setCanvas = function(f_canvas) {
     
     // set canvas properties
     this.canvas.HOVER_CURSOR = "pointer";
-
-    // example of accessing model information on view events
-    // click on a neume, print neume name
-    theCanvas = this.canvas;
-    this.canvas.observe({
-        'mouse:down': function(e) {
-            if (e.memo.target) {
-                console.log("Neume name: " + e.memo.target.ref.props.type.name);
-                e.memo.target.setFill('green');
-                theCanvas.renderAll();
-            }
-        },
-        'mouse:up': function(e) {
-            if (e.memo.target) {
-                e.memo.target.setFill('black');
-                theCanvas.renderAll();
-            }
-        }
-    });
 }
 
 Toe.View.RenderEngine.prototype.setGlobalScale = function(scale) {
@@ -205,7 +186,7 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.hasBorders = opts.hasBorders;
         val.lockRotation = true;
         val.lockScale = true;
-        val.ref = opts.ref
+        val.ref = opts.ref // important: attaches neume reference to fabric group
     });
 
     // add the elements to the canvas

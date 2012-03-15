@@ -34,6 +34,8 @@
     <script src="{{static_url("js/neumeview.js")}}" type="text/javascript"></script>
     <script src="{{static_url("js/nc.js")}}" type="text/javascript"></script>
 	<script src="{{static_url("js/ornament.js")}}" type="text/javascript"></script>
+    <!-- GUI -->
+    <script src="{{static_url("js/gui.js")}}" type="text/javascript"></script>
 
     <script type="text/javascript">
     $(document).ready(function() {
@@ -47,29 +49,11 @@
           backgroundImageOpacity: 0.0
         });
     });
-
-    // GUI elements
-    // note: uses jQuery UI
-    $(function() {
-        $("#ui_bgImgOpacity").slider({
-            min: 0.0,
-            max: 1.0,
-            step: 0.05,
-            value: 0.0
-        });
-    });
     </script>
 </head>
 <body>
   <h1>Editing {{page}}</h1>
-    <div id="gui">
-        <table>
-            <tr>
-                <th><label>Background Image Opacity:</label></th>
-                <td><div id="ui_bgImgOpacity" style="width: 500px; margin: 10px"></div></td>
-            </tr>
-        </table>
-    </div>
+    <div id="gui"></div>
     <div id="neon-wrapper">
     </div>
 </body>
