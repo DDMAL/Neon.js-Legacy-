@@ -15,7 +15,7 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
         facsid = neume.getAttribute("facs").value
         neume.parent.removeChild(neume)
         # Remove the zone if it exists
-        zone = self.mei.getElementById(facsid)
+        zone = self.mei.getElementById(str(facsid))
         if zone and zone.name == "zone":
             zone.parent.removeChild(zone)
 
@@ -41,7 +41,7 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
         IDs. The IDs can be of <note> or <neume> objects.
         """
         for i in ids.split(","):
-            element = self.mei.getElementById(i)
+            element = self.mei.getElementById(str(i))
             if element and element.name == "note":
                 self.delete_note(element)
             elif element and element.name == "neume":
@@ -62,10 +62,10 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
-        self.mei = XmlImport.documentFromFile(fname)
+        self.mei = XmlImport.read(fname)
         self.do_delete(todelete)
 
-        XmlExport.meiDocumentToFile(mei, fname)
+        XmlExport.write(self.mei, fname)
 
         self.set_status(200)
 
