@@ -1,3 +1,14 @@
-#gui label {
-    font-size: 150%;
+#gui {
+    margin-bottom: 15px;
+}
+
+#sldr_bgImgOpacity {
+    width: 27%;
+    margin: 15px 10px;
+}
+
+#toolbar {
+    padding: 15px 4px;
+    background: #4B4A48;
+    border-color: black;
 }

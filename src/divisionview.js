@@ -44,39 +44,39 @@ Toe.View.DivisionView.prototype.renderDivision = function(division, staff) {
         throw new Error("Division: Invalid render context");
     }
 
-    var elements = new Array();
+    var elements = {static: new Array(), modify: new Array()};
     
     // render division lines
     var x1 = division.zone.ulx;
-    var divProps = {interact: division.props.interact, strokeWidth: 4};
+    var divProps = {strokeWidth: 4};
     switch (division.type) {
         case Toe.Model.Division.Type.small:
             var y1 = staff.zone.uly - staff.delta_y/2;
             var y2 = staff.zone.uly + staff.delta_y/2;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.minor:
             var y1 = staff.zone.uly + staff.delta_y/2;
             var y2 = y1 + 2*staff.delta_y;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.major:
             var y1 = staff.zone.uly;
             var y2 = staff.zone.lry;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.final:
             var y1 = staff.zone.uly;
             var y2 = staff.zone.lry;
-            elements.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
 
             var x2 = division.zone.lrx;
-            elements.push(this.rendEng.createLine([x2, y1, x2, y2], divProps));
+            elements.static.push(this.rendEng.createLine([x2, y1, x2, y2], divProps));
             break;
     }
     
-	this.rendEng.draw(elements, {modify: false});
+	this.rendEng.draw(elements, {selectable: division.props.interact});
 }

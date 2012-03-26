@@ -336,6 +336,11 @@ THE SOFTWARE.
                 loadMeiPage(settings.debug, page);
             }
 
+            // instantiate appropriate GUI elements
+            var gui = new Toe.View.GUI(settings.prefix, settings.filename, rendEng,
+                                      {sldr_bgImgOpacity: settings.backgroundImage, 
+                                       initBgImgOpacity: settings.backgroundImageOpacity});
+            /*
             if (settings.backgroundImage) {
                 // set to initial opacity
                 $("#ui_bgImgOpacity").slider("value", settings.backgroundImageOpacity);
@@ -345,7 +350,7 @@ THE SOFTWARE.
                     rendEng.canvas.backgroundImageOpacity = settings.backgroundImageOpacity;
                     rendEng.repaint();
                 });
-            }
+            }*/
 
             console.log("Load successful. Neon.js ready.");
             var runTime = new Date() - startTime;
