@@ -69,3 +69,101 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
 
         self.set_status(200)
 
+class ChangeNeumePitchHandler(tornado.web.RequestHandler):
+
+    pitches = ["a", "b", "c", "d", "e", "f", "g"]
+
+    def find_difference(self, pname, octave, newpname, newoct):
+        """ Find the distance between two pictch/octave pairs.
+        Opposite of new_note. """
+
+        pname = pname.lower()
+        newpname = newpname.lower()
+        if isinstance(octave, basestring):
+            octave = int(octave)
+        if isinstance(newoct, basestring):
+            newoct = int(newoct)
+        oldidx = self.pitches.index(pname)
+        newidx = self.pitches.index(newpname)
+
+        difference = (newidx - oldidx) + (7 * (newoct - octave))
+        return difference
+
+    def new_note(self, pname, octave, difference):
+        """ If you have a pitch and octave and a direction
+        to move it in, give a new pitch and octave -
+        opposite of find_difference.
+
+        Returns a tuple (pname, oct) """
+
+        if isinstance(octave, basestring):
+            octave = int(octave)
+        pname = pname.lower()
+
+        oldidx = self.pitches.index(pname)
+
+        newidx = (oldidx + difference) % 7
+        octavech = (oldidx + difference) / 7
+        octave += octavech
+        return (self.pitches[newidx], "{}".format(octave))
+
+    def move_neume(self, neume, newp, newo):
+        """ Change the pitch of a neume """
+        if neume:
+            notes = neume.getDescendantsByName("note")
+            if len(notes):
+                first = notes[0]
+                o = first.getAttribute("oct").value
+                p = first.getAttribute("pname").value
+                difference = self.find_difference(p, o, newp, newo)
+                for n in notes:
+                    noteoct = n.getAttribute("oct").value
+                    notep = n.getAttribute("pname").value
+                    (changep, changeo) = self.new_note(notep, noteoct, difference)
+                    n.addAttribute("oct", changeo)
+                    n.addAttribute("pname", changep)
+
+    def update_or_add_zone(self, neume, ulx, uly, lrx, lry):
+        if neume:
+            facsid = neume.getAttribute("facs").value
+            if facsid:
+                zone = self.mei.getElementById(facsid)
+                if zone:
+                    zone.addAttribute("ulx", ulx)
+                    zone.addAttribute("uly", uly)
+                    zone.addAttribute("lrx", lrx)
+                    zone.addAttribute("lry", lry)
+
+    def post(self, file):
+        """ Change the pitch of a <neume> element.
+        Pass in an argument called 'id' which is the id of a <neume>
+        object. arguments pname and oct refer to the new pitch and
+        octave of the first note in the neume. All other notes in the
+        neume will have their relative pitches updated.
+
+        if arguments lrx,lry,ulx,uly are provided, then an associated
+        <zone> element will have its coordinates updated. If there is 
+        no <zone> element then nothing will be added.
+        """
+
+        neumeid = self.get_argument("id", "")
+        pname = self.get_argument("pname", "")
+        octave = self.get_argument("octave", "")
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.documentFromFile(fname)
+
+        neume = self.mei.get_by_id(neumeid)
+
+        self.move_neume(neume, pname, octave)
+
+        # Bounding box
+        lrx = self.get_argument("lrx", None)
+        lry = self.get_argument("lry", None)
+        ulx = self.get_argument("ulx", None)
+        uly = self.get_argument("uly", None)
+
+        if lrx and lry and ulx and uly:
+            update_or_add_zone(neume, ulx, uly, lrx, lry)
+
