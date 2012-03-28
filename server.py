@@ -30,7 +30,8 @@ rules = [
     (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
     (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
     (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNoteHandler),
-    (abs_path(r"/edit/(.*?)/change/note"), neonsrv.api.ChangeNoteHandler)
+    (abs_path(r"/edit/(.*?)/change/note"), neonsrv.api.ChangeNoteHandler),
+    (abs_path(r"/edit/(.*?)/new/note"), neonsrv.api.InsertNoteHandler)
 ]
 
 # Set up tests if we're in debug mode

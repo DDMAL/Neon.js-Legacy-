@@ -141,3 +141,76 @@ class ChangeNoteTest(unittest.TestCase):
         self.assertEqual("g", n3.getAttribute("pname").value)
         self.assertEqual("3", n3.getAttribute("oct").value)
 
+class InsertNoteTest(unittest.TestCase):
+
+    def setUp(self):
+        app = tornado.web.Application()
+        req = FakeReq()
+        path = os.path.join(os.path.dirname(__file__), "data", "0400_segment.mei")
+        self.mei = pymei.XmlImport.read(path)
+        self.inserter = api.InsertNeumeHandler(app, req)
+        self.inserter.mei = self.mei
+
+    def testGetNeumeXml(self):
+        r = self.inserter.get_new_neume("c", "4")
+        self.assertEqual("neume", r.name)
+        self.assertEqual("punctum", r.getAttribute("name").value)
+        self.assertEqual("nc", r.children[0].name)
+        self.assertEqual("note", r.children[0].children[0].name)
+        note = r.children[0].children[0]
+        self.assertEqual("c", note.getAttribute("pname").value)
+        self.assertEqual("4", note.getAttribute("oct").value)
+
+    def testGetZoneXml(self):
+        z = self.inserter.get_new_zone("1", "2", "3", "4");
+
+        self.assertEqual("zone", z.name)
+        self.assertEqual("1", z.getAttribute("ulx").value)
+        self.assertEqual("2", z.getAttribute("uly").value)
+        self.assertEqual("3", z.getAttribute("lrx").value)
+        self.assertEqual("4", z.getAttribute("lry").value)
+
+    def testDoInsertBefore(self):
+        newneume = self.inserter.get_new_neume("c", "4")
+        newzone = self.inserter.get_new_zone("1", "2", "3", "4")
+
+        layerId = "m-54a0bb9f-7aee-4417-bbe7-298e9149a8a2"
+        before = "m-a4b60c3b-58ce-4918-8b97-38c960c50dab"
+        self.inserter.do_insert(newneume, newzone, layerId, before)
+
+        surface = self.mei.getElementById("m-4954b1c5-9c05-4963-accb-b6e351e3b6b4")
+        self.assertEqual(6, len(surface.children))
+        self.assertEqual(newzone.id, surface.children[-1].id)
+
+        layer = self.mei.getElementById(layerId)
+        self.assertEqual(6, len(layer.children))
+        self.assertEqual(newneume.id, layer.children[3].id)
+
+    def testDoInsertEnd(self):
+        newneume = self.inserter.get_new_neume("c", "4")
+        newzone = self.inserter.get_new_zone("1", "2", "3", "4")
+
+        layerId = "m-54a0bb9f-7aee-4417-bbe7-298e9149a8a2"
+        self.inserter.do_insert(newneume, newzone, layerId)
+
+        surface = self.mei.getElementById("m-4954b1c5-9c05-4963-accb-b6e351e3b6b4")
+        self.assertEqual(6, len(surface.children))
+        self.assertEqual(newzone.id, surface.children[-1].id)
+
+        layer = self.mei.getElementById(layerId)
+        self.assertEqual(6, len(layer.children))
+        self.assertEqual(newneume.id, layer.children[-1].id)
+
+    def testDoInsertNoZone(self):
+        newneume = self.inserter.get_new_neume("c", "4")
+
+        layerId = "m-54a0bb9f-7aee-4417-bbe7-298e9149a8a2"
+        self.inserter.do_insert(newneume, None, layerId, None)
+
+        surface = self.mei.getElementById("m-4954b1c5-9c05-4963-accb-b6e351e3b6b4")
+        self.assertEqual(5, len(surface.children))
+
+        layer = self.mei.getElementById(layerId)
+        self.assertEqual(6, len(layer.children))
+        self.assertEqual(newneume.id, layer.children[-1].id)
+

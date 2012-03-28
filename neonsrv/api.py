@@ -2,7 +2,9 @@ import os
 
 from pymei import XmlImport
 from pymei import XmlExport
+from pymei import MeiElement
 import tornado.web
+import json
 
 import conf
 
@@ -142,7 +144,7 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
         neume will have their relative pitches updated.
 
         if arguments lrx,lry,ulx,uly are provided, then an associated
-        <zone> element will have its coordinates updated. If there is 
+        <zone> element will have its coordinates updated. If there is
         no <zone> element then nothing will be added.
         """
 
@@ -167,3 +169,103 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
         if lrx and lry and ulx and uly:
             update_or_add_zone(neume, ulx, uly, lrx, lry)
 
+        XmlExport.write(self.mei, fname)
+        self.set_status(200)
+
+class InsertNeumeHandler(tornado.web.RequestHandler):
+
+    def do_insert(self, neume, zone, parentId, before=None):
+        """ Insert into the mei contents """
+        if zone:
+            neume.addAttribute("facs", zone.getId())
+
+        parent = self.mei.getElementById(parentId)
+        if parent and before:
+            before = self.mei.getElementById(before)
+            parent.addChildBefore(before, neume)
+        elif parent:
+            parent.addChild(neume)
+
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces) and zone:
+            surfaces[0].addChild(zone)
+            return surfaces[0].id
+        else:
+            return None
+
+    def get_new_neume(self, pname, octave):
+        """ Make a new note and return MEI object """
+        neume = MeiElement("neume")
+        neume.addAttribute("name", "punctum")
+        nc = MeiElement("nc")
+        note = MeiElement("note")
+        note.addAttribute("pname", pname)
+        note.addAttribute("oct", octave)
+        neume.addChild(nc)
+        nc.addChild(note)
+
+        return neume
+
+    def get_new_zone(self, ulx, uly, lrx, lry):
+        zone = MeiElement("zone")
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+        return zone
+
+    def post(self, file):
+        """ Insert a new neume with a single note.
+        Returns the xml for the note, and the zone information.
+        Set the neume as a child of `parent'. If `before' is set, it is
+        expected to be a child of the parent and the new neume is 
+        inserted before the element with the id specified by before.
+        If `before' is not set, the new neume is added to the end of
+        `parent's children list.
+        Pass in ulx,uly,lrx,lry for bounding boxes if wanted.
+
+        A json dictionary is returned:
+          {"neume": <neume>...,
+           "zone": <zone>...,
+           "zoneparent": m-nnnn-..."
+          }
+        where neume and zone are xml of the elements, and zoneparent
+        is the id of the element that the zone should be added
+        to the end of.
+        """
+        before = self.get_argument("before", None)
+        parent = self.get_argument("parent", None)
+        pname = self.get_argument("pname", "")
+        octave = self.get_argument("octave", "")
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.documentFromFile(fname)
+
+        neume = get_new_neume(pname, octave)
+        neume_xml = XmlExport.meiElementToText(neume)
+
+        # Bounding box
+        lrx = self.get_argument("lrx", None)
+        lry = self.get_argument("lry", None)
+        ulx = self.get_argument("ulx", None)
+        uly = self.get_argument("uly", None)
+
+        if lrx and lry and ulx and uly:
+            zone = self.get_new_zone(ulx, uly, lrx, lry)
+            zone_xml = XmlExport.meiElementToText(zone)
+        else:
+            zone = None
+            zone_xml = ""
+
+        surface_id = self.do_insert(neume, zone, parent, before)
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"zone": zone_xml,
+                "neume": neume_xml,
+                "zoneparent": surface_id
+                }
+        self.write(json.dumps(result))
+        self.set_status(200)
