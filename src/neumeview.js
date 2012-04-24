@@ -68,11 +68,6 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
 
         // check there isn't a note here
         // must also check note after (eg., podatus)
-        if (neume.props.type == Toe.Model.Neume.Type.podatus) {
-            var num = ypos - staff.delta_y/2;
-            console.log("test: " + num + ", nc+1:" +  nc_y[yposInd+1]);
-        }
-
         var isOccNote = false;
         if ((yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - staff.delta_y/2 == nc_y[yposInd+1])) {
             isOccNote = true;
@@ -322,7 +317,6 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
                     var bestDots = bestDotPlacements(nc_y, it);
-                    console.log(it + ", best dots: ", bestDots);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
