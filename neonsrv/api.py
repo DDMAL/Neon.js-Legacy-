@@ -41,7 +41,7 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
         IDs. The IDs can be of <note> or <neume> objects.
         """
         for i in ids.split(","):
-            element = self.mei.getElementById(i)
+            element = self.mei.getElementById(str(i))
             if element and element.name == "note":
                 self.delete_note(element)
             elif element and element.name == "neume":
@@ -61,11 +61,10 @@ class DeleteNoteHandler(tornado.web.RequestHandler):
         todelete = self.get_argument("id", "")
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
-        fname = os.path.join(mei_directory, file)
+        fname = str(os.path.join(mei_directory, file))
         self.mei = XmlImport.documentFromFile(fname)
         self.do_delete(todelete)
 
-        XmlExport.meiDocumentToFile(mei, fname)
+        XmlExport.meiDocumentToFile(self.mei, fname)
 
         self.set_status(200)
-
