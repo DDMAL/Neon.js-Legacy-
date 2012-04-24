@@ -167,15 +167,6 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
 
     // make group if specified
     if (opts.group) {
-        // apply control options to inner elements
-        $.map(elements, function(val, i) {
-            val.selectable = opts.selectable;
-            val.hasControls = opts.hasControls;
-            val.hasBorders = opts.hasBorders;
-            val.lockRotation = true;
-            val.lockScale = true;
-        });
-
         elements = [new fabric.Group(elements)];
     }
 
@@ -183,7 +174,7 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
     $.map(elements, function(val, i) {
         val.selectable = opts.selectable;
         val.hasControls = opts.hasControls;
-        val.hasBorders = opts.hasBorders;
+        //val.hasBorders = opts.hasBorders;
         val.lockRotation = true;
         val.lockScale = true;
         val.ref = opts.ref // important: attaches neume reference to fabric group
