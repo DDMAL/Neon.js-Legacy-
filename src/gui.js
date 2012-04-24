@@ -61,6 +61,39 @@ Toe.View.GUI = function(prefix, fileName, rendEng, guiToggles) {
             $(parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
         }
         
+        // handler for delete
+        $("#btn_delete").bind("click", function() {
+            // get current canvas selection
+            // check individual selection and group selections
+            nids = new Array();
+            var selection = rendEng.canvas.getActiveObject();
+            if (selection) {
+                // individual neume selected
+                nids.push(selection.ref.id);
+                rendEng.canvas.remove(selection);
+                rendEng.canvas.discardActiveObject();
+                rendEng.repaint();
+            }
+            else {
+                selection = rendEng.canvas.getActiveGroup();
+                if (selection) {
+                    // group of neumes selected
+                    for (var i = selection.objects.length-1; i >= 0; i--) {
+                        nids.push(selection.objects[i].ref.id);
+                        rendEng.canvas.remove(selection.objects[i]);
+                    }
+                    rendEng.canvas.discardActiveGroup();
+                    rendEng.repaint();
+                }
+            }
+            // send edit command to server to change underlying MEI
+            $.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")}, function(result, textStatus) {
+                if (textStatus != "success") {
+                    alert("Uh oh. Something went wrong. Client and server are not syncronized!");
+                }
+            });
+        });
+
     });
 
     $("#btn_insert").bind("click", function() {
