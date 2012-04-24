@@ -8,7 +8,7 @@ import json
 
 import conf
 
-class DeleteNoteHandler(tornado.web.RequestHandler):
+class DeleteNeumeHandler(tornado.web.RequestHandler):
     def delete_neume(self, neume):
         """ Delete a <neume> object from the model and also
         a <zone> element of the neume's facs attribute, if one
