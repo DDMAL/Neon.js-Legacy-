@@ -39,64 +39,42 @@ Toe.View.GUI = function(prefix, fileName, rendEng, guiToggles) {
 
     $.extend(toggles, guiToggles);
 
-    var parentDivId = "#gui";
+    this.rendEng = rendEng;
+
+    var parentDivId = "#gui-sidebar";
 
     // create background image opacity slider
     if (toggles.sldr_bgImgOpacity) {
-        $(parentDivId).append('<label for="sldr_bgImgOpacity">Background Image Opacity:</label><div id="sldr_bgImgOpacity"></div>');
-        $("#sldr_bgImgOpacity").slider({
-            min: 0.0,
-            max: 1.0,
-            step: 0.05,
-            value: toggles.initBgImgOpacity
-        });
+        $(parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n<input id="sldr_bgImgOpacity" type="range" name="bgImgOpacity" min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
 
-        $("#sldr_bgImgOpacity").bind("slide", function(event, ui) {
-            rendEng.canvas.backgroundImageOpacity = ui.value;
+        $("#sldr_bgImgOpacity").bind("change", function() {
+            rendEng.canvas.backgroundImageOpacity = $(this).val();
             rendEng.repaint();
         });
     }
 
-    $(parentDivId).append('<span id="toolbar" class="ui-widget-header ui-corner-all">');
+    $("#btn_edit").bind("click", function() {
+        // first remove insert options
+        $(parentDivId + "> #sidebar-insert").remove();
 
-    var parentDivId = "#toolbar";
-
-    if (toggles.btn_neumify) {
-        $(parentDivId).append('<button id="btn_neumify">Neumify</button>');
-        $("#btn_neumify").button();
-    }
-
-    if (toggles.btn_delete) {
-        $(parentDivId).append('<button id="btn_delete">Delete</button>');
-        $("#btn_delete").button();
-    }
-
-    if (toggles.btn_explode) {
-        $(parentDivId).append('<button id="btn_explode">Explode</button>');
-        $("#btn_explode").button();
-    }
-
-    if (toggles.radio_mode) {
-        var editCheck = "";
-        var insertCheck = "";
-        if (toggles.initMode == "edit") {
-            editCheck = 'checked="checked"';
+        if ($(parentDivId + "> #sidebar-edit").length == 0) {
+            $(parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
         }
-        else {
-            insertCheck = 'checked="checked"';
+        
+    });
+
+    $("#btn_insert").bind("click", function() {
+        // first remove edit options
+        $(parentDivId + "> #sidebar-edit").remove();
+
+        if ($(parentDivId + "> #sidebar-insert").length == 0) {
+            $(parentDivId).append('<span id="sidebar-insert"><br /><li class="nav-header">Insert</li>\n<li>\n<b>Ornamentation</b>:<div class="btn-group" data-toggle="buttons-checkbox">\n<button id="btn_delete" class="btn">Dot</button>\n<button id="btn_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="btn_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div>\n</span>');
         }
+    });
 
-        $(parentDivId).append('<span id="mode">');
-        $("#mode").append('<input type="radio" id="radio_insertMode" name="mode" ' + insertCheck + '/><label for="radio_insertMode">Insert Mode</label>');
-        $("#mode").append('<input type="radio" id="radio_editMode" name="mode" ' + editCheck + '/><label for="radio_editMode">Edit Mode</label>');
-        $(parentDivId).append('</span>');
 
-        // jquerify the radio buttons
-        $("#mode").buttonset();
-    }
-
-    $(parentDivId).append('</span>');
+    // set active button on startup
+    $("#btn_" + toggles.initMode).trigger('click');
 }
 
 Toe.View.GUI.prototype.constructor = Toe.View.GUI;
-

@@ -2,10 +2,27 @@
 <html>
 <head>
   <title>Editing {{page}}</title>
-    <link rel="stylesheet" href="{{static_url("css/jquery-ui.css")}}" type="text/css" />
+
+    <link href="{{static_url("css/bootstrap.min.css")}}" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="{{static_url("css/bootstrap-responsive.min.css")}}" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
     <link rel="stylesheet" href="{{static_url("css/neon.css")}}" type="text/css" />
     <script src="{{static_url("js/support/jquery.min.js")}}" type="text/javascript"></script>
-    <script src="{{static_url("js/support/jquery-ui.min.js")}}" type="text/javascript"></script>
+    <script src="{{static_url("js/support/bootstrap.min.js")}}" type="text/javascript"></script>
     <script src="{{static_url("js/support/fabric_all.min.js")}}" type="text/javascript"></script>
 
     <script src="{{static_url("js/neon.js")}}" type="text/javascript"></script>
@@ -52,9 +69,74 @@
     </script>
 </head>
 <body>
-  <h1>Editing {{page}}</h1>
-    <div id="gui"></div>
-    <div id="neon-wrapper">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="http://github.com/DDMAL/Neon.js">Neon.js</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Test1</a></li>
+                  <li class="divider"></li>
+                </ul>
+              </li>
+            </ul>
+            <p class="navbar-text pull-right"><a href="http://ddmal.music.mcgill.ca/">DDMAL</a></p>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
     </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <div class="row-fluid">
+            <div class="span12">
+              <h1>Editing {{page}}</h1>
+              <br />
+            </div>
+          </div>
+          <div class="row-fluid">
+            <div class="span12">
+            <div class="well sidebar-nav">
+              <ul id="gui-sidebar" class="nav nav-list">
+              <li class="nav-header">Mode</li>
+                <li>
+                  <div class="btn-group" data-toggle="buttons-radio">
+                    <button id="btn_insert" class="btn btn-primary"><i class="icon-plus icon-white"></i> Insert</button>
+                    <button id="btn_edit" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</button>
+                  </div>
+                </li>
+              </ul>
+            </div><!--/.well -->
+            </div><!--/span-->
+          </div>
+        </div>
+        <div class="span10">
+          <div class="row-fluid">
+            <div id="neon-wrapper">
+          </div><!--/row-->
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <div class="row-fluid">
+        <div class="span12">
+        <hr />
+        <footer>
+          <p>McGill University | Schulich School of Music | DDMAL</p>
+        </footer>
+        </div>
+      </div>
+      
+
+    </div><!--/.fluid-container-->
+
 </body>
 </html>
