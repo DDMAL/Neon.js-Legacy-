@@ -183,7 +183,18 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width) {
                 }    
             }
             else {
-                coordsPrime.x = coords.x;
+                if (left < this.zone.ulx) {
+                    if (this.clef) {
+                        coordsPrime.x = this.clef.zone.lrx + width/2;
+                    }
+                    else {
+                        coordsPrime.x = this.zone.ulx + width/2;
+                    }
+                }
+                else {
+                    coordsPrime.x = coords.x;
+                }
+
                 if (i > 0) {
                     pElementID = this.elements[i-1].id;
                 }

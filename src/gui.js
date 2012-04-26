@@ -170,7 +170,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
             
             // mount neume on the staff
-            sModel.addNeume(nModel, {forceSort: true});
+            sModel.addNeume(nModel);
             
             /*
             // send insert command to server to change underlying MEI
