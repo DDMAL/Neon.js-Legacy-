@@ -48,7 +48,7 @@ Toe.View.RenderEngine.prototype.setGlyphs = function(glyphs) {
  * Set the context to draw on
  * @param {Object} f_canvas The Fabric.js canvas
  */
-Toe.View.RenderEngine.prototype.setCanvas = function(f_canvas) {
+ Toe.View.RenderEngine.prototype.setCanvas = function(f_canvas) {
     this.canvas = f_canvas;
     
     // set canvas properties
@@ -174,7 +174,6 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
     $.map(elements, function(val, i) {
         val.selectable = opts.selectable;
         val.hasControls = opts.hasControls;
-        //val.hasBorders = opts.hasBorders;
         val.lockRotation = true;
         val.lockScale = true;
         val.ref = opts.ref // important: attaches neume reference to fabric group
