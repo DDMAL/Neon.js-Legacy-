@@ -43,6 +43,9 @@ Toe.Model.Division = function(key, options) {
 
     // initialize bounding box
     this.zone = new Object();
+
+    // set by server or MEI so null by default
+    this.id = null;
 }
 
 Toe.Model.Division.prototype.constructor = Toe.Model.Division;
@@ -62,6 +65,16 @@ Toe.Model.Division.prototype.setBoundingBox = function(bb) {
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];
     this.zone.lry = bb[3];
+}
+
+/**
+ * Sets the id of the division element.
+ * 
+ * @methodOf Toe.Model.Division
+ * @param {String} id
+ */
+Toe.Model.Division.prototype.setID = function(did) {
+    this.id = did;
 }
 
 /**
