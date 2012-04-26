@@ -35,10 +35,6 @@ Toe.Model.Neume = function(options) {
     this.props = {
         key: "punctum",
         type: null,
-        rootNote: {
-            pname: "c",
-            oct: 3
-        },
         modifier: null,
         interact: true
     };
@@ -293,22 +289,22 @@ Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
     this.zone.lry = bb[3];
 }
 
-/**
- * Sets the root note of the neume.
- * Staff is optional here to facilitate setting an arbitrary note and attaching it to a different staff
- *
- * @param {string} pname root pitch
- * @param {number} oct root octave
- */
-Toe.Model.Neume.prototype.setRootNote = function(pname, oct) {
-    this.props.rootNote.pname = pname;
-    this.props.rootNote.oct = oct;
+// get the root pitch name and octave
+Toe.Model.Neume.prototype.getRootPitchInfo = function() {
+    var pname = null;
+    var oct = null;
+
+    if (this.components.length > 0) {
+        pname = this.components[0].pname;
+        oct = this.components[0].oct;
+    }
+
+    return {pname: pname, oct: oct};
 }
 
 /**
  * Sets the integer pitch difference of the root note in relation to the clef
  * of the staff that this neume is mounted on.
- *
  */
 Toe.Model.Neume.prototype.setRootDifference = function(rootDiff) {
     this.rootDiff = rootDiff;
@@ -363,11 +359,6 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
     $(neumeData).find("note").each(function(it, el) {
         var pname = $(el).attr("pname");
         var oct = parseInt($(el).attr("oct"));
-
-        // set root note
-        if (it == 0) {
-            theNeume.setRootNote(pname, oct);
-        }
 
         var ncType = "punctum";
         if ($(this).parent().attr("inclinatum") == "true") {
@@ -476,7 +467,6 @@ Toe.Model.Neume.prototype.deriveName = function() {
     var found = false;
     for(var key in Toe.Model.Neume.Type) {
         var melody = Toe.Model.Neume.Type[key].melodicMove;
-        console.log("key: " + key + ", melody: " + melody, ", diffs: " + diffs); 
         if($.arraysEqual(diffs, melody)) {
             this.props.key = key;
             this.props.type = Toe.Model.Neume.Type[key];

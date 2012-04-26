@@ -299,7 +299,8 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     $.extend(opts, options);
 
     // update neume root note difference
-    neume.setRootDifference(this.calcPitchDifference(neume.props.rootNote.pname, neume.props.rootNote.oct));
+    var rootPitchInfo = neume.getRootPitchInfo();
+    neume.setRootDifference(this.calcPitchDifference(rootPitchInfo["pname"], rootPitchInfo["oct"]));
 
     // update pitch differences (wrt. root note) of each note within the neume
     neume.components[0].setPitchDifference(0);
