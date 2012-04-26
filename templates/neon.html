@@ -45,6 +45,10 @@
 	<script src="{{static_url("js/division.js")}}" type="text/javascript"></script>
     <script src="{{static_url("js/divisioncontroller.js")}}" type="text/javascript"></script>
     <script src="{{static_url("js/divisionview.js")}}" type="text/javascript"></script>
+    <!--CUSTOS-->
+	<script src="{{static_url("js/custos.js")}}" type="text/javascript"></script>
+    <script src="{{static_url("js/custoscontroller.js")}}" type="text/javascript"></script>
+    <script src="{{static_url("js/custosview.js")}}" type="text/javascript"></script>
     <!-- NEUME -->
     <script src="{{static_url("js/neume.js")}}" type="text/javascript"></script>
     <script src="{{static_url("js/neumecontroller.js")}}" type="text/javascript"></script>
@@ -65,7 +69,18 @@
           backgroundImage: "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
           backgroundImageOpacity: 0.0
         });
+
+        // make side nav-bar scroll with the user
+        var $scrollingDiv = $("#neon-sidebar-nav");
+
+        $(window).scroll(function () {
+            $scrollingDiv
+            .stop()
+            .animate({ "marginTop": ($(window).scrollTop() + 5) + "px" }, "200");
+        });
+
     });
+
     </script>
 </head>
 <body>
@@ -83,8 +98,10 @@
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="#">Test1</a></li>
+                  <li><a href="#">Get MEI</a></li>
+                  <li><a href="#">Print Score</a></li>
                   <li class="divider"></li>
+                  <li><a href="#">Exit</a></li>
                 </ul>
               </li>
             </ul>
@@ -120,7 +137,7 @@
           </div>
           <div class="row-fluid">
             <div class="span12">
-            <div class="well sidebar-nav">
+            <div id="neon-sidebar-nav" class="well sidebar-nav">
               <ul id="gui-sidebar" class="nav nav-list">
               <li class="nav-header">Mode</li>
                 <li>
