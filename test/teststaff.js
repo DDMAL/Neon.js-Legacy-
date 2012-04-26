@@ -64,9 +64,91 @@
 
         for (var i = 0; i < numNeumes; i++) { 
             var nModel = new Toe.Model.Neume();
+            nModel.addComponent("punctum", "c", 4);
             sModel.addNeume(nModel);
         }
 
-        equal(sModel.neumes.length, numNeumes);
+        equal(sModel.elements.length, numNeumes);
     });
+
+    /* This has been moved from neume, works but needs slight tweaking.
+        test("Calculate Root Note Difference", function() {
+        var sModel = new Toe.Model.Staff(sbb);
+        var nModel = new Toe.Model.Neume();
+
+        // C CLEF: test notes above and below the clef
+        // differences should be the same regardless of clef staffline
+        var cModel = new Toe.Model.Clef("c", {staffLine: 4});
+        sModel.setClef(cModel);
+
+        var numChroma = Toe.neumaticChroma.length;
+        var iOct = 0;
+        var octRange = 8;
+        var startDiff = -23;
+        for (var iChroma = 0; iOct <= octRange; iChroma++) {
+            iChroma %= numChroma;
+            if (Toe.neumaticChroma[iChroma] == "c") {
+                iOct++;
+            }
+
+            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct, {staff: sModel});
+            equal(nModel.rootDiff, startDiff);
+            startDiff++;
+        }
+
+        // F CLEF: test notes above and below the clef
+        cModel = new Toe.Model.Clef("f", {staffLine: 3});
+        sModel.setClef(cModel);
+
+        var numChroma = Toe.neumaticChroma.length;
+        var iOct = 0;
+        var octRange = 8;
+        var startDiff = -26;
+        for (var iChroma = 0; iOct <= octRange; iChroma++) {
+            iChroma %= numChroma;
+            if (Toe.neumaticChroma[iChroma] == "f") {
+                iOct++;
+            }
+
+            nModel.setRootNote(Toe.neumaticChroma[iChroma], iOct, {staff: sModel});
+            equal(nModel.rootDiff, startDiff);
+            startDiff++;
+        }
+    });
+
+    test("Calculate Pitch Difference", function() {
+        var nModel = new Toe.Model.Neume();
+        var sModel = new Toe.Model.Staff(sbb);
+        var cModel = new Toe.Model.Clef("c");
+        sModel.setClef(cModel);
+
+        nModel.setRootNote("a", 3, {staff: sModel});
+
+        equal(nModel.calcComponentDifference(sModel, "g", 3), -1);
+
+        nModel.setRootNote("c", 4, {staff: sModel});
+
+        equal(nModel.calcComponentDifference(sModel, "c", 4), 0);
+        equal(nModel.calcComponentDifference(sModel, "f", 4), 3);
+        equal(nModel.calcComponentDifference(sModel, "a", 5), 12);
+        equal(nModel.calcComponentDifference(sModel, "a", 3), -2);
+        equal(nModel.calcComponentDifference(sModel, "d", 2), -13);
+
+        nModel.setRootNote("f", 4, {staff: sModel});
+
+        equal(nModel.calcComponentDifference(sModel, "f", 4), 0);
+        equal(nModel.calcComponentDifference(sModel, "b", 4), 3);
+        equal(nModel.calcComponentDifference(sModel, "a", 5), 9);
+        equal(nModel.calcComponentDifference(sModel, "e", 3), -8);
+        equal(nModel.calcComponentDifference(sModel, "d", 2), -16);
+
+        nModel.setRootNote("d", 2, {staff: sModel});
+
+        equal(nModel.calcComponentDifference(sModel, "d", 2), 0);
+        equal(nModel.calcComponentDifference(sModel, "g", 2), 3);
+        equal(nModel.calcComponentDifference(sModel, "f", 3), 9);
+        equal(nModel.calcComponentDifference(sModel, "b", 2), 5);
+        equal(nModel.calcComponentDifference(sModel, "c", 1), -8);
+    });
+    */
 })();
