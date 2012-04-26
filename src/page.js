@@ -76,6 +76,26 @@ Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
 }
 
 /**
+ * Given coordinates, find the index of the closest staff
+ *
+ * @methodOf Toe.Model.Page
+ * @param {Object} coords {x: , y:}
+ * @returns {Number} sInd
+ */
+Toe.Model.Page.prototype.getClosestStaff = function(coords) {
+    var sInd = this.staves.length-1;
+    // for each staff, except the last
+    for (var i = 0; i < this.staves.length-1; i++) {
+        if (coords.y < this.staves[i].zone.lry + (this.staves[i+1].zone.uly - this.staves[i].zone.lry)/2) {
+            // this is the correct staƒf
+            sInd = i;
+            break;
+        }
+    }
+    return this.staves[sInd];
+}
+
+/**
  * Adds a given number of staves to the page
  *
  * @methodOf Toe.Model.Page

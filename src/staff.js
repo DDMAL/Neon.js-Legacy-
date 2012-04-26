@@ -322,6 +322,15 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     return this;
 }
 
+// Remove neume given its unique id
+Toe.Model.Staff.prototype.removeNeume = function(nid) {
+    for (var i = this.elements.length-1; i >= 0; i--) {
+        if (this.elements[i].id == nid) {
+            this.elements.splice(i,i);
+        }
+    }
+}
+
 Toe.Model.Staff.prototype.addDivision = function(division, options) {
 	// check argument is a division
 	if (!(division instanceof Toe.Model.Division)) {
