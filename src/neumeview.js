@@ -290,7 +290,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             else { // draw normally
                 // if punctums are right on top of each other, spread them out a bit
                 var yoffset = 0;
-                if (Math.abs(neume.components[1].diff) == 1) {
+                if (Math.abs(neume.components[1].pitchDiff) == 1) {
                     yoffset = 1;
                 }
 
@@ -373,7 +373,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             for (var i = 0; i < numNC-1; i+=2) {
                 // if punctums are right on top of each other, spread them out a bit
                 yoffset = 0;
-                if (Math.abs(neume.components[i+1].diff - neume.components[i].diff) == 1) {
+                if (Math.abs(neume.components[i+1].pitchDiff - neume.components[i].pitchDiff) == 1) {
                     yoffset = 1
                 }
 

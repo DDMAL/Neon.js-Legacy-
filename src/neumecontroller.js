@@ -49,9 +49,9 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
         var nc_y = new Array();
 
         // set root note y pos
-        nc_y.push(clef_y + (-neume.rootDiff * staff.delta_y / 2));
+        nc_y.push(clef_y + (-neume.rootDiff * staff.delta_y/2));
         for (var i = 1; i < neume.components.length; i++) {
-            nc_y.push(nc_y[0] + (-neume.components[i].diff * staff.delta_y / 2));
+            nc_y.push(nc_y[0] + (-neume.components[i].pitchDiff * staff.delta_y/2));
         }
 
         nView.renderNeume(neume, nc_y, staff);

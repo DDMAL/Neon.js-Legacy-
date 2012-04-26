@@ -28,9 +28,7 @@ THE SOFTWARE.
  * @param {Object} options type {string} corresponding to Toe.Model.NeumeComponent.Type
  *                         ornaments {Array} list of Toe.Model.Ornaments
  */
-Toe.Model.NeumeComponent = function(diff, options) {
-    this.diff = diff;
-
+Toe.Model.NeumeComponent = function(pname, oct, options) {
     this.props = {
         type: "punctum",
         ornaments: [],
@@ -45,6 +43,13 @@ Toe.Model.NeumeComponent = function(diff, options) {
     if (this.props.name == undefined) {
         throw new Error("NeumeComponent: undefined neume component");
     }
+
+    this.setPitchInfo(pname, oct);
+
+    // the integer pitch difference is set when the neume is mounted onto a staff
+    // since calculating this difference with respect to the root note of the neume
+    // requires clef information.
+    this.pitchDiff = null;
 }
 
 Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
@@ -64,15 +69,15 @@ Toe.Model.NeumeComponent.Type = {
     quilisma: "Quilisma"
 };
 
-/**
- * Sets the position of the neume component
- * 
- * @methodOf Toe.Model.NeumeComponent
- * @param {Array} pos [x,y]
- */
-Toe.Model.NeumeComponent.prototype.setPosition = function(pos) {
-    this.x = pos[0];
-    this.y = pos[1];
+// set integer pitch difference with respect to root note of the neume
+Toe.Model.NeumeComponent.prototype.setPitchDifference = function(pitchDiff) {
+    this.pitchDiff = pitchDiff;
+}
+
+// set pitch information
+Toe.Model.NeumeComponent.prototype.setPitchInfo = function(pname, oct) {
+    this.pname = pname;
+    this.oct = oct;
 }
 
 /**

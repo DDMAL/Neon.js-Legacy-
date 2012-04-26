@@ -112,6 +112,15 @@ THE SOFTWARE.
                     div_sbInd.push(dit);
                 }
             });
+
+            var custosList = $("custos, sb", mei);
+            // calculate sb indices in the division list
+            var custos_sbInd = new Array();
+            $(custosList).each(function(cit, cel) {
+                if ($(cel).is("sb")) {
+                    custos_sbInd.push(cit);
+                }
+            });
     
             // for each system
             $("sb", mei).each(function(sit, sel) {
@@ -126,7 +135,9 @@ THE SOFTWARE.
                 if (displayZones) {
                     rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
                 }
-                var sModel = new Toe.Model.Staff(s_bb, rendEng);
+
+                // get id of parent layer
+                var sModel = new Toe.Model.Staff(s_bb);
 
                 // set global scale using staff from first system
                 if(sit == 0) {
@@ -174,7 +185,7 @@ THE SOFTWARE.
                     var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
                     // mount neume on the staff
-                    sModel.addNeume(nModel);
+                    sModel.addNeume(nModel, {forceSort: false});
 
                     console.log("neume: " + nModel.props.type.name);
                 });
@@ -190,16 +201,46 @@ THE SOFTWARE.
                     var dType = $(del).attr("form");
                     var dModel = new Toe.Model.Division(dType);
                     dModel.setBoundingBox(d_bb);
+                    dModel.setID($(del).attr("xml:id"));
 
                     // instantiate division view and controller
                     var dView = new Toe.View.DivisionView(rendEng);
                     var dCtrl = new Toe.Ctrl.DivisionController(dModel, dView);
         
                     // mount the division on the staff
-                    sModel.addDivision(dModel);
+                    sModel.addDivision(dModel, {forceSort: false});
     
                     console.log("division: " + dType);
                 });
+
+                // load custos for the system (if it exists)
+                $(custosList).slice(custos_sbInd[sit]+1, custos_sbInd[sit+1]).each(function(cit, cel) {
+                    var custosFacs = $(mei).find("zone[xml\\:id=" + $(cel).attr("facs") + "]")[0];
+                    var c_bb = parseBoundingBox(custosFacs);
+                    if (displayZones) {
+                        rendEng.outlineBoundingBox(c_bb, {fill: "purple"});
+                    }
+
+                    // get pitch name and octave
+                    var pname = $(cel).attr("pname");
+                    var oct = parseInt($(cel).attr("oct"));
+
+                    var cModel = new Toe.Model.Custos(pname, oct);
+                    cModel.setBoundingBox(c_bb);
+                    cModel.setID($(cel).attr("xml:id"));
+
+                    // instantiate division view and controller
+                    var cView = new Toe.View.CustosView(rendEng);
+                    var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+        
+                    // mount the division on the staff
+                    sModel.setCustos(cModel);
+    
+                    console.log("custos");
+                });
+
+                // now do one batch sort at the end
+                sModel.sortElements();
             });
             rendEng.repaint();
         };
@@ -337,20 +378,9 @@ THE SOFTWARE.
             }
 
             // instantiate appropriate GUI elements
-            var gui = new Toe.View.GUI(settings.prefix, settings.filename, rendEng,
+            var gui = new Toe.View.GUI(settings.prefix, settings.filename, rendEng, page,
                                       {sldr_bgImgOpacity: settings.backgroundImage, 
                                        initBgImgOpacity: settings.backgroundImageOpacity});
-            /*
-            if (settings.backgroundImage) {
-                // set to initial opacity
-                $("#ui_bgImgOpacity").slider("value", settings.backgroundImageOpacity);
-                // bind event to background image opacity slider
-                $("#ui_bgImgOpacity").bind("slide", function(event, ui) {
-                    settings.backgroundImageOpacity = ui.value;
-                    rendEng.canvas.backgroundImageOpacity = settings.backgroundImageOpacity;
-                    rendEng.repaint();
-                });
-            }*/
 
             console.log("Load successful. Neon.js ready.");
             var runTime = new Date() - startTime;
