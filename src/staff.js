@@ -163,7 +163,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width) {
             continue;
         }
         else {
-            if ((left >= ulx && left < lrx) || (right >= ulx && right < lrx)) {
+            if ((left >= ulx && left < lrx) || (right >= ulx && right < lrx) || (ulx > left && lrx < right)) {
                 // uh oh - we've intersected a drawn element
                 var bbCentre = ulx + (lrx-ulx)/2;
                 // figure out if we should move it to the left or right
