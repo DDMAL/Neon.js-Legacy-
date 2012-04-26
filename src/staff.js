@@ -333,13 +333,19 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     return this;
 }
 
-// Remove neume given its unique id
-Toe.Model.Staff.prototype.removeNeume = function(nid) {
+// Remove element by ID
+Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
     for (var i = this.elements.length-1; i >= 0; i--) {
-        if (this.elements[i].id == nid) {
+        if (this.elements[i].id == eleID) {
             this.elements.splice(i,i);
         }
     }
+}
+
+// remove element by reference
+Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
+    eleInd = $.inArray(ele, this.elements);
+    this.elements.splice(eleInd, eleInd);
 }
 
 Toe.Model.Staff.prototype.addDivision = function(division, options) {

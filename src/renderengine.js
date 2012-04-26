@@ -176,7 +176,8 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.hasControls = opts.hasControls;
         val.lockRotation = true;
         val.lockScale = true;
-        val.ref = opts.ref // important: attaches neume reference to fabric group
+        val.eleRef = opts.eleRef // important: attaches element reference to fabric group
+        val.staffRef = opts.staffRef // important: attaches staff reference to fabric group
     });
 
     // add the elements to the canvas

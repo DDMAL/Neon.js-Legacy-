@@ -82,11 +82,14 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             // check individual selection and group selections
             nids = new Array();
             var selection = rendEng.canvas.getActiveObject();
-            console.log(selection);
             if (selection) {
-                // individual neume selected
-                nids.push(selection.ref.id);
+                // individual element selected
+                nids.push(selection.eleRef.id);
                 rendEng.canvas.remove(selection);
+
+                // remove element from internal representation
+                selection.staffRef.removeElementByRef(selection.eleRef);
+
                 rendEng.canvas.discardActiveObject();
                 rendEng.repaint();
             }
@@ -95,15 +98,16 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 if (selection) {
                     // group of neumes selected
                     for (var i = selection.objects.length-1; i >= 0; i--) {
-                        nids.push(selection.objects[i].ref.id);
+                        nids.push(selection.objects[i].neumeRef.id);
                         rendEng.canvas.remove(selection.objects[i]);
+
+                        // remove element from internal representation
+                        selection.staffRef.removeElementByRef(selection.eleRef);
                     }
                     rendEng.canvas.discardActiveGroup();
                     rendEng.repaint();
                 }
             }
-
-            // TODO: remove neumes from internal representation
 
             // send delete command to server to change underlying MEI
             $.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")})

@@ -30,7 +30,7 @@ THE SOFTWARE.
  */
 Toe.Model.Custos = function(pname, oct, options) {
     this.props = {
-        interact: true
+        interact: false
     };
 
     $.extend(this.props, options);
