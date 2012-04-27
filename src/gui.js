@@ -194,6 +194,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // repaint canvas after all the dragging is done
                 rendEng.canvas.discardActiveObject();
                 rendEng.canvas.discardActiveGroup();
+                rendEng.canvas.fire('selection:cleared');
                 rendEng.repaint();
             }
             // we're all done moving
@@ -282,6 +283,10 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     $.merge(newNeume.components, el.ref.components);
                     numPunct += el.ref.components.length;
 
+                    // remove the neume, we don't need it anymore
+                    sModel.removeElementByRef(el.ref);
+                    rendEng.canvas.remove(el.drawing);
+
                     // calculate object's absolute positions from within selection group
                     var left = selection.left + el.drawing.left;
                     var top = selection.top + el.drawing.top;
@@ -294,7 +299,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                 // set the bounding box of the new neume
                 var bb = [ulx, uly, lrx, lry];
-                rendEng.outlineBoundingBox(bb);
+                //rendEng.outlineBoundingBox(bb);
                 newNeume.setBoundingBox(bb);
 
                 // instantiate neume view and controller
@@ -306,7 +311,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                 // get neume name
                 var neumeName = newNeume.props.type.name;
-
+        
+                rendEng.canvas.discardActiveGroup();
                 rendEng.repaint();
 
                 console.log(newNeume);
@@ -326,6 +332,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.unObserve("mouse:down");
         rendEng.unObserve("mouse:up");
         rendEng.unObserve("object:moving");
+        rendEng.unObserve("object:selected");
+        rendEng.unObserve("selection:cleared");
 
         // then add insert options
         if ($(parentDivId + "> #sidebar-insert").length == 0) {
