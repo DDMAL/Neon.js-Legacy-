@@ -45,7 +45,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     // set up punctum that follows the pointer in insert mode
     this.punctGlyph = this.rendEng.getGlyph("punctum");
     this.punct = this.punctGlyph.clone();
-    this.dragging = false;
+    this.objMoving = false;
 
     // cache reference to this
     gui = this;
@@ -79,13 +79,10 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.observe('mouse:down', function(e) {
             // cache pointer coordinates for mouse up
             gui.downCoords = rendEng.canvas.getPointer(e.memo.e);
+        });
 
-            var singleSelection = rendEng.canvas.getActiveObject();
-            var multSelection = rendEng.canvas.getActiveGroup();
-            if (singleSelection || multSelection) {
-                console.log("selection = true");
-                gui.selection = true;
-            }
+        rendEng.canvas.observe('object:moving', function(e) {
+            gui.objMoving = true;
         });
 
         rendEng.canvas.observe('mouse:up', function(e) {
@@ -96,88 +93,99 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             var delta_y = gui.downCoords.y - upCoords.y;
             var thresh = 1;
             // don't perform dragging action if the mouse doesn't move
-            if (!gui.selection || (Math.abs(delta_x) < thresh && Math.abs(delta_y) < thresh)) {
+            if (!gui.objMoving) {
                 return;
             }
-
-            var sModel = page.getClosestStaff(upCoords);
-
+            
             // if something is selected we need to do some housekeeping
             var selection = rendEng.canvas.getActiveObject();
             if (selection) {
-                var ele = selection.eleRef;
-
-                // a single neume has been dragged
-                if (ele instanceof Toe.Model.Neume) {
-                    // we have a neume, this is a pitch shift
-                    console.log("dragging neume");
-
-                    // get y position of first neume component
-                    var nc_y = selection.staffRef.clef.y - (ele.rootDiff * selection.staffRef.delta_y/2);
-                    //var finalCoords = {x: selection.left - delta_x, y: nc_y - delta_y};
-                    var finalCoords = {x: selection.left, y: nc_y - delta_y};
-                    
-                    // snap to staff
-                    var snapInfo = sModel.ohSnap(finalCoords, selection.currentWidth, {ignoreID: ele.id});
-                    var snapCoords = snapInfo["snapCoords"];
-                    var pElementID = snapInfo["pElementID"];
-
-                    var ncdelta_y = nc_y - snapCoords.y;
-
-                    // change certain attributes of the element
-                    // [ulx, uly, lrx, lry]
-                    // TODO: bounding box changes when dot is repositioned
-                    var ulx = snapCoords.x-(selection.currentWidth/2);
-                    var uly = selection.top-(selection.currentHeight/2)-(finalCoords.y-snapCoords.y);
-                    var bb = [ulx, uly, ulx + selection.currentWidth, uly + selection.currentHeight];
-                    ele.setBoundingBox(bb);
-                    //rendEng.outlineBoundingBox(bb, {fill: "blue"});
-
-                    // derive pitch name and octave of notes in the neume on the appropriate staff
-                    for (var i = 0; i < ele.components.length; i++) {
-                        var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * ele.components[i].pitchDiff)});
-                        //console.log("new pname: " + noteInfo["pname"] + ", oct: " + noteInfo["oct"]);
-                        ele.components[i].setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
-                    }
-
-                    // remove the old neume
-                    selection.staffRef.removeElementByRef(ele);
-                    rendEng.canvas.remove(selection);
-                    
-                    // mount the new neume on the most appropriate staff
-                    sModel.addNeume(ele);
-                    //console.log(ele);
-
-                    rendEng.repaint();
-
-                    // send pitch shift command to server to change underlying MEI
-                    /*$.post(prefix + "/edit/" + fileName + "/change/note",  {id: nids.join(",")})
-                    .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
-                        $(".alert").toggleClass("fade");
-                    });*/
-                }
-                else if (ele instanceof Toe.Model.Custos) {
-
-                }
-                else if (ele instanceof Toe.Model.Clef) {
-                    // this is a clef
+                var elements = new Array();
+                if (selection.eleRef && selection.staffRef) {
+                    elements.push(selection);
                 }
                 else {
-                    // this is a division
+                    $.each(selection.objects, function(ind, el) {
+                        elements.push(el);
+                    });
                 }
-            }
-            else {
-                selection = rendEng.canvas.getActiveGroup();
-                if (selection) {
-                    // a group of elements have been dragged
-                    console.log("dragging elementS");
-                }
-            }
 
-            gui.dragging = false;
+                $.each(elements, function(ind, element) {
+                    var ele = element.eleRef;
+
+                    // a single neume has been dragged
+                    if (ele instanceof Toe.Model.Neume) {
+                        // we have a neume, this is a pitch shift
+                        var left = element.left;
+                        var top = element.top;
+                        if (elements.length > 1) {
+                            // calculate object's absolute positions from within selection group
+                            left = selection.left + element.left;
+                            top = selection.top + element.top;
+                        }
+
+                        // get y position of first neume component
+                        var nc_y = element.staffRef.clef.y - (ele.rootDiff * element.staffRef.delta_y/2);
+                        //var finalCoords = {x: element.left - delta_x, y: nc_y - delta_y};
+                        var finalCoords = {x: left, y: nc_y - delta_y};
+
+                        var sModel = page.getClosestStaff(finalCoords);
+                        
+                        // snap to staff
+                        var snapInfo = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreID: ele.id});
+                        var snapCoords = snapInfo["snapCoords"];
+                        var pElementID = snapInfo["pElementID"];
+
+                        var ncdelta_y = nc_y - snapCoords.y;
+
+                        // change certain attributes of the element
+                        // [ulx, uly, lrx, lry]
+                        // TODO: bounding box changes when dot is repositioned
+                        var ulx = snapCoords.x-(element.currentWidth/2);
+                        var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
+                        var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
+                        ele.setBoundingBox(bb);
+
+                        // derive pitch name and octave of notes in the neume on the appropriate staff
+                        for (var i = 0; i < ele.components.length; i++) {
+                            var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * ele.components[i].pitchDiff)});
+                            ele.components[i].setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
+                        }
+
+                        // remove the old neume
+                        element.staffRef.removeElementByRef(ele);
+                             
+                        // mount the new neume on the most appropriate staff
+                        sModel.addNeume(ele);
+
+                        rendEng.canvas.remove(element);
+
+                        // send pitch shift command to server to change underlying MEI
+                        /*$.post(prefix + "/edit/" + fileName + "/change/note",  {id: nids.join(",")})
+                        .error(function() {
+                            // show alert to user
+                            // replace text with error message
+                            $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
+                            $(".alert").toggleClass("fade");
+                        });*/
+                    }
+                    else if (ele instanceof Toe.Model.Custos) {
+
+                    }
+                    else if (ele instanceof Toe.Model.Clef) {
+                        // this is a clef
+                    }
+                    else if (ele instanceof Toe.Model.Division) {
+                        // this is a division
+                    }
+                });
+                // repaint canvas after all the dragging is done
+                rendEng.canvas.discardActiveObject();
+                rendEng.canvas.discardActiveGroup();
+                rendEng.repaint();
+            }
+            // we're all done moving
+            gui.objMoving = false;    
         });
 
         // handler for delete
@@ -190,11 +198,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 console.log("individ object");
                 // individual element selected
                 nids.push(selection.eleRef.id);
-                rendEng.canvas.remove(selection);
 
                 // remove element from internal representation
                 selection.staffRef.removeElementByRef(selection.eleRef);
 
+                rendEng.canvas.remove(selection);
                 rendEng.canvas.discardActiveObject();
                 rendEng.repaint();
             }
