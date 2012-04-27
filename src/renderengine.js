@@ -64,6 +64,11 @@ Toe.View.RenderEngine.prototype.setGlobalScale = function(scale) {
 	});
 }
 
+// get global scale
+Toe.View.RenderEngine.prototype.getGlobalScale = function() {
+    return this.options.globScale;
+}
+
 /**
  * Getter for glyph accesses from musical elements
  * @param {String} svgKey lookup key to attain the glyph
