@@ -45,6 +45,10 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     // set up punctum that follows the pointer in insert mode
     this.punctGlyph = this.rendEng.getGlyph("punctum");
     this.punct = this.punctGlyph.clone();
+    this.dragging = false;
+
+    // cache reference to this
+    gui = this;
 
     var parentDivId = "#gui-sidebar";
 
@@ -58,10 +62,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         });
     }
 
-    // cache references which are overridden inside functions
-    punctGlyph = this.punctGlyph;
-    punct = this.punct;
-
     $("#btn_edit").bind("click", function() {
         // first remove insert options
         $(parentDivId + "> #sidebar-insert").remove();
@@ -69,31 +69,43 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         // unbind insert event handlers
         delete rendEng.canvas.__eventListeners["mouse:move"];
         delete rendEng.canvas.__eventListeners["mouse:up"];
-        rendEng.canvas.remove(punct);
+        rendEng.canvas.remove(gui.punct);
         rendEng.repaint();
                
         if ($(parentDivId + "> #sidebar-edit").length == 0) {
             $(parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
         }
         
-        gui = this;
         rendEng.canvas.observe('mouse:down', function(e) {
             // cache pointer coordinates for mouse up
             gui.downCoords = rendEng.canvas.getPointer(e.memo.e);
+
+            var singleSelection = rendEng.canvas.getActiveObject();
+            var multSelection = rendEng.canvas.getActiveGroup();
+            if (singleSelection || multSelection) {
+                console.log("selection = true");
+                gui.selection = true;
+            }
         });
 
         rendEng.canvas.observe('mouse:up', function(e) {
             var upCoords = rendEng.canvas.getPointer(e.memo.e);
+
+            // get delta of the mouse movement
+            var delta_x = gui.downCoords.x - upCoords.x;
+            var delta_y = gui.downCoords.y - upCoords.y;
+            var thresh = 1;
+            // don't perform dragging action if the mouse doesn't move
+            if (!gui.selection || (Math.abs(delta_x) < thresh && Math.abs(delta_y) < thresh)) {
+                return;
+            }
+
             var sModel = page.getClosestStaff(upCoords);
 
             // if something is selected we need to do some housekeeping
             var selection = rendEng.canvas.getActiveObject();
             if (selection) {
                 var ele = selection.eleRef;
-
-                // get delta of the mouse movement
-                var delta_x = gui.downCoords.x - upCoords.x;
-                var delta_y = gui.downCoords.y - upCoords.y;
 
                 // a single neume has been dragged
                 if (ele instanceof Toe.Model.Neume) {
@@ -114,6 +126,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                     // change certain attributes of the element
                     // [ulx, uly, lrx, lry]
+                    // TODO: bounding box changes when dot is repositioned
                     var ulx = snapCoords.x-(selection.currentWidth/2);
                     var uly = selection.top-(selection.currentHeight/2)-(finalCoords.y-snapCoords.y);
                     var bb = [ulx, uly, ulx + selection.currentWidth, uly + selection.currentHeight];
@@ -133,9 +146,18 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     
                     // mount the new neume on the most appropriate staff
                     sModel.addNeume(ele);
-                    console.log(ele);
+                    //console.log(ele);
 
                     rendEng.repaint();
+
+                    // send pitch shift command to server to change underlying MEI
+                    /*$.post(prefix + "/edit/" + fileName + "/change/note",  {id: nids.join(",")})
+                    .error(function() {
+                        // show alert to user
+                        // replace text with error message
+                        $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
+                        $(".alert").toggleClass("fade");
+                    });*/
                 }
                 else if (ele instanceof Toe.Model.Custos) {
 
@@ -154,6 +176,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     console.log("dragging elementS");
                 }
             }
+
+            gui.dragging = false;
         });
 
         // handler for delete
@@ -163,6 +187,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             nids = new Array();
             var selection = rendEng.canvas.getActiveObject();
             if (selection) {
+                console.log("individ object");
                 // individual element selected
                 nids.push(selection.eleRef.id);
                 rendEng.canvas.remove(selection);
@@ -178,11 +203,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 if (selection) {
                     // group of neumes selected
                     for (var i = selection.objects.length-1; i >= 0; i--) {
-                        nids.push(selection.objects[i].neumeRef.id);
-                        rendEng.canvas.remove(selection.objects[i]);
-
+                        nids.push(selection.objects[i].eleRef.id);
                         // remove element from internal representation
-                        selection.staffRef.removeElementByRef(selection.eleRef);
+                        selection.objects[i].staffRef.removeElementByRef(selection.objects[i].eleRef);
+
+                        rendEng.canvas.remove(selection.objects[i]);
                     }
                     rendEng.canvas.discardActiveGroup();
                     rendEng.repaint();
@@ -218,13 +243,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         }
 
         // put the punctum off the screen for now
-        punct.set({left: -50, top: -50, opacity: 0.60});
-        rendEng.draw({static: [], modify: [punct]}, {repaint: true, selectable: false});
+        gui.punct.set({left: -50, top: -50, opacity: 0.60});
+        rendEng.draw({static: [], modify: [gui.punct]}, {repaint: true, selectable: false});
 
         // render transparent punctum at pointer location
         rendEng.canvas.observe('mouse:move', function(e) {
             var pnt = rendEng.canvas.getPointer(e.memo.e);
-            punct.set({left: pnt.x - punctGlyph.centre[0]/2, top: pnt.y - punctGlyph.centre[1]/2});
+            gui.punct.set({left: pnt.x - gui.punctGlyph.centre[0]/2, top: pnt.y - gui.punctGlyph.centre[1]/2});
             rendEng.repaint();
         });
 
