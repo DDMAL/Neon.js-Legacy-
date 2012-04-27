@@ -309,9 +309,9 @@ Toe.Model.Staff.prototype.sortElements = function() {
  */
 Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     // check argument is a neume
-    //if (!(neume instanceof Toe.Model.Neume)) {
-    //    throw new Error("Staff: Invalid neume");
-    //}
+    if (!(neume instanceof Toe.Model.Neume)) {
+        throw new Error("Staff: Invalid neume");
+    }
     
     var opts = {
         forceSort: true

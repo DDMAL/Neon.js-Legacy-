@@ -85,6 +85,18 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             gui.objMoving = true;
         });
 
+        rendEng.canvas.observe('object:selected', function(e) {
+            var selection = rendEng.canvas.getActiveObject();
+            if (selection.eleRef instanceof Toe.Model.Neume) {
+                $("#info > p").text("Selected: " + selection.eleRef.props.type.name);
+                $("#info").animate({opacity: 1.0}, 100);
+            }
+        });
+
+        rendEng.canvas.observe('selection:cleared', function(e) {
+            $("#info").animate({opacity: 0.0}, 100);
+        });
+
         rendEng.canvas.observe('mouse:up', function(e) {
             var upCoords = rendEng.canvas.getPointer(e.memo.e);
 
@@ -195,7 +207,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             nids = new Array();
             var selection = rendEng.canvas.getActiveObject();
             if (selection) {
-                console.log("individ object");
                 // individual element selected
                 nids.push(selection.eleRef.id);
 
@@ -227,11 +238,80 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             .error(function() {
                 // show alert to user
                 // replace text with error message
-                $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
-                $(".alert").toggleClass("fade");
+                $("#alert > p").text("Server failed to delete note. Client and server are not syncronized.");
+                $("#alert").animate({opacity: 1.0}, 100);
             });
         });
 
+        $("#btn_neumify").bind("click.edit", function() {
+            // only need to neumify if a group of objects are selected
+            var selection = rendEng.canvas.getActiveGroup();
+            if (selection) {
+                // there is something selected
+                // make sure there are at least 2 neumes on the same staff to work with
+                var neumes = new Array();
+                var sModel = null;
+                $.each(selection.objects, function (ind, el) {
+                    if (el.eleRef instanceof Toe.Model.Neume) {
+                        if (!sModel) {
+                            sModel = el.staffRef;
+                        }
+
+                        if (el.staffRef == sModel) {
+                            neumes.push({ref: el.eleRef, drawing: el});
+                        }
+                    }
+                });
+
+                if (neumes.length < 2) {
+                    return;
+                }
+
+                // begin the NEUMIFICATION
+                var newNeume = new Toe.Model.Neume();
+                
+                // id of neumified neume is id of first neume in selection
+                newNeume.id = neumes[0].ref.id; 
+                
+                numPunct = 0;
+                var ulx = Number.MAX_VALUE;
+                var uly = Number.MAX_VALUE;
+                var lry = Number.MIN_VALUE;
+                $.each(neumes, function (ind, el) {
+                    // grab underlying notes
+                    $.merge(newNeume.components, el.ref.components);
+                    numPunct += el.ref.components.length;
+
+                    // calculate object's absolute positions from within selection group
+                    var left = selection.left + el.drawing.left;
+                    var top = selection.top + el.drawing.top;
+                    
+                    ulx = Math.min(ulx, left - el.drawing.currentHeight/2);
+                    uly = Math.min(uly, top - el.drawing.currentHeight/2);
+                    lry = Math.max(lry, top + el.drawing.currentHeight/2);
+                });
+                var lrx = ulx + numPunct*gui.punct.width*rendEng.getGlobalScale();
+
+                // set the bounding box of the new neume
+                var bb = [ulx, uly, lrx, lry];
+                rendEng.outlineBoundingBox(bb);
+                newNeume.setBoundingBox(bb);
+
+                // instantiate neume view and controller
+                var nView = new Toe.View.NeumeView(rendEng);
+                var nCtrl = new Toe.Ctrl.NeumeController(newNeume, nView);
+
+                // render the new neume
+                sModel.addNeume(newNeume);
+
+                // get neume name
+                var neumeName = newNeume.props.type.name;
+
+                rendEng.repaint();
+
+                console.log(newNeume);
+            }
+        });
     });
 
     $("#btn_insert").bind("click.insert", function() {
@@ -240,6 +320,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
         // unbind edit event handlers
         $("#btn_delete").unbind("click.edit");
+        $("#btn_neumify").unbind("click.edit");
 
         // unbind move event handlers
         rendEng.unObserve("mouse:down");

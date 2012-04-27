@@ -33,7 +33,7 @@ Toe.Model.Neume = function(options) {
     this.zone = new Object();
 
     this.props = {
-        key: "punctum",
+        key: null,
         type: null,
         modifier: null,
         interact: true
@@ -41,13 +41,15 @@ Toe.Model.Neume = function(options) {
 
     $.extend(this.props, options);
 
-    this.props.key = this.props.key.toLowerCase();
-    this.props.type = Toe.Model.Neume.Type[this.props.key];
+    if (this.props.key) {
+        this.props.key = this.props.key.toLowerCase();
+        this.props.type = Toe.Model.Neume.Type[this.props.key];
 
-    // check neume name is known
-    if (this.props.type == undefined) {
-        this.props.key = "compound";
-        this.props.type = Toe.Model.Neume.Type.compound;
+        // check neume name is known
+        if (this.props.type == undefined) {
+            this.props.key = "compound";
+            this.props.type = Toe.Model.Neume.Type.compound;
+        }
     }
 
     // check neume modifier is known
