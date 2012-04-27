@@ -67,8 +67,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         $(parentDivId + "> #sidebar-insert").remove();
 
         // unbind insert event handlers
-        delete rendEng.canvas.__eventListeners["mouse:move"];
-        delete rendEng.canvas.__eventListeners["mouse:up"];
+        rendEng.unObserve("mouse:move");
+        rendEng.unObserve("mouse:up");
         rendEng.canvas.remove(gui.punct);
         rendEng.repaint();
                
@@ -242,8 +242,9 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         $("#btn_delete").unbind("click.edit");
 
         // unbind move event handlers
-        delete rendEng.canvas.__eventListeners["mouse:down"];
-        delete rendEng.canvas.__eventListeners["mouse:up"];
+        rendEng.unObserve("mouse:down");
+        rendEng.unObserve("mouse:up");
+        rendEng.unObserve("object:moving");
 
         // then add insert options
         if ($(parentDivId + "> #sidebar-insert").length == 0) {
@@ -262,21 +263,21 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         });
 
         rendEng.canvas.observe('mouse:up', function(e) {
-            var coords = {x: punct.left, y: punct.top};
+            var coords = {x: gui.punct.left, y: gui.punct.top};
             var sModel = page.getClosestStaff(coords);
 
             // instantiate a punctum
             var nModel = new Toe.Model.Neume();
 
             // calculate snapped coords
-            var snapInfo = sModel.ohSnap(coords, punct.currentWidth);
+            var snapInfo = sModel.ohSnap(coords, gui.punct.currentWidth);
             var snapCoords = snapInfo["snapCoords"];
             var pElementID = snapInfo["pElementID"];
 
             // update bounding box with physical position on the page
-            var ulx = snapCoords.x - punct.currentWidth/2;
-            var uly = snapCoords.y - punct.currentHeight/2;
-            var bb = [Math.round(ulx), Math.round(uly), Math.round(ulx + punct.currentWidth), Math.round(uly + punct.currentHeight)];
+            var ulx = snapCoords.x - gui.punct.currentWidth/2;
+            var uly = snapCoords.y - gui.punct.currentHeight/2;
+            var bb = [Math.round(ulx), Math.round(uly), Math.round(ulx + gui.punct.currentWidth), Math.round(uly + gui.punct.currentHeight)];
             nModel.setBoundingBox(bb);
 
             // get pitch name and octave of snapped coords of note
@@ -305,7 +306,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             });*/
         });
     });
-
 
     // set active button on startup
     $("#btn_" + toggles.initMode).trigger('click');

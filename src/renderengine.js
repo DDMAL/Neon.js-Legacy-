@@ -191,6 +191,11 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
 	}
 }
 
+// wrapper for fabric canvas unobserve event listener
+Toe.View.RenderEngine.prototype.unObserve = function(event) {
+    delete this.canvas.__eventListeners[event];
+}
+
 Toe.View.RenderEngine.prototype.repaint = function() {
 	this.canvas.renderAll();
 }
