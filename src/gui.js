@@ -76,6 +76,86 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             $(parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
         }
         
+        gui = this;
+        rendEng.canvas.observe('mouse:down', function(e) {
+            // cache pointer coordinates for mouse up
+            gui.downCoords = rendEng.canvas.getPointer(e.memo.e);
+        });
+
+        rendEng.canvas.observe('mouse:up', function(e) {
+            var upCoords = rendEng.canvas.getPointer(e.memo.e);
+            var sModel = page.getClosestStaff(upCoords);
+
+            // if something is selected we need to do some housekeeping
+            var selection = rendEng.canvas.getActiveObject();
+            if (selection) {
+                var ele = selection.eleRef;
+
+                // get delta of the mouse movement
+                var delta_x = gui.downCoords.x - upCoords.x;
+                var delta_y = gui.downCoords.y - upCoords.y;
+
+                // a single neume has been dragged
+                if (ele instanceof Toe.Model.Neume) {
+                    // we have a neume, this is a pitch shift
+                    console.log("dragging neume");
+
+                    // get y position of first neume component
+                    var nc_y = selection.staffRef.clef.y - (ele.rootDiff * selection.staffRef.delta_y/2);
+                    //var finalCoords = {x: selection.left - delta_x, y: nc_y - delta_y};
+                    var finalCoords = {x: selection.left, y: nc_y - delta_y};
+                    
+                    // snap to staff
+                    var snapInfo = sModel.ohSnap(finalCoords, selection.currentWidth, {ignoreID: ele.id});
+                    var snapCoords = snapInfo["snapCoords"];
+                    var pElementID = snapInfo["pElementID"];
+
+                    var ncdelta_y = nc_y - snapCoords.y;
+
+                    // change certain attributes of the element
+                    // [ulx, uly, lrx, lry]
+                    var ulx = snapCoords.x-(selection.currentWidth/2);
+                    var uly = selection.top-(selection.currentHeight/2)-(finalCoords.y-snapCoords.y);
+                    var bb = [ulx, uly, ulx + selection.currentWidth, uly + selection.currentHeight];
+                    ele.setBoundingBox(bb);
+                    //rendEng.outlineBoundingBox(bb, {fill: "blue"});
+
+                    // derive pitch name and octave of notes in the neume on the appropriate staff
+                    for (var i = 0; i < ele.components.length; i++) {
+                        var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * ele.components[i].pitchDiff)});
+                        //console.log("new pname: " + noteInfo["pname"] + ", oct: " + noteInfo["oct"]);
+                        ele.components[i].setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
+                    }
+
+                    // remove the old neume
+                    selection.staffRef.removeElementByRef(ele);
+                    rendEng.canvas.remove(selection);
+                    
+                    // mount the new neume on the most appropriate staff
+                    sModel.addNeume(ele);
+                    console.log(ele);
+
+                    rendEng.repaint();
+                }
+                else if (ele instanceof Toe.Model.Custos) {
+
+                }
+                else if (ele instanceof Toe.Model.Clef) {
+                    // this is a clef
+                }
+                else {
+                    // this is a division
+                }
+            }
+            else {
+                selection = rendEng.canvas.getActiveGroup();
+                if (selection) {
+                    // a group of elements have been dragged
+                    console.log("dragging elementS");
+                }
+            }
+        });
+
         // handler for delete
         $("#btn_delete").bind("click.edit", function() {
             // get current canvas selection
@@ -128,11 +208,16 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         // unbind edit event handlers
         $("#btn_delete").unbind("click.edit");
 
+        // unbind move event handlers
+        delete rendEng.canvas.__eventListeners["mouse:down"];
+        delete rendEng.canvas.__eventListeners["mouse:up"];
+
         // then add insert options
         if ($(parentDivId + "> #sidebar-insert").length == 0) {
             $(parentDivId).append('<span id="sidebar-insert"><br /><li class="nav-header">Insert</li>\n<li>\n<b>Ornamentation</b>:<div class="btn-group" data-toggle="buttons-checkbox">\n<button id="btn_delete" class="btn">Dot</button>\n<button id="btn_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="btn_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div>\n</span>');
         }
 
+        // put the punctum off the screen for now
         punct.set({left: -50, top: -50, opacity: 0.60});
         rendEng.draw({static: [], modify: [punct]}, {repaint: true, selectable: false});
 
