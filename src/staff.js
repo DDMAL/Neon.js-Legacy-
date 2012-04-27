@@ -124,7 +124,13 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
  * @param {Object} coords {x: ,y: }
  * @returns {Object} snappedCoords {x: xprime, y: yprime}
  */
-Toe.Model.Staff.prototype.ohSnap = function(coords, width) {
+Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
+    var opts = {
+        ignoreID: null
+    };
+
+    $.extend(opts, options);
+
     var coordsPrime = {x: null, y: null};
 
     // CALCULATE NEW VERTICAL POSITION
@@ -156,6 +162,10 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width) {
     var left = coords.x-(width/2);
     var right = coords.x+(width/2);
     for (var i = 0; i < this.elements.length; i++) {
+        if (this.elements[i].id == opts.ignoreID) {
+            continue;
+        }
+
         var ulx = this.elements[i].zone.ulx;
         var lrx = this.elements[i].zone.lrx;
 
@@ -299,9 +309,9 @@ Toe.Model.Staff.prototype.sortElements = function() {
  */
 Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     // check argument is a neume
-    if (!(neume instanceof Toe.Model.Neume)) {
-        throw new Error("Staff: Invalid neume");
-    }
+    //if (!(neume instanceof Toe.Model.Neume)) {
+    //    throw new Error("Staff: Invalid neume");
+    //}
     
     var opts = {
         forceSort: true
@@ -337,7 +347,7 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
 Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
     for (var i = this.elements.length-1; i >= 0; i--) {
         if (this.elements[i].id == eleID) {
-            this.elements.splice(i,i);
+            this.elements.splice(i,1);
         }
     }
 }
@@ -345,7 +355,7 @@ Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
 // remove element by reference
 Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
     eleInd = $.inArray(ele, this.elements);
-    this.elements.splice(eleInd, eleInd);
+    this.elements.splice(eleInd, 1);
 }
 
 Toe.Model.Staff.prototype.addDivision = function(division, options) {
