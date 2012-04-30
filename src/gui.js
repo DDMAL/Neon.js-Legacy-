@@ -323,6 +323,66 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 console.log(newNeume);
             }
         });
+
+        $("#btn_ungroup").bind("click.edit", function() {
+            var neumes = new Array();
+
+            var selection = rendEng.canvas.getActiveObject();
+            if (selection) {
+                if (selection.eleRef instanceof Toe.Model.Neume && selection.eleRef.components.length > 1) {
+                    neumes.push({nRef: selection.eleRef, sRef: selection.staffRef, drawing: selection});
+                }
+            }
+            else {
+                selection = rendEng.canvas.getActiveGroup();
+                if (selection) {
+                    // group of neumes selected
+                    for (var i = selection.objects.length-1; i >= 0; i--) {
+                        var obj = selection.objects[i];
+                        if (obj.eleRef instanceof Toe.Model.Neume && obj.eleRef.components.length > 1) {
+                            neumes.push({nRef: obj.eleRef, sRef: obj.staffRef, drawing: obj});
+                        }
+                    }
+                }
+            }
+
+            console.log(neumes);
+            var punctWidth = gui.punct.width*rendEng.getGlobalScale();
+            var punctHeight = gui.punct.height*rendEng.getGlobalScale();
+            // ungroup each selected neume
+            $.each(neumes, function(nInd, nel) {
+                var ulx = nel.nRef.zone.ulx;
+                var uly = nel.nRef.zone.uly;
+                $.each(nel.nRef.components, function(ncInd, nc) {
+                    var newPunct = new Toe.Model.Neume();
+                    newPunct.components.push(nc);
+
+                    // set the bounding box hint of the new neume for drawing
+                    var bb = [ulx+(ncInd*punctWidth), uly, ulx+((ncInd+1)*punctWidth), uly+punctHeight];
+                    newPunct.setBoundingBox(bb);
+
+                    // instantiate neume view and controller
+                    var nView = new Toe.View.NeumeView(rendEng);
+                    var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
+
+                    // add the punctum to the staff and draw it
+                    nel.sRef.addNeume(newPunct);
+
+                    // get final bounding box information
+                    bb = [newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry];
+
+                    // TODO: call server function with this information
+                });
+
+                // remove the old neume
+                nel.sRef.removeElementByRef(nel.nRef);
+                rendEng.canvas.remove(nel.drawing);
+            });
+
+            rendEng.canvas.discardActiveObject();
+            rendEng.canvas.discardActiveGroup();
+            rendEng.repaint();
+        });
     });
 
     $("#btn_insert").bind("click.insert", function() {
