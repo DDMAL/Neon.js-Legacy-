@@ -170,6 +170,9 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         // mount the new neume on the most appropriate staff
                         sModel.addNeume(ele);
 
+                        // get final bounding box information
+                        bb = [ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry];
+
                         rendEng.canvas.remove(element);
 
                         // send pitch shift command to server to change underlying MEI
@@ -297,9 +300,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 });
                 var lrx = ulx + numPunct*gui.punct.width*rendEng.getGlobalScale();
 
-                // set the bounding box of the new neume
+                // set the bounding box hint of the new neume for drawing
                 var bb = [ulx, uly, lrx, lry];
-                //rendEng.outlineBoundingBox(bb);
                 newNeume.setBoundingBox(bb);
 
                 // instantiate neume view and controller
@@ -308,6 +310,9 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                 // render the new neume
                 sModel.addNeume(newNeume);
+
+                // get final bounding box information
+                bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
 
                 // get neume name
                 var neumeName = newNeume.props.type.name;

@@ -427,5 +427,8 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
             break;
     }
     
-    this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, staffRef: staff, eleRef: neume});
+    var nDrawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, staffRef: staff, eleRef: neume})[0];
+
+    // update model
+    $(neume).trigger("mUpdateBoundingBox", nDrawing);
 }

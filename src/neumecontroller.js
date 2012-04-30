@@ -29,6 +29,17 @@ THE SOFTWARE.
  */
 Toe.Ctrl.NeumeController = function(nModel, nView) {
     // LISTEN TO THE VIEW
+    $(nModel).bind("mUpdateBoundingBox", function(event, nDrawing) {
+        // get final bounding box from drawing
+        var ulx = nDrawing.left - nDrawing.currentWidth/2;
+        var uly = nDrawing.top - nDrawing.currentHeight/2;
+        var lrx = ulx + nDrawing.currentWidth;
+        var lry = uly + nDrawing.currentHeight;
+
+        // reset the bounding box in the model with the final bounding box
+        // of the drawing
+        nModel.setBoundingBox([ulx, uly, lrx, lry]);
+    });
 
     // LISTEN TO THE MODEL
     /** 

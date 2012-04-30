@@ -194,6 +194,9 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
 	if (opts.repaint) {
 		this.repaint();
 	}
+
+    // return the final drawings
+    return elements;
 }
 
 // wrapper for fabric canvas unobserve event listener
