@@ -126,7 +126,7 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
  */
 Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
     var opts = {
-        ignoreID: null
+        ignoreEle: null
     };
 
     $.extend(opts, options);
@@ -162,7 +162,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
     var left = coords.x-(width/2);
     var right = coords.x+(width/2);
     for (var i = 0; i < this.elements.length; i++) {
-        if (this.elements[i].id == opts.ignoreID) {
+        if (this.elements[i] == opts.ignoreEle) {
             continue;
         }
 

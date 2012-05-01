@@ -145,7 +145,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         var sModel = page.getClosestStaff(finalCoords);
                         
                         // snap to staff
-                        var snapInfo = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreID: ele.id});
+                        var snapInfo = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele});
                         var snapCoords = snapInfo["snapCoords"];
                         var pElementID = snapInfo["pElementID"];
 
@@ -153,7 +153,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                         // change certain attributes of the element
                         // [ulx, uly, lrx, lry]
-                        // TODO: bounding box changes when dot is repositioned
+                        // construct bounding box hint: bounding box changes when dot is repositioned
                         var ulx = snapCoords.x-(element.currentWidth/2);
                         var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
                         var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
@@ -354,13 +354,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 }
             }
 
-            console.log(neumes);
             var punctWidth = gui.punct.width*rendEng.getGlobalScale();
             var punctHeight = gui.punct.height*rendEng.getGlobalScale();
             // ungroup each selected neume
             $.each(neumes, function(nInd, nel) {
                 var ulx = nel.nRef.zone.ulx;
-                var uly = nel.nRef.zone.uly;
 
                 // remove the old neume
                 nel.sRef.removeElementByRef(nel.nRef);
@@ -370,6 +368,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     var newPunct = new Toe.Model.Neume();
                     newPunct.components.push(nc);
 
+                    var uly = nel.sRef.clef.y - (nel.nRef.rootDiff+nc.pitchDiff)*nel.sRef.delta_y/2 - punctHeight/2;
                     // set the bounding box hint of the new neume for drawing
                     var bb = [ulx+(ncInd*punctWidth), uly, ulx+((ncInd+1)*punctWidth), uly+punctHeight];
                     newPunct.setBoundingBox(bb);
@@ -383,7 +382,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                     // get final bounding box information
                     bb = [newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry];
-
+                    
                     // TODO: call server function with this information
                 });
             });
