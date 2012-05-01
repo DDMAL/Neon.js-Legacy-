@@ -283,7 +283,7 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         nc = MeiElement("nc")
         
         for i in neumeids:
-            ref_neume = self.mei.getElementById(i)
+            ref_neume = self.mei.getElementById(str(i))
             if ref_neume:
                 # get underlying notes
                 notes = ref_neume.getDescendantsByName("note")
@@ -299,7 +299,8 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         Insert neume into the MEI document before the first neume in the given
         ID list
         '''
-        before = self.mei.getElementById(beforeId)
+        print "beforeID: ", beforeId
+        before = self.mei.getElementById(str(beforeId))
         parent = before.getParent()
 
         if before and parent:
@@ -311,7 +312,7 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         the associated facs data
         '''
         for i in neumeids:
-            neume = self.mei.getElementById(i)
+            neume = self.mei.getElementById(str(i))
             if neume:
                 # remove facs data
                 facs = neume.getAttribute("facs")
@@ -375,5 +376,95 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         result = {"nid": neume.getId()}
+        self.write(json.dumps(result))
+        self.set_status(200)
+
+class UngroupNeumeHandler(tornado.web.RequestHandler):
+
+    def insert_puncta(self, nid, bboxes):
+        '''
+        Insert a punctum for each note in the reference neume
+        before the reference neume in the MEI document.
+        '''
+        ref_neume = self.mei.getElementById(nid)
+        parent = ref_neume.getParent()
+
+        # get underlying notes
+        notes = ref_neume.getDescendantsByName("note")
+        nids = []
+        for n, bb in zip(notes, bboxes):
+            punctum = MeiElement("neume")
+            punctum.addAttribute("name", "punctum")
+            nc = MeiElement("nc")
+            nc.addChild(n)
+            punctum.addChild(nc)
+
+            # add generated punctum id to return to client
+            nids.append(punctum.getId())
+
+            # add facs data for the punctum
+            zone = self.get_new_zone(bb["ulx"], bb["uly"], bb["lrx"], bb["lry"])
+            self.add_zone(punctum, zone)
+
+            # insert the punctum before the reference neume
+            parent.addChildBefore(ref_neume, punctum)
+
+        return nids
+    
+    def delete_old_neume(self, nid):
+        neume = self.mei.getElementById(str(nid))
+        if neume:
+            # remove facs data
+            facs = neume.getAttribute("facs")
+            if facs:
+                facsid = facs.value
+                # Remove the zone if it exists
+                zone = self.mei.getElementById(str(facsid))
+                if zone and zone.name == "zone":
+                    zone.parent.removeChild(zone)
+
+            # now remove the neume
+            neume.parent.removeChild(neume)
+
+    def get_new_zone(self, ulx, uly, lrx, lry):
+        zone = MeiElement("zone")
+        zone.addAttribute("ulx", str(ulx))
+        zone.addAttribute("uly", str(uly))
+        zone.addAttribute("lrx", str(lrx))
+        zone.addAttribute("lry", str(lry))
+
+        return zone
+
+    def add_zone(self, neume, zone):
+        # add zone to the surfaces
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces) and zone:
+            surfaces[0].addChild(zone)
+
+        if zone:
+            # add facs id to neume
+            neume.addAttribute("facs", zone.getId())
+
+    def post(self, file):
+        '''
+        Ungroup a neume with the provided ID into puncta.
+        Create bounding box information for each punctum.
+        '''
+
+        data = json.loads(self.get_argument("data", ""))
+
+        nid = str(data["nid"])
+        bboxes = data["bb"]
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        nids = self.insert_puncta(nid, bboxes)
+        self.delete_old_neume(nid)
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"nids": nids}
         self.write(json.dumps(result))
         self.set_status(200)

@@ -88,6 +88,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.observe('object:selected', function(e) {
             var selection = rendEng.canvas.getActiveObject();
             if (selection.eleRef instanceof Toe.Model.Neume) {
+                console.log(selection.eleRef);
                 $("#info > p").text("Selected: " + selection.eleRef.props.type.name);
                 $("#info").animate({opacity: 1.0}, 100);
             }
@@ -323,6 +324,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // get neume key
                 var neumeKey = newNeume.props.key;
 
+                console.log(nids);
+
                 // call server neumify function to update MEI
                 $.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
                     // set id of the new neume with generated ID from the server
@@ -366,12 +369,14 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             var punctHeight = gui.punct.height*rendEng.getGlobalScale();
             // ungroup each selected neume
             $.each(neumes, function(nInd, nel) {
+                var boxes = new Array();
                 var ulx = nel.nRef.zone.ulx;
 
                 // remove the old neume
                 nel.sRef.removeElementByRef(nel.nRef);
                 rendEng.canvas.remove(nel.drawing);
 
+                var punctums = new Array();
                 $.each(nel.nRef.components, function(ncInd, nc) {
                     var newPunct = new Toe.Model.Neume();
                     newPunct.components.push(nc);
@@ -389,10 +394,28 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     nel.sRef.addNeume(newPunct);
 
                     // get final bounding box information
-                    bb = [newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry];
-                    
-                    // TODO: call server function with this information
+                    boxes.push({"ulx": newPunct.zone.ulx, "uly": newPunct.zone.uly, "lrx": newPunct.zone.lrx, "lry": newPunct.zone.lry});
+
+                    punctums.push(newPunct);
                 });
+
+                var data = JSON.stringify({"nid": nel.nRef.id, "bb": boxes});
+
+                // call server ungroup function to update MEI
+                $.post(prefix + "/edit/" + fileName + "/ungroup", {data: data}, function(data) {
+                    // set ids of the new puncta from the IDs generated from the server
+                    var nids = JSON.parse(data).nids;
+                    for (var i = 0; i < punctums.length; i++) {
+                        punctums[i].id = nids[i];
+                    }
+                })
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not syncronized.");
+                    $("#alert").toggleClass("fade");
+                });
+
             });
 
             rendEng.canvas.discardActiveObject();

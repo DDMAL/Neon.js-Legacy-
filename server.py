@@ -32,7 +32,8 @@ rules = [
     (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNeumeHandler),
     (abs_path(r"/edit/(.*?)/change/note"), neonsrv.api.ChangeNeumePitchHandler),
     (abs_path(r"/edit/(.*?)/new/note"), neonsrv.api.InsertNeumeHandler),
-    (abs_path(r"/edit/(.*?)/neumify"), neonsrv.api.NeumifyNeumeHandler)
+    (abs_path(r"/edit/(.*?)/neumify"), neonsrv.api.NeumifyNeumeHandler),
+    (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.api.UngroupNeumeHandler)
 ]
 
 # Set up tests if we're in debug mode
