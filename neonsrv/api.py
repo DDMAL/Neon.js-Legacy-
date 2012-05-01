@@ -270,3 +270,110 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
                 }
         self.write(json.dumps(result))
         self.set_status(200)
+
+class NeumifyNeumeHandler(tornado.web.RequestHandler):
+
+    def create_new_neume(self, neumeids, neume_name):
+        ''' 
+        Make a new neume with notes from the neumes with
+        ID's from neumeids and return the MEI object
+        '''
+        neume = MeiElement("neume")
+        neume.addAttribute("name", neume_name)
+        nc = MeiElement("nc")
+        
+        for i in neumeids:
+            ref_neume = self.mei.getElementById(i)
+            if ref_neume:
+                # get underlying notes
+                notes = ref_neume.getDescendantsByName("note")
+                for n in notes:
+                    nc.addChild(n)
+
+        neume.addChild(nc)
+
+        return neume
+
+    def insert_neume(self, neume, beforeId):
+        '''
+        Insert neume into the MEI document before the first neume in the given
+        ID list
+        '''
+        before = self.mei.getElementById(beforeId)
+        parent = before.getParent()
+
+        if before and parent:
+            parent.addChildBefore(before, neume)
+
+    def delete_old_neumes(self, neumeids):
+        '''
+        Delete the neumes with ids in neumeids and
+        the associated facs data
+        '''
+        for i in neumeids:
+            neume = self.mei.getElementById(i)
+            if neume:
+                # remove facs data
+                facs = neume.getAttribute("facs")
+                if facs:
+                    facsid = facs.value
+                    # Remove the zone if it exists
+                    zone = self.mei.getElementById(str(facsid))
+                    if zone and zone.name == "zone":
+                        zone.parent.removeChild(zone)
+
+                # now remove the neume
+                neume.parent.removeChild(neume)
+    
+    def get_new_zone(self, ulx, uly, lrx, lry):
+        zone = MeiElement("zone")
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+        return zone
+        
+    def add_zone(self, neume, zone):
+        # add zone to the surfaces
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces) and zone:
+            surfaces[0].addChild(zone)
+
+        if zone:
+            # add facs id to neume
+            neume.addAttribute("facs", zone.getId())
+
+    def post(self, file):
+        '''
+        Neumify a group of neumes (with provided ids)
+        and give it the given neume name. Also update
+        bounding box information.
+        '''
+
+        nids = str(self.get_argument("nids", "")).split(",")
+        neume_name = str(self.get_argument("name", ""))
+        
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        neume = self.create_new_neume(nids, neume_name)
+        self.insert_neume(neume, nids[0])
+        self.delete_old_neumes(nids)
+
+        # Bounding box
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+
+        if lrx and lry and ulx and uly:
+            zone = self.get_new_zone(ulx, uly, lrx, lry)
+            self.add_zone(neume, zone)
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"nid": neume.getId()}
+        self.write(json.dumps(result))
+        self.set_status(200)

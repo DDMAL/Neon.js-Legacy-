@@ -88,7 +88,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.observe('object:selected', function(e) {
             var selection = rendEng.canvas.getActiveObject();
             if (selection.eleRef instanceof Toe.Model.Neume) {
-                console.log(selection.eleRef);
                 $("#info > p").text("Selected: " + selection.eleRef.props.type.name);
                 $("#info").animate({opacity: 1.0}, 100);
             }
@@ -256,7 +255,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // make sure there are at least 2 neumes on the same staff to work with
                 var neumes = new Array();
                 var sModel = null;
-                console.log(selection);
                 $.each(selection.objects, function (ind, el) {
                     if (el.eleRef instanceof Toe.Model.Neume) {
                         if (!sModel) {
@@ -273,26 +271,26 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     return;
                 }
 
-                // sort the group based on x position
+                // sort the group based on x position (why fabric doesn't do this, I don't know)
                 neumes.sort(function(el1, el2) {
                     return el1.ref.zone.ulx - el2.ref.zone.ulx;
                 });
 
                 // begin the NEUMIFICATION
                 var newNeume = new Toe.Model.Neume();
-                
-                // id of neumified neume is id of first neume in selection
-                newNeume.id = neumes[0].ref.id; 
-                
+                                
                 numPunct = 0;
+                var nids = new Array();
                 var ulx = Number.MAX_VALUE;
                 var uly = Number.MAX_VALUE;
                 var lry = Number.MIN_VALUE;
-                console.log(neumes);
                 $.each(neumes, function (ind, el) {
                     // grab underlying notes
                     $.merge(newNeume.components, el.ref.components);
                     numPunct += el.ref.components.length;
+
+                    // update neume ids
+                    nids.push(el.ref.id);
 
                     // remove the neume, we don't need it anymore
                     sModel.removeElementByRef(el.ref);
@@ -322,13 +320,23 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // get final bounding box information
                 bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
 
-                // get neume name
-                var neumeName = newNeume.props.type.name;
-        
+                // get neume key
+                var neumeKey = newNeume.props.key;
+
+                // call server neumify function to update MEI
+                $.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
+                    // set id of the new neume with generated ID from the server
+                    newNeume.id = data.nid;
+                })
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not syncronized.");
+                    $("#alert").toggleClass("fade");
+                });
+
                 rendEng.canvas.discardActiveGroup();
                 rendEng.repaint();
-
-                console.log(newNeume);
             }
         });
 
@@ -463,8 +471,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             .error(function() {
                 // show alert to user
                 // replace text with error message
-                $(".alert > p").text("Server failed to insert note. Client and server are not syncronized.");
-                $(".alert").toggleClass("fade");
+                $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
+                $("#alert").toggleClass("fade");
             });*/
         });
     });
