@@ -330,14 +330,14 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
         nc.setPitchDifference(this.calcPitchDifference(nc.pname, nc.oct) - neume.rootDiff);
     }
 
+    // update view
+    $(neume).trigger("vRenderNeume", [neume, this]);
+
     this.elements.push(neume);
     // TODO: for efficiency insert into sorted list to maintain sort instead of pushing then sorting
     if (opts.forceSort) {
         this.sortElements();
     }
-
-    // update view
-    $(neume).trigger("vRenderNeume", [neume, this]);
     
     // for chaining
     return this;

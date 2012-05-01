@@ -88,6 +88,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.observe('object:selected', function(e) {
             var selection = rendEng.canvas.getActiveObject();
             if (selection.eleRef instanceof Toe.Model.Neume) {
+                console.log(selection.eleRef);
                 $("#info > p").text("Selected: " + selection.eleRef.props.type.name);
                 $("#info").animate({opacity: 1.0}, 100);
             }
@@ -255,6 +256,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // make sure there are at least 2 neumes on the same staff to work with
                 var neumes = new Array();
                 var sModel = null;
+                console.log(selection);
                 $.each(selection.objects, function (ind, el) {
                     if (el.eleRef instanceof Toe.Model.Neume) {
                         if (!sModel) {
@@ -271,6 +273,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     return;
                 }
 
+                // sort the group based on x position
+                neumes.sort(function(el1, el2) {
+                    return el1.ref.zone.ulx - el2.ref.zone.ulx;
+                });
+
                 // begin the NEUMIFICATION
                 var newNeume = new Toe.Model.Neume();
                 
@@ -281,6 +288,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 var ulx = Number.MAX_VALUE;
                 var uly = Number.MAX_VALUE;
                 var lry = Number.MIN_VALUE;
+                console.log(neumes);
                 $.each(neumes, function (ind, el) {
                     // grab underlying notes
                     $.merge(newNeume.components, el.ref.components);
@@ -353,6 +361,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             $.each(neumes, function(nInd, nel) {
                 var ulx = nel.nRef.zone.ulx;
                 var uly = nel.nRef.zone.uly;
+
+                // remove the old neume
+                nel.sRef.removeElementByRef(nel.nRef);
+                rendEng.canvas.remove(nel.drawing);
+
                 $.each(nel.nRef.components, function(ncInd, nc) {
                     var newPunct = new Toe.Model.Neume();
                     newPunct.components.push(nc);
@@ -373,10 +386,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                     // TODO: call server function with this information
                 });
-
-                // remove the old neume
-                nel.sRef.removeElementByRef(nel.nRef);
-                rendEng.canvas.remove(nel.drawing);
             });
 
             rendEng.canvas.discardActiveObject();
