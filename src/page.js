@@ -96,6 +96,24 @@ Toe.Model.Page.prototype.getClosestStaff = function(coords) {
 }
 
 /**
+ * Given a staff, get the next staff on the page
+ *
+ * @methodOf Toe.Model.Page
+ * @param {Toe.Model.Staff} staff 
+ * @returns {Staff} nextStaff the next staff
+ */
+Toe.Model.Page.prototype.getNextStaff = function(staff) {
+    // for each staff, except the last
+    for (var i = 0; i < this.staves.length-1; i++) {
+        if (staff == this.staves[i]) {
+            return this.staves[i+1];
+        }
+    }
+
+    return null;
+}
+
+/**
  * Adds a given number of staves to the page
  *
  * @methodOf Toe.Model.Page
