@@ -239,13 +239,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             // send delete command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")})
+            /*$.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")})
             .error(function() {
                 // show alert to user
                 // replace text with error message
                 $("#alert > p").text("Server failed to delete note. Client and server are not syncronized.");
                 $("#alert").animate({opacity: 1.0}, 100);
-            });
+            });*/
         });
 
         $("#btn_neumify").bind("click.edit", function() {
@@ -324,10 +324,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // get neume key
                 var neumeKey = newNeume.props.key;
 
-                console.log(nids);
-
                 // call server neumify function to update MEI
-                $.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
+                /*$.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
                     // set id of the new neume with generated ID from the server
                     newNeume.id = data.nid;
                 })
@@ -336,7 +334,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     // replace text with error message
                     $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not syncronized.");
                     $("#alert").toggleClass("fade");
-                });
+                });*/
 
                 rendEng.canvas.discardActiveGroup();
                 rendEng.repaint();
@@ -402,7 +400,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 var data = JSON.stringify({"nid": nel.nRef.id, "bb": boxes});
 
                 // call server ungroup function to update MEI
-                $.post(prefix + "/edit/" + fileName + "/ungroup", {data: data}, function(data) {
+                /*$.post(prefix + "/edit/" + fileName + "/ungroup", {data: data}, function(data) {
                     // set ids of the new puncta from the IDs generated from the server
                     var nids = JSON.parse(data).nids;
                     for (var i = 0; i < punctums.length; i++) {
@@ -414,7 +412,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     // replace text with error message
                     $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not syncronized.");
                     $("#alert").toggleClass("fade");
-                });
+                });*/
 
             });
 
