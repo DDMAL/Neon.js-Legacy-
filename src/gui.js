@@ -145,9 +145,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         var sModel = page.getClosestStaff(finalCoords);
                         
                         // snap to staff
-                        var snapInfo = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele});
-                        var snapCoords = snapInfo["snapCoords"];
-                        var pElementID = snapInfo["pElementID"];
+                        var snapCoords = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele});
 
                         var ncdelta_y = nc_y - snapCoords.y;
 
@@ -239,13 +237,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             // send delete command to server to change underlying MEI
-            /*$.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")})
+            $.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")})
             .error(function() {
                 // show alert to user
                 // replace text with error message
                 $("#alert > p").text("Server failed to delete note. Client and server are not syncronized.");
                 $("#alert").animate({opacity: 1.0}, 100);
-            });*/
+            });
         });
 
         $("#btn_neumify").bind("click.edit", function() {
@@ -461,9 +459,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             var nModel = new Toe.Model.Neume();
 
             // calculate snapped coords
-            var snapInfo = sModel.ohSnap(coords, gui.punct.currentWidth);
-            var snapCoords = snapInfo["snapCoords"];
-            var pElementID = snapInfo["pElementID"];
+            var snapCoords = sModel.ohSnap(coords, gui.punct.currentWidth);
 
             // update bounding box with physical position on the page
             var ulx = snapCoords.x - gui.punct.currentWidth/2;
@@ -484,17 +480,29 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
             
             // mount neume on the staff
-            sModel.addNeume(nModel);
+            var nInd = sModel.addNeume(nModel);
+
+            // get next element to insert before
+            var beforeID = null;
+            if (nInd + 1 < sModel.elements.length) {
+                beforeID = sModel.elements[nInd+1].id;
+            }
+            else {
+                // insert before the next system break (staff)
+                var sNextModel = page.getNextStaff(sModel);
+                beforeID = sNextModel.id;
+            }
             
-            /*
             // send insert command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/new/note", {})
+            $.post(prefix + "/edit/" + fileName + "/new/note", {beforeid: beforeID, pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
+                nModel.id = JSON.parse(data).nid;
+            })
             .error(function() {
                 // show alert to user
                 // replace text with error message
                 $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
                 $("#alert").toggleClass("fade");
-            });*/
+            });
         });
     });
 
