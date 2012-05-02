@@ -138,6 +138,7 @@ THE SOFTWARE.
 
                 // get id of parent layer
                 var sModel = new Toe.Model.Staff(s_bb);
+                sModel.setID($(sel).attr("xml:id"));
 
                 // set global scale using staff from first system
                 if(sit == 0) {
@@ -185,7 +186,7 @@ THE SOFTWARE.
                     var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
                     // mount neume on the staff
-                    sModel.addNeume(nModel, {forceSort: false});
+                    sModel.addNeume(nModel, {justPush: true});
 
                     console.log("neume: " + nModel.props.type.name);
                 });
@@ -208,7 +209,7 @@ THE SOFTWARE.
                     var dCtrl = new Toe.Ctrl.DivisionController(dModel, dView);
         
                     // mount the division on the staff
-                    sModel.addDivision(dModel, {forceSort: false});
+                    sModel.addDivision(dModel);
     
                     console.log("division: " + dType);
                 });
@@ -238,9 +239,6 @@ THE SOFTWARE.
     
                     console.log("custos");
                 });
-
-                // now do one batch sort at the end
-                sModel.sortElements();
             });
             rendEng.repaint();
         };
