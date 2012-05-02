@@ -269,6 +269,19 @@ Toe.Model.Staff.prototype.setClef = function(clef) {
     // update view
     $(clef).trigger("vRenderClef", [clef]);
     
+    // add to elements list, replace if clef already exists
+    if (this.elements.length > 0) {
+        if (this.elements[0] instanceof Toe.Model.Clef) {
+            this.elements[0] = clef;
+        }
+        else {
+            this.elements.splice(0,0,clef);
+        }
+    }
+    else {
+        this.elements.push(clef);
+    }
+    
     this.clef = clef;
 
     // for chaining
