@@ -74,21 +74,61 @@ class DeleteNeumeHandler(tornado.web.RequestHandler):
 
 class ChangeNeumePitchHandler(tornado.web.RequestHandler):
 
+    def neume_pitch_shift(self, neume, pitchInfo):
+        notes = neume.getDescendantsByName("note")
+        if len(notes):
+            for n, pinfo in zip(notes, pitchInfo):
+                n.addAttribute("pname", str(pinfo["pname"]))
+                n.addAttribute("oct", str(pinfo["oct"]))
+
+    def reposition_neume(self, neume, beforeid):
+        # first remove the neume
+        self.remove_neume(neume)
+
+        if beforeid is None:
+            # get last layer
+            layers = self.mei.getElementsByName("layer")
+            if len(layers):
+                layers[-1].addChild(neume)
+        else:
+            self.insert_neume(neume, beforeid)
+
+    def remove_neume(self, neume):
+        parent = neume.getParent()
+        parent.removeChild(neume)
+
+    def insert_neume(self, neume, beforeid):
+        before = self.mei.getElementById(beforeid)
+
+        # get layer element
+        parent = before.getParent()
+
+        if parent and before:
+            parent.addChildBefore(before, neume)
+
+    def update_or_add_zone(self, neume, bb):
+        facsid = neume.getAttribute("facs").value
+        if facsid:
+            zone = self.mei.getElementById(facsid)
+        else:
+            zone = MeiElement("zone")
+            neume.addAttribute("facs", zone.getId())
+            surfaces = self.mei.getElementsByName("surface")
+            if len(surfaces):
+                surfaces[0].addChild(zone)
+
+        zone.addAttribute("ulx", str(bb["ulx"]))
+        zone.addAttribute("uly", str(bb["uly"]))
+        zone.addAttribute("lrx", str(bb["lrx"]))
+        zone.addAttribute("lry", str(bb["lry"]))
+        
     def post(self, file):
-        """ Change the pitch of a <neume> element.
-        Pass in an argument called 'id' which is the id of a <neume>
-        object. arguments pname and oct refer to the new pitch and
-        octave of the first note in the neume. All other notes in the
-        neume will have their relative pitches updated.
+        data = json.loads(self.get_argument("data", ""))
 
-        if arguments lrx,lry,ulx,uly are provided, then an associated
-        <zone> element will have its coordinates updated. If there is
-        no <zone> element then nothing will be added.
-        """
-
-        nid = str(self.get_argument("id", ""))
-        pname = str(self.get_argument("pname", ""))
-        octave = str(self.get_argument("oct", ""))
+        nid = str(data["nid"])
+        beforeid = str(data["beforeid"])
+        bb = data["bb"]
+        pitchInfo = data["pitchInfo"]
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
@@ -96,18 +136,14 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
 
         neume = self.mei.getElementById(nid)
 
-        self.move_neume(neume, pname, octave)
+        if pitchInfo is not None:
+            self.neume_pitch_shift(neume, pitchInfo)
 
-        # Bounding box
-        lrx = str(self.get_argument("lrx", None))
-        lry = str(self.get_argument("lry", None))
-        ulx = str(self.get_argument("ulx", None))
-        uly = str(self.get_argument("uly", None))
-
-        if lrx and lry and ulx and uly:
-            self.update_or_add_zone(neume, ulx, uly, lrx, lry)
+        self.reposition_neume(neume, beforeid)
+        self.update_or_add_zone(neume, bb)
 
         XmlExport.write(self.mei, fname)
+
         self.set_status(200)
 
 class InsertNeumeHandler(tornado.web.RequestHandler):

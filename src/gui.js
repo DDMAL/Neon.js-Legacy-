@@ -158,6 +158,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         ele.setBoundingBox(bb);
 
                         // derive pitch name and octave of notes in the neume on the appropriate staff
+                        var oldRootPname = ele.components[0].pname;
+                        var oldRootOct = ele.components[0].oct;
                         for (var i = 0; i < ele.components.length; i++) {
                             var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * ele.components[i].pitchDiff)});
                             ele.components[i].setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
@@ -167,21 +169,43 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         element.staffRef.removeElementByRef(ele);
                              
                         // mount the new neume on the most appropriate staff
-                        sModel.addNeume(ele);
+                        var nInd = sModel.addNeume(ele);
 
                         // get final bounding box information
                         bb = [ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry];
 
                         rendEng.canvas.remove(element);
 
+                        var args = {"nid": ele.id, "bb": {"ulx": bb[0], "uly": bb[1], "lrx": bb[2], "lry": bb[3]}};
+                        if (oldRootPname != ele.components[0].pname || oldRootOct != ele.components[0].oct) {
+                            // this is a pitch shift
+                            args.pitchInfo = new Array();
+                            $.each(ele.components, function(ncInd, nc) {
+                                args.pitchInfo.push({"pname": nc.pname, "oct": nc.oct});
+                            });
+                        }
+                        else {
+                            args.pitchInfo = null
+                        }
+
+                        // get next element to insert before
+                        if (nInd + 1 < sModel.elements.length) {
+                            args["beforeid"] = sModel.elements[nInd+1].id;
+                        }
+                        else {
+                            // insert before the next system break (staff)
+                            var sNextModel = page.getNextStaff(sModel);
+                            args["beforeid"] = sNextModel.id;
+                        }
+
                         // send pitch shift command to server to change underlying MEI
-                        /*$.post(prefix + "/edit/" + fileName + "/change/note",  {id: nids.join(",")})
+                        $.post(prefix + "/edit/" + fileName + "/change/note", {data: JSON.stringify(args)})
                         .error(function() {
                             // show alert to user
                             // replace text with error message
                             $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
                             $(".alert").toggleClass("fade");
-                        });*/
+                        });
                     }
                     else if (ele instanceof Toe.Model.Custos) {
 
@@ -482,19 +506,20 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             // mount neume on the staff
             var nInd = sModel.addNeume(nModel);
 
+            var args = {pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+
             // get next element to insert before
-            var beforeID = null;
             if (nInd + 1 < sModel.elements.length) {
-                beforeID = sModel.elements[nInd+1].id;
+                args["beforeid"] = sModel.elements[nInd+1].id;
             }
             else {
                 // insert before the next system break (staff)
                 var sNextModel = page.getNextStaff(sModel);
-                beforeID = sNextModel.id;
+                args["beforeid"] = sNextModel.id;
             }
-            
+
             // send insert command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/new/note", {beforeid: beforeID, pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
+            $.post(prefix + "/edit/" + fileName + "/new/note", args, function(data) {
                 nModel.id = JSON.parse(data).nid;
             })
             .error(function() {
