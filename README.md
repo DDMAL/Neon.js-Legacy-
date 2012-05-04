@@ -3,11 +3,13 @@ Neon.js
 
 **N**eume **E**ditor **ON**line.
 
+Neon.js is a browser-based music notation editor written in JavaScript. The editor can be used to manipulate digitally encoded early musical scores in square-note notation.
+
 Requirements
 ------------
 
  * tornado (pip install tornado)
- * pymei (https://github.com/ahankinson/pymei)
+ * python bindings of the experimental-meisolesmes branch of libmei (https://github.com/DDMAL/libmei)
 
 Running the server
 ------------------
