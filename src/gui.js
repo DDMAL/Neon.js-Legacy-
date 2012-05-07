@@ -199,13 +199,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         }
 
                         // send pitch shift command to server to change underlying MEI
-                        $.post(prefix + "/edit/" + fileName + "/change/note", {data: JSON.stringify(args)})
+                        /*$.post(prefix + "/edit/" + fileName + "/change/note", {data: JSON.stringify(args)})
                         .error(function() {
                             // show alert to user
                             // replace text with error message
                             $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
                             $(".alert").toggleClass("fade");
-                        });
+                        });*/
                     }
                     else if (ele instanceof Toe.Model.Custos) {
 
@@ -519,7 +519,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             // send insert command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/new/note", args, function(data) {
+            /*$.post(prefix + "/edit/" + fileName + "/new/note", args, function(data) {
                 nModel.id = JSON.parse(data).nid;
             })
             .error(function() {
@@ -527,7 +527,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // replace text with error message
                 $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
                 $("#alert").toggleClass("fade");
-            });
+            });*/
         });
     });
 
