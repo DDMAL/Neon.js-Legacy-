@@ -1,5 +1,6 @@
 # Path where neon will read/write MEI files from.
 MEI_DIRECTORY = ""
+MEI_DIRECTORY_BACKUP = ""
 
 # The absolute path to where this app will sit on a server. e.g. "/" or "/neon"
 APP_ROOT = "/"

@@ -1,6 +1,7 @@
 import json
 import mimetypes
 import os
+import shutil
 
 from pymei import XmlImport
 
@@ -25,6 +26,7 @@ class RootHandler(tornado.web.RequestHandler):
         mei = self.request.files.get("mei", [])
         mei_img = self.request.files.get("mei_img", [])
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        mei_directory_backup = os.path.abspath(conf.MEI_DIRECTORY_BACKUP)
         errors = ""
         mei_fn = ""
         if len(mei):
@@ -35,7 +37,11 @@ class RootHandler(tornado.web.RequestHandler):
                 if os.path.exists(os.path.join(mei_directory, mei_fn)):
                     errors = "mei file already exists"
                 else:
+                    # write to working directory and backup
                     fp = open(os.path.join(mei_directory, mei_fn), "w")
+                    fp.write(contents)
+                    fp.close()
+                    fp = open(os.path.join(mei_directory_backup, mei_fn), "w")
                     fp.write(contents)
                     fp.close()
             except Exception, e:
@@ -82,3 +88,18 @@ class FileHandler(tornado.web.RequestHandler):
             # derive mime type from file for generic serving
             self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0]);
             self.write(response)
+
+class FileRevertHandler(tornado.web.RequestHandler):
+    def get(self, filename):
+        '''
+        Move the given filename from the backup directory to the
+        working directory. Overwrites changes made by the editor!
+        '''
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        meiworking = os.path.join(mei_directory, filename)
+        mei_directory_backup = os.path.abspath(conf.MEI_DIRECTORY_BACKUP)
+        meibackup = os.path.join(mei_directory_backup, filename)
+        
+        if meibackup:
+            shutil.copy(meibackup, meiworking)
+

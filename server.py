@@ -29,6 +29,7 @@ rules = [
     (abs_path(r"/?"), neonsrv.interface.RootHandler),
     (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
     (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
+    (abs_path(r"/revert/(.*?)"), neonsrv.interface.FileRevertHandler),
     (abs_path(r"/edit/(.*?)/delete/note"), neonsrv.api.DeleteNeumeHandler),
     (abs_path(r"/edit/(.*?)/change/note"), neonsrv.api.ChangeNeumePitchHandler),
     (abs_path(r"/edit/(.*?)/new/note"), neonsrv.api.InsertNeumeHandler),

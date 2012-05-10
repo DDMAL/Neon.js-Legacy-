@@ -50,11 +50,35 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     // cache reference to this
     gui = this;
 
-    var parentDivId = "#gui-sidebar";
+    /********************************************************
+     *                      NAVBAR                          *
+     ********************************************************/
+    var nav_file_dropdown_parent = "#nav_file_dropdown";
+    $(nav_file_dropdown_parent).prepend('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li>');
+    $("#nav_file_dropdown_revert").tooltip({animation: true, placement: 'bottom', title: 'Revert the current MEI file to the original version. Warning: this will revert all changes made in the editor.', delay: 100});
+    $("#nav_file_dropdown_revert").click(function() {
+        // move backup mei file to working directory
+        $.get(prefix + "/revert/" + fileName, function(data) {
+            // when the backup file has been restored, reload the page
+            window.location = prefix + "/editor/" + fileName;
+        })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to restore backup MEI file.");
+            $("#alert").animate({opacity: 1.0}, 100);
+
+        });
+    });
+
+    /********************************************************
+     *                     SIDEBAR                          *
+     ********************************************************/
+    var side_parentDivId = "#gui-sidebar";
 
     // create background image opacity slider
     if (toggles.sldr_bgImgOpacity) {
-        $(parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n<input id="sldr_bgImgOpacity" type="range" name="bgImgOpacity" min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
+        $(side_parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n<input id="sldr_bgImgOpacity" type="range" name="bgImgOpacity" min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
 
         $("#sldr_bgImgOpacity").bind("change", function() {
             rendEng.canvas.backgroundImageOpacity = $(this).val();
@@ -64,7 +88,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
     $("#btn_edit").bind("click", function() {
         // first remove insert options
-        $(parentDivId + "> #sidebar-insert").remove();
+        $(side_parentDivId + "> #sidebar-insert").remove();
 
         // unbind insert event handlers
         rendEng.unObserve("mouse:move");
@@ -72,8 +96,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.remove(gui.punct);
         rendEng.repaint();
                
-        if ($(parentDivId + "> #sidebar-edit").length == 0) {
-            $(parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
+        if ($(side_parentDivId + "> #sidebar-edit").length == 0) {
+            $(side_parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
         }
         
         rendEng.canvas.observe('mouse:down', function(e) {
@@ -446,7 +470,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
     $("#btn_insert").bind("click.insert", function() {
         // first remove edit options
-        $(parentDivId + "> #sidebar-edit").remove();
+        $(side_parentDivId + "> #sidebar-edit").remove();
 
         // unbind edit event handlers
         $("#btn_delete").unbind("click.edit");
@@ -460,8 +484,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.unObserve("selection:cleared");
 
         // then add insert options
-        if ($(parentDivId + "> #sidebar-insert").length == 0) {
-            $(parentDivId).append('<span id="sidebar-insert"><br /><li class="nav-header">Insert</li>\n<li>\n<b>Ornamentation</b>:<div class="btn-group" data-toggle="buttons-checkbox">\n<button id="btn_delete" class="btn">Dot</button>\n<button id="btn_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="btn_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div>\n</span>');
+        if ($(side_parentDivId + "> #sidebar-insert").length == 0) {
+            $(side_parentDivId).append('<span id="sidebar-insert"><br /><li class="nav-header">Insert</li>\n<li>\n<b>Ornamentation</b>:<div class="btn-group" data-toggle="buttons-checkbox">\n<button id="btn_delete" class="btn">Dot</button>\n<button id="btn_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="btn_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div>\n</span>');
         }
 
         // put the punctum off the screen for now
@@ -519,7 +543,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             // send insert command to server to change underlying MEI
-            /*$.post(prefix + "/edit/" + fileName + "/new/note", args, function(data) {
+            $.post(prefix + "/edit/" + fileName + "/new/note", args, function(data) {
                 nModel.id = JSON.parse(data).nid;
             })
             .error(function() {
@@ -527,7 +551,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // replace text with error message
                 $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
                 $("#alert").toggleClass("fade");
-            });*/
+            });
         });
     });
 
