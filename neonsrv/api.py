@@ -60,7 +60,7 @@ class DeleteNeumeHandler(tornado.web.RequestHandler):
         Does not reduce the size of the bounding box on a <zone> or change the neume
         type if it now has a different number of <note> elements.
         """
-        todelete = self.get_argument("id", "")
+        todelete = self.get_argument("ids", "")
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
 
@@ -74,10 +74,10 @@ class DeleteNeumeHandler(tornado.web.RequestHandler):
 
 class ChangeNeumePitchHandler(tornado.web.RequestHandler):
 
-    def neume_pitch_shift(self, neume, pitchInfo):
+    def neume_pitch_shift(self, neume, pitch_info):
         notes = neume.getDescendantsByName("note")
         if len(notes):
-            for n, pinfo in zip(notes, pitchInfo):
+            for n, pinfo in zip(notes, pitch_info):
                 n.addAttribute("pname", str(pinfo["pname"]))
                 n.addAttribute("oct", str(pinfo["oct"]))
 
@@ -128,7 +128,7 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
         nid = str(data["nid"])
         beforeid = str(data["beforeid"])
         bb = data["bb"]
-        pitchInfo = data["pitchInfo"]
+        pitch_info = data["pitchInfo"]
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
@@ -136,8 +136,8 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
 
         neume = self.mei.getElementById(nid)
 
-        if pitchInfo is not None:
-            self.neume_pitch_shift(neume, pitchInfo)
+        if pitch_info is not None:
+            self.neume_pitch_shift(neume, pitch_info)
 
         self.reposition_neume(neume, beforeid)
         self.update_or_add_zone(neume, bb)
@@ -415,18 +415,21 @@ class UngroupNeumeHandler(tornado.web.RequestHandler):
 
         data = json.loads(self.get_argument("data", ""))
 
-        nid = str(data["nid"])
-        bboxes = data["bb"]
+        nids = str(data["nids"]).split(",")
+        bboxes = data["bbs"]
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         self.mei = XmlImport.read(fname)
 
-        nids = self.insert_puncta(nid, bboxes)
-        self.delete_old_neume(nid)
+        newids = []
+        for nid, bb in zip(nids, bboxes):
+            newids.append(self.insert_puncta(nid, bb))
+            self.delete_old_neume(nid)
 
         XmlExport.write(self.mei, fname)
 
-        result = {"nids": nids}
+        result = {"nids": newids}
         self.write(json.dumps(result))
+
         self.set_status(200)

@@ -285,7 +285,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             // send delete command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/delete/note",  {id: nids.join(",")})
+            $.post(prefix + "/edit/" + fileName + "/delete/note",  {ids: nids.join(",")})
             .error(function() {
                 // show alert to user
                 // replace text with error message
@@ -409,18 +409,26 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 }
             }
 
+            // cache punctum glyph width and height
             var punctWidth = gui.punct.width*rendEng.getGlobalScale();
             var punctHeight = gui.punct.height*rendEng.getGlobalScale();
+
+            var nids = new Array();
+            var bbs = new Array();
+            var punctums = new Array();
+
             // ungroup each selected neume
             $.each(neumes, function(nInd, nel) {
-                var boxes = new Array();
+                // add to list of neume ids
+                nids.push(nel.nRef.id);
+
+                var punctBoxes = new Array();
                 var ulx = nel.nRef.zone.ulx;
 
                 // remove the old neume
                 nel.sRef.removeElementByRef(nel.nRef);
                 rendEng.canvas.remove(nel.drawing);
 
-                var punctums = new Array();
                 $.each(nel.nRef.components, function(ncInd, nc) {
                     var newPunct = new Toe.Model.Neume();
                     newPunct.components.push(nc);
@@ -438,28 +446,30 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     nel.sRef.addNeume(newPunct);
 
                     // get final bounding box information
-                    boxes.push({"ulx": newPunct.zone.ulx, "uly": newPunct.zone.uly, "lrx": newPunct.zone.lrx, "lry": newPunct.zone.lry});
+                    punctBoxes.push({"ulx": newPunct.zone.ulx, "uly": newPunct.zone.uly, "lrx": newPunct.zone.lrx, "lry": newPunct.zone.lry});
 
                     punctums.push(newPunct);
                 });
 
-                var data = JSON.stringify({"nid": nel.nRef.id, "bb": boxes});
+                // add to list of neume bounding boxes
+                bbs.push(punctBoxes);
+            });
 
-                // call server ungroup function to update MEI
-                /*$.post(prefix + "/edit/" + fileName + "/ungroup", {data: data}, function(data) {
-                    // set ids of the new puncta from the IDs generated from the server
-                    var nids = JSON.parse(data).nids;
-                    for (var i = 0; i < punctums.length; i++) {
-                        punctums[i].id = nids[i];
-                    }
-                })
-                .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not syncronized.");
-                    $("#alert").toggleClass("fade");
-                });*/
+            var data = JSON.stringify({"nids": nids.join(","), "bbs": bbs});
 
+            // call server ungroup function to update MEI
+            $.post(prefix + "/edit/" + fileName + "/ungroup", {data: data}, function(data) {
+                // set ids of the new puncta from the IDs generated from the server
+                var nids = JSON.parse(data).nids;
+                $.each(punctums, function(i, punct) {
+                    punct.id = nids[i];
+                });
+            })
+            .error(function() {
+                // show alert to user
+                // replace text with error message
+                $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not syncronized.");
+                $("#alert").toggleClass("fade");
             });
 
             rendEng.canvas.discardActiveObject();
