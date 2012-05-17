@@ -284,6 +284,8 @@ Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
         throw new Error("Neume: invalid bounding box");
     }
 
+    bb = $.map(bb, Math.round);
+
     // set position
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];

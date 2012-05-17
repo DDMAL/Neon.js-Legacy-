@@ -371,7 +371,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 var neumeKey = newNeume.props.key;
 
                 // call server neumify function to update MEI
-                /*$.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
+                $.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
                     // set id of the new neume with generated ID from the server
                     newNeume.id = data.nid;
                 })
@@ -380,7 +380,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     // replace text with error message
                     $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not syncronized.");
                     $("#alert").toggleClass("fade");
-                });*/
+                });
 
                 rendEng.canvas.discardActiveGroup();
                 rendEng.repaint();

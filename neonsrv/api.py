@@ -261,7 +261,6 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         Insert neume into the MEI document before the first neume in the given
         ID list
         '''
-        print "beforeID: ", beforeId
         before = self.mei.getElementById(str(beforeId))
         parent = before.getParent()
 
