@@ -5,6 +5,8 @@ Neon.js
 
 Neon.js is a browser-based music notation editor written in JavaScript. The editor can be used to manipulate digitally encoded early musical scores in square-note notation.
 
+You can see a demo of Neon.js in action at http://ddmal.music.mcgill.ca/neondemo
+
 Requirements
 ------------
 
