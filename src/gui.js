@@ -501,9 +501,12 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             rendEng.unObserve("mouse:move");
             rendEng.unObserve("mouse:up");
 
+            // remove insert division menu
+            $("#menu_insertdivision").remove();
+
             // add ornamentation toggles
-            if ($("#menu_ornamentation").length == 0) {
-                $("#sidebar-insert").append('<span id="menu_ornamentation"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="chk_dot" class="btn">&#149; Dot</button>\n<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
+            if ($("#menu_insertpunctum").length == 0) {
+                $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="chk_dot" class="btn">&#149; Dot</button>\n<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
             }
 
             // put the punctum off the screen for now
@@ -583,7 +586,19 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             rendEng.repaint();
 
             // remove ornamentation UI elements - not needed for divisions
-            $("#menu_ornamentation").remove()
+            $("#menu_insertpunctum").remove();
+
+            // add division type toggles
+            if ($("#menu_insertdivision").length == 0) {
+                $("#sidebar-insert").append('<span id="menu_insertdivision"><br/><li class="nav-header">Division Type</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="rad_small" class="btn">Small</button>\n<button id="rad_minor" class="btn">Minor</button>\n<button id="rad_major" class="btn">Major</button>\n<button id="rad_final" class="btn">Final</button></div></li></span>');
+            }
+
+            $("#rad_small").bind("click.insert", function() {
+
+            });
+
+            // toggle small division by default
+            $("#rad_small").trigger('click');
         });
 
         // toggle punctum insert by default
