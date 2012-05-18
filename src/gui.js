@@ -55,7 +55,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
      ********************************************************/
     var nav_file_dropdown_parent = "#nav_file_dropdown";
     $(nav_file_dropdown_parent).prepend('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li>');
-    $("#nav_file_dropdown_revert").tooltip({animation: true, placement: 'bottom', title: 'Revert the current MEI file to the original version. Warning: this will revert all changes made in the editor.', delay: 100});
+    $("#nav_file_dropdown_revert").tooltip({animation: true, placement: 'right', title: '<br/><br/>Revert the current MEI file to the original version. Warning: this will revert all changes made in the editor.', delay: 100});
     $("#nav_file_dropdown_revert").click(function() {
         // move backup mei file to working directory
         $.get(prefix + "/revert/" + fileName, function(data) {
