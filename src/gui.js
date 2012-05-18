@@ -97,7 +97,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.repaint();
                
         if ($(side_parentDivId + "> #sidebar-edit").length == 0) {
-            $(side_parentDivId).append('<span id="sidebar-edit"><br /><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></div></li></span>');
+            $(side_parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n</li>\n<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
         }
         
         rendEng.canvas.observe('mouse:down', function(e) {
@@ -112,7 +112,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.observe('object:selected', function(e) {
             var selection = rendEng.canvas.getActiveObject();
             if (selection.eleRef instanceof Toe.Model.Neume) {
-                console.log(selection.eleRef);
                 $("#info > p").text("Selected: " + selection.eleRef.props.type.name);
                 $("#info").animate({opacity: 1.0}, 100);
             }
@@ -163,7 +162,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                         // get y position of first neume component
                         var nc_y = element.staffRef.clef.y - (ele.rootDiff * element.staffRef.delta_y/2);
-                        //var finalCoords = {x: element.left - delta_x, y: nc_y - delta_y};
                         var finalCoords = {x: left, y: nc_y - delta_y};
 
                         var sModel = page.getClosestStaff(finalCoords);
@@ -223,7 +221,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         }
 
                         // send pitch shift command to server to change underlying MEI
-                        $.post(prefix + "/edit/" + fileName + "/change/note", {data: JSON.stringify(args)})
+                        $.post(prefix + "/edit/" + fileName + "/move/neume", {data: JSON.stringify(args)})
                         .error(function() {
                             // show alert to user
                             // replace text with error message
@@ -285,7 +283,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             // send delete command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/delete/note",  {ids: nids.join(",")})
+            $.post(prefix + "/edit/" + fileName + "/delete/neume",  {ids: nids.join(",")})
             .error(function() {
                 // show alert to user
                 // replace text with error message
@@ -495,74 +493,101 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
         // then add insert options
         if ($(side_parentDivId + "> #sidebar-insert").length == 0) {
-            $(side_parentDivId).append('<span id="sidebar-insert"><br /><li class="nav-header">Insert</li>\n<li>\n<b>Ornamentation</b>:<div class="btn-group" data-toggle="buttons-checkbox">\n<button id="btn_delete" class="btn">Dot</button>\n<button id="btn_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="btn_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div>\n</span>');
+            $(side_parentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio"><button id="rad_punctum" class="btn"><i class="icon-bookmark icon-black"></i> Punctum</button>\n<button id="rad_division" class="btn"><b>||</b> Division</button>\n</div>\n</li>\n</span>');
         }
 
-        // put the punctum off the screen for now
-        gui.punct.set({left: -50, top: -50, opacity: 0.60});
-        rendEng.draw({static: [], modify: [gui.punct]}, {repaint: true, selectable: false});
+        $("#rad_punctum").bind("click.insert", function() {
+            // unbind other event handlers
+            rendEng.unObserve("mouse:move");
+            rendEng.unObserve("mouse:up");
 
-        // render transparent punctum at pointer location
-        rendEng.canvas.observe('mouse:move', function(e) {
-            var pnt = rendEng.canvas.getPointer(e.memo.e);
-            gui.punct.set({left: pnt.x - gui.punctGlyph.centre[0]/2, top: pnt.y - gui.punctGlyph.centre[1]/2});
-            rendEng.repaint();
-        });
-
-        rendEng.canvas.observe('mouse:up', function(e) {
-            var coords = {x: gui.punct.left, y: gui.punct.top};
-            var sModel = page.getClosestStaff(coords);
-
-            // instantiate a punctum
-            var nModel = new Toe.Model.Neume();
-
-            // calculate snapped coords
-            var snapCoords = sModel.ohSnap(coords, gui.punct.currentWidth);
-
-            // update bounding box with physical position on the page
-            var ulx = snapCoords.x - gui.punct.currentWidth/2;
-            var uly = snapCoords.y - gui.punct.currentHeight/2;
-            var bb = [Math.round(ulx), Math.round(uly), Math.round(ulx + gui.punct.currentWidth), Math.round(uly + gui.punct.currentHeight)];
-            nModel.setBoundingBox(bb);
-
-            // get pitch name and octave of snapped coords of note
-            var noteInfo = sModel.calcNoteInfo(snapCoords);
-            var pname = noteInfo["pname"];
-            var oct = noteInfo["oct"];
-
-            // TODO: check ornamentation toggles to add to component
-            nModel.addComponent("punctum", pname, oct);
-
-            // instantiate neume view and controller
-            var nView = new Toe.View.NeumeView(rendEng);
-            var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
-            
-            // mount neume on the staff
-            var nInd = sModel.addNeume(nModel);
-
-            var args = {pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
-
-            // get next element to insert before
-            if (nInd + 1 < sModel.elements.length) {
-                args["beforeid"] = sModel.elements[nInd+1].id;
-            }
-            else {
-                // insert before the next system break (staff)
-                var sNextModel = page.getNextStaff(sModel);
-                args["beforeid"] = sNextModel.id;
+            // add ornamentation toggles
+            if ($("#menu_ornamentation").length == 0) {
+                $("#sidebar-insert").append('<span id="menu_ornamentation"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="chk_dot" class="btn">&#149; Dot</button>\n<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
             }
 
-            // send insert command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/new/note", args, function(data) {
-                nModel.id = JSON.parse(data).nid;
-            })
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
-                $("#alert").toggleClass("fade");
+            // put the punctum off the screen for now
+            gui.punct.set({left: -50, top: -50, opacity: 0.60});
+            rendEng.draw({static: [], modify: [gui.punct]}, {repaint: true, selectable: false});
+
+            // render transparent punctum at pointer location
+            rendEng.canvas.observe('mouse:move', function(e) {
+                var pnt = rendEng.canvas.getPointer(e.memo.e);
+                gui.punct.set({left: pnt.x - gui.punctGlyph.centre[0]/2, top: pnt.y - gui.punctGlyph.centre[1]/2});
+                rendEng.repaint();
+            });
+
+            rendEng.canvas.observe('mouse:up', function(e) {
+                var coords = {x: gui.punct.left, y: gui.punct.top};
+                var sModel = page.getClosestStaff(coords);
+
+                // instantiate a punctum
+                var nModel = new Toe.Model.Neume();
+
+                // calculate snapped coords
+                var snapCoords = sModel.ohSnap(coords, gui.punct.currentWidth);
+
+                // update bounding box with physical position on the page
+                var ulx = snapCoords.x - gui.punct.currentWidth/2;
+                var uly = snapCoords.y - gui.punct.currentHeight/2;
+                var bb = [Math.round(ulx), Math.round(uly), Math.round(ulx + gui.punct.currentWidth), Math.round(uly + gui.punct.currentHeight)];
+                nModel.setBoundingBox(bb);
+
+                // get pitch name and octave of snapped coords of note
+                var noteInfo = sModel.calcNoteInfo(snapCoords);
+                var pname = noteInfo["pname"];
+                var oct = noteInfo["oct"];
+
+                // TODO: check ornamentation toggles to add to component
+                nModel.addComponent("punctum", pname, oct);
+
+                // instantiate neume view and controller
+                var nView = new Toe.View.NeumeView(rendEng);
+                var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+                
+                // mount neume on the staff
+                var nInd = sModel.addNeume(nModel);
+
+                var args = {pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+
+                // get next element to insert before
+                if (nInd + 1 < sModel.elements.length) {
+                    args["beforeid"] = sModel.elements[nInd+1].id;
+                }
+                else {
+                    // insert before the next system break (staff)
+                    var sNextModel = page.getNextStaff(sModel);
+                    args["beforeid"] = sNextModel.id;
+                }
+
+                // send insert command to server to change underlying MEI
+                $.post(prefix + "/edit/" + fileName + "/insert/neume", args, function(data) {
+                    nModel.id = JSON.parse(data).nid;
+                })
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
+                    $("#alert").toggleClass("fade");
+                });
             });
         });
+
+        $("#rad_division").bind("click.insert", function() {
+            // unbind insert punctum event handlers
+            rendEng.unObserve("mouse:move");
+            rendEng.unObserve("mouse:up");
+
+            // remove the pointer following punctum
+            rendEng.canvas.remove(gui.punct);
+            rendEng.repaint();
+
+            // remove ornamentation UI elements - not needed for divisions
+            $("#menu_ornamentation").remove()
+        });
+
+        // toggle punctum insert by default
+        $("#rad_punctum").trigger('click');
     });
 
     // set active button on startup
