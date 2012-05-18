@@ -590,11 +590,126 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
             // add division type toggles
             if ($("#menu_insertdivision").length == 0) {
-                $("#sidebar-insert").append('<span id="menu_insertdivision"><br/><li class="nav-header">Division Type</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="rad_small" class="btn">Small</button>\n<button id="rad_minor" class="btn">Minor</button>\n<button id="rad_major" class="btn">Major</button>\n<button id="rad_final" class="btn">Final</button></div></li></span>');
+                $("#sidebar-insert").append('<span id="menu_insertdivision"><br/>\n<li class="nav-header">Division Type</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="rad_small" class="btn">Small</button>\n<button id="rad_minor" class="btn">Minor</button>\n<button id="rad_major" class="btn">Major</button>\n<button id="rad_final" class="btn">Final</button>\n</div>\n</li>\n</span>');
             }
 
-            $("#rad_small").bind("click.insert", function() {
+            var division = null;
+            var divisionDwg = null;
+            var staff = null;
 
+            rendEng.canvas.observe('mouse:move', function(e) {
+                var pnt = rendEng.canvas.getPointer(e.memo.e);
+
+                // get closest staff
+                staff = page.getClosestStaff(pnt);
+
+                // snapped coords
+                var snapCoords = pnt;
+                if (pnt.x < staff.zone.ulx) {
+                    if (staff.clef) {
+                        snapCoords.x = staff.clef.zone.lrx + 1;
+                    }
+                    else {
+                        snapCoords.x = staff.zone.ulx + 1;
+                    }
+                }
+                else if (pnt.x > staff.zone.lrx) {
+                    if (staff.custos) {
+                        snapCoords.x = staff.custos.zone.ulx - 1;
+                    }
+                    else {
+                        snapCoords.x = staff.zone.lrx - 1;
+                    }
+                }
+
+                var divProps = {strokeWidth: 4};
+                switch (division.type) {
+                    case Toe.Model.Division.Type.small:
+                        snapCoords.y = staff.zone.uly;
+
+                        if (!divisionDwg) {
+                            var y1 = staff.zone.uly - staff.delta_y/2;
+                            var y2 = staff.zone.uly + staff.delta_y/2;
+                            var x1 = snapCoords.x;
+
+                            divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
+                        }
+                        break;
+                    case Toe.Model.Division.Type.minor:
+                        snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+
+                        if (!divisionDwg) {
+                            var y1 = staff.zone.uly + staff.delta_y/2;
+                            var y2 = y1 + 2*staff.delta_y;
+                            var x1 = snapCoords.x;
+
+                            divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
+                        }
+                        break;
+                    case Toe.Model.Division.Type.major:
+                        snapCoords.y = snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+
+                        if (!divisionDwg) {
+                            var y1 = staff.zone.uly;
+                            var y2 = staff.zone.lry;
+                            var x1 = snapCoords.x;
+
+                            divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
+                        }
+                        break;
+                    case Toe.Model.Division.Type.final:
+                        snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+
+                        if (!divisionDwg) {
+                            var y1 = staff.zone.uly;
+                            var y2 = staff.zone.lry;
+                            var x1 = snapCoords.x;
+                            // make width equal to width of punctum glyph
+                            var x2 = snapCoords.x + gui.punct.width*rendEng.getGlobalScale();;
+
+                            var div1 = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            var div2 = rendEng.createLine([x2, y1, x2, y2], divProps);
+                            divisionDwg = rendEng.draw({static: [div1, div2], modify: []}, {group: true, selectable: false})[0];
+                        }
+                        break;
+                }                    
+
+                // move around the drawing
+                divisionDwg.left = snapCoords.x;
+                divisionDwg.top = snapCoords.y;
+                rendEng.repaint();
+            });
+
+            $("#rad_small").bind("click.insert", function() {
+                // remove the current division following the pointer
+                rendEng.canvas.remove(divisionDwg);
+                divisionDwg = null;
+
+                division = new Toe.Model.Division("small");
+            });
+
+            $("#rad_minor").bind("click.insert", function() {
+                rendEng.canvas.remove(divisionDwg);
+                divisionDwg = null;
+
+                division = new Toe.Model.Division("minor");
+            });
+
+            $("#rad_major").bind("click.insert", function() {
+                rendEng.canvas.remove(divisionDwg);
+                divisionDwg = null;
+
+                division = new Toe.Model.Division("major");
+            });
+
+            $("#rad_final").bind("click.insert", function() {
+                rendEng.canvas.remove(divisionDwg);
+                divisionDwg = null;
+
+                division = new Toe.Model.Division("final");
             });
 
             // toggle small division by default

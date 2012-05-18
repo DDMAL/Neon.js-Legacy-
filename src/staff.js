@@ -63,6 +63,9 @@ Toe.Model.Staff = function(bb, options) {
     // id of the staff
     this.id = null;
 
+    this.clef = null;
+    this.custos = null;
+
     this.elements = new Array();
 }
 
@@ -341,6 +344,8 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
 
     // update view
     $(custos).trigger("vRenderCustos", [custos, this]);
+
+    this.custos = custos;
 
     // for chaining
     return this;
