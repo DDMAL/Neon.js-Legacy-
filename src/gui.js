@@ -533,7 +533,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // update bounding box with physical position on the page
                 var ulx = snapCoords.x - gui.punct.currentWidth/2;
                 var uly = snapCoords.y - gui.punct.currentHeight/2;
-                var bb = [Math.round(ulx), Math.round(uly), Math.round(ulx + gui.punct.currentWidth), Math.round(uly + gui.punct.currentHeight)];
+                var bb = [ulx, uly, ulx + gui.punct.currentWidth, uly + gui.punct.currentHeight];
                 nModel.setBoundingBox(bb);
 
                 // get pitch name and octave of snapped coords of note
@@ -681,6 +681,41 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 divisionDwg.left = snapCoords.x;
                 divisionDwg.top = snapCoords.y;
                 rendEng.repaint();
+            });
+
+            rendEng.canvas.observe('mouse:up', function(e) {
+                // get coords
+                var coords = {x: divisionDwg.left, y: divisionDwg.top};
+
+                // calculate snapped coords
+                var snapCoords = staff.ohSnap(coords, divisionDwg.currentWidth);
+
+                // update bounding box with physical position on the page
+                var ulx = snapCoords.x - divisionDwg.currentWidth/2;
+                var uly = snapCoords.y - divisionDwg.currentHeight/2;
+                var bb = [ulx, uly, ulx + divisionDwg.currentWidth, uly + divisionDwg.currentHeight];
+                division.setBoundingBox(bb);
+
+                // instantiate division view and controller
+                var dView = new Toe.View.DivisionView(rendEng);
+                var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
+
+                // mount division on the staff
+                var nInd = staff.addDivision(division);
+
+                var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+
+                // get next element to insert before
+                if (nInd + 1 < staff.elements.length) {
+                    args["beforeid"] = staff.elements[nInd+1].id;    
+                }
+                else {
+                    // insert before the next system break (staff)
+                    var sNextModel = page.getNextStaff(staff);
+                    args["beforeid"] = sNextModel.id;
+                }
+
+                // TODO: ajax request to server
             });
 
             $("#rad_small").bind("click.insert", function() {
