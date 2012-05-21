@@ -603,25 +603,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // get closest staff
                 staff = page.getClosestStaff(pnt);
 
-                // snapped coords
                 var snapCoords = pnt;
-                if (pnt.x < staff.zone.ulx) {
-                    if (staff.clef) {
-                        snapCoords.x = staff.clef.zone.lrx + 1;
-                    }
-                    else {
-                        snapCoords.x = staff.zone.ulx + 1;
-                    }
-                }
-                else if (pnt.x > staff.zone.lrx) {
-                    if (staff.custos) {
-                        snapCoords.x = staff.custos.zone.ulx - 1;
-                    }
-                    else {
-                        snapCoords.x = staff.zone.lrx - 1;
-                    }
-                }
-
                 var divProps = {strokeWidth: 4};
                 switch (division.type) {
                     case Toe.Model.Division.Type.small:
@@ -676,6 +658,24 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         }
                         break;
                 }                    
+
+                // snap the drawing to the staff on the x-plane
+                var dwgLeft = pnt.x - divisionDwg.currentWidth/2;
+                var dwgRight = pnt.x + divisionDwg.currentWidth/2;
+                if (staff.clef && dwgLeft <= staff.clef.zone.lrx) {
+                    snapCoords.x = staff.clef.zone.lrx + divisionDwg.currentWidth/2 + 1;
+                }
+                else if (dwgLeft <= staff.zone.ulx) {
+                    snapCoords.x = staff.zone.ulx + divisionDwg.currentWidth/2 + 1;
+                }
+
+                if (staff.custos && dwgRight >= staff.custos.zone.ulx) {
+                    // 3 is a magic number just to give it some padding
+                    snapCoords.x = staff.custos.zone.ulx - divisionDwg.currentWidth/2 - 3;
+                }
+                else if (dwgRight >= staff.zone.lrx) {
+                    snapCoords.x = staff.zone.lrx - divisionDwg.currentWidth/2 - 3;
+                }
 
                 // move around the drawing
                 divisionDwg.left = snapCoords.x;
