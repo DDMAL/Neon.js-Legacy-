@@ -54,7 +54,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
      *                      NAVBAR                          *
      ********************************************************/
     var nav_file_dropdown_parent = "#nav_file_dropdown";
-    $(nav_file_dropdown_parent).prepend('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li>');
+    $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li><li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li><li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
     $("#nav_file_dropdown_revert").tooltip({animation: true, placement: 'right', title: '<br/><br/>Revert the current MEI file to the original version. Warning: this will revert all changes made in the editor.', delay: 100});
     $("#nav_file_dropdown_revert").click(function() {
         // move backup mei file to working directory
@@ -70,6 +70,10 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
         });
     });
+
+    $("#nav_file_dropdown_getmei").tooltip({animation: true, placement: 'right', title: 'Download the MEI file of the document being edited.', delay: 100});
+    // set the download path of the file
+    $("#nav_file_dropdown_getmei").attr("href", prefix + "/file/" + fileName);
 
     /********************************************************
      *                     SIDEBAR                          *
