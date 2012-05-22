@@ -225,7 +225,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         .error(function() {
                             // show alert to user
                             // replace text with error message
-                            $(".alert > p").text("Server failed to delete note. Client and server are not syncronized.");
+                            $(".alert > p").text("Server failed to delete note. Client and server are not synchronized.");
                             $(".alert").toggleClass("fade");
                         });
                     }
@@ -287,7 +287,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             .error(function() {
                 // show alert to user
                 // replace text with error message
-                $("#alert > p").text("Server failed to delete note. Client and server are not syncronized.");
+                $("#alert > p").text("Server failed to delete note. Client and server are not synchronized.");
                 $("#alert").animate({opacity: 1.0}, 100);
             });
         });
@@ -376,7 +376,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 .error(function() {
                     // show alert to user
                     // replace text with error message
-                    $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not syncronized.");
+                    $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not synchronized.");
                     $("#alert").toggleClass("fade");
                 });
 
@@ -466,7 +466,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             .error(function() {
                 // show alert to user
                 // replace text with error message
-                $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not syncronized.");
+                $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not synchronized.");
                 $("#alert").toggleClass("fade");
             });
 
@@ -560,7 +560,9 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 else {
                     // insert before the next system break (staff)
                     var sNextModel = page.getNextStaff(sModel);
-                    args["beforeid"] = sNextModel.id;
+                    if (sNextModel) {
+                        args["beforeid"] = sNextModel.id;
+                    }
                 }
 
                 // send insert command to server to change underlying MEI
@@ -570,7 +572,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 .error(function() {
                     // show alert to user
                     // replace text with error message
-                    $("#alert > p").text("Server failed to insert note. Client and server are not syncronized.");
+                    $("#alert > p").text("Server failed to insert neume. Client and server are not synchronized.");
                     $("#alert").toggleClass("fade");
                 });
             });
@@ -593,7 +595,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 $("#sidebar-insert").append('<span id="menu_insertdivision"><br/>\n<li class="nav-header">Division Type</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="rad_small" class="btn">Small</button>\n<button id="rad_minor" class="btn">Minor</button>\n<button id="rad_major" class="btn">Major</button>\n<button id="rad_final" class="btn">Final</button>\n</div>\n</li>\n</span>');
             }
 
-            var division = null;
+            var divisionForm = null;
             var divisionDwg = null;
             var staff = null;
 
@@ -605,8 +607,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                 var snapCoords = pnt;
                 var divProps = {strokeWidth: 4};
-                switch (division.type) {
-                    case Toe.Model.Division.Type.small:
+                switch (divisionForm) {
+                    case "small":
                         snapCoords.y = staff.zone.uly;
 
                         if (!divisionDwg) {
@@ -618,7 +620,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
                         }
                         break;
-                    case Toe.Model.Division.Type.minor:
+                    case "minor":
                         snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
                         if (!divisionDwg) {
@@ -630,7 +632,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
                         }
                         break;
-                    case Toe.Model.Division.Type.major:
+                    case "major":
                         snapCoords.y = snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
                         if (!divisionDwg) {
@@ -642,7 +644,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
                         }
                         break;
-                    case Toe.Model.Division.Type.final:
+                    case "final":
                         snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
                         if (!divisionDwg) {
@@ -690,11 +692,19 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // calculate snapped coords
                 var snapCoords = staff.ohSnap(coords, divisionDwg.currentWidth);
 
+                // getting coordinates done
+                //$("#progressbar").css("width", "18.75%");
+
+                var division = new Toe.Model.Division(divisionForm);
+
                 // update bounding box with physical position on the page
                 var ulx = snapCoords.x - divisionDwg.currentWidth/2;
                 var uly = snapCoords.y - divisionDwg.currentHeight/2;
                 var bb = [ulx, uly, ulx + divisionDwg.currentWidth, uly + divisionDwg.currentHeight];
                 division.setBoundingBox(bb);
+
+                // bounding box set
+                //$("#progressbar").css("width", "37.5%");
 
                 // instantiate division view and controller
                 var dView = new Toe.View.DivisionView(rendEng);
@@ -703,11 +713,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // mount division on the staff
                 var nInd = staff.addDivision(division);
 
-                var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+                // division drawn on the canvas
+                //$("#progressbar").css("width", "56.25%");
 
+                var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
                 // get next element to insert before
                 if (nInd + 1 < staff.elements.length) {
-                    args["beforeid"] = staff.elements[nInd+1].id;    
+                    args["beforeid"] = staff.elements[nInd+1].id;   
                 }
                 else {
                     // insert before the next system break (staff)
@@ -715,36 +727,58 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     args["beforeid"] = sNextModel.id;
                 }
 
-                // TODO: ajax request to server
+                // arguments prepared for the server
+                //$("#progressbar").css("width", "75%");
+
+                // send insert division command to server to change underlying MEI
+                $.post(prefix + "/edit/" + fileName + "/insert/division", args, function(data) {
+                    //$("#progressbar").css("width", "100%");   
+                    // all done, reset progress bar
+                    //$("#progressbar").delay(1000).css("width", "0%");
+                    division.id = JSON.parse(data).id;
+                })
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to insert division. Client and server are not synchronized.");
+                    $("#alert").toggleClass("fade");
+                    // change progress bar colour to red, reset progress bar
+                    //$("#progressbar").toggleClass("progress-danger");
+                    //$("#progressbar").delay(1000).css("width", "0%").toggleClass("alert");
+                });
             });
 
             $("#rad_small").bind("click.insert", function() {
                 // remove the current division following the pointer
-                rendEng.canvas.remove(divisionDwg);
-                divisionDwg = null;
-
-                division = new Toe.Model.Division("small");
+                if (divisionDwg) {
+                    rendEng.canvas.remove(divisionDwg);
+                    divisionDwg = null;
+                }
+                divisionForm = "small";
             });
 
             $("#rad_minor").bind("click.insert", function() {
-                rendEng.canvas.remove(divisionDwg);
-                divisionDwg = null;
-
-                division = new Toe.Model.Division("minor");
+                if (divisionDwg) {
+                    rendEng.canvas.remove(divisionDwg);
+                    divisionDwg = null;
+                }
+                divisionForm = "minor";
             });
 
             $("#rad_major").bind("click.insert", function() {
-                rendEng.canvas.remove(divisionDwg);
-                divisionDwg = null;
-
-                division = new Toe.Model.Division("major");
+                if (divisionDwg) {
+                    rendEng.canvas.remove(divisionDwg);
+                    divisionDwg = null;
+                }
+                divisionForm = "major";
             });
 
             $("#rad_final").bind("click.insert", function() {
-                rendEng.canvas.remove(divisionDwg);
-                divisionDwg = null;
-
-                division = new Toe.Model.Division("final");
+                if (divisionDwg) {
+                    rendEng.canvas.remove(divisionDwg);
+                    divisionDwg = null;
+                }
+                divisionForm = "final";
             });
 
             // toggle small division by default

@@ -173,7 +173,6 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         if parent and before:
             parent.addChildBefore(before, punctum)
             
-
     def get_new_zone(self, ulx, uly, lrx, lry):
         zone = MeiElement("zone")
         zone.addAttribute("ulx", ulx)
@@ -230,6 +229,130 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         result = {"nid": punctum.getId()}
+        self.write(json.dumps(result))
+        self.set_status(200)
+
+class InsertDivisionHandler(tornado.web.RequestHandler):
+
+    def create_new_division(self, type):
+        '''
+        Make a new division and return the MEI element.
+        Attach the facs data to the division element
+        '''
+
+        division = MeiElement("division")
+        division.addAttribute("form", type)
+
+        return division
+
+    def insert_division(self, division, beforeid):
+        before = self.mei.getElementById(beforeid)
+
+        # get layer element
+        layer_parent = before.getParent()
+
+        if layer_parent and before:
+            layer_parent.addChildBefore(before, division)
+
+            if division.getAttribute("form").getValue() == "final":
+                # if final division, close layer and staff
+                self.move_elements(layer_parent, before)
+
+    def create_zone(self, ulx, uly, lrx, lry):
+        zone = MeiElement("zone")
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+        return zone
+
+    def add_zone(self, division, zone):
+        # add zone to the surfaces
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces) and zone:
+            surfaces[0].addChild(zone)
+
+        if zone:
+            division.addAttribute("facs", zone.getId())
+
+    def move_elements(self, layer, before):
+        # get staff parent element
+        staff = layer.getParent()
+
+        # create new staff and layer
+        new_staff = MeiElement("staff")
+        new_layer = MeiElement("layer")
+        new_layer.addAttribute("n", "1")
+        
+        # get elements after "before element" to move
+        element_peers = before.getPeers()
+        e_ind = list(element_peers).index(before)
+        for e in element_peers[e_ind:]:
+            # add element to the new staff/layer
+            new_layer.addChild(e)
+            # remove element from the current staff/layer
+            layer.removeChild(e)
+
+        new_staff.addChild(new_layer)
+
+        # insert new staff into the document
+        section_parent = staff.getParent()
+        staves = section_parent.getChildrenByName("staff")
+        s_ind = list(staves).index(staff)
+        before_staff = None
+        if s_ind+1 < len(staves):
+            before_staff = staves[s_ind+1]
+
+        # update staff numbers of subsequent staves
+        for i, s in enumerate(staves[s_ind+1:]):
+            s.addAttribute("n", str(s_ind+i+3))
+
+        new_staff.addAttribute("n", str(s_ind+2))
+        self.insert_staff(section_parent, new_staff, before_staff)
+                
+    def insert_staff(self, section, staff, before_staff):
+        '''
+        Insert the given staff before the another given staff.
+        If there is no subsequent staff, just append to the staff
+        to the end.
+        '''
+
+        if before_staff:
+            section.addChildBefore(before_staff, staff)
+        else:
+            section.addChild(staff)
+
+    def post(self, file):
+        '''
+        Insert a division before the given element. There is one case
+        where there is no element to insert before, when there is no
+        subsequent staff. In this case, the element is enserted ath the end
+        of the last system. Also sets the bounding box information of the new
+        punctum.
+        '''
+
+        div_type = str(self.get_argument("type", ""))
+        beforeid = str(self.get_argument("beforeid", None))
+
+        # bounding box
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        zone = self.create_zone(ulx, uly, lrx, lry)
+        division = self.create_new_division(div_type)
+        self.add_zone(division, zone)
+        self.insert_division(division, beforeid)
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"did": division.getId()}
         self.write(json.dumps(result))
         self.set_status(200)
 
