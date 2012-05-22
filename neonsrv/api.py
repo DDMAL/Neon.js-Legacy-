@@ -279,6 +279,7 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
     def move_elements(self, layer, before):
         # get staff parent element
         staff = layer.getParent()
+        section_parent = staff.getParent()
 
         # create new staff and layer
         new_staff = MeiElement("staff")
@@ -297,12 +298,14 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
         new_staff.addChild(new_layer)
 
         # insert new staff into the document
-        section_parent = staff.getParent()
         staves = section_parent.getChildrenByName("staff")
         s_ind = list(staves).index(staff)
         before_staff = None
         if s_ind+1 < len(staves):
             before_staff = staves[s_ind+1]
+
+        # insert and update staff definitions
+        self.insert_staff_def(s_ind+1, len(staves))
 
         # update staff numbers of subsequent staves
         for i, s in enumerate(staves[s_ind+1:]):
@@ -322,6 +325,29 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
             section.addChildBefore(before_staff, staff)
         else:
             section.addChild(staff)
+
+    def insert_staff_def(self, staff_num, num_staves):
+        '''
+        Insert a new staff definition with number staff_num
+        and update subsequent staff definition numbers.
+        '''
+
+        staff_group = self.mei.getElementsByName("staffGrp")
+        if len(staff_group):
+            staff_defs = staff_group[0].getChildrenByName("staffDef")
+            if len(staff_defs) == num_staves:
+                for i, sd in enumerate(staff_defs[staff_num:]):
+                    sd.addAttribute("n", str(staff_num+i+2))
+                staff_def = MeiElement("staffDef")
+                staff_def.addAttribute("n", str(staff_num+1))
+                before_staff_def = None
+                if staff_num < len(staff_defs):
+                    before_staff_def = staff_defs[staff_num]
+
+        if before_staff_def:
+            staff_group[0].addChildBefore(before_staff_def, staff_def)
+        else:
+            staff_group[0].addChild(staff_def)
 
     def post(self, file):
         '''
@@ -352,7 +378,7 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
 
         XmlExport.write(self.mei, fname)
 
-        result = {"did": division.getId()}
+        result = {"id": division.getId()}
         self.write(json.dumps(result))
         self.set_status(200)
 
