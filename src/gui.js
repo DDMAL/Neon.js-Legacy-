@@ -71,9 +71,22 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         });
     });
 
-    $("#nav_file_dropdown_getmei").tooltip({animation: true, placement: 'right', title: 'Download the MEI file of the document being edited.', delay: 100});
+    // MEI download
+    $("#nav_file_dropdown_getmei").tooltip({animation: true, placement: 'right', title: 'View the MEI file of the document being edited.', delay: 100});
     // set the download path of the file
     $("#nav_file_dropdown_getmei").attr("href", prefix + "/file/" + fileName);
+
+    // Document image rasterize
+    $("#nav_file_dropdown_getimg").tooltip({animation: true, placement: 'right', title: 'Download an image of the document being edited.', delay: 100});
+    $("#nav_file_dropdown_getimg").click(function() {
+        if (!fabric.Canvas.supports('toDataURL')) {
+            // show alert to user
+            $("#alert > p").text("The browser you are using does not support this feature.");
+        }
+        else {
+            window.open(rendEng.canvas.toDataURL('png'));
+        }
+    });
 
     /********************************************************
      *                     SIDEBAR                          *
