@@ -8,144 +8,9 @@ import json
 
 import conf
 
-class DeleteNeumeHandler(tornado.web.RequestHandler):
-    def delete_neume(self, neume):
-        """ Delete a <neume> object from the model and also
-        a <zone> element of the neume's facs attribute, if one
-        exists.
-        """
-        facsid = neume.getAttribute("facs").value
-        neume.parent.removeChild(neume)
-        # Remove the zone if it exists
-        zone = self.mei.getElementById(str(facsid))
-        if zone and zone.name == "zone":
-            zone.parent.removeChild(zone)
-
-    def delete_note(self, note):
-        """ Delete a <note> from the model. If its parent <nc> element
-        is empty after this, delete the <nc>. If the parent <neume> is
-        empty after this, delete the <neume>.
-        """
-        nc = note.parent
-        if nc and nc.name == "nc":
-            neume = nc.parent
-            if neume and neume.name == "neume":
-                # If we have neume -> nc -> note, remove the note.
-                nc.removeChild(note)
-                # Remove the nc and neume if they're empty
-                if len(nc.children) == 0:
-                    neume.removeChild(nc)
-                if len(neume.children) == 0:
-                    self.delete_neume(neume)
-
-    def do_delete(self, ids):
-        """ Delete the elements from the mei model that have the specified
-        IDs. The IDs can be of <note> or <neume> objects.
-        """
-        for i in ids.split(","):
-            element = self.mei.getElementById(str(i))
-            if element and element.name == "note":
-                self.delete_note(element)
-            elif element and element.name == "neume":
-                self.delete_neume(element)
-
-    def post(self, file):
-        """ Delete one or more <note> or <neume> elements.
-        Pass in an argument called 'id' with a comma separated list of
-        ids of note elements to delete.
-        If the note's surrounding <nc> element is empty after this, remove it.
-        If the nc's surrounding <neume> element is empty, remove it.
-        Remove any <zone> elements whose ids are referenced by removed <neume>s.
-
-        Does not reduce the size of the bounding box on a <zone> or change the neume
-        type if it now has a different number of <note> elements.
-        """
-        todelete = self.get_argument("ids", "")
-
-        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
-
-        fname = os.path.join(mei_directory, file)
-        self.mei = XmlImport.read(fname)
-        self.do_delete(todelete)
-
-        XmlExport.write(self.mei, fname)
-
-        self.set_status(200)
-
-class ChangeNeumePitchHandler(tornado.web.RequestHandler):
-
-    def neume_pitch_shift(self, neume, pitch_info):
-        notes = neume.getDescendantsByName("note")
-        if len(notes):
-            for n, pinfo in zip(notes, pitch_info):
-                n.addAttribute("pname", str(pinfo["pname"]))
-                n.addAttribute("oct", str(pinfo["oct"]))
-
-    def reposition_neume(self, neume, beforeid):
-        # first remove the neume
-        self.remove_neume(neume)
-
-        if beforeid is None:
-            # get last layer
-            layers = self.mei.getElementsByName("layer")
-            if len(layers):
-                layers[-1].addChild(neume)
-        else:
-            self.insert_neume(neume, beforeid)
-
-    def remove_neume(self, neume):
-        parent = neume.getParent()
-        parent.removeChild(neume)
-
-    def insert_neume(self, neume, beforeid):
-        before = self.mei.getElementById(beforeid)
-
-        # get layer element
-        parent = before.getParent()
-
-        if parent and before:
-            parent.addChildBefore(before, neume)
-
-    def update_or_add_zone(self, neume, bb):
-        facsid = neume.getAttribute("facs").value
-        if facsid:
-            zone = self.mei.getElementById(facsid)
-        else:
-            zone = MeiElement("zone")
-            neume.addAttribute("facs", zone.getId())
-            surfaces = self.mei.getElementsByName("surface")
-            if len(surfaces):
-                surfaces[0].addChild(zone)
-
-        zone.addAttribute("ulx", str(bb["ulx"]))
-        zone.addAttribute("uly", str(bb["uly"]))
-        zone.addAttribute("lrx", str(bb["lrx"]))
-        zone.addAttribute("lry", str(bb["lry"]))
-        
-    def post(self, file):
-        data = json.loads(self.get_argument("data", ""))
-
-        nid = str(data["nid"])
-        beforeid = str(data["beforeid"])
-        bb = data["bb"]
-        pitch_info = data["pitchInfo"]
-
-        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
-        fname = os.path.join(mei_directory, file)
-        self.mei = XmlImport.read(fname)
-
-        neume = self.mei.getElementById(nid)
-
-        if pitch_info is not None:
-            self.neume_pitch_shift(neume, pitch_info)
-
-        self.reposition_neume(neume, beforeid)
-        self.update_or_add_zone(neume, bb)
-
-        XmlExport.write(self.mei, fname)
-
-        self.set_status(200)
-
+#####################################################
+#              NEUME HANDLER CLASSES                #
+#####################################################
 class InsertNeumeHandler(tornado.web.RequestHandler):
 
     def create_new_punctum(self, pname, oct):
@@ -232,154 +97,142 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         self.write(json.dumps(result))
         self.set_status(200)
 
-class InsertDivisionHandler(tornado.web.RequestHandler):
+class ChangeNeumePitchHandler(tornado.web.RequestHandler):
 
-    def create_new_division(self, type):
-        '''
-        Make a new division and return the MEI element.
-        Attach the facs data to the division element
-        '''
+    def neume_pitch_shift(self, neume, pitch_info):
+        notes = neume.getDescendantsByName("note")
+        if len(notes):
+            for n, pinfo in zip(notes, pitch_info):
+                n.addAttribute("pname", str(pinfo["pname"]))
+                n.addAttribute("oct", str(pinfo["oct"]))
 
-        division = MeiElement("division")
-        division.addAttribute("form", type)
+    def reposition_neume(self, neume, beforeid):
+        # first remove the neume
+        self.remove_neume(neume)
 
-        return division
+        if beforeid is None:
+            # get last layer
+            layers = self.mei.getElementsByName("layer")
+            if len(layers):
+                layers[-1].addChild(neume)
+        else:
+            self.insert_neume(neume, beforeid)
 
-    def insert_division(self, division, beforeid):
+    def remove_neume(self, neume):
+        parent = neume.getParent()
+        parent.removeChild(neume)
+
+    def insert_neume(self, neume, beforeid):
         before = self.mei.getElementById(beforeid)
 
         # get layer element
-        layer_parent = before.getParent()
+        parent = before.getParent()
 
-        if layer_parent and before:
-            layer_parent.addChildBefore(before, division)
+        if parent and before:
+            parent.addChildBefore(before, neume)
 
-            if division.getAttribute("form").getValue() == "final":
-                # if final division, close layer and staff
-                self.move_elements(layer_parent, before)
+    def update_or_add_zone(self, neume, bb):
+        facsid = neume.getAttribute("facs").value
+        if facsid:
+            zone = self.mei.getElementById(facsid)
+        else:
+            zone = MeiElement("zone")
+            neume.addAttribute("facs", zone.getId())
+            surfaces = self.mei.getElementsByName("surface")
+            if len(surfaces):
+                surfaces[0].addChild(zone)
 
-    def create_zone(self, ulx, uly, lrx, lry):
-        zone = MeiElement("zone")
-        zone.addAttribute("ulx", ulx)
-        zone.addAttribute("uly", uly)
-        zone.addAttribute("lrx", lrx)
-        zone.addAttribute("lry", lry)
-
-        return zone
-
-    def add_zone(self, division, zone):
-        # add zone to the surfaces
-        surfaces = self.mei.getElementsByName("surface")
-        if len(surfaces) and zone:
-            surfaces[0].addChild(zone)
-
-        if zone:
-            division.addAttribute("facs", zone.getId())
-
-    def move_elements(self, layer, before):
-        # get staff parent element
-        staff = layer.getParent()
-        section_parent = staff.getParent()
-
-        # create new staff and layer
-        new_staff = MeiElement("staff")
-        new_layer = MeiElement("layer")
-        new_layer.addAttribute("n", "1")
+        zone.addAttribute("ulx", str(bb["ulx"]))
+        zone.addAttribute("uly", str(bb["uly"]))
+        zone.addAttribute("lrx", str(bb["lrx"]))
+        zone.addAttribute("lry", str(bb["lry"]))
         
-        # get elements after "before element" to move
-        element_peers = before.getPeers()
-        e_ind = list(element_peers).index(before)
-        for e in element_peers[e_ind:]:
-            # add element to the new staff/layer
-            new_layer.addChild(e)
-            # remove element from the current staff/layer
-            layer.removeChild(e)
-
-        new_staff.addChild(new_layer)
-
-        # insert new staff into the document
-        staves = section_parent.getChildrenByName("staff")
-        s_ind = list(staves).index(staff)
-        before_staff = None
-        if s_ind+1 < len(staves):
-            before_staff = staves[s_ind+1]
-
-        # insert and update staff definitions
-        self.insert_staff_def(s_ind+1, len(staves))
-
-        # update staff numbers of subsequent staves
-        for i, s in enumerate(staves[s_ind+1:]):
-            s.addAttribute("n", str(s_ind+i+3))
-
-        new_staff.addAttribute("n", str(s_ind+2))
-        self.insert_staff(section_parent, new_staff, before_staff)
-                
-    def insert_staff(self, section, staff, before_staff):
-        '''
-        Insert the given staff before the another given staff.
-        If there is no subsequent staff, just append to the staff
-        to the end.
-        '''
-
-        if before_staff:
-            section.addChildBefore(before_staff, staff)
-        else:
-            section.addChild(staff)
-
-    def insert_staff_def(self, staff_num, num_staves):
-        '''
-        Insert a new staff definition with number staff_num
-        and update subsequent staff definition numbers.
-        '''
-
-        staff_group = self.mei.getElementsByName("staffGrp")
-        if len(staff_group):
-            staff_defs = staff_group[0].getChildrenByName("staffDef")
-            if len(staff_defs) == num_staves:
-                for i, sd in enumerate(staff_defs[staff_num:]):
-                    sd.addAttribute("n", str(staff_num+i+2))
-                staff_def = MeiElement("staffDef")
-                staff_def.addAttribute("n", str(staff_num+1))
-                before_staff_def = None
-                if staff_num < len(staff_defs):
-                    before_staff_def = staff_defs[staff_num]
-
-        if before_staff_def:
-            staff_group[0].addChildBefore(before_staff_def, staff_def)
-        else:
-            staff_group[0].addChild(staff_def)
-
     def post(self, file):
-        '''
-        Insert a division before the given element. There is one case
-        where there is no element to insert before, when there is no
-        subsequent staff. In this case, the element is enserted ath the end
-        of the last system. Also sets the bounding box information of the new
-        punctum.
-        '''
+        data = json.loads(self.get_argument("data", ""))
 
-        div_type = str(self.get_argument("type", ""))
-        beforeid = str(self.get_argument("beforeid", None))
-
-        # bounding box
-        lrx = str(self.get_argument("lrx", None))
-        lry = str(self.get_argument("lry", None))
-        ulx = str(self.get_argument("ulx", None))
-        uly = str(self.get_argument("uly", None))
+        nid = str(data["nid"])
+        beforeid = str(data["beforeid"])
+        bb = data["bb"]
+        pitch_info = data["pitchInfo"]
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         self.mei = XmlImport.read(fname)
 
-        zone = self.create_zone(ulx, uly, lrx, lry)
-        division = self.create_new_division(div_type)
-        self.add_zone(division, zone)
-        self.insert_division(division, beforeid)
+        neume = self.mei.getElementById(nid)
+
+        if pitch_info is not None:
+            self.neume_pitch_shift(neume, pitch_info)
+
+        self.reposition_neume(neume, beforeid)
+        self.update_or_add_zone(neume, bb)
 
         XmlExport.write(self.mei, fname)
 
-        result = {"id": division.getId()}
-        self.write(json.dumps(result))
+        self.set_status(200)
+
+class DeleteNeumeHandler(tornado.web.RequestHandler):
+    def delete_neume(self, neume):
+        """ Delete a <neume> object from the model and also
+        a <zone> element of the neume's facs attribute, if one
+        exists.
+        """
+        facsid = neume.getAttribute("facs").value
+        neume.parent.removeChild(neume)
+        # Remove the zone if it exists
+        zone = self.mei.getElementById(str(facsid))
+        if zone and zone.name == "zone":
+            zone.parent.removeChild(zone)
+
+    def delete_note(self, note):
+        """ Delete a <note> from the model. If its parent <nc> element
+        is empty after this, delete the <nc>. If the parent <neume> is
+        empty after this, delete the <neume>.
+        """
+        nc = note.parent
+        if nc and nc.name == "nc":
+            neume = nc.parent
+            if neume and neume.name == "neume":
+                # If we have neume -> nc -> note, remove the note.
+                nc.removeChild(note)
+                # Remove the nc and neume if they're empty
+                if len(nc.children) == 0:
+                    neume.removeChild(nc)
+                if len(neume.children) == 0:
+                    self.delete_neume(neume)
+
+    def do_delete(self, ids):
+        """ Delete the elements from the mei model that have the specified
+        IDs. The IDs can be of <note> or <neume> objects.
+        """
+        for i in ids.split(","):
+            element = self.mei.getElementById(str(i))
+            if element and element.name == "note":
+                self.delete_note(element)
+            elif element and element.name == "neume":
+                self.delete_neume(element)
+
+    def post(self, file):
+        """ Delete one or more <note> or <neume> elements.
+        Pass in an argument called 'id' with a comma separated list of
+        ids of note elements to delete.
+        If the note's surrounding <nc> element is empty after this, remove it.
+        If the nc's surrounding <neume> element is empty, remove it.
+        Remove any <zone> elements whose ids are referenced by removed <neume>s.
+
+        Does not reduce the size of the bounding box on a <zone> or change the neume
+        type if it now has a different number of <note> elements.
+        """
+        todelete = self.get_argument("ids", "")
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+        self.do_delete(todelete)
+
+        XmlExport.write(self.mei, fname)
+
         self.set_status(200)
 
 class NeumifyNeumeHandler(tornado.web.RequestHandler):
@@ -579,5 +432,234 @@ class UngroupNeumeHandler(tornado.web.RequestHandler):
 
         result = {"nids": newids}
         self.write(json.dumps(result))
+
+        self.set_status(200)
+
+#####################################################
+#              DIVISION HANDLER CLASSES             #
+#####################################################
+class InsertDivisionHandler(tornado.web.RequestHandler):
+
+    def create_new_division(self, type):
+        '''
+        Make a new division and return the MEI element.
+        Attach the facs data to the division element
+        '''
+
+        division = MeiElement("division")
+        division.addAttribute("form", type)
+
+        return division
+
+    def insert_division(self, division, beforeid):
+        before = self.mei.getElementById(beforeid)
+
+        # get layer element
+        layer_parent = before.getParent()
+
+        if layer_parent and before:
+            layer_parent.addChildBefore(before, division)
+
+            if division.getAttribute("form").getValue() == "final":
+                # if final division, close layer and staff
+                self.move_elements(layer_parent, before)
+
+    def create_zone(self, ulx, uly, lrx, lry):
+        zone = MeiElement("zone")
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+        return zone
+
+    def add_zone(self, division, zone):
+        # add zone to the surfaces
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces) and zone:
+            surfaces[0].addChild(zone)
+
+        if zone:
+            division.addAttribute("facs", zone.getId())
+
+    def move_elements(self, layer, before):
+        # get staff parent element
+        staff = layer.getParent()
+        section_parent = staff.getParent()
+
+        # create new staff and layer
+        new_staff = MeiElement("staff")
+        new_layer = MeiElement("layer")
+        new_layer.addAttribute("n", "1")
+        
+        # get elements after "before element" to move
+        element_peers = before.getPeers()
+        e_ind = list(element_peers).index(before)
+        for e in element_peers[e_ind:]:
+            # add element to the new staff/layer
+            new_layer.addChild(e)
+            # remove element from the current staff/layer
+            layer.removeChild(e)
+
+        new_staff.addChild(new_layer)
+
+        # insert new staff into the document
+        staves = section_parent.getChildrenByName("staff")
+        s_ind = list(staves).index(staff)
+        before_staff = None
+        if s_ind+1 < len(staves):
+            before_staff = staves[s_ind+1]
+
+        # insert and update staff definitions
+        self.insert_staff_def(s_ind+1, len(staves))
+
+        # update staff numbers of subsequent staves
+        for i, s in enumerate(staves[s_ind+1:]):
+            s.addAttribute("n", str(s_ind+i+3))
+
+        new_staff.addAttribute("n", str(s_ind+2))
+        self.insert_staff(section_parent, new_staff, before_staff)
+                
+    def insert_staff(self, section, staff, before_staff):
+        '''
+        Insert the given staff before the another given staff.
+        If there is no subsequent staff, just append to the staff
+        to the end.
+        '''
+
+        if before_staff:
+            section.addChildBefore(before_staff, staff)
+        else:
+            section.addChild(staff)
+
+    def insert_staff_def(self, staff_num, num_staves):
+        '''
+        Insert a new staff definition with number staff_num
+        and update subsequent staff definition numbers.
+        '''
+
+        staff_group = self.mei.getElementsByName("staffGrp")
+        if len(staff_group):
+            staff_defs = staff_group[0].getChildrenByName("staffDef")
+            if len(staff_defs) == num_staves:
+                for i, sd in enumerate(staff_defs[staff_num:]):
+                    sd.addAttribute("n", str(staff_num+i+2))
+                staff_def = MeiElement("staffDef")
+                staff_def.addAttribute("n", str(staff_num+1))
+                before_staff_def = None
+                if staff_num < len(staff_defs):
+                    before_staff_def = staff_defs[staff_num]
+
+        if before_staff_def:
+            staff_group[0].addChildBefore(before_staff_def, staff_def)
+        else:
+            staff_group[0].addChild(staff_def)
+
+    def post(self, file):
+        '''
+        Insert a division before the given element. There is one case
+        where there is no element to insert before, when there is no
+        subsequent staff. In this case, the element is enserted ath the end
+        of the last system. Also sets the bounding box information of the new
+        punctum.
+        '''
+
+        div_type = str(self.get_argument("type", ""))
+        beforeid = str(self.get_argument("beforeid", None))
+
+        # bounding box
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        zone = self.create_zone(ulx, uly, lrx, lry)
+        division = self.create_new_division(div_type)
+        self.add_zone(division, zone)
+        self.insert_division(division, beforeid)
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"id": division.getId()}
+        self.write(json.dumps(result))
+        self.set_status(200)
+
+class DeleteDivisionHandler(tornado.web.RequestHandler):
+
+    def move_elements(self, division):
+        layer = division.getParent()
+        staff = layer.getParent()
+        section = staff.getParent()
+
+        staves = section.getChildrenByName("staff")
+        s_ind = list(staves).index(staff)
+
+        # get elements from next staff/layer, if any
+        # and move them to the previous staff/layer
+        next_layer = staves[s_ind+1].getChildrenByName("layer")
+        if len(next_layer):
+            elements = next_layer[0].getChildren()
+
+            # add these elements to the previous staff/layer
+            for e in elements:
+                layer.addChild(e)
+
+            # remove the staffDef for the removed layer
+            staff_group = self.mei.getElementsByName("staffGrp")
+            if len(staff_group):
+                staff_defs = staff_group[0].getChildrenByName("staffDef")
+                if len(staff_defs) == len(staves):
+                    # renumber subsequent staff defs
+                    for i, sd in enumerate(staff_defs[s_ind+2:]):
+                        sd.addAttribute("n", str(s_ind+i+2))
+
+                    staff_group[0].removeChild(staff_defs[s_ind+1])
+
+            # renumber subsequent staves
+            for i, s in enumerate(staves[s_ind+2:]):
+                s.addAttribute("n", str(s_ind+i+2))
+
+            # remove the next staff/layer
+            section.removeChild(staves[s_ind+1])
+
+    def delete_division(self, division):
+        '''
+        Remove the given division from the MEI document
+        '''
+
+        # first remove zone if it exists
+        facs_id = division.getAttribute("facs").getValue()
+        zone = self.mei.getElementById(facs_id)
+        if zone:
+            zone.getParent().removeChild(zone)
+
+        if division.getAttribute("form").getValue() == "final":
+            self.move_elements(division)
+
+        # delete the division
+        division.getParent().removeChild(division)
+
+    def post(self, file):
+        '''
+        Delete a division from the MEI document. Special
+        consideration is taken when deleting divisions of form
+        "final"
+        '''
+
+        division_ids = str(self.get_argument("ids", ""))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+        
+        for id in division_ids.split(","):
+            division = self.mei.getElementById(id)
+            self.delete_division(division)
+
+        XmlExport.write(self.mei, fname)
 
         self.set_status(200)
