@@ -270,11 +270,17 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         $("#btn_delete").bind("click.edit", function() {
             // get current canvas selection
             // check individual selection and group selections
-            nids = new Array();
+            toDelete = {nids: new Array(), dids: new Array()};
+
             var selection = rendEng.canvas.getActiveObject();
             if (selection) {
                 // individual element selected
-                nids.push(selection.eleRef.id);
+                if (selection.eleRef instanceof Toe.Model.Neume) {
+                    toDelete.nids.push(selection.eleRef.id);
+                }
+                else if (selection.eleRef instanceof Toe.Model.Division) {
+                    toDelete.dids.push(selection.eleRef.id);
+                }
 
                 // remove element from internal representation
                 selection.staffRef.removeElementByRef(selection.eleRef);
@@ -288,7 +294,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 if (selection) {
                     // group of neumes selected
                     for (var i = selection.objects.length-1; i >= 0; i--) {
-                        nids.push(selection.objects[i].eleRef.id);
+                        if (selection.eleRef instanceof Toe.Model.Neume) {
+                            toDelete.nids.push(selection.objects[i].eleRef.id);
+                        }
+                        else if (selection.eleRef instanceof Toe.Model.Division) {
+                            toDelete.dids.push(selection.objects[i].eleRef.id);
+                        }
+
                         // remove element from internal representation
                         selection.objects[i].staffRef.removeElementByRef(selection.objects[i].eleRef);
 
@@ -299,14 +311,26 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 }
             }
 
-            // send delete command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/delete/neume",  {ids: nids.join(",")})
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to delete note. Client and server are not synchronized.");
-                $("#alert").animate({opacity: 1.0}, 100);
-            });
+            if (toDelete.nids.length > 0) {
+                // send delete command to server to change underlying MEI
+                $.post(prefix + "/edit/" + fileName + "/delete/neume",  {ids: toDelete.nids.join(",")})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
+            }
+            if (toDelete.dids.length > 0) {
+                // send delete command to server to change underlying MEI
+                $.post(prefix + "/edit/" + fileName + "/delete/division", {ids: toDelete.dids.join(",")})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
+                    $("#alert > p").animate({opacity: 1.0}, 100);
+                });
+            }
         });
 
         $("#btn_neumify").bind("click.edit", function() {

@@ -36,7 +36,7 @@ Toe.Model.Division = function(key, options) {
     }
 
     this.props = {
-        interact: false
+        interact: true
     };
 
     $.extend(this.props, options);
