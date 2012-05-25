@@ -36,6 +36,7 @@ rules = [
     (abs_path(r"/edit/(.*?)/neumify"), neonsrv.api.NeumifyNeumeHandler),
     (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.api.UngroupNeumeHandler),
     (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.api.InsertDivisionHandler),
+    (abs_path(r"/edit/(.*?)/move/division"), neonsrv.api.MoveDivisionHandler),
     (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.api.DeleteDivisionHandler)
 ]
 

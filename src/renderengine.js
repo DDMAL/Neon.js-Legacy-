@@ -145,7 +145,7 @@ Toe.View.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
     var elements = {static: new Array(), modify: new Array()};
     elements.static.push(bb);
 
-	this.draw(elements, {selectable: opts.interact});
+	this.draw(elements, {selectable: opts.interact, opacity: opts.opacity});
 }
 
 /**

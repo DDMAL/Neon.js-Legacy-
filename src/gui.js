@@ -289,7 +289,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         // update bounding box data in the model
                         var ulx = snapCoords.x - element.currentWidth/2;
                         var uly = snapCoords.y - element.currentHeight/2;
-                        var bb = [ulx, uly, ulx + element.currentWidth/2, uly + element.currentHeight/2];
+                        var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
                         ele.setBoundingBox(bb);
 
                         // remove division from the previous staff representation
@@ -307,16 +307,16 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             beforeid = sNextModel.id;
                         }
 
-                        var args = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, beforeid: beforeid};
+                        var data = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, beforeid: beforeid};
 
                         // send move command to the server to change underlying MEI
-                        /*$.post(prefix + "/edit/" + fileName + "/move/division", {data: args})
+                        $.post(prefix + "/edit/" + fileName + "/move/division", data)
                         .error(function() {
                             // show alert to user
                             // replace text with error message
                             $(".alert > p").text("Server failed to move division. Client and server are not synchronized.");
                             $(".alert").toggleClass("fade");
-                        });*/
+                        });
                     }
                 });
                 // repaint canvas after all the dragging is done
