@@ -133,81 +133,93 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
  */
 Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
     var opts = {
-        ignoreEle: null
+        ignoreEle: null,
+        x: true,
+        y: true
     };
 
     $.extend(opts, options);
 
-    var coordsPrime = {x: coords.x, y: null};
+    var coordsPrime = coords;
 
-    // CALCULATE NEW VERTICAL POSITION
-    var linesRoot = this.zone.uly;
-    var spacesRoot = this.zone.uly + this.delta_y/2;
+    if (opts.y) {
+        // CALCULATE NEW VERTICAL POSITION
+        var linesRoot = this.zone.uly;
+        var spacesRoot = this.zone.uly + this.delta_y/2;
 
-    // calculate multiple of lines or spaces
-    var lineMult = (coords.y - linesRoot) / this.delta_y;
-    var lineErr = Math.abs(Math.round(Math.abs(lineMult)) - Math.abs(lineMult));
-    var spaceMult = (coords.y - spacesRoot) / this.delta_y;
-    var spaceErr = Math.abs(Math.round(Math.abs(spaceMult)) - Math.abs(spaceMult));
+        // calculate multiple of lines or spaces
+        var lineMult = (coords.y - linesRoot) / this.delta_y;
+        var lineErr = Math.abs(Math.round(Math.abs(lineMult)) - Math.abs(lineMult));
+        var spaceMult = (coords.y - spacesRoot) / this.delta_y;
+        var spaceErr = Math.abs(Math.round(Math.abs(spaceMult)) - Math.abs(spaceMult));
 
-    // find the minimum error for lines or spaces
-    var minError = Math.min(lineErr, spaceErr);
-    // there really should be an argmin in javascript ... sigh
-    if (minError == lineErr) {
-        // we should snap to the line!
-        coordsPrime.y = linesRoot + Math.round(lineMult)*this.delta_y;
-    }
-    else {
-        // we should snap to the space!
-        coordsPrime.y = spacesRoot + Math.round(spaceMult)*this.delta_y;
-    }
-
-    // CALCULATE NEW HORIZONTAL POSITION
-    // go through each element in staff element list to see if the inserted element 
-    // temporally intersects with others. If so, offset it.
-    var left = coords.x-(width/2);
-    var right = coords.x+(width/2);
-    for (var i = 0; i < this.elements.length; i++) {
-        if (this.elements[i] == opts.ignoreEle) {
-            continue;
-        }
-
-        var ulx = this.elements[i].zone.ulx;
-        var lrx = this.elements[i].zone.lrx;
-
-        if (left >= lrx) {
-            continue;
+        // find the minimum error for lines or spaces
+        var minError = Math.min(lineErr, spaceErr);
+        // there really should be an argmin in javascript ... sigh
+        if (minError == lineErr) {
+            // we should snap to the line!
+            coordsPrime.y = linesRoot + Math.round(lineMult)*this.delta_y;
         }
         else {
-            if ((left >= ulx && left < lrx) || (right >= ulx && right < lrx) || (ulx > left && lrx < right)) {
-                // uh oh - we've intersected a drawn element
-                var bbCentre = ulx + (lrx-ulx)/2;
-                // figure out if we should move it to the left or right
-                if (coords.x < bbCentre) {
-                    // move left
-                    // TODO: must check that other elements aren't drawn here
-                    coordsPrime.x = ulx - width/2;
-                }
-                else {
-                    // move right
-                    // TODO: must check that other elements aren't drawn here
-                    coordsPrime.x = lrx + width/2;
-                }    
+            // we should snap to the space!
+            coordsPrime.y = spacesRoot + Math.round(spaceMult)*this.delta_y;
+        }
+    }
+
+    if (opts.x) {
+        // CALCULATE NEW HORIZONTAL POSITION
+        // go through each element in staff element list to see if the inserted element 
+        // temporally intersects with others. If so, offset it.
+        var left = coords.x-(width/2);
+        var right = coords.x+(width/2);
+        for (var i = 0; i < this.elements.length; i++) {
+            if (this.elements[i] == opts.ignoreEle) {
+                continue;
+            }
+
+            var ulx = this.elements[i].zone.ulx;
+            var lrx = this.elements[i].zone.lrx;
+
+            if (left >= lrx) {
+                continue;
             }
             else {
-                if (left < this.zone.ulx) {
-                    if (this.clef) {
-                        coordsPrime.x = this.clef.zone.lrx + width/2;
+                if ((left >= ulx && left < lrx) || (right >= ulx && right < lrx) || (ulx > left && lrx < right)) {
+                    // uh oh - we've intersected a drawn element
+                    var bbCentre = ulx + (lrx-ulx)/2;
+                    // figure out if we should move it to the left or right
+                    if (coords.x < bbCentre) {
+                        // move left
+                        // TODO: check that other elements aren't drawn here
+                        coordsPrime.x = ulx - width/2;
                     }
                     else {
-                        coordsPrime.x = this.zone.ulx + width/2;
-                    }
+                        // move right
+                        // TODO: check that other elements aren't drawn here
+                        coordsPrime.x = lrx + width/2;
+                    }    
                 }
                 else {
                     coordsPrime.x = coords.x;
                 }
+                break;
             }
-            break;
+        }
+
+        // check left staff boundary
+        if (this.clef && left <= this.clef.zone.lrx) {
+            coordsPrime.x = this.clef.zone.lrx + width/2 + 1;
+        }
+        else if (left <= this.zone.ulx) {
+            coordsPrime.x = this.zone.ulx + width/2 + 1;
+        }
+
+        // check right staff boundary
+        if (this.custos && right >= this.custos.zone.ulx) {
+            coordsPrime.x = this.custos.zone.ulx - width/2 - 3; 
+        }
+        else if (right >= this.zone.lrx) {
+            coordsPrime.x = this.zone.lrx - width/2 - 3;
         }
     }
 
