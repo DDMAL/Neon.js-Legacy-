@@ -109,6 +109,7 @@ Toe.View.RenderEngine.prototype.createLine = function(coords, options) {
 	var opts = {
 		fill: "rgb(0,0,0)",
 		strokeWidth: 3,
+        opacity: 1.0,
 		interact: false
 	};
 	$.extend(opts, options);
@@ -116,6 +117,7 @@ Toe.View.RenderEngine.prototype.createLine = function(coords, options) {
 	return new fabric.Line(coords, {
 		fill: opts.fill,
         strokeWidth: opts.strokeWidth,
+        opacity: opts.opacity,
         selectable: opts.interact
     });
 }
@@ -159,7 +161,11 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         selectable: true,
         hasControls: false,
         hasBorders: false,
-        ref: null
+        lockMovementX: false,
+        lockMovementY: false,
+        opacity: 1.0,
+        eleRef: null,
+        staffRef: null
 	};
 
 	$.extend(opts, options);
@@ -181,8 +187,11 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.hasControls = opts.hasControls;
         val.lockRotation = true;
         val.lockScale = true;
-        val.eleRef = opts.eleRef // important: attaches element reference to fabric group
-        val.staffRef = opts.staffRef // important: attaches staff reference to fabric group
+        val.lockMovementX = opts.lockMovementX;
+        val.lockMovementY = opts.lockMovementY;
+        val.opacity = opts.opacity;
+        val.eleRef = opts.eleRef; // important: attaches element reference to fabric group
+        val.staffRef = opts.staffRef; // important: attaches staff reference to fabric group
     });
 
     // add the elements to the canvas

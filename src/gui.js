@@ -45,6 +45,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     // set up punctum that follows the pointer in insert mode
     this.punctGlyph = this.rendEng.getGlyph("punctum");
     this.punct = this.punctGlyph.clone();
+    this.divisionDwg = null;
+
     this.objMoving = false;
 
     // cache reference to this
@@ -110,7 +112,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         // unbind insert event handlers
         rendEng.unObserve("mouse:move");
         rendEng.unObserve("mouse:up");
+
         rendEng.canvas.remove(gui.punct);
+        if (gui.divisionDwg) {
+            rendEng.canvas.remove(gui.divisionDwg);
+        }
         rendEng.repaint();
                
         if ($(side_parentDivId + "> #sidebar-edit").length == 0) {
@@ -242,7 +248,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         .error(function() {
                             // show alert to user
                             // replace text with error message
-                            $(".alert > p").text("Server failed to delete note. Client and server are not synchronized.");
+                            $(".alert > p").text("Server failed to move neume. Client and server are not synchronized.");
                             $(".alert").toggleClass("fade");
                         });
                     }
@@ -254,6 +260,63 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     }
                     else if (ele instanceof Toe.Model.Division) {
                         // this is a division
+                        
+                        // get closest staff
+                        var staff = page.getClosestStaff(upCoords);
+
+                        var snapCoords = staff.ohSnap(upCoords, element.currentWidth, {x: true, y: false});
+
+                        // get vertical snap coordinates for the appropriate staff
+                        switch (ele.type) {
+                            case Toe.Model.Division.Type.small:
+                                snapCoords.y = staff.zone.uly;
+                                break;
+                            case Toe.Model.Division.Type.minor:
+                                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                                break;
+                            case Toe.Model.Division.Type.major:
+                                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                                break;
+                            case Toe.Model.Division.Type.final:
+                                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                                break;
+                        }
+
+                        // move to the snapped coordinates
+                        element.left = snapCoords.x;
+                        element.top = snapCoords.y;
+
+                        // update bounding box data in the model
+                        var ulx = snapCoords.x - element.currentWidth/2;
+                        var uly = snapCoords.y - element.currentHeight/2;
+                        var bb = [ulx, uly, ulx + element.currentWidth/2, uly + element.currentHeight/2];
+                        ele.setBoundingBox(bb);
+
+                        // remove division from the previous staff representation
+                        element.staffRef.removeElementByRef(ele);
+
+                        // get id of note to move before
+                        var dInd = staff.insertElement(ele);
+                        var beforeid = null;
+                        if (dInd + 1 < staff.elements.length) {
+                            beforeid = staff.elements[dInd+1].id;
+                        }
+                        else {
+                            // insert before the next system break staff
+                            var sNextModel = page.getNextStaff(sModel);
+                            beforeid = sNextModel.id;
+                        }
+
+                        var args = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, beforeid: beforeid};
+
+                        // send move command to the server to change underlying MEI
+                        /*$.post(prefix + "/edit/" + fileName + "/move/division", {data: args})
+                        .error(function() {
+                            // show alert to user
+                            // replace text with error message
+                            $(".alert > p").text("Server failed to move division. Client and server are not synchronized.");
+                            $(".alert").toggleClass("fade");
+                        });*/
                     }
                 });
                 // repaint canvas after all the dragging is done
@@ -545,14 +608,19 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             // remove insert division menu
             $("#menu_insertdivision").remove();
 
+            if (gui.divisionDwg) {
+                // remove drawn division
+                rendEng.canvas.remove(gui.divisionDwg);
+                rendEng.repaint();
+            }
             // add ornamentation toggles
             if ($("#menu_insertpunctum").length == 0) {
                 $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="chk_dot" class="btn">&#149; Dot</button>\n<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
             }
 
             // put the punctum off the screen for now
-            gui.punct.set({left: -50, top: -50, opacity: 0.60});
-            rendEng.draw({static: [], modify: [gui.punct]}, {repaint: true, selectable: false});
+            gui.punct.set({left: -50, top: -50, opacity: 0.6});
+            rendEng.draw({static: [], modify: [gui.punct]}, {repaint: true, selectable: false, opacity: 0.6});
 
             // render transparent punctum at pointer location
             rendEng.canvas.observe('mouse:move', function(e) {
@@ -637,7 +705,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             }
 
             var divisionForm = null;
-            var divisionDwg = null;
             var staff = null;
 
             rendEng.canvas.observe('mouse:move', function(e) {
@@ -647,48 +714,48 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 staff = page.getClosestStaff(pnt);
 
                 var snapCoords = pnt;
-                var divProps = {strokeWidth: 4};
+                var divProps = {strokeWidth: 4, opacity: 0.6};
                 switch (divisionForm) {
                     case "small":
                         snapCoords.y = staff.zone.uly;
 
-                        if (!divisionDwg) {
+                        if (!gui.divisionDwg) {
                             var y1 = staff.zone.uly - staff.delta_y/2;
                             var y2 = staff.zone.uly + staff.delta_y/2;
                             var x1 = snapCoords.x;
 
-                            divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
-                            rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
+                            gui.divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                         }
                         break;
                     case "minor":
                         snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
-                        if (!divisionDwg) {
+                        if (!gui.divisionDwg) {
                             var y1 = staff.zone.uly + staff.delta_y/2;
                             var y2 = y1 + 2*staff.delta_y;
                             var x1 = snapCoords.x;
 
-                            divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
-                            rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
+                            gui.divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                         }
                         break;
                     case "major":
-                        snapCoords.y = snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                        snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
-                        if (!divisionDwg) {
+                        if (!gui.divisionDwg) {
                             var y1 = staff.zone.uly;
                             var y2 = staff.zone.lry;
                             var x1 = snapCoords.x;
 
-                            divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
-                            rendEng.draw({static: [divisionDwg], modify: []}, {selectable: false});
+                            gui.divisionDwg = rendEng.createLine([x1, y1, x1, y2], divProps);
+                            rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                         }
                         break;
                     case "final":
                         snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
-                        if (!divisionDwg) {
+                        if (!gui.divisionDwg) {
                             var y1 = staff.zone.uly;
                             var y2 = staff.zone.lry;
                             var x1 = snapCoords.x;
@@ -697,41 +764,41 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                             var div1 = rendEng.createLine([x1, y1, x1, y2], divProps);
                             var div2 = rendEng.createLine([x2, y1, x2, y2], divProps);
-                            divisionDwg = rendEng.draw({static: [div1, div2], modify: []}, {group: true, selectable: false})[0];
+                            gui.divisionDwg = rendEng.draw({static: [div1, div2], modify: []}, {group: true, selectable: false, opacity: 0.6})[0];
                         }
                         break;
                 }                    
 
                 // snap the drawing to the staff on the x-plane
-                var dwgLeft = pnt.x - divisionDwg.currentWidth/2;
-                var dwgRight = pnt.x + divisionDwg.currentWidth/2;
+                var dwgLeft = pnt.x - gui.divisionDwg.currentWidth/2;
+                var dwgRight = pnt.x + gui.divisionDwg.currentWidth/2;
                 if (staff.clef && dwgLeft <= staff.clef.zone.lrx) {
-                    snapCoords.x = staff.clef.zone.lrx + divisionDwg.currentWidth/2 + 1;
+                    snapCoords.x = staff.clef.zone.lrx + gui.divisionDwg.currentWidth/2 + 1;
                 }
                 else if (dwgLeft <= staff.zone.ulx) {
-                    snapCoords.x = staff.zone.ulx + divisionDwg.currentWidth/2 + 1;
+                    snapCoords.x = staff.zone.ulx + gui.divisionDwg.currentWidth/2 + 1;
                 }
 
                 if (staff.custos && dwgRight >= staff.custos.zone.ulx) {
                     // 3 is a magic number just to give it some padding
-                    snapCoords.x = staff.custos.zone.ulx - divisionDwg.currentWidth/2 - 3;
+                    snapCoords.x = staff.custos.zone.ulx - gui.divisionDwg.currentWidth/2 - 3;
                 }
                 else if (dwgRight >= staff.zone.lrx) {
-                    snapCoords.x = staff.zone.lrx - divisionDwg.currentWidth/2 - 3;
+                    snapCoords.x = staff.zone.lrx - gui.divisionDwg.currentWidth/2 - 3;
                 }
 
                 // move around the drawing
-                divisionDwg.left = snapCoords.x;
-                divisionDwg.top = snapCoords.y;
+                gui.divisionDwg.left = snapCoords.x;
+                gui.divisionDwg.top = snapCoords.y;
                 rendEng.repaint();
             });
 
             rendEng.canvas.observe('mouse:up', function(e) {
                 // get coords
-                var coords = {x: divisionDwg.left, y: divisionDwg.top};
+                var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
 
                 // calculate snapped coords
-                var snapCoords = staff.ohSnap(coords, divisionDwg.currentWidth);
+                var snapCoords = staff.ohSnap(coords, gui.divisionDwg.currentWidth);
 
                 // getting coordinates done
                 //$("#progressbar").css("width", "18.75%");
@@ -739,9 +806,9 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 var division = new Toe.Model.Division(divisionForm);
 
                 // update bounding box with physical position on the page
-                var ulx = snapCoords.x - divisionDwg.currentWidth/2;
-                var uly = snapCoords.y - divisionDwg.currentHeight/2;
-                var bb = [ulx, uly, ulx + divisionDwg.currentWidth, uly + divisionDwg.currentHeight];
+                var ulx = snapCoords.x - gui.divisionDwg.currentWidth/2;
+                var uly = snapCoords.y - gui.divisionDwg.currentHeight/2;
+                var bb = [ulx, uly, ulx + gui.divisionDwg.currentWidth, uly + gui.divisionDwg.currentHeight];
                 division.setBoundingBox(bb);
 
                 // bounding box set
@@ -791,33 +858,33 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
             $("#rad_small").bind("click.insert", function() {
                 // remove the current division following the pointer
-                if (divisionDwg) {
-                    rendEng.canvas.remove(divisionDwg);
-                    divisionDwg = null;
+                if (gui.divisionDwg) {
+                    rendEng.canvas.remove(gui.divisionDwg);
+                    gui.divisionDwg = null;
                 }
                 divisionForm = "small";
             });
 
             $("#rad_minor").bind("click.insert", function() {
-                if (divisionDwg) {
-                    rendEng.canvas.remove(divisionDwg);
-                    divisionDwg = null;
+                if (gui.divisionDwg) {
+                    rendEng.canvas.remove(gui.divisionDwg);
+                    gui.divisionDwg = null;
                 }
                 divisionForm = "minor";
             });
 
             $("#rad_major").bind("click.insert", function() {
-                if (divisionDwg) {
-                    rendEng.canvas.remove(divisionDwg);
-                    divisionDwg = null;
+                if (gui.divisionDwg) {
+                    rendEng.canvas.remove(gui.divisionDwg);
+                    gui.divisionDwg = null;
                 }
                 divisionForm = "major";
             });
 
             $("#rad_final").bind("click.insert", function() {
-                if (divisionDwg) {
-                    rendEng.canvas.remove(divisionDwg);
-                    divisionDwg = null;
+                if (gui.divisionDwg) {
+                    rendEng.canvas.remove(gui.divisionDwg);
+                    gui.divisionDwg = null;
                 }
                 divisionForm = "final";
             });
