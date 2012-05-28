@@ -42,10 +42,17 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     this.rendEng = rendEng;
     this.page = page;
 
-    // set up punctum that follows the pointer in insert mode
-    this.punctGlyph = this.rendEng.getGlyph("punctum");
-    this.punct = this.punctGlyph.clone();
+    // these are variables holding pointers to the drawings
+    // that follow around the pointer in insert mode.
+    this.punctDwg = null;
     this.divisionDwg = null;
+
+    // cache height and width of punctum glyph for use in
+    // bounding box estimation in neumify and ungroup
+    // and insert ornamentation spacing.
+    var punctGlyph = rendEng.getGlyph("punctum").clone();
+    this.punctWidth = punctGlyph.width*rendEng.getGlobalScale();
+    this.punctHeight = punctGlyph.height*rendEng.getGlobalScale();
 
     this.objMoving = false;
 
@@ -69,7 +76,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             // replace text with error message
             $("#alert > p").text("Server failed to restore backup MEI file.");
             $("#alert").animate({opacity: 1.0}, 100);
-
         });
     });
 
@@ -113,7 +119,12 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.unObserve("mouse:move");
         rendEng.unObserve("mouse:up");
 
-        rendEng.canvas.remove(gui.punct);
+        // remove punctum following the pointer
+        if (gui.punctDwg) {
+            rendEng.canvas.remove(gui.punctDwg);
+        }
+
+        // remove division following the pointer
         if (gui.divisionDwg) {
             rendEng.canvas.remove(gui.divisionDwg);
         }
@@ -453,7 +464,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     uly = Math.min(uly, top - el.drawing.currentHeight/2);
                     lry = Math.max(lry, top + el.drawing.currentHeight/2);
                 });
-                var lrx = ulx + numPunct*gui.punct.width*rendEng.getGlobalScale();
+                var lrx = ulx + numPunct*gui.punctWidth;
 
                 // set the bounding box hint of the new neume for drawing
                 var bb = [ulx, uly, lrx, lry];
@@ -511,10 +522,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 }
             }
 
-            // cache punctum glyph width and height
-            var punctWidth = gui.punct.width*rendEng.getGlobalScale();
-            var punctHeight = gui.punct.height*rendEng.getGlobalScale();
-
             var nids = new Array();
             var bbs = new Array();
             var punctums = new Array();
@@ -535,9 +542,9 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     var newPunct = new Toe.Model.Neume();
                     newPunct.components.push(nc);
 
-                    var uly = nel.sRef.clef.y - (nel.nRef.rootDiff+nc.pitchDiff)*nel.sRef.delta_y/2 - punctHeight/2;
+                    var uly = nel.sRef.clef.y - (nel.nRef.rootDiff+nc.pitchDiff)*nel.sRef.delta_y/2 - gui.punctHeight/2;
                     // set the bounding box hint of the new neume for drawing
-                    var bb = [ulx+(ncInd*punctWidth), uly, ulx+((ncInd+1)*punctWidth), uly+punctHeight];
+                    var bb = [ulx+(ncInd*gui.punctWidth), uly, ulx+((ncInd+1)*gui.punctWidth), uly+gui.punctHeight];
                     newPunct.setBoundingBox(bb);
 
                     // instantiate neume view and controller
@@ -613,36 +620,82 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 rendEng.canvas.remove(gui.divisionDwg);
                 rendEng.repaint();
             }
+
             // add ornamentation toggles
             if ($("#menu_insertpunctum").length == 0) {
                 $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="chk_dot" class="btn">&#149; Dot</button>\n<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
             }
 
+            // ornamentation toggle flags
+            var hasDot = false;
+            var hasHorizEpisema = false;
+            var hasVertEpisema = false;
+
+            var updateFollowPunct = function(initial) {
+                var elements = {modify: new Array(), static: new Array()};
+
+                var punctPos = null;
+                var punctGlyph = rendEng.getGlyph("punctum");
+                if (initial) {
+                    // draw the punctum off the screen, initially
+                    var punctPos = {left: -50, top: -50};
+                }
+                else {
+                    var punctPos = {left: gui.punctDwg.left, top: gui.punctDwg.top};
+
+                    if (hasDot) {
+                        var glyphDot = rendEng.getGlyph("dot");
+                        var dot = glyphDot.clone().set({left: punctPos.left + gui.punctWidth, top: punctPos.top, opacity: 0.6});
+                        elements.modify.push(dot);
+                    }
+
+                    if (hasHorizEpisema) {
+                    }
+
+                    if (hasVertEpisema) {
+                    }
+
+                }
+
+                // create clean punctum glyph with no ornamentation
+                var punct = punctGlyph.clone().set({left: punctPos.left, top: punctPos.top, opacity: 0.6});
+                elements.modify.push(punct);
+
+                // remove old punctum drawing following the pointer
+                if (gui.punctDwg) {
+                    rendEng.canvas.remove(gui.punctDwg);
+                }
+
+                // replace with new punctum drawing
+                gui.punctDwg = rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0]; 
+            };
+
             // put the punctum off the screen for now
-            gui.punct.set({left: -50, top: -50, opacity: 0.6});
-            rendEng.draw({static: [], modify: [gui.punct]}, {repaint: true, selectable: false, opacity: 0.6});
+            updateFollowPunct(true);
 
             // render transparent punctum at pointer location
             rendEng.canvas.observe('mouse:move', function(e) {
                 var pnt = rendEng.canvas.getPointer(e.memo.e);
-                gui.punct.set({left: pnt.x - gui.punctGlyph.centre[0]/2, top: pnt.y - gui.punctGlyph.centre[1]/2});
+                gui.punctDwg.left = pnt.x - gui.punctDwg.currentWidth/4;
+                gui.punctDwg.top = pnt.y - gui.punctDwg.currentHeight/4;
+
                 rendEng.repaint();
             });
 
             rendEng.canvas.observe('mouse:up', function(e) {
-                var coords = {x: gui.punct.left, y: gui.punct.top};
+                var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
                 var sModel = page.getClosestStaff(coords);
 
                 // instantiate a punctum
                 var nModel = new Toe.Model.Neume();
 
                 // calculate snapped coords
-                var snapCoords = sModel.ohSnap(coords, gui.punct.currentWidth);
+                var snapCoords = sModel.ohSnap(coords, gui.punctDwg.currentWidth);
 
                 // update bounding box with physical position on the page
-                var ulx = snapCoords.x - gui.punct.currentWidth/2;
-                var uly = snapCoords.y - gui.punct.currentHeight/2;
-                var bb = [ulx, uly, ulx + gui.punct.currentWidth, uly + gui.punct.currentHeight];
+                var ulx = snapCoords.x - gui.punctDwg.currentWidth/2;
+                var uly = snapCoords.y - gui.punctDwg.currentHeight/2;
+                var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
                 nModel.setBoundingBox(bb);
 
                 // get pitch name and octave of snapped coords of note
@@ -650,8 +703,22 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 var pname = noteInfo["pname"];
                 var oct = noteInfo["oct"];
 
-                // TODO: check ornamentation toggles to add to component
-                nModel.addComponent("punctum", pname, oct);
+                //  start forming arguments for the server function call
+                var args = {pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+
+                // check ornamentation toggles to add to component
+                var ornaments = new Array();
+                if (hasDot) {
+                    ornaments.push(new Toe.Model.Ornament("dot"));
+                    args["dot"] = true;
+                }
+                if (hasHorizEpisema) {
+
+                }
+                if (hasVertEpisema) {
+
+                }
+                nModel.addComponent("punctum", pname, oct, {ornaments: ornaments});
 
                 // instantiate neume view and controller
                 var nView = new Toe.View.NeumeView(rendEng);
@@ -659,8 +726,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 
                 // mount neume on the staff
                 var nInd = sModel.addNeume(nModel);
-
-                var args = {pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
 
                 // get next element to insert before
                 if (nInd + 1 < sModel.elements.length) {
@@ -685,6 +750,30 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     $("#alert").toggleClass("fade");
                 });
             });
+
+            $("#chk_dot").bind("click.insert", function() {
+                // toggle dot
+                if (!hasDot) {
+                    hasDot = true;
+                }
+                else {
+                    hasDot = false;
+                }
+
+                updateFollowPunct(false);
+            });
+
+            /*$("#chk_horizepisema").bind("click.insert", function() {
+                if ($(this).hasClass("active")) {
+                    hasHorizEpisema = true;
+                }
+                else {
+                    hasHorizEpisema = false;
+                }
+            });
+
+            $("#chk_vertepisema").bind("click.insert", function() {
+            });*/
         });
 
         $("#rad_division").bind("click.insert", function() {
@@ -693,7 +782,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             rendEng.unObserve("mouse:up");
 
             // remove the pointer following punctum
-            rendEng.canvas.remove(gui.punct);
+            rendEng.canvas.remove(gui.punctDwg);
             rendEng.repaint();
 
             // remove ornamentation UI elements - not needed for divisions
@@ -760,7 +849,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             var y2 = staff.zone.lry;
                             var x1 = snapCoords.x;
                             // make width equal to width of punctum glyph
-                            var x2 = snapCoords.x + gui.punct.width*rendEng.getGlobalScale();;
+                            var x2 = snapCoords.x + gui.punctDwg.width*rendEng.getGlobalScale();;
 
                             var div1 = rendEng.createLine([x1, y1, x1, y2], divProps);
                             var div2 = rendEng.createLine([x2, y1, x2, y2], divProps);
