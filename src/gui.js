@@ -704,7 +704,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 var oct = noteInfo["oct"];
 
                 //  start forming arguments for the server function call
-                var args = {pname: pname, oct: oct, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+                var args = {pname: pname, oct: oct};
 
                 // check ornamentation toggles to add to component
                 var ornaments = new Array();
@@ -726,6 +726,13 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 
                 // mount neume on the staff
                 var nInd = sModel.addNeume(nModel);
+
+                // now that final bounding box is calculated from the drawing
+                // add the bounding box information to the server function arguments
+                args["ulx"] = nModel.zone.ulx;
+                args["uly"] = nModel.zone.uly;
+                args["lrx"] = nModel.zone.lrx;
+                args["lry"] = nModel.zone.lry;
 
                 // get next element to insert before
                 if (nInd + 1 < sModel.elements.length) {
