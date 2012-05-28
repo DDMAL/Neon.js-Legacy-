@@ -13,7 +13,7 @@ import conf
 #####################################################
 class InsertNeumeHandler(tornado.web.RequestHandler):
 
-    def create_new_punctum(self, pname, oct):
+    def create_new_punctum(self, pname, oct, dot_form):
         '''
         Make a new punctum with the given pitch name and
         octave and return the MEI element
@@ -24,6 +24,12 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         note = MeiElement("note")
         note.addAttribute("pname", pname)
         note.addAttribute("oct", oct)
+
+        if dot_form is not None:
+            dot = MeiElement("dot")
+            dot.addAttribute("form", dot_form)
+            note.addChild(dot)
+
         punctum.addChild(nc)
         nc.addChild(note)
 
@@ -68,6 +74,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         beforeid = str(self.get_argument("beforeid", None))
         pname = str(self.get_argument("pname", ""))
         oct = str(self.get_argument("oct", ""))
+        dot_form = str(self.get_argument("dotform", None))
 
         # Bounding box
         lrx = str(self.get_argument("lrx", None))
@@ -79,7 +86,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         fname = os.path.join(mei_directory, file)
         self.mei = XmlImport.read(fname)
 
-        punctum = self.create_new_punctum(pname, oct)
+        punctum = self.create_new_punctum(pname, oct, dot_form)
         zone = self.get_new_zone(ulx, uly, lrx, lry)
         self.add_zone(punctum, zone)
         

@@ -709,8 +709,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 // check ornamentation toggles to add to component
                 var ornaments = new Array();
                 if (hasDot) {
-                    ornaments.push(new Toe.Model.Ornament("dot"));
-                    args["dot"] = true;
+                    ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
+                    args["dotform"] = "aug";
                 }
                 if (hasHorizEpisema) {
 
