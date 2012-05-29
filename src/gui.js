@@ -171,7 +171,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         // remove the old neume
                         sModel.removeElementByRef(nModel);
                         
-                        if (!$(this).hasClass("active")) {
+                        var addDot = !$(this).hasClass("active");
+                        if (addDot) {
                             // add a dot
                             var ornament = new Toe.Model.Ornament("dot", {form: "aug"});
                             nModel.components[0].addOrnament(ornament);
@@ -185,7 +186,27 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         var nInd = sModel.addNeume(nModel);
 
                         // get final bounding box information
-                        var bb = [nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry];
+                        var args = {id: nModel.id, dotform: "aug", ulx: nModel.zone.ulx, uly: nModel.zone.uly, lrx: nModel.zone.lrx, lry: nModel.zone.lry};
+                        if (addDot) {
+                            // send add dot command to server to change underlying MEI
+                            $.post(prefix + "/edit/" + fileName + "/insert/dot", args)
+                            .error(function() {
+                                // show alert to user
+                                // replace text with error message
+                                $("#alert > p").text("Server failed to add a dot to the punctum. Client and server are not synchronized.");
+                                $("#alert").animate({opacity: 1.0}, 100);
+                            });
+                        }
+                        else {
+                            // send remove dot command to server to change underlying MEI
+                            $.post(prefix + "/edit/" + fileName + "/delete/dot", args)
+                            .error(function() {
+                                // show alert to user
+                                // replace text with error message
+                                $("#alert > p").text("Server failed to remove dot from the punctum. Client and server are not synchronized.");
+                                $("#alert").animate({opacity: 1.0}, 100);
+                            });
+                        }
 
                         // interface maitenance
                         rendEng.canvas.remove(selection);
@@ -321,8 +342,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         .error(function() {
                             // show alert to user
                             // replace text with error message
-                            $(".alert > p").text("Server failed to move neume. Client and server are not synchronized.");
-                            $(".alert").toggleClass("fade");
+                            $("#alert > p").text("Server failed to move neume. Client and server are not synchronized.");
+                            $("#alert").toggleClass("fade");
                         });
                     }
                     else if (ele instanceof Toe.Model.Custos) {
@@ -387,8 +408,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         .error(function() {
                             // show alert to user
                             // replace text with error message
-                            $(".alert > p").text("Server failed to move division. Client and server are not synchronized.");
-                            $(".alert").toggleClass("fade");
+                            $("#alert > p").text("Server failed to move division. Client and server are not synchronized.");
+                            $("#alert").toggleClass("fade");
                         });
                     }
                 });

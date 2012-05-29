@@ -813,3 +813,105 @@ class DeleteDivisionHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         self.set_status(200)
+
+class AddDotHandler(tornado.web.RequestHandler):
+
+    def update_or_add_zone(self, punctum, ulx, uly, lrx, lry):
+        facsid = punctum.getAttribute("facs").getValue()
+        if facsid:
+            # the zone exists already
+            zone = self.mei.getElementById(facsid)
+        else:
+            # create a new zone
+            zone = MeiElement("zone")
+
+        # update bounding box data
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+    def post(self, file):
+        '''
+        Add a dot ornament to a given element.
+        '''
+
+        neumeid = str(self.get_argument("id", ""))
+        dot_form = str(self.get_argument("dotform", ""))
+
+        # Bounding box
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        punctum = self.mei.getElementById(neumeid)
+        # check that a punctum element was provided
+        if punctum.getName() == "neume" and punctum.getAttribute("name").getValue() == "punctum":
+            note = punctum.getDescendantsByName("note")
+            if len(note):
+                # if a dot does not already exist on the note
+                if len(note[0].getChildrenByName("dot")) == 0:
+                    dot = MeiElement("dot")
+                    dot.addAttribute("form", dot_form)
+                    note[0].addChild(dot)
+
+            self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)
+
+class DeleteDotHandler(tornado.web.RequestHandler):
+
+    def update_or_add_zone(self, punctum, ulx, uly, lrx, lry):
+        facsid = punctum.getAttribute("facs").getValue()
+        if facsid:
+            # the zone exists already
+            zone = self.mei.getElementById(facsid)
+        else:
+            # create a new zone
+            zone = MeiElement("zone")
+
+        # update bounding box data
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+    def post(self, file):
+        '''
+        Remove a dot ornament to a given element.
+        '''
+
+        neumeid = str(self.get_argument("id", ""))
+
+        # Bounding box
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        punctum = self.mei.getElementById(neumeid)
+        # check that a punctum element was provided
+        if punctum.getName() == "neume" and punctum.getAttribute("name").getValue() == "punctum":
+            note = punctum.getDescendantsByName("note")
+            if len(note):
+                dot = note[0].getChildrenByName("dot")
+                # if a dot exists
+                if len(dot) == 1:
+                    note[0].removeChild(dot[0])
+
+            self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)

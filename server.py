@@ -37,7 +37,9 @@ rules = [
     (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.api.UngroupNeumeHandler),
     (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.api.InsertDivisionHandler),
     (abs_path(r"/edit/(.*?)/move/division"), neonsrv.api.MoveDivisionHandler),
-    (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.api.DeleteDivisionHandler)
+    (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.api.DeleteDivisionHandler),
+    (abs_path(r"/edit/(.*?)/insert/dot"), neonsrv.api.AddDotHandler),
+    (abs_path(r"/edit/(.*?)/delete/dot"), neonsrv.api.DeleteDotHandler)
 ]
 
 # Set up tests if we're in debug mode
