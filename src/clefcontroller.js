@@ -36,8 +36,8 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
      * event type: vRenderClef
      * @param {Toe.Model.Clef} clef Clef to render
      */
-    $(cModel).bind("vRenderClef", function(event, clef) {
-        cView.renderClef(clef);
+    $(cModel).bind("vRenderClef", function(event, clef, staff) {
+        cView.renderClef(clef, staff);
     });
 
 }

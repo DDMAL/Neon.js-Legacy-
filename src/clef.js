@@ -46,7 +46,7 @@ Toe.Model.Clef = function(clefShape, options) {
 
     this.props = {
         staffPos: clefPos,
-        interact: false
+        interact: true
     };
 
     $.extend(this.props, options);

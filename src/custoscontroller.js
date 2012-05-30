@@ -38,7 +38,7 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
      */
     $(cModel).bind("vRenderCustos", function(event, custos, staff) {
         // calculate the y position
-        var custos_y = staff.clef.y - (custos.pitchDiff * staff.delta_y / 2);
+        var custos_y = staff.clef.y - (custos.rootDiff * staff.delta_y / 2);
 
         cView.renderCustos(custos, staff, custos_y);
     });

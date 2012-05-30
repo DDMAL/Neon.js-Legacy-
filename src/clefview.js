@@ -44,7 +44,7 @@ Toe.View.ClefView.prototype.constructor = Toe.View.ClefView;
  * @methodOf Toe.View.ClefView
  * @param {Toe.Model.Clef} clef Clef to render
  */
-Toe.View.ClefView.prototype.renderClef = function(clef) {
+Toe.View.ClefView.prototype.renderClef = function(clef, staff) {
     if (!this.rendEng) {
         throw new Error("Clef: Invalid render context");
     }
@@ -66,5 +66,5 @@ Toe.View.ClefView.prototype.renderClef = function(clef) {
 
     elements.modify.push(svgClef);
 
-    this.rendEng.draw(elements, {selectable: clef.props.interact});
+    this.rendEng.draw(elements, {selectable: clef.props.interact, staffRef: staff, eleRef: clef});
 }

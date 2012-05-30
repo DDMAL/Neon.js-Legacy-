@@ -150,6 +150,9 @@ THE SOFTWARE.
                 var clefShape = $(clef).attr("shape");
                 var clefStaffLine = parseInt($(clef).attr("line"));
 
+                // convert mei line attribute to staffPos attribute used in the internal clef Model
+                var staffPos = (sModel.props.numLines - clefStaffLine) * 2;
+
                 var clefFacsId = $(clef).attr("facs");
                 var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
                 var c_bb = parseBoundingBox(clefFacs);
@@ -157,7 +160,7 @@ THE SOFTWARE.
                     rendEng.outlineBoundingBox(c_bb, {fill: "red"});
                 }
 
-                var cModel = new Toe.Model.Clef(clefShape, {"staffLine": clefStaffLine});
+                var cModel = new Toe.Model.Clef(clefShape, {"staffPos": staffPos});
                 cModel.setBoundingBox(c_bb);
                 // instantiate clef view and controller
                 var cView = new Toe.View.ClefView(rendEng);
