@@ -105,12 +105,11 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     var cShape = this.clef.shape;
 
     // remove clef offset from step difference of coordinates
-    var cOffset = (this.props.numLines - this.clef.props.staffLine) * 2;
-    yStep -= cOffset;
+    yStep -= this.clef.props.staffPos;
 
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
-    
+
     var iClef = $.inArray(cShape, Toe.neumaticChroma);
     pInd = (iClef - yStep) % numChroma;
     if (pInd < 0) {
@@ -313,7 +312,7 @@ Toe.Model.Staff.prototype.setClef = function(clef) {
     if (clef.zone.ulx) {
         x = clef.zone.ulx;
     }
-    clef.setPosition([x, this.zone.uly+((this.props.numLines-clef.props.staffLine)*this.delta_y)]);
+    clef.setPosition([x, this.zone.uly + clef.props.staffPos*this.delta_y/2]);
 
     // update view
     $(clef).trigger("vRenderClef", [clef]);

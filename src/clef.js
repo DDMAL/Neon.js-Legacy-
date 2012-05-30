@@ -31,21 +31,21 @@ Toe.Model.Clef = function(clefShape, options) {
     this.shape = clefShape.toLowerCase();
     this.name = Toe.Model.Clef.Type[this.shape];
 
-    var clefLine = null;
+    var clefPos = null;
     if (this.name == undefined) {
         throw new Error("Clef: undefined clef type: '" + clefShape + "'");
     }
     else if (clefShape == "c") {
         // default staffline from pp. 17 Liber Usualis
-        clefLine = 4;
+        clefPos = 0;
     }
     else if (clefShape == "f") {
         // default staffline from pp. 17 Liber Usualis
-        clefLine = 3;
+        clefPos = 2;
     }
 
     this.props = {
-        staffLine: clefLine,
+        staffPos: clefPos,
         interact: false
     };
 
