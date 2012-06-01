@@ -101,6 +101,8 @@ Toe.Model.Clef.prototype.setPosition = function(pos) {
         throw new Error("Clef: invalid bounding box");
     }
 
+    bb = $.map(bb, Math.round);
+
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];

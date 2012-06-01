@@ -39,7 +39,6 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
     $(cModel).bind("vRenderClef", function(event, clef, staff) {
         cView.renderClef(clef, staff);
     });
-
 }
 
 Toe.Ctrl.ClefController.prototype.constructor = Toe.Ctrl.ClefController;
