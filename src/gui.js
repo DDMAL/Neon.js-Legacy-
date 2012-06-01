@@ -276,6 +276,18 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                         var staff = element.staffRef;
 
+                        if (staff != page.getClosestStaff({x: element.left, y: element.top})) {
+                            // restore coordinates of mouse down
+                            element.left += delta_x;
+                            element.top += delta_y;
+
+                            // message to the user ... hey, you can't do that
+                            $("#alert > p").text("Clefs can not be moved to a different staff.");
+                            $("#alert").toggleClass("fade", false).delay(650).queue(function() { $("#alert").toggleClass("fade", true); });
+                            
+                            return true; // jQuery equivalent of continue in for loop
+                        }
+
                         var snappedCoords = staff.ohSnap({x: staff.zone.ulx + element.currentWidth/2, y: top}, null, {x: false, ignoreEle: ele});
 
                         // get staff position of snapped coordinates
