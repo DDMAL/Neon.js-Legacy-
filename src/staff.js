@@ -111,7 +111,7 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     var numChroma = Toe.neumaticChroma.length;
 
     var iClef = $.inArray(cShape, Toe.neumaticChroma);
-    pInd = (iClef - yStep) % numChroma;
+    var pInd = (iClef - yStep) % numChroma;
     if (pInd < 0) {
         pInd += numChroma;
     }
@@ -120,6 +120,44 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     var oct = 4 - Math.ceil(yStep / numChroma);
 
     return {pname: pname, oct: oct};
+}
+
+// if root pitch difference (integer diference between root note and clef position
+// has changed, call this method to update pitch name/octave of each component of the pitched
+// element.
+Toe.Model.Staff.prototype.updatePitchInfo = function(pitchedEle) {
+    // get clef information
+    var cShape = this.clef.shape;
+
+    // ["a", "b", "c", "d", "e", "f", "g"]
+    var numChroma = Toe.neumaticChroma.length;
+
+    var iClef = $.inArray(cShape, Toe.neumaticChroma);
+
+    if (pitchedEle instanceof Toe.Model.Neume) {
+        $.each(pitchedEle.components, function(ncInd, nc) {
+            var finalPitchDiff = -(pitchedEle.rootDiff + nc.pitchDiff);
+            var pInd = (iClef - finalPitchDiff) % numChroma;
+            if (pInd < 0) {
+                pInd += numChroma;
+            }
+
+            // update the pitch information
+            nc.pname = Toe.neumaticChroma[pInd];
+            nc.oct = 4 - Math.ceil(finalPitchDiff / numChroma);
+        });
+    }
+    else if (pitchedEle instanceof Toe.Model.Custos) {
+        var finalPitchDiff = -pitchedEle.rootDiff;
+        var pInd = (iClef - finalPitchDiff) % numChroma;
+        if (pInd < 0) {
+            pInd += numChroma;
+        }
+
+        // update the pitch information
+        pitchedEle.pname = Toe.neumaticChroma[pInd];
+        pitchedEle.oct = 4 - Math.ceil(finalPitchDiff / numChroma);
+    }
 }
 
 /**
@@ -344,9 +382,14 @@ Toe.Model.Staff.prototype.moveClef = function(staffPos) {
         this.clef.y += pitchDiff*this.delta_y/2;
 
         // update root note pitch differences of pitched elements on the staff
+        var staffRef = this;
         $.each(this.elements, function(eInd, e) {
             if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
+                // update root difference
                 e.rootDiff -= pitchDiff;
+
+                // with this updated root difference, recalculate the pitch information
+                staffRef.updatePitchInfo(e);
             }
         });
     }

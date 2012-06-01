@@ -266,8 +266,33 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                 $.each(elements, function(ind, element) {
                     var ele = element.eleRef;
 
-                    // a single neume has been dragged
-                    if (ele instanceof Toe.Model.Neume) {
+                    if (ele instanceof Toe.Model.Clef) {
+                        // this is a clef
+                        var top = element.top;
+                        if (elements.length > 1) {
+                            // calculate object's absolute positions from within selection group
+                            top = selection.top + element.top;
+                        }
+
+                        var staff = element.staffRef;
+
+                        var snappedCoords = staff.ohSnap({x: staff.zone.ulx + element.currentWidth/2, y: top}, null, {x: false, ignoreEle: ele});
+
+                        // get staff position of snapped coordinates
+                        var staffPos = Math.round((snappedCoords.y - staff.zone.uly) / (staff.delta_y/2));
+
+                        staff.moveClef(staffPos);
+
+                        element.left = snappedCoords.x; 
+                        element.top = snappedCoords.y;
+
+                        // get new bounding box information
+                        var ulx = snappedCoords.x - element.currentWidth/2;
+                        var uly = snappedCoords.y - element.currentHeight/2;
+                        var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
+                        ele.setBoundingBox(bb);
+                    }
+                    else if (ele instanceof Toe.Model.Neume) {
                         // we have a neume, this is a pitch shift
                         var left = element.left;
                         var top = element.top;
@@ -348,25 +373,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     }
                     else if (ele instanceof Toe.Model.Custos) {
 
-                    }
-                    else if (ele instanceof Toe.Model.Clef) {
-                        // this is a clef
-                        var staff = element.staffRef;
-
-                        var snappedCoords = staff.ohSnap({x: staff.zone.ulx + element.currentWidth/2, y: element.top}, null, {x: false, ignoreEle: ele});
-
-                        // get staff position of snapped coordinates
-                        var staffPos = Math.round((snappedCoords.y - staff.zone.uly) / (staff.delta_y/2));
-
-                        staff.moveClef(staffPos);
-
-                        element.set({left: snappedCoords.x, top: snappedCoords.y});
-
-                        // get new bounding box information
-                        var ulx = snappedCoords.x - element.currentWidth/2;
-                        var uly = snappedCoords.y - element.currentHeight/2;
-                        var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
-                        ele.setBoundingBox(bb);
                     }
                     else if (ele instanceof Toe.Model.Division) {
                         // this is a division

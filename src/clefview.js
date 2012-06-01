@@ -66,5 +66,5 @@ Toe.View.ClefView.prototype.renderClef = function(clef, staff) {
 
     elements.modify.push(svgClef);
 
-    this.rendEng.draw(elements, {selectable: clef.props.interact, staffRef: staff, eleRef: clef});
+    this.rendEng.draw(elements, {group: true, selectable: clef.props.interact, staffRef: staff, eleRef: clef});
 }
