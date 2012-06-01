@@ -291,6 +291,30 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         var uly = snappedCoords.y - element.currentHeight/2;
                         var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
                         ele.setBoundingBox(bb);
+
+                        var pitchInfo = $.map(staff.elements, function(e) {
+                            if (e instanceof Toe.Model.Neume) {
+                                var pitchInfo = new Array();
+                                $.each(e.components, function(nInd, n) {
+                                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                                });
+                                return {id: e.id, pitchInfo: pitchInfo};
+                            }
+                            else if (e instanceof Toe.Model.Custos) {
+                                return {id: e.id, pitchInfo: [{pname: e.pname, oct: e.oct}]};
+                            }
+                        });
+
+                        var args = {id: ele.id, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3], pitchInfo: pitchInfo};
+
+                        // send pitch shift command to server to change underlying MEI
+                        /*$.post(prefix + "/edit/" + fileName + "/move/clef", {data: JSON.stringify(args)})
+                        .error(function() {
+                            // show alert to user
+                            // replace text with error message
+                            $("#alert > p").text("Server failed to move clef. Client and server are not synchronized.");
+                            $("#alert").toggleClass("fade");
+                        });*/
                     }
                     else if (ele instanceof Toe.Model.Neume) {
                         // we have a neume, this is a pitch shift

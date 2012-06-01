@@ -161,7 +161,9 @@ THE SOFTWARE.
                 }
 
                 var cModel = new Toe.Model.Clef(clefShape, {"staffPos": staffPos});
+                cModel.setID($(clef).attr("xml:id"));
                 cModel.setBoundingBox(c_bb);
+
                 // instantiate clef view and controller
                 var cView = new Toe.View.ClefView(rendEng);
                 var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);

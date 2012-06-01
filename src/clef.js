@@ -70,6 +70,16 @@ Toe.Model.Clef.Type = {
 Toe.Model.Clef.prototype.constructor = Toe.Model.Clef;
 
 /**
+ * Sets the id of the clef
+ *
+ * @methodOf Toe.Model.Clef
+ * @ param {String} cid clef id
+ */
+Toe.Model.Clef.prototype.setID = function(cid) {
+    this.id = cid;
+}
+
+/**
  * Sets the position of the clef
  *
  * @methodOf Toe.Model.Clef
