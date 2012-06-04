@@ -145,17 +145,20 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
         rendEng.canvas.observe('object:selected', function(e) {
             var selection = rendEng.canvas.getActiveObject();
-            if (selection.eleRef instanceof Toe.Model.Neume) {
-                $("#info > p").text("Selected: " + selection.eleRef.props.type.name);
+            var ele = selection.eleRef;
+            if (ele instanceof Toe.Model.Neume) {
+                $("#info > p").text("Selected: " + ele.props.type.name);
                 $("#info").animate({opacity: 1.0}, 100);
 
-                if (selection.eleRef.props.type == Toe.Model.Neume.Type.punctum) {
+                $("#menu_editclef").remove();
+
+                if (ele.props.type == Toe.Model.Neume.Type.punctum) {
                     if ($("#menu_editpunctum").length == 0) {
                         $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
                     }
 
                     // toggle ornamentation
-                    var nc = selection.eleRef.components[0];
+                    var nc = ele.components[0];
                     var hasDot = nc.hasOrnament("dot");
                     if (hasDot) {
                         $("#edit_chk_dot").toggleClass("active", true);
@@ -165,7 +168,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     }
 
                     $("#edit_chk_dot").bind("click.edit", function() {
-                        var nModel = selection.eleRef;
+                        var nModel = ele;
                         var sModel = selection.staffRef;
 
                         // remove the old neume
@@ -225,8 +228,90 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     $("#menu_editpunctum").remove();
                 }
             }
+            else if (ele instanceof Toe.Model.Clef) {
+                $("#info > p").text("Selected: " + ele.name);
+                $("#info").animate({opacity: 1.0}, 100);
+
+                if ($("#menu_editclef").length == 0) {
+                        $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="edit_rad_c" class="btn">Doh</button>\n<button id="edit_rad_f" class="btn">Fah</button>\n</div></li></span>');
+                }
+
+                // activate appropriate radio button
+                if (ele.shape == "c") {
+                    $("#edit_rad_c").toggleClass("active", true);
+                }
+                else {
+                    $("#edit_rad_f").toggleClass("active", true);
+                }
+
+                $("#edit_rad_c").bind("click.edit", function() {
+                    if (!$(this).hasClass("active")) {
+                        // switch from f to c clef
+                        sModel = selection.staffRef;
+                        rendEng.canvas.remove(selection);
+
+                        sModel.updateClefShape("c");
+
+                        var pitchInfo = $.map(sModel.elements, function(e) {
+                            if (e instanceof Toe.Model.Neume) {
+                                var pitchInfo = new Array();
+                                $.each(e.components, function(nInd, n) {
+                                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                                });
+                                return {id: e.id, noteInfo: pitchInfo};
+                            }
+                            else if (e instanceof Toe.Model.Custos) {
+                                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                            }
+                        });
+
+                        $(this).toggleClass("active");
+                        rendEng.canvas.discardActiveObject();
+                        rendEng.canvas.discardActiveGroup();
+                        rendEng.canvas.fire('selection:cleared');
+                        rendEng.repaint();
+                    }
+                });
+
+                $("#edit_rad_f").bind("click.edit", function() {
+                    if (!$(this).hasClass("active")) {
+                        // switch from c to f clef
+                        sModel = selection.staffRef;
+                        rendEng.canvas.remove(selection);
+
+                        sModel.updateClefShape("f");
+
+                        var pitchInfo = $.map(sModel.elements, function(e) {
+                            if (e instanceof Toe.Model.Neume) {
+                                var pitchInfo = new Array();
+                                $.each(e.components, function(nInd, n) {
+                                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                                });
+                                return {id: e.id, noteInfo: pitchInfo};
+                            }
+                            else if (e instanceof Toe.Model.Custos) {
+                                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                            }
+                        });
+
+                        $(this).toggleClass("active");
+                        rendEng.canvas.discardActiveObject();
+                        rendEng.canvas.discardActiveGroup();
+                        rendEng.canvas.fire('selection:cleared');
+                        rendEng.repaint();
+                    }
+                });
+            }
+            else if (ele instanceof Toe.Model.Division) {
+                $("#info > p").text("Selected: " + ele.type);
+                $("#info").animate({opacity: 1.0}, 100);
+
+                $("#menu_editpunctum").remove();
+                $("#menu_editclef").remove();
+            }
             else {
                 $("#menu_editpunctum").remove();
+                $("#menu_editclef").remove();
             }
         });
 
@@ -236,6 +321,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
             // remove selection specific editing options
             $("#menu_editpunctum").remove();
+            $("#menu_editclef").remove();
         });
 
         rendEng.canvas.observe('mouse:up', function(e) {

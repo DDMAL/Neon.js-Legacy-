@@ -62,9 +62,52 @@ Toe.View.ClefView.prototype.renderClef = function(clef, staff) {
     }
 
     var cGlyph = this.rendEng.getGlyph(svgKey);
-    var svgClef = cGlyph.clone().set({left: clef.x + cGlyph.centre[0], top: clef.y}); // offset centre
+    var glyphLeft = clef.x;
+    var glyphTop = clef.y;
+    if (clef.shape == "c") {
+        glyphLeft += cGlyph.centre[0];
+    }
+    else if (clef.shape == "f") {
+        // 0.34 is the relative position of the f clef glyph placement
+        glyphTop += 0.34*cGlyph.centre[1];
+    }
+
+    var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop}); // offset centre
 
     elements.modify.push(svgClef);
 
-    this.rendEng.draw(elements, {group: true, selectable: clef.props.interact, staffRef: staff, eleRef: clef});
+    this.drawing = this.rendEng.draw(elements, {group: true, selectable: clef.props.interact, staffRef: staff, eleRef: clef})[0];
+}
+
+Toe.View.ClefView.prototype.updateShape = function(clef) {
+    if (!this.drawing) {
+        throw new Error("Clef: Invalid render context");
+    }
+
+    var svgKey = null;
+    switch(clef.shape) {
+        case "c":
+            svgKey = "c_clef";
+            break;
+        case "f":
+            svgKey = "f_clef";
+            break;
+    }
+
+    // remove the old clef drawing from the canvas surface
+    this.rendEng.canvas.remove(this.drawing);
+
+    var cGlyph = this.rendEng.getGlyph(svgKey);
+    var glyphLeft = clef.x;
+    var glyphTop = clef.y;
+    if (clef.shape == "c") {
+        glyphLeft += cGlyph.centre[0];
+    }
+    else if (clef.shape == "f") {
+        glyphTop += 0.34*cGlyph.centre[1];
+    }
+
+    var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop});
+
+    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {group: true, selectable: clef.selectable, staffRef: clef.staff, eleRef: clef, repaint: true})[0];
 }

@@ -28,14 +28,10 @@ THE SOFTWARE.
  * @param {Object} options staffline {Number}, interact {Boolean}
  */
 Toe.Model.Clef = function(clefShape, options) {
-    this.shape = clefShape.toLowerCase();
-    this.name = Toe.Model.Clef.Type[this.shape];
+    this.setShape(clefShape);
 
     var clefPos = null;
-    if (this.name == undefined) {
-        throw new Error("Clef: undefined clef type: '" + clefShape + "'");
-    }
-    else if (clefShape == "c") {
+    if (clefShape == "c") {
         // default staffline from pp. 17 Liber Usualis
         clefPos = 0;
     }
@@ -53,6 +49,9 @@ Toe.Model.Clef = function(clefShape, options) {
 
     // initialize bounding box
     this.zone = new Object();
+
+    // reference to the staff this clef is mounted to
+    this.staff = null;
 }
 
 /**
@@ -77,6 +76,30 @@ Toe.Model.Clef.prototype.constructor = Toe.Model.Clef;
  */
 Toe.Model.Clef.prototype.setID = function(cid) {
     this.id = cid;
+}
+
+/**
+ * Sets the shape of the clef
+ * @methodOf Toe.Model.clef
+ * @param {String} shape the new clef shape
+ */
+Toe.Model.Clef.prototype.setShape = function(shape) {
+    this.shape = shape.toLowerCase();
+    this.name = Toe.Model.Clef.Type[this.shape];
+
+    if (this.name == undefined) {
+        throw new Error("Clef: unknown clef shape");
+    }
+
+    $(this).trigger("vUpdateShape", [this]);
+}
+
+Toe.Model.Clef.prototype.setStaff = function(staff) {
+    if (!(staff instanceof Toe.Model.Staff)) {
+        throw new Error("Clef: invalid staff reference");
+    }
+
+    this.staff = staff;
 }
 
 /**

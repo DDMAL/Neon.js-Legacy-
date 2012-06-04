@@ -169,7 +169,7 @@ THE SOFTWARE.
                 var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
 
                 // mount clef on the staff
-                sModel.setClef(cModel);
+                sModel.mountClef(cModel);
 
                 // instantiate staff view and controller
                 var sView = new Toe.View.StaffView(rendEng);

@@ -337,7 +337,7 @@ Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
  * @param {Toe.Model.Clef} clef The clef to mount
  * @returns {Toe.Model.Staff} pointer to this staff for chaining
  */
-Toe.Model.Staff.prototype.setClef = function(clef) {
+Toe.Model.Staff.prototype.mountClef = function(clef) {
     if (!(clef instanceof Toe.Model.Clef)) {
         throw new Error("Staff: Invalid clef");
     }
@@ -350,18 +350,29 @@ Toe.Model.Staff.prototype.setClef = function(clef) {
     clef.setPosition([x, this.zone.uly + clef.props.staffPos*this.delta_y/2]);
 
     // add to elements list, replace if clef already exists
-    if (this.elements.length > 0 && this.elements[0] instanceof Toe.Model.Clef) {        
+    if (this.clef && this.clef.shape == clef.shape) {        
         // update pitched elements on staff and other clef attributes
         this.moveClef(clef.props.staffPos);
 
         // reset to new clef
         this.elements[0] = clef;
+        this.clef = clef;
     }
     else {
+        // update root note pitch differences of pitched elements on the staff
+        this.clef = clef;
+        var staffRef = this;
+        $.each(this.elements, function(eInd, e) {
+            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
+                // with this updated root difference, recalculate the pitch information
+                staffRef.updatePitchInfo(e);
+            }
+        });
+
         this.elements.splice(0,0,clef);
     } 
 
-    this.clef = clef;
+    this.clef.setStaff(this);
 
     // update view
     $(clef).trigger("vRenderClef", [this.clef, this]);
@@ -373,7 +384,7 @@ Toe.Model.Staff.prototype.setClef = function(clef) {
 // move clef vertically to provided staff position
 Toe.Model.Staff.prototype.moveClef = function(staffPos) {
     // move only if a clef is already attached to this staff
-    if (this.elements[0] instanceof Toe.Model.Clef) {
+    if (this.clef) {
         // get pitch difference between the old and new staff position of the clef
         var pitchDiff = this.clef.props.staffPos - staffPos;
        
@@ -388,6 +399,23 @@ Toe.Model.Staff.prototype.moveClef = function(staffPos) {
                 // update root difference
                 e.rootDiff -= pitchDiff;
 
+                // with this updated root difference, recalculate the pitch information
+                staffRef.updatePitchInfo(e);
+            }
+        });
+    }
+}
+
+// change clef shape
+// this needs to be refactored to clef model
+Toe.Model.Staff.prototype.updateClefShape = function(shape) {
+    if (this.clef) {
+        this.clef.setShape(shape);
+
+        // update pitched elements on the staff
+        var staffRef = this;
+        $.each(this.elements, function(eInd, e) {
+            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
                 // with this updated root difference, recalculate the pitch information
                 staffRef.updatePitchInfo(e);
             }
