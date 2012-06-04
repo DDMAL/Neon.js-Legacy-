@@ -29,6 +29,17 @@ THE SOFTWARE.
  */
 Toe.Ctrl.ClefController = function(cModel, cView) {
     // LISTEN TO THE VIEW
+    $(cModel).bind("mUpdateBoundingBox", function(event, drawing) {
+        // get final bounding box from drawing
+        var ulx = drawing.left - drawing.currentWidth/2;
+        var uly = drawing.top - drawing.currentHeight/2;
+        var lrx = ulx + drawing.currentWidth;
+        var lry = uly + drawing.currentHeight;
+
+        // reset the bounding box in the model with the final bounding box
+        // of the drawing
+        cModel.setBoundingBox([ulx, uly, lrx, lry]);
+    });
 
     // LISTEN TO THE MODEL
     /** 
@@ -36,8 +47,8 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
      * event type: vRenderClef
      * @param {Toe.Model.Clef} clef Clef to render
      */
-    $(cModel).bind("vRenderClef", function(event, clef, staff) {
-        cView.renderClef(clef, staff);
+    $(cModel).bind("vRenderClef", function(event, clef) {
+        cView.renderClef(clef);
     });
 
     $(cModel).bind("vUpdateShape", function(event, clef) {

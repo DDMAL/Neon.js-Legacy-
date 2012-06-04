@@ -375,7 +375,7 @@ Toe.Model.Staff.prototype.mountClef = function(clef) {
     this.clef.setStaff(this);
 
     // update view
-    $(clef).trigger("vRenderClef", [this.clef, this]);
+    $(clef).trigger("vRenderClef", [this.clef]);
 
     // for chaining
     return this;

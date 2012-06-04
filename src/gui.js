@@ -265,6 +265,17 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             }
                         });
 
+                        var args = {id: ele.id, shape: "c", ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
+
+                        // send pitch shift command to server to change underlying MEI
+                        $.post(prefix + "/edit/" + fileName + "/update/clef/shape", {data: JSON.stringify(args)})
+                        .error(function() {
+                            // show alert to user
+                            // replace text with error message
+                            $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
+                            $("#alert").toggleClass("fade");
+                        });
+
                         $(this).toggleClass("active");
                         rendEng.canvas.discardActiveObject();
                         rendEng.canvas.discardActiveGroup();
@@ -292,6 +303,17 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             else if (e instanceof Toe.Model.Custos) {
                                 return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
                             }
+                        });
+
+                        var args = {id: ele.id, shape: "f", ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
+
+                        // send pitch shift command to server to change underlying MEI
+                        $.post(prefix + "/edit/" + fileName + "/update/clef/shape", {data: JSON.stringify(args)})
+                        .error(function() {
+                            // show alert to user
+                            // replace text with error message
+                            $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
+                            $("#alert").toggleClass("fade");
                         });
 
                         $(this).toggleClass("active");

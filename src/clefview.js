@@ -44,12 +44,12 @@ Toe.View.ClefView.prototype.constructor = Toe.View.ClefView;
  * @methodOf Toe.View.ClefView
  * @param {Toe.Model.Clef} clef Clef to render
  */
-Toe.View.ClefView.prototype.renderClef = function(clef, staff) {
+Toe.View.ClefView.prototype.renderClef = function(clef) {
     if (!this.rendEng) {
         throw new Error("Clef: Invalid render context");
     }
     
-    var elements = {static: new Array(), modify: new Array()};
+    var staff = clef.staff;
 
     var svgKey = null;
     switch(clef.shape) {
@@ -62,27 +62,27 @@ Toe.View.ClefView.prototype.renderClef = function(clef, staff) {
     }
 
     var cGlyph = this.rendEng.getGlyph(svgKey);
-    var glyphLeft = clef.x;
-    var glyphTop = clef.y;
-    if (clef.shape == "c") {
-        glyphLeft += cGlyph.centre[0];
-    }
-    else if (clef.shape == "f") {
+    var glyphLeft = clef.zone.ulx + cGlyph.centre[0];
+    var glyphTop = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
+     if (clef.shape == "f") {
         // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*cGlyph.centre[1];
     }
 
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop}); // offset centre
 
-    elements.modify.push(svgClef);
+    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {selectable: clef.props.interact, staffRef: staff, eleRef: clef})[0];
 
-    this.drawing = this.rendEng.draw(elements, {group: true, selectable: clef.props.interact, staffRef: staff, eleRef: clef})[0];
+    // update model
+    $(clef).trigger("mUpdateBoundingBox", this.drawing);
 }
 
 Toe.View.ClefView.prototype.updateShape = function(clef) {
     if (!this.drawing) {
         throw new Error("Clef: Invalid render context");
     }
+
+    var staff = clef.staff;
 
     var svgKey = null;
     switch(clef.shape) {
@@ -98,16 +98,20 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
     this.rendEng.canvas.remove(this.drawing);
 
     var cGlyph = this.rendEng.getGlyph(svgKey);
-    var glyphLeft = clef.x;
-    var glyphTop = clef.y;
+    var glyphLeft = staff.zone.ulx;
+    var glyphTop = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
     if (clef.shape == "c") {
         glyphLeft += cGlyph.centre[0];
     }
     else if (clef.shape == "f") {
+        // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*cGlyph.centre[1];
     }
 
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop});
 
-    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {group: true, selectable: clef.selectable, staffRef: clef.staff, eleRef: clef, repaint: true})[0];
+    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {selectable: clef.selectable, staffRef: clef.staff, eleRef: clef, repaint: true})[0];
+
+    // update model
+    $(clef).trigger("mUpdateBoundingBox", this.drawing);
 }

@@ -40,7 +40,8 @@ rules = [
     (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.api.DeleteDivisionHandler),
     (abs_path(r"/edit/(.*?)/insert/dot"), neonsrv.api.AddDotHandler),
     (abs_path(r"/edit/(.*?)/delete/dot"), neonsrv.api.DeleteDotHandler),
-    (abs_path(r"/edit/(.*?)/move/clef"), neonsrv.api.MoveClefHandler)
+    (abs_path(r"/edit/(.*?)/move/clef"), neonsrv.api.MoveClefHandler),
+    (abs_path(r"/edit/(.*?)/update/clef/shape"), neonsrv.api.UpdateClefShapeHandler)
 ]
 
 # Set up tests if we're in debug mode

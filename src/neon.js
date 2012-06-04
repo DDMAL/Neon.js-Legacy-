@@ -147,6 +147,11 @@ THE SOFTWARE.
 
                 // CLEF
                 var clef = $("~ clef", this);
+                if (!clef) {
+                    // there is no clef present ... abort! abort!
+                    return false;
+                }
+
                 var clefShape = $(clef).attr("shape");
                 var clefStaffLine = parseInt($(clef).attr("line"));
 

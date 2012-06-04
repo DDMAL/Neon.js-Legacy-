@@ -981,3 +981,66 @@ class MoveClefHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         self.set_status(200)
+
+class UpdateClefShapeHandler(tornado.web.RequestHandler):
+
+    def update_or_add_zone(self, clef, ulx, uly, lrx, lry):
+        facsid = clef.getAttribute("facs").value
+        if facsid:
+            zone = self.mei.getElementById(facsid)
+        else:
+            zone = MeiElement("zone")
+            clef.addAttribute("facs", zone.getId())
+            surfaces = self.mei.getElementsByName("surface")
+            if len(surfaces):
+                surfaces[0].addChild(zone)
+
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+    def update_pitched_elements(self, pitch_info):
+        for ele in pitch_info:
+            pitched_ele = self.mei.getElementById(str(ele["id"]))
+            if pitched_ele.getName() == "custos":
+                pitched_ele.addAttribute("pname", str(ele["noteInfo"]["pname"]))
+                pitched_ele.addAttribute("oct", str(ele["noteInfo"]["oct"]))
+            elif pitched_ele.getName() == "neume":
+                notes = pitched_ele.getDescendantsByName("note")
+                for n_info, n in zip(ele["noteInfo"], notes):
+                    n.addAttribute("pname", str(n_info["pname"]))
+                    n.addAttribute("oct", str(n_info["oct"]))
+
+    def post(self, file):
+        '''
+        Change the shape of a given clef. Must also update
+        bounding box data since the glyphs for c and f clefs
+        are different. Must also update pitched elements on the
+        affected staff to correspond with the new clef shape.
+        '''
+
+        data = json.loads(self.get_argument("data", ""))
+        clef_id = str(data["id"])
+
+        # bounding box
+        ulx = str(data["ulx"])
+        uly = str(data["uly"])
+        lrx = str(data["lrx"])
+        lry = str(data["lry"])
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        clef = self.mei.getElementById(clef_id)
+
+        # update clef shape
+        clef.addAttribute("shape", str(data["shape"]).upper())
+
+        self.update_or_add_zone(clef, ulx, uly, lrx, lry)
+        self.update_pitched_elements(data["pitchInfo"])
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)
