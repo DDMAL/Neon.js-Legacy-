@@ -396,7 +396,11 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                             return true; // jQuery equivalent of continue in for loop
                         }
 
-                        var snappedCoords = staff.ohSnap({x: staff.zone.ulx + element.currentWidth/2, y: top}, null, {x: false, ignoreEle: ele});
+                        var left = staff.zone.ulx;
+                        if (ele.shape == "c") {
+                            left += element.currentWidth/2;
+                        }
+                        var snappedCoords = staff.ohSnap({x: left, y: top}, null, {x: false, ignoreEle: ele});
 
                         // get staff position of snapped coordinates
                         var staffPos = Math.round((snappedCoords.y - staff.zone.uly) / (staff.delta_y/2));
@@ -404,6 +408,10 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         staff.moveClef(staffPos);
 
                         element.left = snappedCoords.x; 
+                        if (ele.shape == "f") {
+                            // 0.34 is the relative position of the f clef glyph placement
+                            snappedCoords.y += 0.34*element.currentHeight/2;
+                        }
                         element.top = snappedCoords.y;
 
                         // get new bounding box information
