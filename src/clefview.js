@@ -71,7 +71,7 @@ Toe.View.ClefView.prototype.renderClef = function(clef) {
 
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop}); // offset centre
 
-    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {selectable: clef.props.interact, staffRef: staff, eleRef: clef})[0];
+    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {group: true, selectable: clef.props.interact, staffRef: staff, eleRef: clef})[0];
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
@@ -110,7 +110,7 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
 
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop});
 
-    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {selectable: clef.selectable, staffRef: clef.staff, eleRef: clef, repaint: true})[0];
+    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {group: true, selectable: clef.selectable, staffRef: clef.staff, eleRef: clef, repaint: true})[0];
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
