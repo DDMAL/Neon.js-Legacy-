@@ -40,10 +40,12 @@ Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
  * @param {Toe.Model.Neume} neume Neume to render
  * @param {Array} nc_y The y positions of each neume component within the neume
  */
-Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y, staff) {
+Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
     if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
     }
+
+    var staff = neume.staff;
 
     var bestDotPlacements = function(nc_y, yposInd) {
         // corresponding to whether or not it is good to put a dot

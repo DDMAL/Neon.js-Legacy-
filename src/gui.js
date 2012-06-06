@@ -146,6 +146,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
         rendEng.canvas.observe('object:selected', function(e) {
             var selection = rendEng.canvas.getActiveObject();
             var ele = selection.eleRef;
+            console.log(ele);
             if (ele instanceof Toe.Model.Neume) {
                 $("#info > p").text("Selected: " + ele.props.type.name);
                 $("#info").animate({opacity: 1.0}, 100);

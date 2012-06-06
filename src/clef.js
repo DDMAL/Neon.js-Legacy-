@@ -50,7 +50,7 @@ Toe.Model.Clef = function(clefShape, options) {
     // initialize bounding box
     this.zone = new Object();
 
-    // reference to the staff this clef is mounted to
+    // reference to the staff this clef is mounted on
     this.staff = null;
 }
 
@@ -78,6 +78,14 @@ Toe.Model.Clef.prototype.setID = function(cid) {
     this.id = cid;
 }
 
+Toe.Model.Clef.prototype.setStaff = function(staff) {
+    if (!(staff instanceof Toe.Model.Staff)) {
+        throw new Error("Clef: invalid staff reference");
+    }
+
+    this.staff = staff;
+}
+
 /**
  * Sets the shape of the clef
  *
@@ -95,14 +103,6 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
     // TODO update affected pitched elements on the staff
 
     $(this).trigger("vUpdateShape", [this]);
-}
-
-Toe.Model.Clef.prototype.setStaff = function(staff) {
-    if (!(staff instanceof Toe.Model.Staff)) {
-        throw new Error("Clef: invalid staff reference");
-    }
-
-    this.staff = staff;
 }
 
 /**

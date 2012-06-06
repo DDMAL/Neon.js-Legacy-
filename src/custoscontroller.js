@@ -36,7 +36,10 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
      * event type: vRenderCustos
      * @param {Toe.Model.Custos} custos Custos to render
      */
-    $(cModel).bind("vRenderCustos", function(event, custos, staff) {
+    $(cModel).bind("vRenderCustos", function(event, custos) {
+        // get the staff this custos is mounted on
+        var staff = custos.staff;
+
         // calculate the y position of the custos
         var custos_y = staff.zone.uly - custos.rootStaffPos*staff.delta_y/2;
 

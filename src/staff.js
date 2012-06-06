@@ -337,10 +337,12 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
             this.elements.push(custos);
         }
 
-        // update view
-        $(custos).trigger("vRenderCustos", [custos, this]);
-
+        custos.setStaff(this);
         this.custos = custos;
+        
+        // update view
+        $(custos).trigger("vRenderCustos", [custos]);
+
     }
     // for chaining
     return this;
@@ -391,8 +393,10 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
             nInd = this.insertElement(neume);
         }
 
+        neume.setStaff(this);
+
         // update view
-        $(neume).trigger("vRenderNeume", [neume, this]);
+        $(neume).trigger("vRenderNeume", [neume]);
 
         return nInd;
     }
@@ -418,9 +422,6 @@ Toe.Model.Staff.prototype.addDivision = function(division, options) {
 
     $.extend(opts, options);
 
-	// update view
-	$(division).trigger("vRenderDivision", [division, this]);
-
     // insert division into list of sorted staff elements
     var nInd = null;
     if (opts.justPush) {
@@ -430,6 +431,11 @@ Toe.Model.Staff.prototype.addDivision = function(division, options) {
     else {
         nInd = this.insertElement(division);
     }
+
+    division.setStaff(this);
+
+    // update view
+	$(division).trigger("vRenderDivision", [division]);
 
     return nInd;
 }

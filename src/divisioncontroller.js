@@ -36,8 +36,8 @@ Toe.Ctrl.DivisionController = function(dModel, dView) {
      * event type: vRenderDivision
      * @param {Toe.Model.Division} division Division to render
      */
-    $(dModel).bind("vRenderDivision", function(event, division, staff) {
-        dView.renderDivision(division, staff);
+    $(dModel).bind("vRenderDivision", function(event, division) {
+        dView.renderDivision(division);
     });
 }
 

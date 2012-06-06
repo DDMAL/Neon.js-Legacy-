@@ -39,10 +39,12 @@ Toe.View.DivisionView.prototype.constructor = Toe.View.DivisionView;
  * @param {Toe.Model.Division} division Division to render
  * @param {Toe.Model.Staff} staff Staff context in which to render the provided division
  */
-Toe.View.DivisionView.prototype.renderDivision = function(division, staff) {
+Toe.View.DivisionView.prototype.renderDivision = function(division) {
     if (!this.rendEng) {
         throw new Error("Division: Invalid render context");
     }
+
+    var staff = division.staff;
 
     var elements = {static: new Array(), modify: new Array()};
     

@@ -47,6 +47,9 @@ Toe.Model.Custos = function(pname, oct, options) {
 
     // set by server or MEI so null by default
     this.id = null;
+
+    // reference to the staff this custos is mounted on
+    this.staff = null;
 }
 
 Toe.Model.Custos.prototype.constructor = Toe.Model.Custos;
@@ -69,6 +72,24 @@ Toe.Model.Custos.prototype.setBoundingBox = function(bb) {
 }
 
 /**
+ * Sets the id of the custos element.
+ * 
+ * @methodOf Toe.Model.Custos
+ * @param {String} id
+ */
+Toe.Model.Custos.prototype.setID = function(cid) {
+    this.id = cid;
+}
+
+Toe.Model.Custos.prototype.setStaff = function(staff) {
+    if (!(staff instanceof Toe.Model.Staff)) {
+        throw new Error("Custos: invalid staff reference");
+    }
+
+    this.staff = staff;
+}
+
+/**
  * Sets the pitch name and octave of the custos
  *
  * @methodOf Toe.Model.Custos
@@ -86,14 +107,4 @@ Toe.Model.Custos.prototype.setRootNote = function(pname, oct) {
  */
 Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
     this.rootStaffPos = staffPos;
-}
-
-/**
- * Sets the id of the custos element.
- * 
- * @methodOf Toe.Model.Custos
- * @param {String} id
- */
-Toe.Model.Custos.prototype.setID = function(cid) {
-    this.id = cid;
 }

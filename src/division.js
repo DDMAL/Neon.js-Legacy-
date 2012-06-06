@@ -46,6 +46,9 @@ Toe.Model.Division = function(key, options) {
 
     // set by server or MEI so null by default
     this.id = null;
+
+    // reference to the staff this clef is mounted on
+    this.staff = null;
 }
 
 Toe.Model.Division.prototype.constructor = Toe.Model.Division;
@@ -77,6 +80,14 @@ Toe.Model.Division.prototype.setBoundingBox = function(bb) {
  */
 Toe.Model.Division.prototype.setID = function(did) {
     this.id = did;
+}
+
+Toe.Model.Division.prototype.setStaff = function(staff) {
+    if (!(staff instanceof Toe.Model.Staff)) {
+        throw new Error("Division: invalid staff reference");
+    }
+
+    this.staff = staff;
 }
 
 /**
