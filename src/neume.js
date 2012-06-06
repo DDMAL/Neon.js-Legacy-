@@ -475,7 +475,6 @@ Toe.Model.Neume.prototype.diffToMelodicMove = function() {
 /**
  * Derives the name of the neume using the pitch differences
  * and sets the name on the model.
- * TODO: use binary search tree instead of linear search
  * 
  * @methodOf Toe.Model.Neume
  * @returns {string} neume name
@@ -508,4 +507,15 @@ Toe.Model.Neume.prototype.deriveName = function() {
     }
 
     return this.props.type.name;
+}
+
+/**
+ * Synchronize drawing with the current state of the model.
+ * Should be called when underlying note content has changed 
+ * or ornamentation has been added to individual notes.
+ */
+Toe.Model.Neume.prototype.syncDrawing = function() {
+    this.deriveName();
+
+    $(this).trigger("vRenderNeume", [this]);
 }

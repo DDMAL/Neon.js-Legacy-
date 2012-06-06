@@ -30,10 +30,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     var toggles = {
         sldr_bgImgOpacity: true,
         initBgImgOpacity: 0.60,
-        btn_neumify: true,
-        btn_delete: true,
-        btn_explode: true,
-        radio_mode: true,
         initMode: "edit"
     };
 
@@ -156,6 +152,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     }
     gui.rendEng.repaint();
            
+    // add buttons for edit commands
     if ($("#sidebar-edit").length == 0) {
         $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n</li>\n<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }

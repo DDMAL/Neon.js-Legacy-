@@ -28,6 +28,8 @@ THE SOFTWARE.
  */
 Toe.View.CustosView = function(renderEngine) {
     this.rendEng = renderEngine;
+
+    this.drawing = null;
 }
 
 Toe.View.CustosView.prototype.constructor = Toe.View.CustosView;
@@ -50,5 +52,5 @@ Toe.View.CustosView.prototype.renderCustos = function(cModel, custos_y) {
 
     elements.modify.push(custos);
 
-	this.rendEng.draw(elements, {selectable: cModel.props.interact, eleRef: custos});
+	this.drawing = this.rendEng.draw(elements, {selectable: cModel.props.interact, eleRef: custos})[0];
 }

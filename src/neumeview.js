@@ -28,73 +28,88 @@ THE SOFTWARE.
  */
 Toe.View.NeumeView = function(renderEngine) {
     this.rendEng = renderEngine;
+
+    this.drawing = null;
 }
 
 Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
 
+/*********************************
+ *      HELPER FUNCTIONS         *
+ *********************************/
+Toe.View.NeumeView.prototype.calcNoteYPos = function(neume) {
+    var staff = neume.staff;
 
-/**
- * Renders the neume on the canvas
- * 
- * @methodOf Toe.View.NeumeView
- * @param {Toe.Model.Neume} neume Neume to render
- * @param {Array} nc_y The y positions of each neume component within the neume
- */
-Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
-    if (!this.rendEng) {
+    // derive positions of neume components
+    var nc_y = new Array();
+
+    // set root note y pos
+    nc_y.push(staff.zone.uly - neume.rootStaffPos*staff.delta_y/2);
+    for (var i = 1; i < neume.components.length; i++) {
+        nc_y.push(nc_y[0] + (-neume.components[i].pitchDiff * staff.delta_y/2));
+    }
+
+    return nc_y;
+}
+
+Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) {
+    // corresponding to whether or not it is good to put a dot
+    // at the middle, top, or bottom of the neume component
+    var bestDots = [false, false, false];
+    var dotsy = new Array();
+
+    var firstSpace = staff.zone.uly + staff.delta_y/2;
+
+    ypos = nc_y[yposInd];
+
+    // try middle first
+    var midPos = ypos;
+    k = Math.round(2*(midPos - firstSpace) / staff.delta_y);
+    if (k % 2 == 0) {
+        dotsy.push(midPos);
+    } 
+
+    // try top next
+    var topPos = ypos - staff.delta_y/2;
+    var k = Math.round(2*(topPos - firstSpace) / staff.delta_y);
+
+    // check there isn't a note here
+    // must also check note after (eg., podatus)
+    var isOccNote = false;
+    if ((yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - staff.delta_y/2 == nc_y[yposInd+1])) {
+        isOccNote = true;
+    }
+
+    if (k % 2 == 0 && !isOccNote) {
+        dotsy.push(topPos);
+    }
+    
+    // try bottom
+    var botPos = ypos + staff.delta_y/2;
+    k = Math.round(2*(botPos - firstSpace) / staff.delta_y);
+
+    // check there isn't a note here
+    isOccNote = false;
+    if ((yposInd+1 < nc_y.length && ypos + staff.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + staff.delta_y/2 == nc_y[yposInd-1])) {
+        isOccNote = true;
+    }
+
+    if (k % 2 == 0 && !isOccNote) {
+        dotsy.push(botPos);
+    } 
+
+    return dotsy;
+}
+
+Toe.View.NeumeView.prototype.drawNeume = function(neume) {
+        if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
     }
 
+    var nc_y = this.calcNoteYPos(neume);
+
     var staff = neume.staff;
-
-    var bestDotPlacements = function(nc_y, yposInd) {
-        // corresponding to whether or not it is good to put a dot
-        // at the middle, top, or bottom of the neume component
-        var bestDots = [false, false, false];
-        var dotsy = new Array();
-
-        var firstSpace = staff.zone.uly + staff.delta_y/2;
-
-        ypos = nc_y[yposInd];
-
-        // try middle first
-        var midPos = ypos;
-        k = Math.round(2*(midPos - firstSpace) / staff.delta_y);
-        if (k % 2 == 0) {
-            dotsy.push(midPos);
-        } 
-
-        // try top next
-        var topPos = ypos - staff.delta_y/2;
-        var k = Math.round(2*(topPos - firstSpace) / staff.delta_y);
-
-        // check there isn't a note here
-        // must also check note after (eg., podatus)
-        var isOccNote = false;
-        if ((yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - staff.delta_y/2 == nc_y[yposInd+1])) {
-            isOccNote = true;
-        }
-
-        if (k % 2 == 0 && !isOccNote) {
-            dotsy.push(topPos);
-        }
-        
-        // try bottom
-        var botPos = ypos + staff.delta_y/2;
-        k = Math.round(2*(botPos - firstSpace) / staff.delta_y);
-
-        // check there isn't a note here
-        isOccNote = false;
-        if ((yposInd+1 < nc_y.length && ypos + staff.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + staff.delta_y/2 == nc_y[yposInd-1])) {
-            isOccNote = true;
-        }
-
-        if (k % 2 == 0 && !isOccNote) {
-            dotsy.push(botPos);
-        } 
-
-        return dotsy;
-    };
+    var nv = this;
 
     var ncOverlap_x = 1; // (pixels)
     
@@ -137,7 +152,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             // render dots
             if (neume.components[0].hasOrnament('dot')) {
                 // get best spot for one dot
-                var bestDots = bestDotPlacements(nc_y, 0);
+                var bestDots = this.bestDotPlacements(staff, nc_y, 0);
                 elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
@@ -151,7 +166,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             // render dots
             if (neume.components[0].hasOrnament('dot')) {
                 // get best spot for one dot
-                var bestDots = bestDotPlacements(nc_y, 0);
+                var bestDots = this.bestDotPlacements(staff, nc_y, 0);
                 elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
@@ -213,7 +228,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = bestDotPlacements(nc_y, it);
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -259,7 +274,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = bestDotPlacements(nc_y, it);
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -317,7 +332,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = bestDotPlacements(nc_y, it);
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -356,7 +371,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             // only check last note has a dot
             if(neume.components[2].hasOrnament('dot')) {
                 // get best spot for the dot
-                var bestDots = bestDotPlacements(nc_y, 2);
+                var bestDots = this.bestDotPlacements(staff, nc_y, 2);
                 if (bestDots.length > 0) {
                     elements.modify.push(glyphDot.clone().set({left: glyphPunct.left + (2*ncGlyphs[2].centre[0]), top: bestDots[0]}));
                 }
@@ -397,7 +412,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
                 for (var ncInd = i; ncInd < i+2; ncInd++) {
                     if (neume.components[ncInd].hasOrnament('dot')) {
                         //get best spot for the dot
-                        var bestDots = bestDotPlacements(nc_y, ncInd);
+                        var bestDots = this.bestDotPlacements(staff, nc_y, ncInd);
                         if (bestDots.length > 0) {
                             elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[ncInd].centre[0]), top: bestDots[0]}));
                         }
@@ -414,7 +429,7 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
                 // draw dots on stray virga if they exist
                 if(neume.components[numNC-1].hasOrnament('dot')) {
                     // get best spot for the dot
-                    var bestDots = bestDotPlacements(nc_y, numNC-1);
+                    var bestDots = this.bestDotPlacements(staff, nc_y, numNC-1);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct3.left + (2*ncGlyphs[numNC-1].centre[0]), top: bestDots[0]}));
                     }
@@ -429,8 +444,27 @@ Toe.View.NeumeView.prototype.renderNeume = function(neume, nc_y) {
             break;
     }
     
-    var nDrawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, staffRef: staff, eleRef: neume})[0];
+    this.drawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, eleRef: neume})[0];
 
     // update model
-    $(neume).trigger("mUpdateBoundingBox", nDrawing);
+    $(neume).trigger("mUpdateBoundingBox", this.drawing);
+}
+
+/*********************************
+ *      VIEW HANDLERS            *
+ *********************************/
+/**
+ * Renders the neume on the canvas
+ * 
+ * @methodOf Toe.View.NeumeView
+ * @param {Toe.Model.Neume} neume Neume to render
+ */
+Toe.View.NeumeView.prototype.render = function(neume) {
+    // if a drawing exists for this neume, update it
+    // by removing and drawing again.
+    if (this.drawing) {
+        this.rendEng.canvas.remove(this.drawing);
+    }
+
+    this.drawNeume(neume);
 }

@@ -46,7 +46,6 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
      * @event
      * event type: vRenderNeume
      * @param {Toe.Model.Neume} neume Neume to render
-     * @param {Toe.Model.Staff} staff Staff the neume is on
      */
     $(nModel).bind("vRenderNeume", function(event, neume) {
         // make sure neume type is known for it to be drawn properly
@@ -54,18 +53,7 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
             neume.deriveName();
         }
 
-        var staff = neume.staff;
-
-        // derive positions of neume components
-        var nc_y = new Array();
-
-        // set root note y pos
-        nc_y.push(staff.zone.uly - neume.rootStaffPos*staff.delta_y/2);
-        for (var i = 1; i < neume.components.length; i++) {
-            nc_y.push(nc_y[0] + (-neume.components[i].pitchDiff * staff.delta_y/2));
-        }
-
-        nView.renderNeume(neume, nc_y);
+        nView.render(neume);
     });
 }
 
