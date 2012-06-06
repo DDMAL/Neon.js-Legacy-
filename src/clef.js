@@ -110,9 +110,9 @@ Toe.Model.Clef.prototype.setStaff = function(staff) {
  *
  *  <ulx,uly> =======
  *            ------- 0
- *            ------- 2
+ *            ------- -2
  *            ------- ...
- *            ------- (numlines x 2)
+ *            ------- -(numlines x 2)
  *            ======= <lrx,lry>
  * 
  * @methodOf Toe.Model.Clef
@@ -123,15 +123,12 @@ Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
     if (this.props.staffPos == staffPos) {
         return;
     }
-
-    // get pitch difference between the old and new staff position of the clef
-    var pitchDiff = staffPos - this.props.staffPos;
    
     // reset clef position in model
     this.props.staffPos = staffPos;
 
     // update pitched elements on the staff this clef is mounted on
-    this.staff.shiftPitchedElements(this, pitchDiff);
+    this.staff.shiftPitchedElements(this);
 
     $(this).trigger("vUpdateStaffPosition", [this]);
 }

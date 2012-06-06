@@ -55,7 +55,7 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
         }
 
         var clef = staff.getActingClefByEle(neume);
-        var clef_y = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
+        var clef_y = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
 
         // derive positions of neume components
         var nc_y = new Array();

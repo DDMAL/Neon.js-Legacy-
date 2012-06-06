@@ -156,7 +156,7 @@ THE SOFTWARE.
                 var clefStaffLine = parseInt($(clef).attr("line"));
 
                 // convert mei line attribute to staffPos attribute used in the internal clef Model
-                var staffPos = (sModel.props.numLines - clefStaffLine) * 2;
+                var staffPos = -(sModel.props.numLines - clefStaffLine) * 2;
 
                 var clefFacsId = $(clef).attr("facs");
                 var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];

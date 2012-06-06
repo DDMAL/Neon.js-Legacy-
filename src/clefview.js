@@ -56,7 +56,7 @@ Toe.View.ClefView.prototype.renderClef = function(clef) {
 
     var cGlyph = this.rendEng.getGlyph(svgKey);
     var glyphLeft = clef.zone.ulx + cGlyph.centre[0];
-    var glyphTop = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
+    var glyphTop = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
      if (clef.shape == "f") {
         // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*cGlyph.centre[1];
@@ -92,7 +92,7 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
 
     var cGlyph = this.rendEng.getGlyph(svgKey);
     var glyphLeft = staff.zone.ulx;
-    var glyphTop = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
+    var glyphTop = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
     if (clef.shape == "c") {
         glyphLeft += cGlyph.centre[0];
     }
@@ -116,7 +116,7 @@ Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
 
     var staff = clef.staff;
 
-    var glyphTop = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
+    var glyphTop = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
     if (clef.shape == "f") {
         // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*this.drawing.currentHeight/2;

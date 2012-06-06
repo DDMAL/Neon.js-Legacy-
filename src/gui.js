@@ -401,7 +401,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         var snappedCoords = staff.ohSnap({x: left, y: top}, null, {ignoreEle: ele});
 
                         // get staff position of snapped coordinates
-                        var staffPos = Math.round((snappedCoords.y - staff.zone.uly) / (staff.delta_y/2));
+                        var staffPos = -Math.round((snappedCoords.y - staff.zone.uly) / (staff.delta_y/2));
 
                         ele.setStaffPosition(staffPos);
 
@@ -424,7 +424,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         }
 
                         // convert staffPos to staffLine format used in MEI attribute
-                        var staffLine = staff.props.numLines - (ele.props.staffPos/2);
+                        var staffLine = staff.props.numLines + (ele.props.staffPos/2);
                         var args = {id: ele.id, line: staffLine, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
 
                         // send pitch shift command to server to change underlying MEI
