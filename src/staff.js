@@ -63,7 +63,6 @@ Toe.Model.Staff = function(bb, options) {
     // id of the staff
     this.id = null;
 
-    this.clef = null;
     this.custos = null;
 
     this.elements = new Array();
@@ -102,10 +101,11 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     var yStep = Math.round((coords.y - this.zone.uly) / (this.delta_y/2));
 
     // get clef pos
-    var cShape = this.clef.shape;
+    var clef = this.getActingClefByCoords(coords);
+    var cShape = clef.shape;
 
     // remove clef offset from step difference of coordinates
-    yStep -= this.clef.props.staffPos;
+    yStep -= clef.props.staffPos;
 
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
@@ -122,12 +122,26 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     return {pname: pname, oct: oct};
 }
 
+// shift all pitched elements under affect by the given clef
+Toe.Model.Staff.prototype.shiftPitchedElements = function(clef, pitchDiff) {
+    var clefInd = $.inArray(clef, this.elements);
+    for (var eInd = clefInd+1; !(this.elements[eInd] instanceof Toe.Model.Clef); eInd++) {
+        var e = this.elements[eInd];
+        // update root pitch difference (between clef and root note of pitched element)
+        e.rootDiff += pitchDiff;
+
+        // with this updated root difference, recalculate the pitch information
+        this.updatePitchInfo(e);
+    }
+}
+
 // if root pitch difference (integer diference between root note and clef position
 // has changed, call this method to update pitch name/octave of each component of the pitched
 // element.
 Toe.Model.Staff.prototype.updatePitchInfo = function(pitchedEle) {
     // get clef information
-    var cShape = this.clef.shape;
+    var clef = this.getActingClefByEle(pitchedEle);
+    var cShape = clef.shape;
 
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
@@ -244,10 +258,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
         }
 
         // check left staff boundary
-        if (this.clef && opts.ignoreEle != this.clef && left <= this.clef.zone.lrx) {
-            coordsPrime.x = this.clef.zone.lrx + width/2 + 1;
-        }
-        else if (left <= this.zone.ulx) {
+        if (left <= this.zone.ulx) {
             coordsPrime.x = this.zone.ulx + width/2 + 1;
         }
 
@@ -264,22 +275,19 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
 }
 
 /**
- * Calculate the pitch difference of a note with respect to the position of the clef
+ * Calculate the pitch difference of a note with respect to the clef shape
  *
  * @methodOf Toe.Model.Staff
  * @param {string} pname neume component pname
  * @param {number} octave neume component octave
  * @return {Integer} integer pitch difference
  */
-Toe.Model.Staff.prototype.calcPitchDifference = function(pname, octave) {
-    // get clef pos
-    var c_type = this.clef.shape;
-
+Toe.Model.Staff.prototype.calcPitchDifference = function(pname, octave, clefShape) {
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
     
     // make root note search in relation to the clef index
-    var iClef = $.inArray(c_type, Toe.neumaticChroma);
+    var iClef = $.inArray(clefShape, Toe.neumaticChroma);
     var iRoot = $.inArray(pname, Toe.neumaticChroma);
 
     var offset = Math.abs(iRoot - iClef);
@@ -299,7 +307,7 @@ Toe.Model.Staff.prototype.sortElements = function() {
 }
 
 // insert element in the element list (sorted in ascending order
-// by x position.
+// by x position).
 Toe.Model.Staff.prototype.insertElement = function(ele) {
     // by default, we should push to the end of the array
     var iInsert = this.elements.length;
@@ -326,8 +334,40 @@ Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
 
 // remove element by reference
 Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
-    eleInd = $.inArray(ele, this.elements);
+    var eleInd = $.inArray(ele, this.elements);
     this.elements.splice(eleInd, 1);
+}
+
+/**
+ * Get clef acting on an element
+ *
+ * @methodOf Toe.Model.staff
+ */
+Toe.Model.Staff.prototype.getActingClefByEle = function(element) {
+    var eleInd = $.inArray(element, this.elements);
+    // look backwards for first clef
+    for (var i = eleInd; i >= 0; i--) {
+        var e = this.elements[i];
+        if (e instanceof Toe.Model.Clef) {
+            return e;
+        }
+    }
+
+    // if no clef is on the staff
+    return null;
+}
+
+Toe.Model.Staff.prototype.getActingClefByCoords = function(coords) {
+    // look backwards from end of element list for first clef
+    for (var i = this.elements.length; i >= 0; i--) {
+        var e = this.elements[i];
+        if (e instanceof Toe.Model.Clef && coords.x > e.zone.lrx) {
+            return e;
+        }
+    }
+
+    // if no clef is on found
+    return null;
 }
 
 /**
@@ -337,90 +377,36 @@ Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
  * @param {Toe.Model.Clef} clef The clef to mount
  * @returns {Toe.Model.Staff} pointer to this staff for chaining
  */
-Toe.Model.Staff.prototype.mountClef = function(clef) {
+Toe.Model.Staff.prototype.addClef = function(clef, options) {
     if (!(clef instanceof Toe.Model.Clef)) {
         throw new Error("Staff: Invalid clef");
     }
 
-    // set clef position given the staffline
-    var x = this.zone.ulx;
-    if (clef.zone.ulx) {
-        x = clef.zone.ulx;
-    }
-    clef.setPosition([x, this.zone.uly + clef.props.staffPos*this.delta_y/2]);
+    var opts = {
+        justPush: false
+    };
 
-    // add to elements list, replace if clef already exists
-    if (this.clef && this.clef.shape == clef.shape) {        
-        // update pitched elements on staff and other clef attributes
-        this.moveClef(clef.props.staffPos);
+    $.extend(opts, options);
 
-        // reset to new clef
-        this.elements[0] = clef;
-        this.clef = clef;
+    // insert neume into list of sorted staff elements
+    var nInd = null;
+    if (opts.justPush) {
+        this.elements.push(clef);
+        nInd = this.elements.length-1;
     }
     else {
-        // update root note pitch differences of pitched elements on the staff
-        this.clef = clef;
-        var staffRef = this;
-        $.each(this.elements, function(eInd, e) {
-            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
-                // with this updated root difference, recalculate the pitch information
-                staffRef.updatePitchInfo(e);
-            }
-        });
+        nInd = this.insertElement(clef);
+    }
 
-        this.elements.splice(0,0,clef);
-    } 
-
-    this.clef.setStaff(this);
-
+    clef.setStaff(this);
+    
+    // TODO update affected pitched elements on this staff
+    
     // update view
-    $(clef).trigger("vRenderClef", [this.clef]);
+    $(clef).trigger("vRenderClef", [clef]);
 
     // for chaining
     return this;
-}
-
-// move clef vertically to provided staff position
-Toe.Model.Staff.prototype.moveClef = function(staffPos) {
-    // move only if a clef is already attached to this staff
-    if (this.clef) {
-        // get pitch difference between the old and new staff position of the clef
-        var pitchDiff = this.clef.props.staffPos - staffPos;
-       
-        // reset clef position in model
-        this.clef.props.staffPos = staffPos;
-        this.clef.y += pitchDiff*this.delta_y/2;
-
-        // update root note pitch differences of pitched elements on the staff
-        var staffRef = this;
-        $.each(this.elements, function(eInd, e) {
-            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
-                // update root difference
-                e.rootDiff -= pitchDiff;
-
-                // with this updated root difference, recalculate the pitch information
-                staffRef.updatePitchInfo(e);
-            }
-        });
-    }
-}
-
-// change clef shape
-// this needs to be refactored to clef model
-Toe.Model.Staff.prototype.updateClefShape = function(shape) {
-    if (this.clef) {
-        this.clef.setShape(shape);
-
-        // update pitched elements on the staff
-        var staffRef = this;
-        $.each(this.elements, function(eInd, e) {
-            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
-                // with this updated root difference, recalculate the pitch information
-                staffRef.updatePitchInfo(e);
-            }
-        });
-    }
 }
 
 Toe.Model.Staff.prototype.setCustos = function(custos) {
@@ -428,10 +414,10 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
         throw new Error("Staff: Invalid Custos");
     }
 
-    // only add the custos if there is a clef attached to the staff
-    if (this.clef) {
+    var clef = this.getActingClefByCoords(custos.zone.ulx);
+    if (clef) {
         // calculate pitch difference in relation to the clef
-        custos.setPitchDiff(this.calcPitchDifference(custos.pname, custos.oct));
+        custos.setPitchDiff(this.calcPitchDifference(custos.pname, custos.oct, clef.shape));
 
         // custos should always be at the end
         // if a custos exists already, replace it
@@ -447,7 +433,6 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
 
         this.custos = custos;
     }
-
     // for chaining
     return this;
 }
@@ -474,21 +459,18 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
 
     $.extend(opts, options);
 
-    // only add neumes if there is a clef attached to the staff
-    if (this.clef) {
+    var clef = this.getActingClefByCoords({x: neume.zone.ulx});
+    if (clef) {
         // update neume root note difference
         var rootPitchInfo = neume.getRootPitchInfo();
-        neume.setRootDifference(this.calcPitchDifference(rootPitchInfo["pname"], rootPitchInfo["oct"]));
+        neume.setRootDifference(this.calcPitchDifference(rootPitchInfo["pname"], rootPitchInfo["oct"], clef.shape));
 
         // update pitch differences (wrt. root note) of each note within the neume
         neume.components[0].setPitchDifference(0);
         for (var i = 1; i < neume.components.length; i++) {
             var nc = neume.components[i];
-            nc.setPitchDifference(this.calcPitchDifference(nc.pname, nc.oct) - neume.rootDiff);
+            nc.setPitchDifference(this.calcPitchDifference(nc.pname, nc.oct, clef.shape) - neume.rootDiff);
         }
-
-        // update view
-        $(neume).trigger("vRenderNeume", [neume, this]);
 
         // insert neume into list of sorted staff elements
         var nInd = null;
@@ -499,9 +481,15 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
         else {
             nInd = this.insertElement(neume);
         }
+
+        // update view
+        $(neume).trigger("vRenderNeume", [neume, this]);
+
+        return nInd;
     }
-        
-    return nInd;
+    else {
+        return null;
+    }
 }
 
 /**

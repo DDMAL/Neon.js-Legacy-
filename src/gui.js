@@ -250,7 +250,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         sModel = selection.staffRef;
                         rendEng.canvas.remove(selection);
 
-                        sModel.updateClefShape("c");
+                        ele.setShape("c");
 
                         var pitchInfo = $.map(sModel.elements, function(e) {
                             if (e instanceof Toe.Model.Neume) {
@@ -290,7 +290,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                         sModel = selection.staffRef;
                         rendEng.canvas.remove(selection);
 
-                        sModel.updateClefShape("f");
+                        ele.setShape("f");
 
                         var pitchInfo = $.map(sModel.elements, function(e) {
                             if (e instanceof Toe.Model.Neume) {
@@ -352,7 +352,6 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
             // get delta of the mouse movement
             var delta_x = gui.downCoords.x - upCoords.x;
             var delta_y = gui.downCoords.y - upCoords.y;
-            var thresh = 1;
             // don't perform dragging action if the mouse doesn't move
             if (!gui.objMoving) {
                 return;
@@ -376,66 +375,57 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
                     if (ele instanceof Toe.Model.Clef) {
                         // this is a clef
+                        var left = element.left;
                         var top = element.top;
                         if (elements.length > 1) {
                             // calculate object's absolute positions from within selection group
+                            left = selection.left + element.left;
                             top = selection.top + element.top;
                         }
 
-                        var staff = element.staffRef;
+                        var staff = ele.staff;
 
                         if (staff != page.getClosestStaff({x: element.left, y: element.top})) {
                             // restore coordinates of mouse down
                             element.left += delta_x;
                             element.top += delta_y;
 
-                            // message to the user ... hey, you can't do that
+                            // message to the user ... hey, you can't do that!
                             $("#alert > p").text("Clefs can not be moved to a different staff.");
                             $("#alert").toggleClass("fade", false).delay(650).queue(function() { $("#alert").toggleClass("fade", true); });
                             
                             return true; // jQuery equivalent of continue in for loop
                         }
 
-                        var left = staff.zone.ulx;
-                        if (ele.shape == "c") {
-                            left += element.currentWidth/2;
-                        }
-                        var snappedCoords = staff.ohSnap({x: left, y: top}, null, {x: false, ignoreEle: ele});
+                        // snap release position to line/space
+                        var snappedCoords = staff.ohSnap({x: left, y: top}, null, {ignoreEle: ele});
 
                         // get staff position of snapped coordinates
                         var staffPos = Math.round((snappedCoords.y - staff.zone.uly) / (staff.delta_y/2));
 
-                        staff.moveClef(staffPos);
+                        ele.setStaffPosition(staffPos);
 
-                        element.left = snappedCoords.x; 
-                        if (ele.shape == "f") {
-                            // 0.34 is the relative position of the f clef glyph placement
-                            snappedCoords.y += 0.34*element.currentHeight/2;
-                        }
-                        element.top = snappedCoords.y;
+                        // gather new pitch information of affected pitched elements
+                        var clefInd = $.inArray(ele, staff.elements);
+                        var pitchInfo = new Array();
+                        for (var eInd = clefInd+1; !(staff.elements[eInd] instanceof Toe.Model.Clef); eInd++) {
+                            var e = staff.elements[eInd];
 
-                        // get new bounding box information
-                        var ulx = snappedCoords.x - element.currentWidth/2;
-                        var uly = snappedCoords.y - element.currentHeight/2;
-                        var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
-                        ele.setBoundingBox(bb);
-
-                        var pitchInfo = $.map(staff.elements, function(e) {
                             if (e instanceof Toe.Model.Neume) {
-                                var pitchInfo = new Array();
+                                var noteInfo = new Array();
                                 $.each(e.components, function(nInd, n) {
-                                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                                    noteInfo.push({pname: n.pname, oct: n.oct});
                                 });
-                                return {id: e.id, noteInfo: pitchInfo};
+                                pitchInfo.push({id: e.id, noteInfo: pitchInfo});
                             }
                             else if (e instanceof Toe.Model.Custos) {
-                                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                                pitchInfo.push({id: e.id, noteInfo: {pname: e.pname, oct: e.oct}});
                             }
-                        });
+                        }
 
-                        // convert staffPos to staffLine
+                        // convert staffPos to staffLine format used in MEI attribute
                         var staffLine = staff.props.numLines - (ele.props.staffPos/2);
-                        var args = {id: ele.id, line: staffLine, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3], pitchInfo: pitchInfo};
+                        var args = {id: ele.id, line: staffLine, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
 
                         // send pitch shift command to server to change underlying MEI
                         $.post(prefix + "/edit/" + fileName + "/move/clef", {data: JSON.stringify(args)})
@@ -592,10 +582,10 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
                     }
                 });
                 // repaint canvas after all the dragging is done
-                rendEng.canvas.discardActiveObject();
+                /*rendEng.canvas.discardActiveObject();
                 rendEng.canvas.discardActiveGroup();
                 rendEng.canvas.fire('selection:cleared');
-                rendEng.repaint();
+                rendEng.repaint();*/
             }
             // we're all done moving
             gui.objMoving = false;    

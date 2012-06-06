@@ -33,14 +33,7 @@ Toe.View.ClefView = function(renderEngine) {
 Toe.View.ClefView.prototype.constructor = Toe.View.ClefView;
 
 /**
- * Renders the clef according to the following scheme:
- *  <ulx,uly> =======
- *            ------- (line numLines)
- *            ------- (line numLines-1)
- *            ------- ...
- *            ------- (line 1)
- *            ======= <lrx,lry>
- * 
+ * Renders the clef
  * @methodOf Toe.View.ClefView
  * @param {Toe.Model.Clef} clef Clef to render
  */
@@ -79,7 +72,7 @@ Toe.View.ClefView.prototype.renderClef = function(clef) {
 
 Toe.View.ClefView.prototype.updateShape = function(clef) {
     if (!this.drawing) {
-        throw new Error("Clef: Invalid render context");
+        throw new Error("Clef: update method called, but there exists no drawing to update.");
     }
 
     var staff = clef.staff;
@@ -111,6 +104,25 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop});
 
     this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {group: true, selectable: clef.selectable, staffRef: clef.staff, eleRef: clef, repaint: true})[0];
+
+    // update model
+    $(clef).trigger("mUpdateBoundingBox", this.drawing);
+}
+
+Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
+    if (!this.drawing) {
+        throw new Error("Clef: update method called, but there exists no drawing to update.");
+    }
+
+    var staff = clef.staff;
+
+    var glyphTop = staff.zone.uly + clef.props.staffPos*staff.delta_y/2;
+    if (clef.shape == "f") {
+        // 0.34 is the relative position of the f clef glyph placement
+        glyphTop += 0.34*this.drawing.currentHeight/2;
+    }
+
+    this.drawing.top = glyphTop;
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);

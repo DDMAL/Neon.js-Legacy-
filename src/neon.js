@@ -174,7 +174,7 @@ THE SOFTWARE.
                 var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
 
                 // mount clef on the staff
-                sModel.mountClef(cModel);
+                sModel.addClef(cModel);
 
                 // instantiate staff view and controller
                 var sView = new Toe.View.StaffView(rendEng);
@@ -196,7 +196,7 @@ THE SOFTWARE.
                     var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
                     // mount neume on the staff
-                    sModel.addNeume(nModel, {justPush: true});
+                    sModel.addNeume(nModel);
 
                     console.log("neume: " + nModel.props.type.name);
                 });

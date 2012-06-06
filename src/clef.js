@@ -80,6 +80,7 @@ Toe.Model.Clef.prototype.setID = function(cid) {
 
 /**
  * Sets the shape of the clef
+ *
  * @methodOf Toe.Model.clef
  * @param {String} shape the new clef shape
  */
@@ -90,6 +91,8 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
     if (this.name == undefined) {
         throw new Error("Clef: unknown clef shape");
     }
+
+    // TODO update affected pitched elements on the staff
 
     $(this).trigger("vUpdateShape", [this]);
 }
@@ -103,14 +106,34 @@ Toe.Model.Clef.prototype.setStaff = function(staff) {
 }
 
 /**
- * Sets the position of the clef
+ * Sets the position on the staff according to the following scheme:
  *
+ *  <ulx,uly> =======
+ *            ------- 0
+ *            ------- 2
+ *            ------- ...
+ *            ------- (numlines x 2)
+ *            ======= <lrx,lry>
+ * 
  * @methodOf Toe.Model.Clef
- * @param pos {Array} [x,y]
+ * @param {Number} staffPos new staff position
  */
-Toe.Model.Clef.prototype.setPosition = function(pos) {
-    this.x = pos[0];
-    this.y = pos[1];
+Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
+    // only redraw the glyph if it needs to be redrawn
+    if (this.props.staffPos == staffPos) {
+        return;
+    }
+
+    // get pitch difference between the old and new staff position of the clef
+    var pitchDiff = staffPos - this.props.staffPos;
+   
+    // reset clef position in model
+    this.props.staffPos = staffPos;
+
+    // update pitched elements on the staff this clef is mounted on
+    this.staff.shiftPitchedElements(this, pitchDiff);
+
+    $(this).trigger("vUpdateStaffPosition", [this]);
 }
 
 /**
