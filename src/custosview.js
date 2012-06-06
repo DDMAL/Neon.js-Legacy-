@@ -37,9 +37,8 @@ Toe.View.CustosView.prototype.constructor = Toe.View.CustosView;
  *
  * @methodOf Toe.View.CustosView
  * @param {Toe.Model.Custos} custos Custos to render
- * @param {Toe.Model.Staff} staff Staff context in which to render the provided custos
  */
-Toe.View.CustosView.prototype.renderCustos = function(cModel, sModel, custos_y) {
+Toe.View.CustosView.prototype.renderCustos = function(cModel, custos_y) {
     if (!this.rendEng) {
         throw new Error("Custos: Invalid render context");
     }
@@ -51,5 +50,5 @@ Toe.View.CustosView.prototype.renderCustos = function(cModel, sModel, custos_y) 
 
     elements.modify.push(custos);
 
-	this.rendEng.draw(elements, {selectable: cModel.props.interact});
+	this.rendEng.draw(elements, {selectable: cModel.props.interact, eleRef: custos});
 }

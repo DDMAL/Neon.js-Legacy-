@@ -40,7 +40,7 @@ Toe.Model.Custos = function(pname, oct, options) {
 
     // the integer pitch difference relative to the clef
     // this is set when the custos is mounted on a staff
-    this.rootDiff = null;
+    this.rootStaffPos = null;
 
     // initialize bounding box
     this.zone = new Object();
@@ -84,8 +84,8 @@ Toe.Model.Custos.prototype.setRootNote = function(pname, oct) {
  * Sets the pitch difference of the custos in relation to the clef of the staff the 
  * custos is mounted on
  */
-Toe.Model.Custos.prototype.setPitchDiff = function(pitchDiff) {
-    this.rootDiff = pitchDiff;
+Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
+    this.rootStaffPos = staffPos;
 }
 
 /**

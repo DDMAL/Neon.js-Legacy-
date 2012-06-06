@@ -54,14 +54,11 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
             neume.deriveName();
         }
 
-        var clef = staff.getActingClefByEle(neume);
-        var clef_y = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
-
         // derive positions of neume components
         var nc_y = new Array();
 
         // set root note y pos
-        nc_y.push(clef_y + (-neume.rootDiff * staff.delta_y/2));
+        nc_y.push(staff.zone.uly - neume.rootStaffPos*staff.delta_y/2);
         for (var i = 1; i < neume.components.length; i++) {
             nc_y.push(nc_y[0] + (-neume.components[i].pitchDiff * staff.delta_y/2));
         }

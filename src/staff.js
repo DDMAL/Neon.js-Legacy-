@@ -96,6 +96,7 @@ Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
 
 /**
  * Calculates note pitch name and octave from coordinates of note
+ * Coords should be snapped to line/space already! @see ohSnap
  */
 Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     var yStep = Math.round((coords.y - this.zone.uly) / (this.delta_y/2));
@@ -104,7 +105,7 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
     var clef = this.getActingClefByCoords(coords);
     var cShape = clef.shape;
 
-    // remove clef offset from step difference of coordinates
+    // add clef offset from step difference of coordinates
     yStep += clef.props.staffPos;
 
     // ["a", "b", "c", "d", "e", "f", "g"]
@@ -172,6 +173,14 @@ Toe.Model.Staff.prototype.updatePitchInfo = function(pitchedEle) {
         pitchedEle.pname = Toe.neumaticChroma[pInd];
         pitchedEle.oct = 4 - Math.ceil(finalPitchDiff / numChroma);
     }
+}
+
+// Calculate staff position of note on the staff. 
+Toe.Model.Staff.prototype.calcStaffPos = function(pname, oct, clef) {
+    // calculate pitch difference from acting clef
+    var pitchDiff = this.calcPitchDifference(pname, oct, clef.shape);
+
+    return clef.props.staffPos + pitchDiff;
 }
 
 /**
@@ -314,10 +323,10 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
         throw new Error("Staff: Invalid Custos");
     }
 
-    var clef = this.getActingClefByCoords(custos.zone.ulx);
+    var clef = this.getActingClefByCoords({x: custos.zone.ulx});
     if (clef) {
         // calculate pitch difference in relation to the clef
-        custos.setPitchDiff(this.calcPitchDifference(custos.pname, custos.oct, clef.shape));
+        custos.setRootStaffPos(this.calcStaffPos(custos.pname, custos.oct, clef));
 
         // custos should always be at the end
         // if a custos exists already, replace it
@@ -363,13 +372,13 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     if (clef) {
         // update neume root note difference
         var rootPitchInfo = neume.getRootPitchInfo();
-        neume.setRootDifference(this.calcPitchDifference(rootPitchInfo["pname"], rootPitchInfo["oct"], clef.shape));
+        neume.setRootStaffPos(this.calcStaffPos(neume.components[0].pname, neume.components[0].oct, clef));
 
         // update pitch differences (wrt. root note) of each note within the neume
         neume.components[0].setPitchDifference(0);
         for (var i = 1; i < neume.components.length; i++) {
             var nc = neume.components[i];
-            nc.setPitchDifference(this.calcPitchDifference(nc.pname, nc.oct, clef.shape) - neume.rootDiff);
+            nc.setPitchDifference(this.calcStaffPos(nc.pname, nc.oct, clef) - neume.rootStaffPos);
         }
 
         // insert neume into list of sorted staff elements
