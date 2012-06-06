@@ -460,6 +460,10 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
  * @param {Toe.Model.Neume} neume Neume to render
  */
 Toe.View.NeumeView.prototype.render = function(neume) {
+    this.drawNeume(neume);
+}
+
+Toe.View.NeumeView.prototype.updateDrawing = function(neume) {
     // if a drawing exists for this neume, update it
     // by removing and drawing again.
     if (this.drawing) {
@@ -467,4 +471,9 @@ Toe.View.NeumeView.prototype.render = function(neume) {
     }
 
     this.drawNeume(neume);
+
+    this.rendEng.repaint();
+
+    // select the new drawing
+    this.rendEng.canvas.setActiveObject(this.drawing);
 }

@@ -517,5 +517,5 @@ Toe.Model.Neume.prototype.deriveName = function() {
 Toe.Model.Neume.prototype.syncDrawing = function() {
     this.deriveName();
 
-    $(this).trigger("vRenderNeume", [this]);
+    $(this).trigger("vUpdateDrawing", [this]);
 }

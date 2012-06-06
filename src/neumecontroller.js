@@ -55,6 +55,10 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
 
         nView.render(neume);
     });
+
+    $(nModel).bind("vUpdateDrawing", function(event, neume) {
+        nView.updateDrawing(neume);
+    });
 }
 
 Toe.Ctrl.NeumeController.prototype.constructor = Toe.Ctrl.NeumeController;

@@ -37,6 +37,8 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
     this.rendEng = rendEng;
     this.page = page;
+    this.prefix = prefix;
+    this.fileName = fileName;
 
     // these are variables holding pointers to the drawings
     // that follow around the pointer in insert mode.
@@ -55,7 +57,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     // cache reference to this
     gui = this;
 
-    this.setupNavBar(prefix, fileName);
+    this.setupNavBar();
 
     this.setupSideBar("#gui-sidebar", toggles);
     
@@ -70,15 +72,17 @@ Toe.View.GUI.prototype.constructor = Toe.View.GUI;
  *
  * @methodOf Toe.View.GUI
  */
-Toe.View.GUI.prototype.setupNavBar = function(prefix, fileName) {
+Toe.View.GUI.prototype.setupNavBar = function() {
+    var gui = this;
+
     var nav_file_dropdown_parent = "#nav_file_dropdown";
     $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li><li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li><li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
     $("#nav_file_dropdown_revert").tooltip({animation: true, placement: 'right', title: '<br/><br/>Revert the current MEI file to the original version. Warning: this will revert all changes made in the editor.', delay: 100});
     $("#nav_file_dropdown_revert").click(function() {
         // move backup mei file to working directory
-        $.get(prefix + "/revert/" + fileName, function(data) {
+        $.get(gui.prefix + "/revert/" + gui.fileName, function(data) {
             // when the backup file has been restored, reload the page
-            window.location = prefix + "/editor/" + fileName;
+            window.location = gui.prefix + "/editor/" + gui.fileName;
         })
         .error(function() {
             // show alert to user
@@ -91,13 +95,10 @@ Toe.View.GUI.prototype.setupNavBar = function(prefix, fileName) {
     // MEI download
     $("#nav_file_dropdown_getmei").tooltip({animation: true, placement: 'right', title: 'View the MEI file of the document being edited.', delay: 100});
     // set the download path of the file
-    $("#nav_file_dropdown_getmei").attr("href", prefix + "/file/" + fileName);
+    $("#nav_file_dropdown_getmei").attr("href", this.prefix + "/file/" + this.fileName);
 
     // Document image rasterize
     $("#nav_file_dropdown_getimg").tooltip({animation: true, placement: 'right', title: 'Download an image of the document being edited.', delay: 100});
-
-    // cache this
-    var gui = this;
     $("#nav_file_dropdown_getimg").click(function() {
         if (!fabric.Canvas.supports('toDataURL')) {
             // show alert to user
@@ -193,9 +194,6 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                 $("#edit_chk_dot").bind("click.edit", function() {
                     var nModel = ele;
                     var sModel = selection.staffRef;
-
-                    // remove the old neume
-                    sModel.removeElementByRef(nModel);
                     
                     var addDot = !$(this).hasClass("active");
                     if (addDot) {
@@ -208,14 +206,14 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         nModel.components[0].removeOrnament("dot");
                     }
 
-                    // mount the new neume on the most appropriate staff
-                    var nInd = sModel.addNeume(nModel);
+                    // update neume drawing
+                    nModel.syncDrawing();
 
                     // get final bounding box information
                     var args = {id: nModel.id, dotform: "aug", ulx: nModel.zone.ulx, uly: nModel.zone.uly, lrx: nModel.zone.lrx, lry: nModel.zone.lry};
                     if (addDot) {
                         // send add dot command to server to change underlying MEI
-                        $.post(prefix + "/edit/" + fileName + "/insert/dot", args)
+                        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/dot", args)
                         .error(function() {
                             // show alert to user
                             // replace text with error message
@@ -225,7 +223,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     }
                     else {
                         // send remove dot command to server to change underlying MEI
-                        $.post(prefix + "/edit/" + fileName + "/delete/dot", args)
+                        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/dot", args)
                         .error(function() {
                             // show alert to user
                             // replace text with error message
@@ -234,16 +232,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         });
                     }
 
-                    // interface maitenance
-                    gui.rendEng.canvas.remove(selection);
-
                     $("#edit_chk_dot").toggleClass("active");
-
-                    // repaint canvas after all the dragging is done
-                    gui.rendEng.canvas.discardActiveObject();
-                    gui.rendEng.canvas.discardActiveGroup();
-                    gui.rendEng.canvas.fire('selection:cleared');
-                    gui.rendEng.repaint();
                 });
 
             }
@@ -291,7 +280,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var args = {id: ele.id, shape: "c", ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
 
                     // send pitch shift command to server to change underlying MEI
-                    $.post(prefix + "/edit/" + fileName + "/update/clef/shape", {data: JSON.stringify(args)})
+                    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -331,7 +320,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var args = {id: ele.id, shape: "f", ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
 
                     // send pitch shift command to server to change underlying MEI
-                    $.post(prefix + "/edit/" + fileName + "/update/clef/shape", {data: JSON.stringify(args)})
+                    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -451,7 +440,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var args = {id: ele.id, line: staffLine, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
 
                     // send pitch shift command to server to change underlying MEI
-                    $.post(prefix + "/edit/" + fileName + "/move/clef", {data: JSON.stringify(args)})
+                    $.post(gui.prefix + "/edit/" + gui.fileName + "/move/clef", {data: JSON.stringify(args)})
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -530,7 +519,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     }
 
                     // send pitch shift command to server to change underlying MEI
-                    $.post(prefix + "/edit/" + fileName + "/move/neume", {data: JSON.stringify(args)})
+                    $.post(gui.prefix + "/edit/" + gui.fileName + "/move/neume", {data: JSON.stringify(args)})
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -595,7 +584,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var data = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, beforeid: beforeid};
 
                     // send move command to the server to change underlying MEI
-                    $.post(prefix + "/edit/" + fileName + "/move/division", data)
+                    $.post(gui.prefix + "/edit/" + gui.fileName + "/move/division", data)
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -661,7 +650,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
         if (toDelete.nids.length > 0) {
             // send delete command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/delete/neume",  {ids: toDelete.nids.join(",")})
+            $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/neume",  {ids: toDelete.nids.join(",")})
             .error(function() {
                 // show alert to user
                 // replace text with error message
@@ -671,7 +660,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         }
         if (toDelete.dids.length > 0) {
             // send delete command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/delete/division", {ids: toDelete.dids.join(",")})
+            $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/division", {ids: toDelete.dids.join(",")})
             .error(function() {
                 // show alert to user
                 // replace text with error message
@@ -758,7 +747,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
             var neumeKey = newNeume.props.key;
 
             // call server neumify function to update MEI
-            $.post(prefix + "/edit/" + fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
+            $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
                 // set id of the new neume with generated ID from the server
                 newNeume.id = data.nid;
             })
@@ -841,7 +830,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         var data = JSON.stringify({"nids": nids.join(","), "bbs": bbs});
 
         // call server ungroup function to update MEI
-        $.post(prefix + "/edit/" + fileName + "/ungroup", {data: data}, function(data) {
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/ungroup", {data: data}, function(data) {
             // set ids of the new puncta from the IDs generated from the server
             var nids = JSON.parse(data).nids;
             $.each(punctums, function(i, punct) {
@@ -1024,7 +1013,7 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
             }
 
             // send insert command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/insert/neume", args, function(data) {
+            $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/neume", args, function(data) {
                 nModel.id = JSON.parse(data).nid;
             })
             .error(function() {
@@ -1212,7 +1201,7 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
             //$("#progressbar").css("width", "75%");
 
             // send insert division command to server to change underlying MEI
-            $.post(prefix + "/edit/" + fileName + "/insert/division", args, function(data) {
+            $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/division", args, function(data) {
                 //$("#progressbar").css("width", "100%");   
                 // all done, reset progress bar
                 //$("#progressbar").delay(1000).css("width", "0%");
