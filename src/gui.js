@@ -191,9 +191,10 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     $("#edit_chk_dot").toggleClass("active", false);
                 }
 
+                // remove onclick listener for previous selection
+                $("#edit_chk_dot").unbind("click");
                 $("#edit_chk_dot").bind("click.edit", function() {
                     var nModel = ele;
-                    var sModel = selection.staffRef;
                     
                     var addDot = !$(this).hasClass("active");
                     if (addDot) {
