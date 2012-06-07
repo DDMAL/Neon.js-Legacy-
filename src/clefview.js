@@ -61,7 +61,7 @@ Toe.View.ClefView.prototype.drawClef = function(clef) {
 
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop}); // offset centre
 
-    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {group: true, selectable: clef.props.interact, eleRef: clef})[0];
+    this.drawing = this.rendEng.draw({static: [], modify: [svgClef]}, {selectable: clef.props.interact, eleRef: clef})[0];
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
@@ -98,15 +98,15 @@ Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
         throw new Error("Clef: update method called, but there exists no drawing to update.");
     }
 
-    var staff = clef.staff;
-
-    var glyphTop = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
+    var glyphTop = clef.staff.zone.uly - clef.props.staffPos*clef.staff.delta_y/2;
     if (clef.shape == "f") {
         // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*this.drawing.currentHeight/2;
     }
 
     this.drawing.top = glyphTop;
+
+    this.rendEng.repaint();
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);

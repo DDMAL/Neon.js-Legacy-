@@ -133,8 +133,8 @@ Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
     // reset clef position in model
     this.props.staffPos = staffPos;
 
-    // update pitched elements on the staff this clef is mounted on
-    this.staff.shiftPitchedElements(this);
+    // update affected pitched elements on the staff
+    this.staff.updatePitchedElements({clef: this});
 
     $(this).trigger("vUpdateStaffPosition", [this]);
 }
