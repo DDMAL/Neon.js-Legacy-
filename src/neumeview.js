@@ -477,3 +477,7 @@ Toe.View.NeumeView.prototype.updateDrawing = function(neume) {
 
     this.rendEng.repaint();
 }
+
+Toe.View.NeumeView.prototype.selectDrawing = function() {
+    this.rendEng.canvas.setActiveObject(this.drawing);
+}

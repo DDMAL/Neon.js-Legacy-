@@ -170,7 +170,7 @@ Toe.Model.Staff.prototype.updatePitchedElements = function(options) {
     // update pitched elements from the given clef to the next clef
     if (opts.clef) {
         $.each(this.getPitchedElements({clef: opts.clef}), function(eInd, e) {
-            staff.updateElePitchInfo(e, opts.clef);
+            staff.updateElePitchInfo(e, {clef: opts.clef});
         });
     }
     else {
@@ -180,15 +180,25 @@ Toe.Model.Staff.prototype.updatePitchedElements = function(options) {
                 curClef = e;
             }
             else if (curClef && (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos)) {
-                staff.updateElePitchInfo(e, curClef);
+                staff.updateElePitchInfo(e, {clef: curClef});
             }
         });
     }
 }
 
 // update pitch name/octave of each component of the pitched element.
-Toe.Model.Staff.prototype.updateElePitchInfo = function(pitchedEle, actingClef) {
-    var cShape = actingClef.shape;
+Toe.Model.Staff.prototype.updateElePitchInfo = function(pitchedEle, options) {
+    var opts = {
+        clef: null
+    };
+
+    $.extend(opts, options);
+
+    if (!opts.clef) {
+        opts.clef = this.getActingClefByEle(pitchedEle);
+    }
+
+    var cShape = opts.clef.shape;
 
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
@@ -197,7 +207,7 @@ Toe.Model.Staff.prototype.updateElePitchInfo = function(pitchedEle, actingClef) 
 
     if (pitchedEle instanceof Toe.Model.Neume) {
         $.each(pitchedEle.components, function(ncInd, nc) {
-            var finalPitchDiff = actingClef.props.staffPos - pitchedEle.rootStaffPos - nc.pitchDiff;
+            var finalPitchDiff = opts.clef.props.staffPos - pitchedEle.rootStaffPos - nc.pitchDiff;
             var pInd = (iClef - finalPitchDiff) % numChroma;
             if (pInd < 0) {
                 pInd += numChroma;
@@ -208,7 +218,7 @@ Toe.Model.Staff.prototype.updateElePitchInfo = function(pitchedEle, actingClef) 
         });
     }
     else if (pitchedEle instanceof Toe.Model.Custos) {
-        var finalPitchDiff = actingClef.props.staffPos - pitchedEle.rootStaffPos;
+        var finalPitchDiff = opts.clef.props.staffPos - pitchedEle.rootStaffPos;
         var pInd = (iClef - finalPitchDiff) % numChroma;
         if (pInd < 0) {
             pInd += numChroma;
@@ -418,7 +428,7 @@ Toe.Model.Staff.prototype.addNeume = function(neume, options) {
     if (clef) {
         // update neume root note difference
         var rootPitchInfo = neume.getRootPitchInfo();
-        neume.setRootStaffPos(this.calcStaffPos(neume.components[0].pname, neume.components[0].oct, clef));
+        neume.rootStaffPos = this.calcStaffPos(neume.components[0].pname, neume.components[0].oct, clef);
 
         // update pitch differences (wrt. root note) of each note within the neume
         neume.components[0].setPitchDifference(0);

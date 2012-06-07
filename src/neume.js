@@ -332,7 +332,18 @@ Toe.Model.Neume.prototype.getRootPitchInfo = function() {
  * of the staff that this neume is mounted on.
  */
 Toe.Model.Neume.prototype.setRootStaffPos = function(staffPos) {
+    // only redraw the glyph if it needs to be redrawn
+    if (this.rootStaffPos == staffPos) {
+        return;
+    }
+
     this.rootStaffPos = staffPos;
+
+    // update pitch information of underlying notes
+    this.staff.updateElePitchInfo(this);
+
+    // redraw
+    $(this).trigger("vUpdateDrawing", [this]);
 }
 
 /**
@@ -518,4 +529,11 @@ Toe.Model.Neume.prototype.syncDrawing = function() {
     this.deriveName();
 
     $(this).trigger("vUpdateDrawing", [this]);
+}
+
+/**
+ * Select neume on the drawing surface
+ */
+Toe.Model.Neume.prototype.selectDrawing = function() {
+    $(this).trigger("vSelectDrawing");
 }

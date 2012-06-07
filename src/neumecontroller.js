@@ -59,6 +59,10 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
     $(nModel).bind("vUpdateDrawing", function(event, neume) {
         nView.updateDrawing(neume);
     });
+
+    $(nModel).bind("vSelectDrawing", function(event) {
+        nView.selectDrawing();
+    });
 }
 
 Toe.Ctrl.NeumeController.prototype.constructor = Toe.Ctrl.NeumeController;

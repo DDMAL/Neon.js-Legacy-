@@ -138,7 +138,7 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
         if parent and before:
             parent.addChildBefore(before, neume)
 
-    def update_or_add_zone(self, neume, bb):
+    def update_or_add_zone(self, neume, ulx, uly, lrx, lry):
         facsid = neume.getAttribute("facs").value
         if facsid:
             zone = self.mei.getElementById(facsid)
@@ -149,17 +149,23 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
             if len(surfaces):
                 surfaces[0].addChild(zone)
 
-        zone.addAttribute("ulx", str(bb["ulx"]))
-        zone.addAttribute("uly", str(bb["uly"]))
-        zone.addAttribute("lrx", str(bb["lrx"]))
-        zone.addAttribute("lry", str(bb["lry"]))
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
         
     def post(self, file):
         data = json.loads(self.get_argument("data", ""))
 
-        nid = str(data["nid"])
+        nid = str(data["id"])
         beforeid = str(data["beforeid"])
-        bb = data["bb"]
+        
+        # Bounding box
+        ulx = str(data["ulx"])
+        uly = str(data["uly"])
+        lrx = str(data["lrx"])
+        lry = str(data["lry"])
+
         pitch_info = data["pitchInfo"]
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
@@ -172,7 +178,7 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
             self.neume_pitch_shift(neume, pitch_info)
 
         self.reposition_neume(neume, beforeid)
-        self.update_or_add_zone(neume, bb)
+        self.update_or_add_zone(neume, ulx, uly, lrx, lry)
 
         XmlExport.write(self.mei, fname)
 

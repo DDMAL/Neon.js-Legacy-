@@ -312,6 +312,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     // snap release position to line/space
                     var snappedCoords = ele.staff.ohSnap({x: left, y: top}, null, {ignoreEle: ele});
 
+                    // TODO clefs moving to different staves?
+
                     // get staff position of snapped coordinates
                     var staffPos = -Math.round((snappedCoords.y - ele.staff.zone.uly) / (ele.staff.delta_y/2));
 
@@ -355,7 +357,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     }
 
                     // get y position of first neume component
-                    var nc_y = element.staffRef.clef.y - (ele.rootDiff * element.staffRef.delta_y/2);
+                    var nc_y = ele.staff.zone.uly - ele.rootStaffPos*ele.staff.delta_y/2;
                     var finalCoords = {x: left, y: nc_y - delta_y};
 
                     var sModel = gui.page.getClosestStaff(finalCoords);
@@ -363,37 +365,32 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     // snap to staff
                     var snapCoords = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele});
 
-                    var ncdelta_y = nc_y - snapCoords.y;
+                    var newRootStaffPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
 
-                    // change certain attributes of the element
-                    // [ulx, uly, lrx, lry]
-                    // construct bounding box hint: bounding box changes when dot is repositioned
+                    // construct bounding box hint for the new drawing: bounding box changes when dot is repositioned
                     var ulx = snapCoords.x-(element.currentWidth/2);
                     var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
                     var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
                     ele.setBoundingBox(bb);
 
+                    var oldRootStaffPos = ele.rootStaffPos;
                     // derive pitch name and octave of notes in the neume on the appropriate staff
-                    var oldRootPname = ele.components[0].pname;
-                    var oldRootOct = ele.components[0].oct;
-                    for (var i = 0; i < ele.components.length; i++) {
-                        var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * ele.components[i].pitchDiff)});
-                        ele.components[i].setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
-                    }
+                    $.each(ele.components, function(ncInd, nc) {
+                        var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
+                        nc.setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
+                    });
 
                     // remove the old neume
-                    element.staffRef.removeElementByRef(ele);
-                         
+                    ele.staff.removeElementByRef(ele);
+                    gui.rendEng.canvas.remove(element);
+     
                     // mount the new neume on the most appropriate staff
                     var nInd = sModel.addNeume(ele);
+                    $(ele).trigger("vSelectDrawing");
+                    gui.rendEng.repaint();
 
-                    // get final bounding box information
-                    bb = [ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry];
-
-                    gui.rendEng.canvas.remove(element);
-
-                    var args = {"nid": ele.id, "bb": {"ulx": bb[0], "uly": bb[1], "lrx": bb[2], "lry": bb[3]}};
-                    if (oldRootPname != ele.components[0].pname || oldRootOct != ele.components[0].oct) {
+                    var args = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry};
+                    if (oldRootStaffPos != newRootStaffPos) {
                         // this is a pitch shift
                         args.pitchInfo = new Array();
                         $.each(ele.components, function(ncInd, nc) {
