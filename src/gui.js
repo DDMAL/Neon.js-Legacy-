@@ -76,8 +76,14 @@ Toe.View.GUI.prototype.setupNavBar = function() {
     var gui = this;
 
     var nav_file_dropdown_parent = "#nav_file_dropdown";
-    $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li><li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li><li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
-    $("#nav_file_dropdown_revert").tooltip({animation: true, placement: 'right', title: '<br/><br/>Revert the current MEI file to the original version. Warning: this will revert all changes made in the editor.', delay: 100});
+    $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li>' +
+                                       '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
+                                       '<li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
+    $("#nav_file_dropdown_revert").tooltip({animation: true, 
+                                            placement: 'right', 
+                                            title: '<br/><br/>Revert the current MEI file to the original version. ' +
+                                                   'Warning: this will revert all changes made in the editor.', 
+                                            delay: 100});
     $("#nav_file_dropdown_revert").click(function() {
         // move backup mei file to working directory
         $.get(gui.prefix + "/revert/" + gui.fileName, function(data) {
@@ -93,12 +99,18 @@ Toe.View.GUI.prototype.setupNavBar = function() {
     });
 
     // MEI download
-    $("#nav_file_dropdown_getmei").tooltip({animation: true, placement: 'right', title: 'View the MEI file of the document being edited.', delay: 100});
+    $("#nav_file_dropdown_getmei").tooltip({animation: true, 
+                                            placement: 'right', 
+                                            title: 'View the MEI file of the document being edited.',
+                                            delay: 100});
     // set the download path of the file
     $("#nav_file_dropdown_getmei").attr("href", this.prefix + "/file/" + this.fileName);
 
     // Document image rasterize
-    $("#nav_file_dropdown_getimg").tooltip({animation: true, placement: 'right', title: 'Download an image of the document being edited.', delay: 100});
+    $("#nav_file_dropdown_getimg").tooltip({animation: true, 
+                                            placement: 'right', 
+                                            title: 'Download an image of the document being edited.',
+                                            delay: 100});
     $("#nav_file_dropdown_getimg").click(function() {
         if (!fabric.Canvas.supports('toDataURL')) {
             // show alert to user
@@ -116,7 +128,10 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
 
     // create background image opacity slider
     if (toggles.sldr_bgImgOpacity) {
-        $(parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n<input id="sldr_bgImgOpacity" type="range" name="bgImgOpacity" min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
+        $(parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n' +
+                               '<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n' +
+                               '<input id="sldr_bgImgOpacity" type="range" name="bgImgOpacity" ' +
+                               'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
 
         $("#sldr_bgImgOpacity").bind("change", function() {
             gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
@@ -155,7 +170,10 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
            
     // add buttons for edit commands
     if ($("#sidebar-edit").length == 0) {
-        $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n</li>\n<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
+        $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
+                              '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n</li>\n' +
+                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }
     
     gui.rendEng.canvas.observe('mouse:down', function(e) {
@@ -171,14 +189,20 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            $("#info > p").html("Selected: " + ele.props.type.name + "<br/> Pitches: " + $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
+            $("#info > p").html("Selected: " + ele.props.type.name + "<br/> Pitche(s): " + 
+                                $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
             $("#info").animate({opacity: 1.0}, 100);
 
             $("#menu_editclef").remove();
 
             if (ele.props.type == Toe.Model.Neume.Type.punctum) {
                 if ($("#menu_editpunctum").length == 0) {
-                    $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
+                    $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
+                                              '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
+                                              '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
+                                              '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
+                                              '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n' +
+                                              '</div></li></span>');
                 }
 
                 // toggle ornamentation
@@ -205,7 +229,10 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
             $("#info").animate({opacity: 1.0}, 100);
 
             if ($("#menu_editclef").length == 0) {
-                    $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="edit_rad_c" class="btn">Doh</button>\n<button id="edit_rad_f" class="btn">Fah</button>\n</div></li></span>');
+                    $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n' +
+                                              '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
+                                              '<button id="edit_rad_c" class="btn">Doh</button>\n' +
+                                              '<button id="edit_rad_f" class="btn">Fah</button>\n</div></li></span>');
             }
 
             // activate appropriate radio button
@@ -837,7 +864,10 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
 
     // then add insert options
     if ($("#sidebar-insert").length == 0) {
-        $(parentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio"><button id="rad_punctum" class="btn"><i class="icon-bookmark icon-black"></i> Punctum</button>\n<button id="rad_division" class="btn"><b>||</b> Division</button>\n</div>\n</li>\n</span>');
+        $(parentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
+                              '<li><div class="btn-group" data-toggle="buttons-radio">' +
+                              '<button id="rad_punctum" class="btn"><i class="icon-bookmark icon-black"></i> Punctum</button>\n' +
+                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n</div>\n</li>\n</span>');
     }
 
     $("#rad_punctum").bind("click.insert", function() {
@@ -856,7 +886,11 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
 
         // add ornamentation toggles
         if ($("#menu_insertpunctum").length == 0) {
-            $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-checkbox">\n<button id="chk_dot" class="btn">&#149; Dot</button>\n<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
+            $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
+                                        '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
+                                        '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
+                                        '<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
+                                        '<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
         }
 
         // ornamentation toggle flags
@@ -1030,7 +1064,12 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
 
         // add division type toggles
         if ($("#menu_insertdivision").length == 0) {
-            $("#sidebar-insert").append('<span id="menu_insertdivision"><br/>\n<li class="nav-header">Division Type</li>\n<li>\n<li><div class="btn-group" data-toggle="buttons-radio">\n<button id="rad_small" class="btn">Small</button>\n<button id="rad_minor" class="btn">Minor</button>\n<button id="rad_major" class="btn">Major</button>\n<button id="rad_final" class="btn">Final</button>\n</div>\n</li>\n</span>');
+            $("#sidebar-insert").append('<span id="menu_insertdivision"><br/>\n<li class="nav-header">Division Type</li>\n' +
+                                        '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
+                                        '<button id="rad_small" class="btn">Small</button>\n' +
+                                        '<button id="rad_minor" class="btn">Minor</button>\n' +
+                                        '<button id="rad_major" class="btn">Major</button>\n' +
+                                        '<button id="rad_final" class="btn">Final</button>\n</div>\n</li>\n</span>');
         }
 
         var divisionForm = null;
@@ -1129,9 +1168,6 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
             // calculate snapped coords
             var snapCoords = staff.ohSnap(coords, gui.divisionDwg.currentWidth);
 
-            // getting coordinates done
-            //$("#progressbar").css("width", "18.75%");
-
             var division = new Toe.Model.Division(divisionForm);
 
             // update bounding box with physical position on the page
@@ -1140,18 +1176,12 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
             var bb = [ulx, uly, ulx + gui.divisionDwg.currentWidth, uly + gui.divisionDwg.currentHeight];
             division.setBoundingBox(bb);
 
-            // bounding box set
-            //$("#progressbar").css("width", "37.5%");
-
             // instantiate division view and controller
             var dView = new Toe.View.DivisionView(gui.rendEng);
             var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
 
             // mount division on the staff
             var nInd = staff.addDivision(division);
-
-            // division drawn on the canvas
-            //$("#progressbar").css("width", "56.25%");
 
             var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
             // get next element to insert before
@@ -1164,14 +1194,8 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
                 args["beforeid"] = sNextModel.id;
             }
 
-            // arguments prepared for the server
-            //$("#progressbar").css("width", "75%");
-
             // send insert division command to server to change underlying MEI
             $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/division", args, function(data) {
-                //$("#progressbar").css("width", "100%");   
-                // all done, reset progress bar
-                //$("#progressbar").delay(1000).css("width", "0%");
                 division.id = JSON.parse(data).id;
             })
             .error(function() {
@@ -1179,9 +1203,6 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
                 // replace text with error message
                 $("#alert > p").text("Server failed to insert division. Client and server are not synchronized.");
                 $("#alert").toggleClass("fade");
-                // change progress bar colour to red, reset progress bar
-                //$("#progressbar").toggleClass("progress-danger");
-                //$("#progressbar").delay(1000).css("width", "0%").toggleClass("alert");
             });
         });
 
