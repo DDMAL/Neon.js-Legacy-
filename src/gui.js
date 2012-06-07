@@ -125,7 +125,7 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
     }
 
     // switch to edit mode
-    $("#btn_edit").bind("click", {gui: gui, parentDivId: parentDivId}, this.handleEdit);
+    $("#btn_edit").bind("click.edit", {gui: gui, parentDivId: parentDivId}, this.handleEdit);
 
     // switch to insert mode
     $("#btn_insert").bind("click.insert", {gui: gui, parentDivId: parentDivId}, this.handleInsert);
@@ -191,51 +191,10 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     $("#edit_chk_dot").toggleClass("active", false);
                 }
 
+                // Handle dot toggles
                 // remove onclick listener for previous selection
                 $("#edit_chk_dot").unbind("click");
-                $("#edit_chk_dot").bind("click.edit", function() {
-                    var nModel = ele;
-                    
-                    var addDot = !$(this).hasClass("active");
-                    if (addDot) {
-                        // add a dot
-                        var ornament = new Toe.Model.Ornament("dot", {form: "aug"});
-                        nModel.components[0].addOrnament(ornament);
-                    }
-                    else {
-                        // remove the dot
-                        nModel.components[0].removeOrnament("dot");
-                    }
-
-                    // update neume drawing
-                    nModel.syncDrawing();
-
-                    // get final bounding box information
-                    var args = {id: nModel.id, dotform: "aug", ulx: nModel.zone.ulx, uly: nModel.zone.uly, lrx: nModel.zone.lrx, lry: nModel.zone.lry};
-                    if (addDot) {
-                        // send add dot command to server to change underlying MEI
-                        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/dot", args)
-                        .error(function() {
-                            // show alert to user
-                            // replace text with error message
-                            $("#alert > p").text("Server failed to add a dot to the punctum. Client and server are not synchronized.");
-                            $("#alert").animate({opacity: 1.0}, 100);
-                        });
-                    }
-                    else {
-                        // send remove dot command to server to change underlying MEI
-                        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/dot", args)
-                        .error(function() {
-                            // show alert to user
-                            // replace text with error message
-                            $("#alert > p").text("Server failed to remove dot from the punctum. Client and server are not synchronized.");
-                            $("#alert").animate({opacity: 1.0}, 100);
-                        });
-                    }
-
-                    $("#edit_chk_dot").toggleClass("active");
-                });
-
+                $("#edit_chk_dot").bind("click.edit", {gui: gui, punctum: ele}, gui.handleDotToggle);
             }
             else {
                 $("#menu_editpunctum").remove();
@@ -257,85 +216,12 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                 $("#edit_rad_f").toggleClass("active", true);
             }
 
-            $("#edit_rad_c").bind("click.edit", function() {
-                if (!$(this).hasClass("active")) {
-                    // switch from f to c clef
-                    sModel = selection.staffRef;
-                    gui.rendEng.canvas.remove(selection);
-
-                    ele.setShape("c");
-
-                    var pitchInfo = $.map(sModel.elements, function(e) {
-                        if (e instanceof Toe.Model.Neume) {
-                            var pitchInfo = new Array();
-                            $.each(e.components, function(nInd, n) {
-                                pitchInfo.push({pname: n.pname, oct: n.oct});
-                            });
-                            return {id: e.id, noteInfo: pitchInfo};
-                        }
-                        else if (e instanceof Toe.Model.Custos) {
-                            return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
-                        }
-                    });
-
-                    var args = {id: ele.id, shape: "c", ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
-
-                    // send pitch shift command to server to change underlying MEI
-                    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
-                    .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
-                        $("#alert").toggleClass("fade");
-                    });
-
-                    $(this).toggleClass("active");
-                    gui.rendEng.canvas.discardActiveObject();
-                    gui.rendEng.canvas.discardActiveGroup();
-                    gui.rendEng.canvas.fire('selection:cleared');
-                    gui.rendEng.repaint();
-                }
-            });
-
-            $("#edit_rad_f").bind("click.edit", function() {
-                if (!$(this).hasClass("active")) {
-                    // switch from c to f clef
-                    sModel = selection.staffRef;
-                    gui.rendEng.canvas.remove(selection);
-
-                    ele.setShape("f");
-
-                    var pitchInfo = $.map(sModel.elements, function(e) {
-                        if (e instanceof Toe.Model.Neume) {
-                            var pitchInfo = new Array();
-                            $.each(e.components, function(nInd, n) {
-                                pitchInfo.push({pname: n.pname, oct: n.oct});
-                            });
-                            return {id: e.id, noteInfo: pitchInfo};
-                        }
-                        else if (e instanceof Toe.Model.Custos) {
-                            return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
-                        }
-                    });
-
-                    var args = {id: ele.id, shape: "f", ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
-
-                    // send pitch shift command to server to change underlying MEI
-                    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
-                    .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
-                        $("#alert").toggleClass("fade");
-                    });
-
-                    $(this).toggleClass("active");
-                    gui.rendEng.canvas.discardActiveObject();
-                    gui.rendEng.canvas.discardActiveGroup();
-                    gui.rendEng.canvas.fire('selection:cleared');
-                    gui.rendEng.repaint();
-                }
-            });
+            // Handle clef shape changes
+            // remove onclick listener for previous selection
+            $("#edit_rad_c").unbind("click");
+            $("#edit_rad_f").unbind("click");
+            $("#edit_rad_c").bind("click.edit", {gui: gui, clef: ele, shape: "c"}, gui.handleClefShapeChange);
+            $("#edit_rad_f").bind("click.edit", {gui: gui, clef: ele, shape: "f"}, gui.handleClefShapeChange);
         }
         else if (ele instanceof Toe.Model.Division) {
             $("#info > p").text("Selected: " + ele.type);
@@ -849,6 +735,86 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         gui.rendEng.canvas.discardActiveGroup();
         gui.rendEng.repaint();
     });
+}
+
+Toe.View.GUI.prototype.handleDotToggle = function(e) {
+    var gui = e.data.gui;
+    var punctum = e.data.punctum;
+
+    var hasDot = punctum.components[0].hasOrnament("dot");
+    if (!hasDot) {
+        // add a dot
+        var ornament = new Toe.Model.Ornament("dot", {form: "aug"});
+        punctum.components[0].addOrnament(ornament);
+    }
+    else {
+        // remove the dot
+        punctum.components[0].removeOrnament("dot");
+    }
+
+    // update neume drawing
+    punctum.syncDrawing();
+
+    // get final bounding box information
+    var args = {id: punctum.id, dotform: "aug", ulx: punctum.zone.ulx, uly: punctum.zone.uly, lrx: punctum.zone.lrx, lry: punctum.zone.lry};
+    if (!hasDot) {
+        // send add dot command to server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/dot", args)
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to add a dot to the punctum. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+    else {
+        // send remove dot command to server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/dot", args)
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to remove dot from the punctum. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+
+    $(this).toggleClass("active");
+}
+
+Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
+    var gui = e.data.gui;
+    var clef = e.data.clef;
+    var cShape = e.data.shape;
+
+    if (clef.shape != cShape) {
+        clef.setShape(cShape);
+
+        var pitchInfo = $.map(clef.staff.getPitchedElements({clef: clef}), function(e) {
+            if (e instanceof Toe.Model.Neume) {
+                var pitchInfo = new Array();
+                $.each(e.components, function(nInd, n) {
+                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                });
+                return {id: e.id, noteInfo: pitchInfo};
+            }
+            else if (e instanceof Toe.Model.Custos) {
+                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+            }
+        });
+
+        var args = {id: clef.id, shape: cShape, ulx: clef.zone.ulx, uly: clef.zone.uly, lrx: clef.zone.lrx, lry: clef.zone.lry, pitchInfo: pitchInfo};
+
+        // send pitch shift command to server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
+            $("#alert").toggleClass("fade");
+        });
+
+        $(this).toggleClass("active");
+    }
 }
 
 Toe.View.GUI.prototype.handleInsert = function(e) {

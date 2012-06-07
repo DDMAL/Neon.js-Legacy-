@@ -28,7 +28,12 @@ THE SOFTWARE.
  * @param {Object} options staffline {Number}, interact {Boolean}
  */
 Toe.Model.Clef = function(clefShape, options) {
-    this.setShape(clefShape);
+    this.shape = clefShape.toLowerCase();
+    this.name = Toe.Model.Clef.Type[this.shape];
+
+    if (this.name == undefined) {
+        throw new Error("Clef: unknown clef shape");
+    }
 
     var clefPos = null;
     if (clefShape == "c") {
@@ -100,7 +105,8 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
         throw new Error("Clef: unknown clef shape");
     }
 
-    // TODO update affected pitched elements on the staff
+    // update affected pitched elements on the staff
+    this.staff.updatePitchedElements({clef: this});
 
     $(this).trigger("vUpdateShape", [this]);
 }
