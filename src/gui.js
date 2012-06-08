@@ -343,7 +343,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         // show alert to user
                         // replace text with error message
                         $("#alert > p").text("Server failed to move clef. Client and server are not synchronized.");
-                        $("#alert").toggleClass("fade");
+                        $("#alert").animate({opacity: 1.0}, 100);
                     });
                 }
                 else if (ele instanceof Toe.Model.Neume) {
@@ -417,7 +417,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         // show alert to user
                         // replace text with error message
                         $("#alert > p").text("Server failed to move neume. Client and server are not synchronized.");
-                        $("#alert").toggleClass("fade");
+                        $("#alert").animate({opacity: 1.0}, 100);
                     });
                 }
                 else if (ele instanceof Toe.Model.Custos) {
@@ -480,7 +480,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         // show alert to user
                         // replace text with error message
                         $("#alert > p").text("Server failed to move division. Client and server are not synchronized.");
-                        $("#alert").toggleClass("fade");
+                        $("#alert").animate({opacity: 1.0}, 100);
                     });
 
                     gui.rendEng.repaint();
@@ -491,96 +491,14 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         gui.objMoving = false;    
     });
 
-    // handler for delete
+    // Bind click handlers for the side-bar buttons
+    $("#btn_delete").unbind("click");
+    $("#btn_neumify").unbind("click");
+    $("#btn_ungroup").unbind("click");
+
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
-
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
-        
-    $("#btn_ungroup").bind("click.edit", function() {
-        var neumes = new Array();
-
-        var selection = gui.rendEng.canvas.getActiveObject();
-        if (selection) {
-            if (selection.eleRef instanceof Toe.Model.Neume && selection.eleRef.components.length > 1) {
-                neumes.push({nRef: selection.eleRef, sRef: selection.staffRef, drawing: selection});
-            }
-        }
-        else {
-            selection = gui.rendEng.canvas.getActiveGroup();
-            if (selection) {
-                // group of neumes selected
-                for (var i = selection.objects.length-1; i >= 0; i--) {
-                    var obj = selection.objects[i];
-                    if (obj.eleRef instanceof Toe.Model.Neume && obj.eleRef.components.length > 1) {
-                        neumes.push({nRef: obj.eleRef, sRef: obj.staffRef, drawing: obj});
-                    }
-                }
-            }
-        }
-
-        var nids = new Array();
-        var bbs = new Array();
-        var punctums = new Array();
-
-        // ungroup each selected neume
-        $.each(neumes, function(nInd, nel) {
-            // add to list of neume ids
-            nids.push(nel.nRef.id);
-
-            var punctBoxes = new Array();
-            var ulx = nel.nRef.zone.ulx;
-
-            // remove the old neume
-            nel.sRef.removeElementByRef(nel.nRef);
-            gui.rendEng.canvas.remove(nel.drawing);
-
-            $.each(nel.nRef.components, function(ncInd, nc) {
-                var newPunct = new Toe.Model.Neume();
-                newPunct.components.push(nc);
-
-                var uly = nel.sRef.clef.y - (nel.nRef.rootDiff+nc.pitchDiff)*nel.sRef.delta_y/2 - gui.punctHeight/2;
-                // set the bounding box hint of the new neume for drawing
-                var bb = [ulx+(ncInd*gui.punctWidth), uly, ulx+((ncInd+1)*gui.punctWidth), uly+gui.punctHeight];
-                newPunct.setBoundingBox(bb);
-
-                // instantiate neume view and controller
-                var nView = new Toe.View.NeumeView(gui.rendEng);
-                var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
-
-                // add the punctum to the staff and draw it
-                nel.sRef.addNeume(newPunct);
-
-                // get final bounding box information
-                punctBoxes.push({"ulx": newPunct.zone.ulx, "uly": newPunct.zone.uly, "lrx": newPunct.zone.lrx, "lry": newPunct.zone.lry});
-
-                punctums.push(newPunct);
-            });
-
-            // add to list of neume bounding boxes
-            bbs.push(punctBoxes);
-        });
-
-        var data = JSON.stringify({"nids": nids.join(","), "bbs": bbs});
-
-        // call server ungroup function to update MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/ungroup", {data: data}, function(data) {
-            // set ids of the new puncta from the IDs generated from the server
-            var nids = JSON.parse(data).nids;
-            $.each(punctums, function(i, punct) {
-                punct.id = nids[i];
-            });
-        })
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not synchronized.");
-            $("#alert").toggleClass("fade");
-        });
-
-        gui.rendEng.canvas.discardActiveObject();
-        gui.rendEng.canvas.discardActiveGroup();
-        gui.rendEng.repaint();
-    });
+    $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
 }
 
 Toe.View.GUI.prototype.handleDotToggle = function(e) {
@@ -656,7 +574,7 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
             // show alert to user
             // replace text with error message
             $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
-            $("#alert").toggleClass("fade");
+            $("#alert").animate({opacity: 1.0}, 100);
         });
 
         $(this).toggleClass("active");
@@ -813,18 +731,17 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         // get neume key
         var neumeKey = newNeume.props.key;
 
+        var args = {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
         // call server neumify function to update MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", 
-              {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, 
-              function(data) {
-                  // set id of the new neume with generated ID from the server
-                  newNeume.id = data.nid;
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", args, function(data) {
+            // set id of the new neume with generated ID from the server
+            newNeume.id = JSON.parse(data).nid;
         })
         .error(function() {
             // show alert to user
             // replace text with error message
             $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not synchronized.");
-            $("#alert").toggleClass("fade");
+            $("#alert").animate({opacity: 1.0}, 100);
         });
 
         gui.rendEng.canvas.discardActiveGroup();
@@ -834,6 +751,99 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
 
         gui.rendEng.repaint();
     }
+}
+
+Toe.View.GUI.prototype.handleUngroup = function(e) {
+    var gui = e.data.gui;
+
+    var neumes = new Array();
+
+    var selection = gui.rendEng.canvas.getActiveObject();
+    if (selection) {
+        if (selection.eleRef instanceof Toe.Model.Neume && selection.eleRef.components.length > 1) {
+            neumes.push(selection);
+        }
+    }
+    else {
+        selection = gui.rendEng.canvas.getActiveGroup();
+        if (selection) {
+            // group of elements selected
+            $.each(selection.getObjects(), function(oInd, o) {
+                // only deal with neumes with that have more components than a punctum
+                if (o.eleRef instanceof Toe.Model.Neume && o.eleRef.components.length > 1) {
+                    neumes.push(o);
+                }
+            });
+        }
+    }
+
+    var nids = new Array();
+    var bbs = new Array();
+    var punctums = new Array();
+
+    // ungroup each selected neume
+    $.each(neumes, function(oInd, o) {
+        // add to list of neume ids
+        nids.push(o.eleRef.id);
+
+        var punctBoxes = new Array();
+        var ulx = o.eleRef.zone.ulx;
+
+        // remove the old neume
+        o.eleRef.staff.removeElementByRef(o.eleRef);
+        gui.rendEng.canvas.remove(o);
+
+        $.each(o.eleRef.components, function(ncInd, nc) {
+            var newPunct = new Toe.Model.Neume();
+            newPunct.components.push(nc);
+
+            var uly = o.eleRef.staff.zone.uly - (o.eleRef.rootStaffPos + nc.pitchDiff)*o.eleRef.staff.delta_y/2 - gui.punctHeight/2;
+            // set the bounding box hint of the new neume for drawing
+            var bb = [ulx+(ncInd*gui.punctWidth), uly, ulx+((ncInd+1)*gui.punctWidth), uly+gui.punctHeight];
+            newPunct.setBoundingBox(bb);
+
+            // instantiate neume view and controller
+            var nView = new Toe.View.NeumeView(gui.rendEng);
+            var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
+
+            // add the punctum to the staff and draw it
+            o.eleRef.staff.addNeume(newPunct);
+
+            // get final bounding box information
+            punctBoxes.push({"ulx": newPunct.zone.ulx, "uly": newPunct.zone.uly, "lrx": newPunct.zone.lrx, "lry": newPunct.zone.lry});
+
+            punctums.push(newPunct);
+        });
+
+        // add to list of neume bounding boxes
+        bbs.push(punctBoxes);
+    });
+
+    var data = JSON.stringify({"nids": nids.join(","), "bbs": bbs});
+
+    // call server ungroup function to update MEI
+    $.post(gui.prefix + "/edit/" + gui.fileName + "/ungroup", {data: data}, function(data) {
+        // set ids of the new puncta from the IDs generated from the server
+        var nids = JSON.parse(data).nids;
+        // flatten array of nested nid arrays (if ungrouping more than one neume)
+        nids = $.map(nids, function(n) {
+            return n;
+        });
+
+        $.each(punctums, function(i, punct) {
+            punct.id = nids[i];
+        });
+    })
+    .error(function() {
+        // show alert to user
+        // replace text with error message
+        $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
+
+    gui.rendEng.canvas.discardActiveObject();
+    gui.rendEng.canvas.discardActiveGroup();
+    gui.rendEng.repaint();
 }
 
 Toe.View.GUI.prototype.handleInsert = function(e) {
@@ -1013,7 +1023,7 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
                 // show alert to user
                 // replace text with error message
                 $("#alert > p").text("Server failed to insert neume. Client and server are not synchronized.");
-                $("#alert").toggleClass("fade");
+                $("#alert").animate({opacity: 1.0}, 100);
             });
         });
 
@@ -1194,7 +1204,7 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
                 // show alert to user
                 // replace text with error message
                 $("#alert > p").text("Server failed to insert division. Client and server are not synchronized.");
-                $("#alert").toggleClass("fade");
+                $("#alert").animate({opacity: 1.0}, 100);
             });
         });
 
