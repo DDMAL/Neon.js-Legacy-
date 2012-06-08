@@ -44,6 +44,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
     // that follow around the pointer in insert mode.
     this.punctDwg = null;
     this.divisionDwg = null;
+    this.clefDwg = null;
 
     // cache height and width of punctum glyph for use in
     // bounding box estimation in neumify and ungroup
@@ -160,14 +161,15 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     gui.rendEng.unObserve("mouse:move");
     gui.rendEng.unObserve("mouse:up");
 
-    // remove punctum following the pointer
+    // remove drawings following the pointer from insert mode
     if (gui.punctDwg) {
         gui.rendEng.canvas.remove(gui.punctDwg);
     }
-
-    // remove division following the pointer
     if (gui.divisionDwg) {
         gui.rendEng.canvas.remove(gui.divisionDwg);
+    }
+    if (gui.clefDwg) {
+        gui.rendEng.canvas.remove(gui.clefDwg);
     }
     gui.rendEng.repaint();
            
@@ -875,16 +877,18 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
         $(parentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
                               '<li><div class="btn-group" data-toggle="buttons-radio">' +
                               '<button id="rad_punctum" class="btn"><i class="icon-bookmark icon-black"></i> Punctum</button>\n' +
-                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n</div>\n</li>\n</span>');
+                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
+                              '<button id="rad_clef" class="btn">Clef</button>\n</div>\n</li>\n</span>');
     }
 
     // update click handlers
     $("#rad_punctum").unbind("click");
     $("#rad_division").unbind("click");
+    $("#rad_clef").unbind("click");
 
     $("#rad_punctum").bind("click.insert", {gui: gui}, gui.handleInsertPunctum);
-
     $("#rad_division").bind("click.insert", {gui: gui}, gui.handleInsertDivision);
+    $("#rad_clef").bind("click.insert", {gui: gui}, gui.handleInsertClef);
 
     // toggle punctum insert by default
     $("#rad_punctum").trigger('click');
@@ -897,14 +901,16 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
     gui.rendEng.unObserve("mouse:move");
     gui.rendEng.unObserve("mouse:up");
 
-    // remove insert division menu
+    // remove insert menus not for punctums
     $("#menu_insertdivision").remove();
+    $("#menu_insertclef").remove();
 
-
-    // remove drawn division
+    // remove division/clef following the punctum
     if (gui.divisionDwg) {
         gui.rendEng.canvas.remove(gui.divisionDwg);
-        gui.rendEng.repaint();
+    }
+    if (gui.clefDwg) {
+        gui.rendEng.canvas.remove(gui.clefDwg);
     }
 
     // add ornamentation toggles
@@ -1085,15 +1091,21 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
 Toe.View.GUI.prototype.handleInsertDivision = function(e) {
     var gui = e.data.gui;
 
-    // unbind insert punctum event handlers
+    // unbind other insert event handlers
     gui.rendEng.unObserve("mouse:move");
     gui.rendEng.unObserve("mouse:up");
 
-    // remove the pointer following punctum
-    gui.rendEng.canvas.remove(gui.punctDwg);
+    // remove the punctum/clef following the pointer
+    if (gui.punctDwg) {
+        gui.rendEng.canvas.remove(gui.punctDwg);
+    }
+    if (gui.clefDwg) {
+        gui.rendEng.canvas.remove(gui.clefDwg);
+    }
 
     // remove ornamentation UI elements - not needed for divisions
     $("#menu_insertpunctum").remove();
+    $("#menu_insertclef").remove();
 
     // add division type toggles
     if ($("#menu_insertdivision").length == 0) {
@@ -1275,4 +1287,33 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
 
     // toggle small division by default
     $("#rad_small").trigger('click');
+}
+
+Toe.View.GUI.prototype.handleInsertClef = function(e) {
+    var gui = e.data.gui;
+
+    // unbind other insert event handlers
+    gui.rendEng.unObserve("mouse:move");
+    gui.rendEng.unObserve("mouse:up");
+
+    // remove the punctum/division following the pointer
+    if (gui.punctDwg) {
+        gui.rendEng.canvas.remove(gui.punctDwg);
+    }
+    if (gui.divisionDwg) {
+        gui.rendEng.canvas.remove(gui.divisionDwg);
+    }
+
+    // remove insert menus not for clefs
+    $("#menu_insertpunctum").remove();
+    $("#menu_insertdivision").remove();
+
+    // add clef type toggles
+    if ($("#menu_insertclef").length == 0) {
+        $("#sidebar-insert").append('<span id="menu_insertclef"><br/>\n<li class="nav-header">Clef Type</li>\n' +
+                                    '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
+                                    '<button id="rad_doh" class="btn">Doh</button>\n' +
+                                    '<button id="rad_fah" class="btn">Fah</button>\n' +
+                                    '</div>\n</li>\n</span>');
+    }
 }
