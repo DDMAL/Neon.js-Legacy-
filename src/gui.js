@@ -458,7 +458,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     ele.setBoundingBox(bb);
 
                     // remove division from the previous staff representation
-                    element.staffRef.removeElementByRef(ele);
+                    ele.staff.removeElementByRef(ele);
 
                     // get id of note to move before
                     var dInd = staff.insertElement(ele);
@@ -494,99 +494,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     // handler for delete
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
 
-    $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify)function() {
-        // only need to neumify if a group of objects are selected
-        var selection = gui.rendEng.canvas.getActiveGroup();
-        if (selection) {
-            // there is something selected
-            // make sure there are at least 2 neumes on the same staff to work with
-            var neumes = new Array();
-            var sModel = null;
-            $.each(selection.objects, function (ind, el) {
-                if (el.eleRef instanceof Toe.Model.Neume) {
-                    if (!sModel) {
-                        sModel = el.staffRef;
-                    }
-
-                    if (el.staffRef == sModel) {
-                        neumes.push({ref: el.eleRef, drawing: el});
-                    }
-                }
-            });
-
-            if (neumes.length < 2) {
-                return;
-            }
-
-            // sort the group based on x position (why fabric doesn't do this, I don't know)
-            neumes.sort(function(el1, el2) {
-                return el1.ref.zone.ulx - el2.ref.zone.ulx;
-            });
-
-            // begin the NEUMIFICATION
-            var newNeume = new Toe.Model.Neume();
-                            
-            numPunct = 0;
-            var nids = new Array();
-            var ulx = Number.MAX_VALUE;
-            var uly = Number.MAX_VALUE;
-            var lry = Number.MIN_VALUE;
-            $.each(neumes, function (ind, el) {
-                // grab underlying notes
-                $.merge(newNeume.components, el.ref.components);
-                numPunct += el.ref.components.length;
-
-                // update neume ids
-                nids.push(el.ref.id);
-
-                // remove the neume, we don't need it anymore
-                sModel.removeElementByRef(el.ref);
-                gui.rendEng.canvas.remove(el.drawing);
-
-                // calculate object's absolute positions from within selection group
-                var left = selection.left + el.drawing.left;
-                var top = selection.top + el.drawing.top;
-                
-                ulx = Math.min(ulx, left - el.drawing.currentHeight/2);
-                uly = Math.min(uly, top - el.drawing.currentHeight/2);
-                lry = Math.max(lry, top + el.drawing.currentHeight/2);
-            });
-            var lrx = ulx + numPunct*gui.punctWidth;
-
-            // set the bounding box hint of the new neume for drawing
-            var bb = [ulx, uly, lrx, lry];
-            newNeume.setBoundingBox(bb);
-
-            // instantiate neume view and controller
-            var nView = new Toe.View.NeumeView(gui.rendEng);
-            var nCtrl = new Toe.Ctrl.NeumeController(newNeume, nView);
-
-            // render the new neume
-            sModel.addNeume(newNeume);
-
-            // get final bounding box information
-            bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
-
-            // get neume key
-            var neumeKey = newNeume.props.key;
-
-            // call server neumify function to update MEI
-            $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, function(data) {
-                // set id of the new neume with generated ID from the server
-                newNeume.id = data.nid;
-            })
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not synchronized.");
-                $("#alert").toggleClass("fade");
-            });
-
-            gui.rendEng.canvas.discardActiveGroup();
-            gui.rendEng.repaint();
-        }
-    });
-
+    $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
+        
     $("#btn_ungroup").bind("click.edit", function() {
         var neumes = new Array();
 
@@ -813,14 +722,118 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         });
     }
     if (toDelete.dids.length > 0) {
+        console.log(toDelete.dids.join(","));
         // send delete command to server to change underlying MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/division", {ids: toDelete.dids.join(",")})
         .error(function() {
             // show alert to user
             // replace text with error message
             $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
-            $("#alert > p").animate({opacity: 1.0}, 100);
+            $("#alert").animate({opacity: 1.0}, 100);
         });
+    }
+}
+
+Toe.View.GUI.prototype.handleNeumify = function(e) {
+    var gui = e.data.gui;
+
+    // only need to neumify if a group of objects are selected
+    var selection = gui.rendEng.canvas.getActiveGroup();
+    if (selection) {
+        // there is something selected
+        // make sure there are at least 2 neumes on the same staff to work with
+        var neumes = new Array();
+        var sModel = null;
+        $.each(selection.getObjects(), function (oInd, o) {
+            if (o.eleRef instanceof Toe.Model.Neume) {
+                if (!sModel) {
+                    sModel = o.eleRef.staff;
+                }
+
+                if (o.eleRef.staff == sModel) {
+                    neumes.push(o);
+                }
+            }
+        });
+
+        if (neumes.length < 2) {
+            return;
+        }
+
+        // sort the group based on x position (why fabric doesn't do this, I don't know)
+        neumes.sort(function(o1, o2) {
+            return o1.eleRef.zone.ulx - o2.eleRef.zone.ulx;
+        });
+
+        // begin the NEUMIFICATION
+        var newNeume = new Toe.Model.Neume();
+                        
+        numPunct = 0;
+        var nids = new Array();
+        var ulx = Number.MAX_VALUE;
+        var uly = Number.MAX_VALUE;
+        var lry = Number.MIN_VALUE;
+        $.each(neumes, function (oInd, o) {
+            var nModel = o.eleRef;
+
+            // grab underlying notes
+            $.merge(newNeume.components, o.eleRef.components);
+            numPunct += o.eleRef.components.length;
+
+            // update neume ids
+            nids.push(o.eleRef.id);
+
+            // calculate object's absolute positions from within selection group
+            var left = selection.left + o.left;
+            var top = selection.top + o.top;
+            
+            ulx = Math.min(ulx, left - o.currentHeight/2);
+            uly = Math.min(uly, top - o.currentHeight/2);
+            lry = Math.max(lry, top + o.currentHeight/2);
+
+            // remove the neume, we don't need it anymore
+            sModel.removeElementByRef(o.eleRef);
+            gui.rendEng.canvas.remove(o);
+        });
+        var lrx = ulx + numPunct*gui.punctWidth;
+
+        // set the bounding box hint of the new neume for drawing
+        var bb = [ulx, uly, lrx, lry];
+        newNeume.setBoundingBox(bb);
+
+        // instantiate neume view and controller
+        var nView = new Toe.View.NeumeView(gui.rendEng);
+        var nCtrl = new Toe.Ctrl.NeumeController(newNeume, nView);
+
+        // render the new neume
+        sModel.addNeume(newNeume);
+
+        // get final bounding box information
+        bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
+
+        // get neume key
+        var neumeKey = newNeume.props.key;
+
+        // call server neumify function to update MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", 
+              {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]}, 
+              function(data) {
+                  // set id of the new neume with generated ID from the server
+                  newNeume.id = data.nid;
+        })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not synchronized.");
+            $("#alert").toggleClass("fade");
+        });
+
+        gui.rendEng.canvas.discardActiveGroup();
+
+        // select the new neume
+        $(newNeume).trigger("vSelectDrawing");
+
+        gui.rendEng.repaint();
     }
 }
 
