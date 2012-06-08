@@ -460,8 +460,6 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     // remove division from the previous staff representation
                     element.staffRef.removeElementByRef(ele);
 
-                    // TODO: add division to closest staff model
-
                     // get id of note to move before
                     var dInd = staff.insertElement(ele);
                     var beforeid = null;
@@ -484,86 +482,19 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         $("#alert > p").text("Server failed to move division. Client and server are not synchronized.");
                         $("#alert").toggleClass("fade");
                     });
+
+                    gui.rendEng.repaint();
                 }
             });
-            // repaint canvas after all the dragging is done
-            /*gui.rendEng.canvas.discardActiveObject();
-            gui.rendEng.canvas.discardActiveGroup();
-            gui.rendEng.canvas.fire('selection:cleared');
-            gui.rendEng.repaint();*/
         }
         // we're all done moving
         gui.objMoving = false;    
     });
 
     // handler for delete
-    $("#btn_delete").bind("click.edit", function() {
-        // get current canvas selection
-        // check individual selection and group selections
-        toDelete = {nids: new Array(), dids: new Array()};
+    $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
 
-        var selection = gui.rendEng.canvas.getActiveObject();
-        if (selection) {
-            // individual element selected
-            if (selection.eleRef instanceof Toe.Model.Neume) {
-                toDelete.nids.push(selection.eleRef.id);
-            }
-            else if (selection.eleRef instanceof Toe.Model.Division) {
-                toDelete.dids.push(selection.eleRef.id);
-            }
-
-            // remove element from internal representation
-            selection.staffRef.removeElementByRef(selection.eleRef);
-
-            gui.rendEng.canvas.remove(selection);
-            gui.rendEng.canvas.discardActiveObject();
-            gui.rendEng.repaint();
-        }
-        else {
-            selection = gui.rendEng.canvas.getActiveGroup();
-            if (selection) {
-                // group of neumes selected
-                for (var i = selection.objects.length-1; i >= 0; i--) {
-                    if (selection.eleRef instanceof Toe.Model.Neume) {
-                        toDelete.nids.push(selection.objects[i].eleRef.id);
-                    }
-                    else if (selection.eleRef instanceof Toe.Model.Division) {
-                        toDelete.dids.push(selection.objects[i].eleRef.id);
-                    }
-
-                    // remove element from internal representation
-                    selection.objects[i].staffRef.removeElementByRef(selection.objects[i].eleRef);
-
-                    gui.rendEng.canvas.remove(selection.objects[i]);
-                }
-                gui.rendEng.canvas.discardActiveGroup();
-                gui.rendEng.repaint();
-            }
-        }
-
-        if (toDelete.nids.length > 0) {
-            // send delete command to server to change underlying MEI
-            $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/neume",  {ids: toDelete.nids.join(",")})
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
-                $("#alert").animate({opacity: 1.0}, 100);
-            });
-        }
-        if (toDelete.dids.length > 0) {
-            // send delete command to server to change underlying MEI
-            $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/division", {ids: toDelete.dids.join(",")})
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
-                $("#alert > p").animate({opacity: 1.0}, 100);
-            });
-        }
-    });
-
-    $("#btn_neumify").bind("click.edit", function() {
+    $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify)function() {
         // only need to neumify if a group of objects are selected
         var selection = gui.rendEng.canvas.getActiveGroup();
         if (selection) {
@@ -820,6 +751,76 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
         });
 
         $(this).toggleClass("active");
+    }
+}
+
+Toe.View.GUI.prototype.handleDelete = function(e) {
+    var gui = e.data.gui;
+
+    // get current canvas selection
+    // check individual selection and group selections
+    toDelete = {nids: new Array(), dids: new Array()};
+
+    var selection = gui.rendEng.canvas.getActiveObject();
+    if (selection) {
+        var ele = selection.eleRef;
+        // individual element selected
+        if (ele instanceof Toe.Model.Neume) {
+            toDelete.nids.push(ele.id);
+        }
+        else if (ele instanceof Toe.Model.Division) {
+            toDelete.dids.push(ele.id);
+        }
+
+        // remove element from internal representation
+        ele.staff.removeElementByRef(ele);
+
+        gui.rendEng.canvas.remove(selection);
+        gui.rendEng.canvas.discardActiveObject();
+        gui.rendEng.repaint();
+    }
+    else {
+        selection = gui.rendEng.canvas.getActiveGroup();
+        if (selection) {
+            // group of elements selected
+            $.each(selection.getObjects(), function(oInd, o) {
+                if (o.eleRef instanceof Toe.Model.Neume) {
+                    toDelete.nids.push(o.eleRef.id);
+                }
+                else if (o.eleRef instanceof Toe.Model.Division) {
+                    toDelete.dids.push(o.eleRef.id);
+                }
+
+                // remove elements from internal representation
+                o.eleRef.staff.removeElementByRef(o.eleRef);
+
+                gui.rendEng.canvas.remove(o);
+            });
+
+            gui.rendEng.canvas.discardActiveGroup();
+            gui.rendEng.repaint();
+        }
+    }
+
+    if (toDelete.nids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/neume",  {ids: toDelete.nids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+    if (toDelete.dids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/division", {ids: toDelete.dids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
+            $("#alert > p").animate({opacity: 1.0}, 100);
+        });
     }
 }
 

@@ -164,8 +164,7 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         lockMovementX: false,
         lockMovementY: false,
         opacity: 1.0,
-        eleRef: null,
-        staffRef: null
+        eleRef: null
 	};
 
 	$.extend(opts, options);
@@ -191,7 +190,6 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.lockMovementY = opts.lockMovementY;
         val.opacity = opts.opacity;
         val.eleRef = opts.eleRef; // important: attaches element reference to fabric group
-        val.staffRef = opts.staffRef; // important: attaches staff reference to fabric group
     });
 
     // add the elements to the canvas
