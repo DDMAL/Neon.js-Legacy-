@@ -882,200 +882,9 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
     $("#rad_punctum").unbind("click");
     $("#rad_division").unbind("click");
 
-    $("#rad_punctum").bind("click.insert", {gui: gui}, this.handleInsertPunctum);
+    $("#rad_punctum").bind("click.insert", {gui: gui}, gui.handleInsertPunctum);
 
-    $("#rad_division").bind("click.insert", function() {
-        // unbind insert punctum event handlers
-        gui.rendEng.unObserve("mouse:move");
-        gui.rendEng.unObserve("mouse:up");
-
-        // remove the pointer following punctum
-        gui.rendEng.canvas.remove(gui.punctDwg);
-        gui.rendEng.repaint();
-
-        // remove ornamentation UI elements - not needed for divisions
-        $("#menu_insertpunctum").remove();
-
-        // add division type toggles
-        if ($("#menu_insertdivision").length == 0) {
-            $("#sidebar-insert").append('<span id="menu_insertdivision"><br/>\n<li class="nav-header">Division Type</li>\n' +
-                                        '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
-                                        '<button id="rad_small" class="btn">Small</button>\n' +
-                                        '<button id="rad_minor" class="btn">Minor</button>\n' +
-                                        '<button id="rad_major" class="btn">Major</button>\n' +
-                                        '<button id="rad_final" class="btn">Final</button>\n</div>\n</li>\n</span>');
-        }
-
-        var divisionForm = null;
-        var staff = null;
-
-        gui.rendEng.canvas.observe('mouse:move', function(e) {
-            var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
-
-            // get closest staff
-            staff = gui.page.getClosestStaff(pnt);
-
-            var snapCoords = pnt;
-            var divProps = {strokeWidth: 4, opacity: 0.6};
-            switch (divisionForm) {
-                case "small":
-                    snapCoords.y = staff.zone.uly;
-
-                    if (!gui.divisionDwg) {
-                        var y1 = staff.zone.uly - staff.delta_y/2;
-                        var y2 = staff.zone.uly + staff.delta_y/2;
-                        var x1 = snapCoords.x;
-
-                        gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                        gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
-                    }
-                    break;
-                case "minor":
-                    snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
-
-                    if (!gui.divisionDwg) {
-                        var y1 = staff.zone.uly + staff.delta_y/2;
-                        var y2 = y1 + 2*staff.delta_y;
-                        var x1 = snapCoords.x;
-
-                        gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                        gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
-                    }
-                    break;
-                case "major":
-                    snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
-
-                    if (!gui.divisionDwg) {
-                        var y1 = staff.zone.uly;
-                        var y2 = staff.zone.lry;
-                        var x1 = snapCoords.x;
-
-                        gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                        gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
-                    }
-                    break;
-                case "final":
-                    snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
-
-                    if (!gui.divisionDwg) {
-                        var y1 = staff.zone.uly;
-                        var y2 = staff.zone.lry;
-                        var x1 = snapCoords.x;
-                        // make width equal to width of punctum glyph
-                        var x2 = snapCoords.x + gui.punctWidth;
-
-                        var div1 = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                        var div2 = gui.rendEng.createLine([x2, y1, x2, y2], divProps);
-                        gui.divisionDwg = gui.rendEng.draw({static: [div1, div2], modify: []}, {group: true, selectable: false, opacity: 0.6})[0];
-                    }
-                    break;
-            }                    
-
-            // snap the drawing to the staff on the x-plane
-            var dwgLeft = pnt.x - gui.divisionDwg.currentWidth/2;
-            var dwgRight = pnt.x + gui.divisionDwg.currentWidth/2;
-            if (staff.clef && dwgLeft <= staff.clef.zone.lrx) {
-                snapCoords.x = staff.clef.zone.lrx + gui.divisionDwg.currentWidth/2 + 1;
-            }
-            else if (dwgLeft <= staff.zone.ulx) {
-                snapCoords.x = staff.zone.ulx + gui.divisionDwg.currentWidth/2 + 1;
-            }
-
-            if (staff.custos && dwgRight >= staff.custos.zone.ulx) {
-                // 3 is a magic number just to give it some padding
-                snapCoords.x = staff.custos.zone.ulx - gui.divisionDwg.currentWidth/2 - 3;
-            }
-            else if (dwgRight >= staff.zone.lrx) {
-                snapCoords.x = staff.zone.lrx - gui.divisionDwg.currentWidth/2 - 3;
-            }
-
-            // move around the drawing
-            gui.divisionDwg.left = snapCoords.x;
-            gui.divisionDwg.top = snapCoords.y;
-            gui.rendEng.repaint();
-        });
-
-        gui.rendEng.canvas.observe('mouse:up', function(e) {
-            // get coords
-            var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
-
-            // calculate snapped coords
-            var snapCoords = staff.ohSnap(coords, gui.divisionDwg.currentWidth);
-
-            var division = new Toe.Model.Division(divisionForm);
-
-            // update bounding box with physical position on the page
-            var ulx = snapCoords.x - gui.divisionDwg.currentWidth/2;
-            var uly = snapCoords.y - gui.divisionDwg.currentHeight/2;
-            var bb = [ulx, uly, ulx + gui.divisionDwg.currentWidth, uly + gui.divisionDwg.currentHeight];
-            division.setBoundingBox(bb);
-
-            // instantiate division view and controller
-            var dView = new Toe.View.DivisionView(gui.rendEng);
-            var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
-
-            // mount division on the staff
-            var nInd = staff.addDivision(division);
-
-            var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
-            // get next element to insert before
-            if (nInd + 1 < staff.elements.length) {
-                args["beforeid"] = staff.elements[nInd+1].id;   
-            }
-            else {
-                // insert before the next system break (staff)
-                var sNextModel = gui.page.getNextStaff(staff);
-                args["beforeid"] = sNextModel.id;
-            }
-
-            // send insert division command to server to change underlying MEI
-            $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/division", args, function(data) {
-                division.id = JSON.parse(data).id;
-            })
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to insert division. Client and server are not synchronized.");
-                $("#alert").animate({opacity: 1.0}, 100);
-            });
-        });
-
-        $("#rad_small").bind("click.insert", function() {
-            // remove the current division following the pointer
-            if (gui.divisionDwg) {
-                gui.rendEng.canvas.remove(gui.divisionDwg);
-                gui.divisionDwg = null;
-            }
-            divisionForm = "small";
-        });
-
-        $("#rad_minor").bind("click.insert", function() {
-            if (gui.divisionDwg) {
-                gui.rendEng.canvas.remove(gui.divisionDwg);
-                gui.divisionDwg = null;
-            }
-            divisionForm = "minor";
-        });
-
-        $("#rad_major").bind("click.insert", function() {
-            if (gui.divisionDwg) {
-                gui.rendEng.canvas.remove(gui.divisionDwg);
-                gui.divisionDwg = null;
-            }
-            divisionForm = "major";
-        });
-
-        $("#rad_final").bind("click.insert", function() {
-            if (gui.divisionDwg) {
-                gui.rendEng.canvas.remove(gui.divisionDwg);
-                gui.divisionDwg = null;
-            }
-            divisionForm = "final";
-        });
-
-        // toggle small division by default
-        $("#rad_small").trigger('click');
-    });
+    $("#rad_division").bind("click.insert", {gui: gui}, gui.handleInsertDivision);
 
     // toggle punctum insert by default
     $("#rad_punctum").trigger('click');
@@ -1271,4 +1080,199 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
     $("#chk_vertepisema").bind("click.insert", function() {
     });
     */
+}
+
+Toe.View.GUI.prototype.handleInsertDivision = function(e) {
+    var gui = e.data.gui;
+
+    // unbind insert punctum event handlers
+    gui.rendEng.unObserve("mouse:move");
+    gui.rendEng.unObserve("mouse:up");
+
+    // remove the pointer following punctum
+    gui.rendEng.canvas.remove(gui.punctDwg);
+
+    // remove ornamentation UI elements - not needed for divisions
+    $("#menu_insertpunctum").remove();
+
+    // add division type toggles
+    if ($("#menu_insertdivision").length == 0) {
+        $("#sidebar-insert").append('<span id="menu_insertdivision"><br/>\n<li class="nav-header">Division Type</li>\n' +
+                                    '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
+                                    '<button id="rad_small" class="btn">Small</button>\n' +
+                                    '<button id="rad_minor" class="btn">Minor</button>\n' +
+                                    '<button id="rad_major" class="btn">Major</button>\n' +
+                                    '<button id="rad_final" class="btn">Final</button>\n</div>\n</li>\n</span>');
+    }
+
+    var divisionForm = null;
+    var staff = null;
+
+    gui.rendEng.canvas.observe('mouse:move', function(e) {
+        var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
+
+        // get closest staff
+        staff = gui.page.getClosestStaff(pnt);
+
+        var snapCoords = pnt;
+        var divProps = {strokeWidth: 4, opacity: 0.6};
+        switch (divisionForm) {
+            case "small":
+                snapCoords.y = staff.zone.uly;
+
+                if (!gui.divisionDwg) {
+                    var y1 = staff.zone.uly - staff.delta_y/2;
+                    var y2 = staff.zone.uly + staff.delta_y/2;
+                    var x1 = snapCoords.x;
+
+                    gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
+                    gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
+                }
+                break;
+            case "minor":
+                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+
+                if (!gui.divisionDwg) {
+                    var y1 = staff.zone.uly + staff.delta_y/2;
+                    var y2 = y1 + 2*staff.delta_y;
+                    var x1 = snapCoords.x;
+
+                    gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
+                    gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
+                }
+                break;
+            case "major":
+                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+
+                if (!gui.divisionDwg) {
+                    var y1 = staff.zone.uly;
+                    var y2 = staff.zone.lry;
+                    var x1 = snapCoords.x;
+
+                    gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
+                    gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
+                }
+                break;
+            case "final":
+                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+
+                if (!gui.divisionDwg) {
+                    var y1 = staff.zone.uly;
+                    var y2 = staff.zone.lry;
+                    var x1 = snapCoords.x;
+                    // make width equal to width of punctum glyph
+                    var x2 = snapCoords.x + gui.punctWidth;
+
+                    var div1 = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
+                    var div2 = gui.rendEng.createLine([x2, y1, x2, y2], divProps);
+                    gui.divisionDwg = gui.rendEng.draw({static: [div1, div2], modify: []}, {group: true, selectable: false, opacity: 0.6})[0];
+                }
+                break;
+        }                    
+
+        // snap the drawing to the staff on the x-plane
+        var dwgLeft = pnt.x - gui.divisionDwg.currentWidth/2;
+        var dwgRight = pnt.x + gui.divisionDwg.currentWidth/2;
+        if (staff.elements[0] instanceof Toe.Model.Clef && dwgLeft <= staff.elements[0].zone.lrx) {
+            snapCoords.x = staff.elements[0].zone.lrx + gui.divisionDwg.currentWidth/2 + 1;
+        }
+        else if (dwgLeft <= staff.zone.ulx) {
+            snapCoords.x = staff.zone.ulx + gui.divisionDwg.currentWidth/2 + 1;
+        }
+
+        if (staff.custos && dwgRight >= staff.custos.zone.ulx) {
+            // 3 is a magic number just to give it some padding
+            snapCoords.x = staff.custos.zone.ulx - gui.divisionDwg.currentWidth/2 - 3;
+        }
+        else if (dwgRight >= staff.zone.lrx) {
+            snapCoords.x = staff.zone.lrx - gui.divisionDwg.currentWidth/2 - 3;
+        }
+
+        // move around the drawing
+        gui.divisionDwg.left = snapCoords.x;
+        gui.divisionDwg.top = snapCoords.y;
+        gui.rendEng.repaint();
+    });
+
+    // handle the actual insertion
+    gui.rendEng.canvas.observe('mouse:up', function(e) {
+        // get coords
+        var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
+
+        // calculate snapped coords
+        var snapCoords = staff.ohSnap(coords, gui.divisionDwg.currentWidth);
+
+        var division = new Toe.Model.Division(divisionForm);
+
+        // update bounding box with physical position on the page
+        var ulx = snapCoords.x - gui.divisionDwg.currentWidth/2;
+        var uly = snapCoords.y - gui.divisionDwg.currentHeight/2;
+        var bb = [ulx, uly, ulx + gui.divisionDwg.currentWidth, uly + gui.divisionDwg.currentHeight];
+        division.setBoundingBox(bb);
+
+        // instantiate division view and controller
+        var dView = new Toe.View.DivisionView(gui.rendEng);
+        var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
+
+        // mount division on the staff
+        var nInd = staff.addDivision(division);
+
+        var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        // get next element to insert before
+        if (nInd + 1 < staff.elements.length) {
+            args["beforeid"] = staff.elements[nInd+1].id;   
+        }
+        else {
+            // insert before the next system break (staff)
+            var sNextModel = gui.page.getNextStaff(staff);
+            args["beforeid"] = sNextModel.id;
+        }
+
+        // send insert division command to server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/division", args, function(data) {
+            division.id = JSON.parse(data).id;
+        })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to insert division. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    });
+
+    $("#rad_small").bind("click.insert", function() {
+        // remove the current division following the pointer
+        if (gui.divisionDwg) {
+            gui.rendEng.canvas.remove(gui.divisionDwg);
+            gui.divisionDwg = null;
+        }
+        divisionForm = "small";
+    });
+
+    $("#rad_minor").bind("click.insert", function() {
+        if (gui.divisionDwg) {
+            gui.rendEng.canvas.remove(gui.divisionDwg);
+            gui.divisionDwg = null;
+        }
+        divisionForm = "minor";
+    });
+
+    $("#rad_major").bind("click.insert", function() {
+        if (gui.divisionDwg) {
+            gui.rendEng.canvas.remove(gui.divisionDwg);
+            gui.divisionDwg = null;
+        }
+        divisionForm = "major";
+    });
+
+    $("#rad_final").bind("click.insert", function() {
+        if (gui.divisionDwg) {
+            gui.rendEng.canvas.remove(gui.divisionDwg);
+            gui.divisionDwg = null;
+        }
+        divisionForm = "final";
+    });
+
+    // toggle small division by default
+    $("#rad_small").trigger('click');
 }
