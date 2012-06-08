@@ -722,7 +722,6 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         });
     }
     if (toDelete.dids.length > 0) {
-        console.log(toDelete.dids.join(","));
         // send delete command to server to change underlying MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/division", {ids: toDelete.dids.join(",")})
         .error(function() {

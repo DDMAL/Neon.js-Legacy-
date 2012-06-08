@@ -760,6 +760,9 @@ class DeleteDivisionHandler(tornado.web.RequestHandler):
         if len(next_layer):
             elements = next_layer[0].getChildren()
 
+            # remove the next staff/layer
+            section.removeChild(staves[s_ind+1])
+
             # add these elements to the previous staff/layer
             for e in elements:
                 layer.addChild(e)
@@ -778,9 +781,6 @@ class DeleteDivisionHandler(tornado.web.RequestHandler):
             # renumber subsequent staves
             for i, s in enumerate(staves[s_ind+2:]):
                 s.addAttribute("n", str(s_ind+i+2))
-
-            # remove the next staff/layer
-            section.removeChild(staves[s_ind+1])
 
     def delete_division(self, division):
         '''
