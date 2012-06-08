@@ -39,6 +39,10 @@ Toe.Ctrl.DivisionController = function(dModel, dView) {
     $(dModel).bind("vRenderDivision", function(event, division) {
         dView.renderDivision(division);
     });
+
+    $(dModel).bind("vSelectDrawing", function(event) {
+        dView.selectDrawing();
+    });
 }
 
 Toe.Ctrl.DivisionController.prototype.constructor = Toe.Ctrl.DivisionController;

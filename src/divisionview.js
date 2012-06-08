@@ -82,3 +82,7 @@ Toe.View.DivisionView.prototype.renderDivision = function(division) {
     
 	this.rendEng.draw(elements, {group: true, selectable: division.props.interact, staffRef: staff, eleRef: division});
 }
+
+Toe.View.DivisionView.prototype.selectDrawing = function() {
+    this.rendEng.canvas.setActiveObject(this.drawing);
+}

@@ -102,9 +102,16 @@ Toe.Model.Custos.prototype.setRootNote = function(pname, oct) {
 }
 
 /**
- * Sets the pitch difference of the custos in relation to the clef of the staff the 
+ * Sets the pitch difference of the custos in relation to the clef of the staff the
  * custos is mounted on
  */
 Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
     this.rootStaffPos = staffPos;
+}
+
+/**
+ * Select custos on the drawing surface
+ */
+Toe.Model.Custos.prototype.selectDrawing = function() {
+    $(this).trigger("vSelectDrawing");
 }

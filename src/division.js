@@ -103,3 +103,10 @@ Toe.Model.Division.Type = {
     major: "Major Division",
     final: "Final Division"
 };
+
+/**
+ * Select division on the drawing surface
+ */
+Toe.Model.Division.prototype.selectDrawing = function() {
+    $(this).trigger("vSelectDrawing");
+}

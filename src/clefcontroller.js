@@ -58,6 +58,10 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
     $(cModel).bind("vUpdateStaffPosition", function(event, clef) {
         cView.updateStaffPosition(clef);
     });
+
+    $(cModel).bind("vSelectDrawing", function(event) {
+        cView.selectDrawing();
+    });
 }
 
 Toe.Ctrl.ClefController.prototype.constructor = Toe.Ctrl.ClefController;

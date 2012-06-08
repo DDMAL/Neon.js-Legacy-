@@ -88,7 +88,7 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
     this.drawClef(clef);
 
     // select the new drawing
-    this.rendEng.canvas.setActiveObject(this.drawing);
+    this.selectDrawing();
 
     this.rendEng.repaint();
 }
@@ -110,4 +110,8 @@ Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
+}
+
+Toe.View.ClefView.prototype.selectDrawing = function() {
+    this.rendEng.canvas.setActiveObject(this.drawing);
 }

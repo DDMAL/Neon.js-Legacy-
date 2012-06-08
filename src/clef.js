@@ -157,3 +157,10 @@ Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
     this.zone.lrx = bb[2];
     this.zone.lry = bb[3];
 }
+
+/**
+ * Select clef on the drawing surface
+ */
+Toe.Model.Clef.prototype.selectDrawing = function() {
+    $(this).trigger("vSelectDrawing");
+}

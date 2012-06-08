@@ -54,3 +54,7 @@ Toe.View.CustosView.prototype.renderCustos = function(cModel, custos_y) {
 
 	this.drawing = this.rendEng.draw(elements, {selectable: cModel.props.interact, eleRef: custos})[0];
 }
+
+Toe.View.CustosView.prototype.selectDrawing = function() {
+    this.rendEng.canvas.setActiveObject(this.drawing);
+}

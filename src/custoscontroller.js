@@ -45,6 +45,10 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
 
         cView.renderCustos(custos, custos_y);
     });
+
+    $(cModel).bind("vSelectDrawing", function(event) {
+        cView.selectDrawing();
+    });
 }
 
 Toe.Ctrl.CustosController.prototype.constructor = Toe.Ctrl.CustosController;
