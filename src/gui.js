@@ -605,21 +605,28 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
     // get current canvas selection
     // check individual selection and group selections
-    toDelete = {nids: new Array(), dids: new Array()};
+    toDelete = {cids: new Array(), nids: new Array(), dids: new Array()};
 
     var selection = gui.rendEng.canvas.getActiveObject();
     if (selection) {
         var ele = selection.eleRef;
+
+        // remove element from internal representation
+        ele.staff.removeElementByRef(ele);
+
         // individual element selected
-        if (ele instanceof Toe.Model.Neume) {
+        if (ele instanceof Toe.Model.Clef) {
+            // update pitched elements on the affected staff
+            ele.staff.updatePitchedElements();
+
+            toDelete.cids.push(ele.id);
+        }
+        else if (ele instanceof Toe.Model.Neume) {
             toDelete.nids.push(ele.id);
         }
         else if (ele instanceof Toe.Model.Division) {
             toDelete.dids.push(ele.id);
         }
-
-        // remove element from internal representation
-        ele.staff.removeElementByRef(ele);
 
         gui.rendEng.canvas.remove(selection);
         gui.rendEng.canvas.discardActiveObject();
@@ -630,15 +637,20 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         if (selection) {
             // group of elements selected
             $.each(selection.getObjects(), function(oInd, o) {
-                if (o.eleRef instanceof Toe.Model.Neume) {
+                // remove element from internal representation
+                o.eleRef.staff.removeElementByRef(o.eleRef);
+
+                if (o.eleRef instanceof Toe.Model.Clef) {
+                    ele.staff.updatePitchedElements();
+
+                    toDelete.cids.push(o.eleRef.id);
+                }
+                else if (o.eleRef instanceof Toe.Model.Neume) {
                     toDelete.nids.push(o.eleRef.id);
                 }
                 else if (o.eleRef instanceof Toe.Model.Division) {
                     toDelete.dids.push(o.eleRef.id);
                 }
-
-                // remove elements from internal representation
-                o.eleRef.staff.removeElementByRef(o.eleRef);
 
                 gui.rendEng.canvas.remove(o);
             });
@@ -646,6 +658,17 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
             gui.rendEng.canvas.discardActiveGroup();
             gui.rendEng.repaint();
         }
+    }
+
+    if (toDelete.cids.length > 0) {
+        // send delete command to the server to change underlying MEI
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/clef", {ids: toDelete.nids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
     }
 
     if (toDelete.nids.length > 0) {
