@@ -431,11 +431,20 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                 }
                 else if (ele instanceof Toe.Model.Division) {
                     // this is a division
+                    var left = element.left;
+                    var top = element.top;
+                    if (elements.length > 1) {
+                        // calculate object's absolute positions from within selection group
+                        left += selection.left;
+                        top += selection.top;
+                    }
+
+                    var finalCoords = {x: left, y: top};
                     
                     // get closest staff
-                    var staff = gui.page.getClosestStaff(upCoords);
+                    var staff = gui.page.getClosestStaff(finalCoords);
 
-                    var snapCoords = staff.ohSnap(upCoords, element.currentWidth, {x: true, y: false});
+                    var snapCoords = staff.ohSnap(finalCoords, element.currentWidth, {x: true, y: false});
 
                     // get vertical snap coordinates for the appropriate staff
                     switch (ele.type) {
@@ -453,21 +462,23 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                             break;
                     }
 
-                    // move to the snapped coordinates
-                    element.left = snapCoords.x;
-                    element.top = snapCoords.y;
+                    // remove division from the previous staff representation
+                    ele.staff.removeElementByRef(ele);
+                    gui.rendEng.canvas.remove(element);
+                    gui.rendEng.repaint();
 
-                    // update bounding box data in the model
+                    // set bounding box hint 
                     var ulx = snapCoords.x - element.currentWidth/2;
                     var uly = snapCoords.y - element.currentHeight/2;
                     var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
                     ele.setBoundingBox(bb);
 
-                    // remove division from the previous staff representation
-                    ele.staff.removeElementByRef(ele);
-
                     // get id of note to move before
-                    var dInd = staff.insertElement(ele);
+                    var dInd = staff.addDivision(ele);
+                    if (elements.length == 1) {
+                        ele.selectDrawing();
+                    }
+
                     var beforeid = null;
                     if (dInd + 1 < staff.elements.length) {
                         beforeid = staff.elements[dInd+1].id;
