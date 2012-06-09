@@ -391,8 +391,9 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
      
                     // mount the new neume on the most appropriate staff
                     var nInd = sModel.addNeume(ele);
-                    $(ele).trigger("vSelectDrawing");
-                    gui.rendEng.repaint();
+                    if (elements.length == 1) {
+                        $(ele).trigger("vSelectDrawing");
+                    }
 
                     var args = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry};
                     if (oldRootStaffPos != newRootStaffPos) {
@@ -487,13 +488,15 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         $("#alert > p").text("Server failed to move division. Client and server are not synchronized.");
                         $("#alert").animate({opacity: 1.0}, 100);
                     });
-
-                    gui.rendEng.repaint();
                 }
             });
+            if (elements.length > 1) {
+                gui.rendEng.canvas.discardActiveGroup();
+            }
+            gui.rendEng.repaint();
         }
         // we're all done moving
-        gui.objMoving = false;    
+        gui.objMoving = false;
     });
 
     // Bind click handlers for the side-bar buttons
