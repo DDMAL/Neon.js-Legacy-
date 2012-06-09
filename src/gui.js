@@ -1411,11 +1411,9 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
             }
         });
 
-        console.log(args);
         // send insert clef command to the server to change underlying MEI
-        /*
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/clef", args, function(data) {
-            clef.id = JSON.parse(data).nid;
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/clef", {data: JSON.stringify(args)}, function(data) {
+            clef.id = JSON.parse(data).id;
         })
         .error(function() {
             // show alert to user
@@ -1423,7 +1421,6 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
             $("#alert > p").text("Server failed to insert clef. Client and server are not synchronized.");
             $("#alert").animate({opacity: 1.0}, 100);
         });
-        */
     });
 
     // release old bindings

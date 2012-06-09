@@ -1050,3 +1050,81 @@ class UpdateClefShapeHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         self.set_status(200)
+
+class InsertClefHandler(tornado.web.RequestHandler):
+
+    def create_clef(self, shape, line):
+        clef = MeiElement("clef")
+        clef.addAttribute("shape", shape)
+        clef.addAttribute("line", line)
+
+        return clef
+
+    def insert_clef(self, clef, before_id):
+        before = self.mei.getElementById(before_id)
+
+        # get layer element
+        parent = before.getParent()
+
+        if parent and before:
+            parent.addChildBefore(before, clef)
+
+    def create_zone(self, ulx, uly, lrx, lry, clef):
+        zone = MeiElement("zone")
+        
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+        clef.addAttribute("facs", zone.getId())
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces):
+            surfaces[0].addChild(zone)
+
+    def update_pitched_elements(self, pitch_info):
+        for ele in pitch_info:
+            pitched_ele = self.mei.getElementById(str(ele["id"]))
+            if pitched_ele.getName() == "custos":
+                pitched_ele.addAttribute("pname", str(ele["noteInfo"]["pname"]))
+                pitched_ele.addAttribute("oct", str(ele["noteInfo"]["oct"]))
+            elif pitched_ele.getName() == "neume":
+                notes = pitched_ele.getDescendantsByName("note")
+                for n_info, n in zip(ele["noteInfo"], notes):
+                    n.addAttribute("pname", str(n_info["pname"]))
+                    n.addAttribute("oct", str(n_info["oct"]))
+
+    def post(self, file):
+        '''
+        Insert a doh or fah clef, with a given bounding box.
+        Must also update pitched elements on the staff that
+        affected by this clef being inserted.
+        '''
+
+        data = json.loads(self.get_argument("data", ""))
+        shape = str(data["shape"]).upper()
+        line = str(data["line"])
+        before_id = str(data["beforeid"])
+
+        # bounding box
+        ulx = str(data["ulx"])
+        uly = str(data["uly"])
+        lrx = str(data["lrx"])
+        lry = str(data["lry"])
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        clef = self.create_clef(shape, line)
+        self.insert_clef(clef, before_id)
+        self.create_zone(ulx, uly, lrx, lry, clef)
+        self.update_pitched_elements(data["pitchInfo"])
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"id": clef.getId()}
+        self.write(json.dumps(result))
+
+        self.set_status(200)
+
