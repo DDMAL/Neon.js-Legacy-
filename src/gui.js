@@ -1334,6 +1334,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
     // current clef shape being inserted.
     var cShape = null;
 
+    // move the drawing with the pointer
     gui.rendEng.canvas.observe("mouse:move", function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
 
@@ -1354,6 +1355,75 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
         gui.clefDwg.top = pnt.y + yOffset;
 
         gui.rendEng.repaint();
+    });
+
+    // handle the actual insertion
+    gui.rendEng.canvas.observe("mouse:up", function(e) {
+        // get coords
+        var coords = {x: gui.clefDwg.left, y: gui.clefDwg.top};
+
+        // get closest staff to insert onto
+        var staff = gui.page.getClosestStaff(coords);
+
+        // calculate snapped coordinates on the staff
+        var snapCoords = staff.ohSnap(coords, gui.clefDwg.currentWidth);
+
+        var staffPos = Math.round((staff.zone.uly - snapCoords.y) / (staff.delta_y/2));
+
+        var clef = new Toe.Model.Clef(cShape, {"staffPos": staffPos});
+
+        // update bounding box with physical position on page
+        var ulx = snapCoords.x - gui.clefDwg.currentWidth/2;
+        var uly = snapCoords.y - gui.clefDwg.currentHeight/2;
+        var bb = [ulx, uly, ulx + gui.clefDwg.currentWidth, uly + gui.clefDwg.currentHeight];
+        clef.setBoundingBox(bb);
+
+        // instantiate clef view and controller
+        var cView = new Toe.View.ClefView(gui.rendEng);
+        var cCtrl = new Toe.Ctrl.ClefController(clef, cView);
+
+        // mount clef on the staff
+        var nInd = staff.addClef(clef);
+
+        var staffLine = staff.props.numLines + staffPos/2;
+        var args = {shape: cShape, line: staffLine, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        // get next element to insert before
+        if (nInd + 1 < staff.elements.length) {
+            args["beforeid"] = staff.elements[nInd+1].id;
+        }
+        else {
+            // insert before the next system break
+            var sNextModel = gui.page.getNextStaff(staff);
+            args["beforeid"] = sNextModel.id;
+        }
+
+        // gather new pitch information of affected pitched elements
+        args["pitchInfo"] = $.map(staff.getPitchedElements({clef: clef}), function(e) {
+            if (e instanceof Toe.Model.Neume) {
+                var pitchInfo = new Array();
+                $.each(e.components, function(nInd, n) {
+                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                });
+                return {id: e.id, noteInfo: pitchInfo};
+            }
+            else if (e instanceof Toe.Model.Custos) {
+                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+            }
+        });
+
+        console.log(args);
+        // send insert clef command to the server to change underlying MEI
+        /*
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/clef", args, function(data) {
+            clef.id = JSON.parse(data).nid;
+        })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to insert clef. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+        */
     });
 
     // release old bindings

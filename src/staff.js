@@ -363,13 +363,13 @@ Toe.Model.Staff.prototype.addClef = function(clef, options) {
 
     clef.setStaff(this);
     
-    // TODO update affected pitched elements on this staff
+    // update affected pitched elements on this staff
+    this.updatePitchedElements({clef: clef});
     
     // update view
     $(clef).trigger("vRenderClef", [clef]);
 
-    // for chaining
-    return this;
+    return nInd;
 }
 
 Toe.Model.Staff.prototype.setCustos = function(custos) {
@@ -398,8 +398,10 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
         $(custos).trigger("vRenderCustos", [custos]);
 
     }
-    // for chaining
-    return this;
+
+    // return index in element list
+    // custos will always be last in this list
+    return this.elements.length-1;
 }
 
 /**
