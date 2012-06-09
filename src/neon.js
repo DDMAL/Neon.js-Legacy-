@@ -94,6 +94,15 @@ THE SOFTWARE.
         };
 
         var loadMeiPage = function(displayZones, page) {
+            var clefList = $("clef, sb", mei);
+            // calculate sb indices in the clef list
+            var clef_sbInd = new Array();
+            $(clefList).each(function(cit, cel) {
+                if ($(cel).is("sb")) {
+                    clef_sbInd.push(cit);
+                }
+            });
+
             var neumeList = $("neume, sb", mei);
             // calculate sb indices in the neume list
             // precomputing will render better performance than a filter operation in the loops
@@ -114,7 +123,7 @@ THE SOFTWARE.
             });
 
             var custosList = $("custos, sb", mei);
-            // calculate sb indices in the division list
+            // calculate sb indices in the custos list
             var custos_sbInd = new Array();
             $(custosList).each(function(cit, cel) {
                 if ($(cel).is("sb")) {
@@ -145,41 +154,39 @@ THE SOFTWARE.
                     rendEng.calcScaleFromStaff(sModel, {overwrite: true});
                 }
 
-                // CLEF
-                var clef = $("~ clef", this);
-                if (!clef) {
-                    // there is no clef present ... abort! abort!
-                    return false;
-                }
-
-                var clefShape = $(clef).attr("shape");
-                var clefStaffLine = parseInt($(clef).attr("line"));
-
-                // convert mei line attribute to staffPos attribute used in the internal clef Model
-                var staffPos = -(sModel.props.numLines - clefStaffLine) * 2;
-
-                var clefFacsId = $(clef).attr("facs");
-                var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
-                var c_bb = parseBoundingBox(clefFacs);
-                if (displayZones) {
-                    rendEng.outlineBoundingBox(c_bb, {fill: "red"});
-                }
-
-                var cModel = new Toe.Model.Clef(clefShape, {"staffPos": staffPos});
-                cModel.setID($(clef).attr("xml:id"));
-                cModel.setBoundingBox(c_bb);
-
-                // instantiate clef view and controller
-                var cView = new Toe.View.ClefView(rendEng);
-                var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
-
-                // mount clef on the staff
-                sModel.addClef(cModel);
-
                 // instantiate staff view and controller
                 var sView = new Toe.View.StaffView(rendEng);
                 var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
                 page.addStaff(sModel);
+
+                // load all clefs in the system
+                $(clefList).slice(clef_sbInd[sit]+1, clef_sbInd[sit+1]).each(function(cit, cel) {
+                    var clefShape = $(cel).attr("shape");
+                    var clefStaffLine = parseInt($(cel).attr("line"));
+
+                    // convert mei line attribute to staffPos attribute used in the internal clef Model
+                    var staffPos = -(sModel.props.numLines - clefStaffLine) * 2;
+
+                    var clefFacsId = $(cel).attr("facs");
+                    var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
+                    var c_bb = parseBoundingBox(clefFacs);
+                    if (displayZones) {
+                        rendEng.outlineBoundingBox(c_bb, {fill: "red"});
+                    }
+
+                    var cModel = new Toe.Model.Clef(clefShape, {"staffPos": staffPos});
+                    cModel.setID($(cel).attr("xml:id"));
+                    cModel.setBoundingBox(c_bb);
+
+                    // instantiate clef view and controller
+                    var cView = new Toe.View.ClefView(rendEng);
+                    var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
+
+                    // mount clef on the staff
+                    sModel.addClef(cModel);
+
+                    console.log("clef: " + cModel.name);
+                });
 
                 // load all neumes in the system
                 $(neumeList).slice(neume_sbInd[sit]+1, neume_sbInd[sit+1]).each(function(nit, nel) {
