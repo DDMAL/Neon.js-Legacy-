@@ -1362,6 +1362,11 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
         // get coords
         var coords = {x: gui.clefDwg.left, y: gui.clefDwg.top};
 
+        if (cShape == "f") {
+            coords.x -= gui.clefDwg.currentWidth/8;
+            coords.y -= gui.clefDwg.currentHeight/8;
+        }
+
         // get closest staff to insert onto
         var staff = gui.page.getClosestStaff(coords);
 
