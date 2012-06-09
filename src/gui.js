@@ -1330,4 +1330,76 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
                                     '<button id="rad_fah" class="btn">Fah</button>\n' +
                                     '</div>\n</li>\n</span>');
     }
+
+    // current clef shape being inserted.
+    var cShape = null;
+
+    gui.rendEng.canvas.observe("mouse:move", function(e) {
+        var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
+
+        var xOffset = 0;
+        var yOffset = 0;
+        // calculate pointer offset
+        // are mostly magic numbers to make the interface look pretty
+        // but these are relative scalings to the glyph size so it will
+        // work for all global scalings.
+        if (cShape == "c") {
+            xOffset = gui.clefDwg.currentWidth/4;
+        }
+        else {
+            xOffset = gui.clefDwg.currentWidth/8;
+            yOffset = gui.clefDwg.currentHeight/8;
+        }
+        gui.clefDwg.left = pnt.x - xOffset;
+        gui.clefDwg.top = pnt.y + yOffset;
+
+        gui.rendEng.repaint();
+    });
+
+    // release old bindings
+    $("#rad_doh").unbind("click");
+    $("#rad_fah").unbind("click");
+
+    $("#rad_doh").bind("click.insert", function() {
+        // only need to update following drawing if the clef
+        // shape is different
+        if (!$(this).hasClass("active")) {
+            // initially set clefshape of the screen
+            var cPos = {left: -50, top: -50};
+            if (gui.clefDwg) {
+                gui.rendEng.canvas.remove(gui.clefDwg);
+                // draw the new clef at the old clef's location
+                cPos = {left: gui.clefDwg.left, top: gui.clefDwg.top};
+            }
+
+            var cGlyph = gui.rendEng.getGlyph("c_clef");
+            var clef = cGlyph.clone().set($.extend(cPos, {opacity: 0.6}));
+            gui.clefDwg = gui.rendEng.draw({static: [], modify: [clef]}, {opacity: 0.6, selectable: false, repaint: true})[0];
+
+            cShape = "c";
+        }
+    });
+
+    $("#rad_fah").bind("click.insert", function() {
+        // only need to update following drawing if the clef
+        // shape is different
+        if (!$(this).hasClass("active")) {
+            // initially set clefshape of the screen
+            var cPos = {left: -50, top: -50};
+            if (gui.clefDwg) {
+                gui.rendEng.canvas.remove(gui.clefDwg);
+                // draw the new clef at the old clef's location
+                cPos = {left: gui.clefDwg.left, top: gui.clefDwg.top};
+            }
+
+            var cGlyph = gui.rendEng.getGlyph("f_clef");
+            var clef = cGlyph.clone().set($.extend(cPos, {opacity: 0.6}));
+            gui.clefDwg = gui.rendEng.draw({static: [], modify: [clef]}, {opacity: 0.6, selectable: false, repaint: true})[0];
+
+            cShape = "f";
+        }
+    });
+
+    // toggle doh clef by default
+    $("#rad_doh").trigger("click");
 }
