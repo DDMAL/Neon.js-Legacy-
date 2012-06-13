@@ -27,7 +27,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
 
         if dot_form is not None:
             dot = MeiElement("dot")
-            dot.addAttribute("form", dot_form)
+            dot.addAttribute("form", str(dot_form))
             note.addChild(dot)
 
         punctum.addChild(nc)
@@ -74,7 +74,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         beforeid = str(self.get_argument("beforeid", None))
         pname = str(self.get_argument("pname", ""))
         oct = str(self.get_argument("oct", ""))
-        dot_form = str(self.get_argument("dotform", None))
+        dot_form = self.get_argument("dotform", None)
 
         # Bounding box
         lrx = str(self.get_argument("lrx", None))
