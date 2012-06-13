@@ -262,6 +262,13 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
             $("#menu_editpunctum").remove();
             $("#menu_editclef").remove();
         }
+        else if (ele instanceof Toe.Model.Custos) {
+            $("#info > p").html("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
+            $("#info").animate({opacity: 1.0}, 100);
+
+            $("#menu_editpunctum").remove();
+            $("#menu_editclef").remove();
+        }
         else {
             $("#menu_editpunctum").remove();
             $("#menu_editclef").remove();
@@ -334,7 +341,16 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                             return {id: e.id, noteInfo: pitchInfo};
                         }
                         else if (e instanceof Toe.Model.Custos) {
-                            return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                            // the custos has been vertically moved
+                            // update the custos bounding box information in the model
+                            // do not need to update pitch name & octave since this does not change
+                            $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                            .error(function() {
+                                // show alert to user
+                                // replace text with error message
+                                $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                                $("#alert").animate({opacity: 1.0}, 100);
+                            });
                         }
                     });
 
@@ -581,7 +597,16 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
                 return {id: e.id, noteInfo: pitchInfo};
             }
             else if (e instanceof Toe.Model.Custos) {
-                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                // the custos has been vertically moved
+                // update the custos bounding box information in the model
+                // do not need to update pitch name & octave since this does not change
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
             }
         });
 
@@ -634,7 +659,16 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 return {id: e.id, noteInfo: pitchInfo};
             }
             else if (e instanceof Toe.Model.Custos) {
-                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                // the custos has been vertically moved
+                // update the custos bounding box information in the model
+                // do not need to update pitch name & octave since this does not change
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
             }
         });
 
@@ -1455,7 +1489,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
         var nInd = staff.addClef(clef);
 
         var staffLine = staff.props.numLines + staffPos/2;
-        var args = {shape: cShape, line: staffLine, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        var args = {shape: cShape, line: staffLine, ulx: clef.zone.ulx, uly: clef.zone.uly, lrx: clef.zone.lrx, lry: clef.zone.lry};
         // get next element to insert before
         if (nInd + 1 < staff.elements.length) {
             args["beforeid"] = staff.elements[nInd+1].id;
@@ -1476,7 +1510,16 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
                 return {id: e.id, noteInfo: pitchInfo};
             }
             else if (e instanceof Toe.Model.Custos) {
-                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+                // the custos has been vertically moved
+                // update the custos bounding box information in the model
+                // do not need to update pitch name & octave since this does not change
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
             }
         });
 

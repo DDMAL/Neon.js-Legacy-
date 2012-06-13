@@ -106,7 +106,8 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
     }
 
     // update affected pitched elements on the staff
-    this.staff.updatePitchedElements({clef: this});
+    // do not update custos
+    this.staff.updatePitchedElements({clef: this, custos: false});
 
     $(this).trigger("vUpdateShape", [this]);
 }
@@ -134,7 +135,8 @@ Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
     this.props.staffPos = staffPos;
 
     // update affected pitched elements on the staff
-    this.staff.updatePitchedElements({clef: this});
+    // do not update custos
+    this.staff.updatePitchedElements({clef: this, custos: false});
 
     $(this).trigger("vUpdateStaffPosition", [this]);
 }

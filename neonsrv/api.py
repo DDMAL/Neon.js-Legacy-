@@ -1173,3 +1173,56 @@ class DeleteClefHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         self.set_status(200)
+
+#####################################################
+#              CUSTOS HANDLER CLASSES               #
+#####################################################
+class MoveCustosHandler(tornado.web.RequestHandler):
+
+    def update_or_add_zone(self, custos, ulx, uly, lrx, lry):
+        facsid = custos.getAttribute("facs").value
+        if facsid:
+            zone = self.mei.getElementById(facsid)
+        else:
+            zone = MeiElement("zone")
+            custos.addAttribute("facs", zone.getId())
+            surfaces = self.mei.getElementsByName("surface")
+            if len(surfaces):
+                surfaces[0].addChild(zone)
+
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+    def post(self, file):
+        '''
+        Move the given custos element.
+        Also update the bounding box information.
+        '''
+
+        custos_id = str(self.get_argument("id", ""))
+        pname = self.get_argument("pname", None)
+        oct = self.get_argument("oct", None)
+
+        # bounding box
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        custos = self.mei.getElementById(custos_id)
+        print pname, oct
+        if pname is not None and oct is not None:
+            custos.addAttribute("pname", str(pname))
+            custos.addAttribute("oct", str(oct))
+
+        self.update_or_add_zone(custos, ulx, uly, lrx, lry)
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)

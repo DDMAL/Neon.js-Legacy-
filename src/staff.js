@@ -160,7 +160,9 @@ Toe.Model.Staff.prototype.calcNoteInfo = function(coords) {
 // otherwise update everything
 Toe.Model.Staff.prototype.updatePitchedElements = function(options) {
     var opts = {
-        clef: null
+        clef: null,
+        neumes: true,
+        custos: false
     };
 
     $.extend(opts, options);
@@ -169,7 +171,18 @@ Toe.Model.Staff.prototype.updatePitchedElements = function(options) {
 
     // update pitched elements from the given clef to the next clef
     if (opts.clef) {
-        $.each(this.getPitchedElements({clef: opts.clef}), function(eInd, e) {
+        var pitchedEles = this.getPitchedElements(opts);
+        
+        // if the custos is under the given acting clef and opts.custos is false
+        // (meaning we are not to overwrite its pitch content), then we need to shift
+        // the custos drawing accordingly
+        if (this.custos && pitchedEles[pitchedEles.length-1] == this.custos && !opts.custos) {
+            var newStaffPos = this.calcStaffPos(this.custos.pname, this.custos.oct, opts.clef);
+            this.custos.setRootStaffPos(newStaffPos);
+            pitchedEles.pop();
+        }
+
+        $.each(pitchedEles, function(eInd, e) {
             staff.updateElePitchInfo(e, {clef: opts.clef});
         });
     }
@@ -179,8 +192,12 @@ Toe.Model.Staff.prototype.updatePitchedElements = function(options) {
             if (e instanceof Toe.Model.Clef) {
                 curClef = e;
             }
-            else if (curClef && (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos)) {
+            else if (curClef && ((e instanceof Toe.Model.Neume && opts.neumes) || (e == this.custos && opts.custos))) {
                 staff.updateElePitchInfo(e, {clef: curClef});
+            }
+            else if (this.custos && e == this.custos && !opts.custos) {
+                var newStaffPos = this.calcStaffPos(this.custos.pname, this.custos.oct, curClef);
+                this.custos.setRootStaffPos(newStaffPos);
             }
         });
     }
@@ -379,7 +396,7 @@ Toe.Model.Staff.prototype.addClef = function(clef, options) {
     clef.setStaff(this);
     
     // update affected pitched elements on this staff
-    this.updatePitchedElements({clef: clef});
+    this.updatePitchedElements({clef: clef, custos: false});
     
     // update view
     $(clef).trigger("vRenderClef", [clef]);
@@ -395,7 +412,7 @@ Toe.Model.Staff.prototype.setCustos = function(custos) {
     var clef = this.getActingClefByCoords({x: custos.zone.ulx});
     if (clef) {
         // calculate pitch difference in relation to the clef
-        custos.setRootStaffPos(this.calcStaffPos(custos.pname, custos.oct, clef));
+        custos.rootStaffPos = this.calcStaffPos(custos.pname, custos.oct, clef);
 
         // custos should always be at the end
         // if a custos exists already, replace it

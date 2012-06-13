@@ -29,6 +29,17 @@ THE SOFTWARE.
  */
 Toe.Ctrl.CustosController = function(cModel, cView) {
     // LISTEN TO THE VIEW
+    $(cModel).bind("mUpdateBoundingBox", function(event, drawing) {
+        // get final bounding box from drawing
+        var ulx = drawing.left - drawing.currentWidth/2;
+        var uly = drawing.top - drawing.currentHeight/2;
+        var lrx = ulx + drawing.currentWidth;
+        var lry = uly + drawing.currentHeight;
+
+        // reset the bounding box in the model with the final bounding box
+        // of the drawing
+        cModel.setBoundingBox([ulx, uly, lrx, lry]);
+    });
 
     // LISTEN TO THE MODEL
     /** 
@@ -37,13 +48,11 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
      * @param {Toe.Model.Custos} custos Custos to render
      */
     $(cModel).bind("vRenderCustos", function(event, custos) {
-        // get the staff this custos is mounted on
-        var staff = custos.staff;
+        cView.renderCustos(custos);
+    });
 
-        // calculate the y position of the custos
-        var custos_y = staff.zone.uly - custos.rootStaffPos*staff.delta_y/2;
-
-        cView.renderCustos(custos, custos_y);
+    $(cModel).bind("vUpdateStaffPosition", function(event, custos) {
+        cView.updateStaffPosition(custos);
     });
 
     $(cModel).bind("vSelectDrawing", function(event) {

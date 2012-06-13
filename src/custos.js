@@ -30,7 +30,7 @@ THE SOFTWARE.
  */
 Toe.Model.Custos = function(pname, oct, options) {
     this.props = {
-        interact: false
+        interact: true
     };
 
     $.extend(this.props, options);
@@ -64,6 +64,8 @@ Toe.Model.Custos.prototype.setBoundingBox = function(bb) {
     if(!Toe.validBoundingBox(bb)) {
         throw new Error("Division: invalid bounding box");
     }
+
+    bb = $.map(bb, Math.round);
 
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
@@ -106,7 +108,16 @@ Toe.Model.Custos.prototype.setRootNote = function(pname, oct) {
  * custos is mounted on
  */
 Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
+    // only redraw the glyph if it needs to be redrawn
+    if (this.rootStaffPos == staffPos) {
+        return;
+    }
+
+    // reset staff position of custos
     this.rootStaffPos = staffPos;
+
+    $(this).trigger("vUpdateStaffPosition", [this]);
+
 }
 
 /**
