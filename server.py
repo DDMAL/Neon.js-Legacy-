@@ -44,7 +44,9 @@ rules = [
     (abs_path(r"/edit/(.*?)/move/clef"), neonsrv.api.MoveClefHandler),
     (abs_path(r"/edit/(.*?)/update/clef/shape"), neonsrv.api.UpdateClefShapeHandler),
     (abs_path(r"/edit/(.*?)/delete/clef"), neonsrv.api.DeleteClefHandler),
-    (abs_path(r"/edit/(.*?)/move/custos"), neonsrv.api.MoveCustosHandler)
+    (abs_path(r"/edit/(.*?)/insert/custos"), neonsrv.api.InsertCustosHandler),
+    (abs_path(r"/edit/(.*?)/move/custos"), neonsrv.api.MoveCustosHandler),
+    (abs_path(r"/edit/(.*?)/delete/custos"), neonsrv.api.DeleteCustosHandler)
 ]
 
 # Set up tests if we're in debug mode

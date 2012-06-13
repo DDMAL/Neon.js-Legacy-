@@ -251,7 +251,7 @@ THE SOFTWARE.
                     var cView = new Toe.View.CustosView(rendEng);
                     var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
         
-                    // mount the division on the staff
+                    // mount the custos on the staff
                     sModel.setCustos(cModel);
     
                     console.log("custos");

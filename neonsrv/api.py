@@ -1177,6 +1177,68 @@ class DeleteClefHandler(tornado.web.RequestHandler):
 #####################################################
 #              CUSTOS HANDLER CLASSES               #
 #####################################################
+class InsertCustosHandler(tornado.web.RequestHandler):
+
+    def create_custos(self, pname, oct):
+        custos = MeiElement("custos")
+        custos.addAttribute("pname", pname)
+        custos.addAttribute("oct", oct)
+
+        return custos
+
+    def insert_custos(self, custos, before_id):
+        before = self.mei.getElementById(before_id)
+
+        # get layer element
+        parent = before.getParent()
+
+        if parent and before:
+            parent.addChildBefore(before, custos)
+
+    def add_zone(self, custos, ulx, uly, lrx, lry):
+        zone = MeiElement("zone")
+        
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+        custos.addAttribute("facs", zone.getId())
+        surfaces = self.mei.getElementsByName("surface")
+        if len(surfaces):
+            surfaces[0].addChild(zone)
+
+    def post(self, file):
+        '''
+        Insert a custos. Also add a bounding box
+        for this element.
+        '''
+
+        pname = str(self.get_argument("pname", ""))
+        oct = str(self.get_argument("oct", ""))
+        before_id = str(self.get_argument("beforeid", None))
+
+        # bounding box
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        custos = self.create_custos(pname, oct)
+        self.insert_custos(custos, before_id)
+        self.add_zone(custos, ulx, uly, lrx, lry)
+
+        XmlExport.write(self.mei, fname)
+
+        result = {"id": custos.getId()}
+        self.write(json.dumps(result))
+
+        self.set_status(200)
+
 class MoveCustosHandler(tornado.web.RequestHandler):
 
     def update_or_add_zone(self, custos, ulx, uly, lrx, lry):
@@ -1216,7 +1278,6 @@ class MoveCustosHandler(tornado.web.RequestHandler):
         self.mei = XmlImport.read(fname)
 
         custos = self.mei.getElementById(custos_id)
-        print pname, oct
         if pname is not None and oct is not None:
             custos.addAttribute("pname", str(pname))
             custos.addAttribute("oct", str(oct))
@@ -1226,3 +1287,12 @@ class MoveCustosHandler(tornado.web.RequestHandler):
         XmlExport.write(self.mei, fname)
 
         self.set_status(200)
+
+class DeleteCustosHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        '''
+        Delete a given custos from the document.
+        Also remove the element's bounding box information.
+        '''
+        pass

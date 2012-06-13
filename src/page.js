@@ -103,14 +103,24 @@ Toe.Model.Page.prototype.getClosestStaff = function(coords) {
  * @returns {Staff} nextStaff the next staff
  */
 Toe.Model.Page.prototype.getNextStaff = function(staff) {
-    // for each staff, except the last
-    for (var i = 0; i < this.staves.length-1; i++) {
-        if (staff == this.staves[i]) {
-            return this.staves[i+1];
-        }
+    var sInd = $.inArray(staff, this.staves);
+    if (sInd != -1 && sInd+1 < this.staves.length) {
+        return this.staves[sInd+1];
     }
+    else {
+        return null;
+    }
+}
 
-    return null;
+Toe.Model.Page.prototype.getPreviousStaff = function(staff) {
+    // for each staff, except the first
+    var sInd = $.inArray(staff, this.staves);
+    if (sInd-1 >= 0) {
+        return this.staves[sInd-1];
+    }
+    else {
+        return null;
+    }
 }
 
 /**

@@ -311,7 +311,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
             $.each(elements, function(ind, element) {
                 var ele = element.eleRef;
 
-                if (ele instanceof Toe.Model.Clef) {
+                if (ele instanceof Toe.Model.Clef ) {
                     // this is a clef
                     var left = element.left;
                     var top = element.top;
@@ -441,9 +441,6 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         $("#alert > p").text("Server failed to move neume. Client and server are not synchronized.");
                         $("#alert").animate({opacity: 1.0}, 100);
                     });
-                }
-                else if (ele instanceof Toe.Model.Custos) {
-
                 }
                 else if (ele instanceof Toe.Model.Division) {
                     // this is a division
@@ -1141,6 +1138,52 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         
         // mount neume on the staff
         var nInd = sModel.addNeume(nModel);
+
+        // if this is the first neume on a staff, update the custos of the next staff
+        if (nInd == 1) {
+            var prevStaff = gui.page.getPreviousStaff(sModel);
+            if (prevStaff) {
+                var custos = prevStaff.custos;
+                if (custos) {
+                    // update the custos
+                    custos.setRootNote(pname, oct);
+                    
+                    // get acting clef for the custos 
+                    var actingClef = prevStaff.getActingClefByEle(custos);
+                    custos.setRootStaffPos(prevStaff.calcStaffPos(pname, oct, actingClef));
+                }
+                else {
+                    // insert a custos
+                    var cModel = new Toe.Model.Custos(pname, oct);
+
+                    // create bounding box hint
+                    var ulx = prevStaff.zone.lrx - gui.punctWidth/2;
+                    var uly = prevStaff.zone.uly; // probably not correct, but sufficient for the hint
+                    var bb = [ulx, uly, ulx + gui.punctWidth, uly + gui.punctHeight];
+                    cModel.setBoundingBox(bb);
+
+                    // instantiate custos view and controller
+                    var cView = new Toe.View.CustosView(gui.rendEng);
+                    var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+        
+                    // mount the custos on the staff
+                    prevStaff.setCustos(cModel);
+
+                    // update underlying MEI file
+                    $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/custos", 
+                           {id: cModel.id, beforeid: sModel.id, pname: pname, oct: oct, ulx: cModel.zone.ulx, uly: cModel.zone.uly, lrx: cModel.zone.lrx, lry: cModel.zone.lry}, 
+                           function(data) {
+                               cModel.id = JSON.parse(data).id;
+                           }
+                    ).error(function() {
+                        // show alert to user
+                        // replace text with error message
+                        $("#alert > p").text("Server failed to insert custos. Client and server are not synchronized.");
+                        $("#alert").animate({opacity: 1.0}, 100);
+                    });
+                }
+            }
+        }
 
         // now that final bounding box is calculated from the drawing
         // add the bounding box information to the server function arguments
