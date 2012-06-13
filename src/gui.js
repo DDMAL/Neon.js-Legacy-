@@ -311,7 +311,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
             $.each(elements, function(ind, element) {
                 var ele = element.eleRef;
 
-                if (ele instanceof Toe.Model.Clef ) {
+                if (ele instanceof Toe.Model.Clef) {
                     // this is a clef
                     var left = element.left;
                     var top = element.top;
@@ -418,6 +418,16 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         $.each(ele.components, function(ncInd, nc) {
                             args.pitchInfo.push({"pname": nc.pname, "oct": nc.oct});
                         });
+
+                        // if this element is the first neume on the staff
+                        if (ele == sModel.elements[1]) {
+                            var prevStaff = gui.page.getPreviousStaff(sModel);
+                            if (prevStaff) {
+                                var cPname = ele.components[0].pname;
+                                var cOct = ele.components[0].oct;
+                                gui.handleUpdateCustos(cPname, cOct, prevStaff);
+                            }
+                        }
                     }
                     else {
                         args.pitchInfo = null
@@ -1143,45 +1153,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         if (nInd == 1) {
             var prevStaff = gui.page.getPreviousStaff(sModel);
             if (prevStaff) {
-                var custos = prevStaff.custos;
-                if (custos) {
-                    // update the custos
-                    custos.setRootNote(pname, oct);
-                    
-                    // get acting clef for the custos 
-                    var actingClef = prevStaff.getActingClefByEle(custos);
-                    custos.setRootStaffPos(prevStaff.calcStaffPos(pname, oct, actingClef));
-                }
-                else {
-                    // insert a custos
-                    var cModel = new Toe.Model.Custos(pname, oct);
-
-                    // create bounding box hint
-                    var ulx = prevStaff.zone.lrx - gui.punctWidth/2;
-                    var uly = prevStaff.zone.uly; // probably not correct, but sufficient for the hint
-                    var bb = [ulx, uly, ulx + gui.punctWidth, uly + gui.punctHeight];
-                    cModel.setBoundingBox(bb);
-
-                    // instantiate custos view and controller
-                    var cView = new Toe.View.CustosView(gui.rendEng);
-                    var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
-        
-                    // mount the custos on the staff
-                    prevStaff.setCustos(cModel);
-
-                    // update underlying MEI file
-                    $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/custos", 
-                           {id: cModel.id, beforeid: sModel.id, pname: pname, oct: oct, ulx: cModel.zone.ulx, uly: cModel.zone.uly, lrx: cModel.zone.lrx, lry: cModel.zone.lry}, 
-                           function(data) {
-                               cModel.id = JSON.parse(data).id;
-                           }
-                    ).error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to insert custos. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
-                    });
-                }
+                gui.handleUpdateCustos(pname, oct, prevStaff);
             }
         }
 
@@ -1624,4 +1596,54 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
 
     // toggle doh clef by default
     $("#rad_doh").trigger("click");
+}
+
+Toe.View.GUI.prototype.handleUpdateCustos = function(pname, oct, prevStaff) {
+    var custos = prevStaff.custos;
+    if (custos) {
+        // update the custos
+        custos.setRootNote(pname, oct);
+        
+        // get acting clef for the custos 
+        var actingClef = prevStaff.getActingClefByEle(custos);
+        custos.setRootStaffPos(prevStaff.calcStaffPos(pname, oct, actingClef));
+
+        $.post(this.prefix + "/edit/" + this.fileName + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+    else {
+        // insert a custos
+        var cModel = new Toe.Model.Custos(pname, oct);
+
+        // create bounding box hint
+        var ulx = prevStaff.zone.lrx - gui.punctWidth/2;
+        var uly = prevStaff.zone.uly; // probably not correct, but sufficient for the hint
+        var bb = [ulx, uly, ulx + gui.punctWidth, uly + gui.punctHeight];
+        cModel.setBoundingBox(bb);
+
+        // instantiate custos view and controller
+        var cView = new Toe.View.CustosView(gui.rendEng);
+        var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+
+        // mount the custos on the staff
+        prevStaff.setCustos(cModel);
+
+        // update underlying MEI file
+        $.post(this.prefix + "/edit/" + this.fileName + "/insert/custos", 
+               {id: cModel.id, beforeid: sModel.id, pname: pname, oct: oct, ulx: cModel.zone.ulx, uly: cModel.zone.uly, lrx: cModel.zone.lrx, lry: cModel.zone.lry}, 
+               function(data) {
+                   cModel.id = JSON.parse(data).id;
+               }
+        ).error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to insert custos. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
 }
