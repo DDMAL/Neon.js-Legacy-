@@ -605,31 +605,78 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
     // get current canvas selection
     // check individual selection and group selections
-    toDelete = {cids: new Array(), nids: new Array(), dids: new Array()};
+    toDelete = {clefs: new Array(), nids: new Array(), dids: new Array()};
+
+    var deleteClef = function(drawing) {
+        var clef = drawing.eleRef;
+        var staff = clef.staff;
+
+        // get previous acting clef
+        //  (NOTE: this should always be defined
+        // since the first clef on a system is not allowed to be deleted)
+        var pClef = staff.getPreviousClef(clef);
+
+        // get references to pitched elements that will be changed after
+        // the clef is deleted.
+        var pitchedEles = staff.getPitchedElements(clef);
+
+        // now delete the clef, and update the pitch information of these elements
+        staff.removeElementByRef(clef);
+        staff.updatePitchedElements(pClef);
+
+        // gather the pitch information of the pitched notes
+        var pitchInfo = $.map(pitchedEles, function(e) {
+            if (e instanceof Toe.Model.Neume) {
+                var pitchInfo = new Array();
+                $.each(e.components, function(nInd, n) {
+                    pitchInfo.push({pname: n.pname, oct: n.oct});
+                });
+                return {id: e.id, noteInfo: pitchInfo};
+            }
+            else if (e instanceof Toe.Model.Custos) {
+                return {id: e.id, noteInfo: {pname: e.pname, oct: e.oct}};
+            }
+        });
+
+        toDelete.clefs.push({id: clef.id, pitchInfo: pitchInfo});
+
+        gui.rendEng.canvas.remove(drawing);
+        gui.rendEng.canvas.discardActiveObject();
+    };
+
+    var deleteNeume = function(drawing) {
+        var neume = drawing.eleRef;
+
+        neume.staff.removeElementByRef(neume);
+        toDelete.nids.push(neume.id);
+
+        gui.rendEng.canvas.remove(drawing);
+        gui.rendEng.canvas.discardActiveObject();
+    };
+
+    var deleteDivision = function(drawing) {
+        var division = drawing.eleRef;
+
+        division.staff.removeElementByRef(division);
+        toDelete.dids.push(division.id);
+
+        gui.rendEng.canvas.remove(drawing);
+        gui.rendEng.canvas.discardActiveObject();
+    };
 
     var selection = gui.rendEng.canvas.getActiveObject();
     if (selection) {
-        var ele = selection.eleRef;
-
-        // remove element from internal representation
-        ele.staff.removeElementByRef(ele);
-
-        // individual element selected
-        if (ele instanceof Toe.Model.Clef) {
-            // update pitched elements on the affected staff
-            ele.staff.updatePitchedElements();
-
-            toDelete.cids.push(ele.id);
+        // ignore the first clef, since this should never be deleted
+        if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.staff.elements[0] != selection.eleRef) {
+            deleteClef(selection);
         }
-        else if (ele instanceof Toe.Model.Neume) {
-            toDelete.nids.push(ele.id);
+        else if (selection.eleRef instanceof Toe.Model.Neume) {
+            deleteNeume(selection);
         }
-        else if (ele instanceof Toe.Model.Division) {
-            toDelete.dids.push(ele.id);
+        else if (selection.eleRef instanceof Toe.Model.Division) {
+            deleteDivision(selection);
         }
 
-        gui.rendEng.canvas.remove(selection);
-        gui.rendEng.canvas.discardActiveObject();
         gui.rendEng.repaint();
     }
     else {
@@ -637,22 +684,16 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         if (selection) {
             // group of elements selected
             $.each(selection.getObjects(), function(oInd, o) {
-                // remove element from internal representation
-                o.eleRef.staff.removeElementByRef(o.eleRef);
-
-                if (o.eleRef instanceof Toe.Model.Clef) {
-                    ele.staff.updatePitchedElements();
-
-                    toDelete.cids.push(o.eleRef.id);
+                // ignore the first clef, since this should never be deleted
+                if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.staff.elements[0] != o.eleRef) {
+                    deleteClef(o);
                 }
                 else if (o.eleRef instanceof Toe.Model.Neume) {
-                    toDelete.nids.push(o.eleRef.id);
+                    deleteNeume(o);
                 }
                 else if (o.eleRef instanceof Toe.Model.Division) {
-                    toDelete.dids.push(o.eleRef.id);
+                    deleteDivision(o);
                 }
-
-                gui.rendEng.canvas.remove(o);
             });
 
             gui.rendEng.canvas.discardActiveGroup();
@@ -660,9 +701,9 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         }
     }
 
-    if (toDelete.cids.length > 0) {
+    if (toDelete.clefs.length > 0) {
         // send delete command to the server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/clef", {ids: toDelete.nids.join(",")})
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
         .error(function() {
             // show alert to user
             // replace text with error message

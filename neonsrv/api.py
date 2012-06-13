@@ -1128,3 +1128,48 @@ class InsertClefHandler(tornado.web.RequestHandler):
 
         self.set_status(200)
 
+class DeleteClefHandler(tornado.web.RequestHandler):
+
+    def delete_clef(self, clef):
+        facsid = clef.getAttribute("facs").getValue()
+        clef.getParent().removeChild(clef)
+
+        # remove the zone if it exists
+        zone = self.mei.getElementById(str(facsid))
+        if zone:
+            zone.getParent().removeChild(zone)
+
+    def update_pitched_elements(self, pitch_info):
+        for ele in pitch_info:
+            pitched_ele = self.mei.getElementById(str(ele["id"]))
+            if pitched_ele.getName() == "custos":
+                pitched_ele.addAttribute("pname", str(ele["noteInfo"]["pname"]))
+                pitched_ele.addAttribute("oct", str(ele["noteInfo"]["oct"]))
+            elif pitched_ele.getName() == "neume":
+                notes = pitched_ele.getDescendantsByName("note")
+                for n_info, n in zip(ele["noteInfo"], notes):
+                    n.addAttribute("pname", str(n_info["pname"]))
+                    n.addAttribute("oct", str(n_info["oct"]))
+
+    def post(self, file):
+        '''
+        Delete a doh or fah clef.
+        Must also update pitched elements on the staff
+        that are affected by the deletion of this clef
+        element.
+        '''
+
+        clefs_to_delete = json.loads(self.get_argument("data", ""))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        for c in clefs_to_delete:
+            clef = self.mei.getElementById(str(c["id"]))
+            self.delete_clef(clef)
+            self.update_pitched_elements(c["pitchInfo"])
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)

@@ -333,6 +333,21 @@ Toe.Model.Staff.prototype.getActingClefByCoords = function(coords) {
     return null;
 }
 
+// Given a clef mounted on this staff, get the previous acting clef
+Toe.Model.Staff.prototype.getPreviousClef = function(clef) {
+    var oldClefInd = $.inArray(clef, this.elements);
+    // only search if the clef is not the first clef, and is mounted on this staff
+    if (oldClefInd > 0) {
+        for (var i = oldClefInd-1; i >= 0; i--) {
+            if (this.elements[i] instanceof Toe.Model.Clef) {
+                return this.elements[i];
+            }
+        }
+    }
+
+    return null;
+}
+
 /**
  * Mounts the clef on the staff
  *
