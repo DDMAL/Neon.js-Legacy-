@@ -30,6 +30,7 @@ Toe.View.NeumeView = function(renderEngine) {
     this.rendEng = renderEngine;
 
     this.drawing = null;
+    this.ledgerLines = null;
 }
 
 Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
@@ -101,9 +102,26 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) 
     return dotsy;
 }
 
+Toe.View.NeumeView.prototype.drawLedgerLines = function(ncStaffPos, centre, width, staff) {
+    var nv = this;
+    var ledgers = new Array();
+    $.each(ncStaffPos, function(ncInd, staffPos) {
+        if ((staffPos > 0 || staffPos < staff.props.numLines) && staffPos % 2 == 0) {
+            var y = staff.zone.uly - (staffPos*staff.delta_y/2);
+            ledgers.push(nv.rendEng.createLine([centre[ncInd]-width, y, centre[ncInd]+width, y]));
+        }
+    });
+
+    this.ledgerLines = this.rendEng.draw({static: ledgers, modify: []}, {group: true, selectable: false})[0];
+}
+
 Toe.View.NeumeView.prototype.drawNeume = function(neume) {
-        if (!this.rendEng) {
+    if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");
+    }
+
+    if (this.ledgerLines) {
+        this.rendEng.canvas.remove(this.ledgerLines);
     }
 
     var nc_y = this.calcNoteYPos(neume);
@@ -146,7 +164,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
     switch (neume.props.type) {
         // PUNCTUM
         case Toe.Model.Neume.Type.punctum:
-            var glyphPunct = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
+            var left = neume.zone.ulx + ncGlyphs[0].centre[0];
+            var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
             elements.modify.push(glyphPunct);
 
             // render dots
@@ -156,11 +175,14 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
+            this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
+
             break;
 
         // VIRGA
         case Toe.Model.Neume.Type.virga:
-            var glyphPunct = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
+            var left = neume.zone.ulx + ncGlyphs[0].centre[0];
+            var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
             elements.modify.push(glyphPunct);
 
             // render dots
@@ -174,20 +196,25 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
             var line = this.rendEng.createLine([rx, nc_y[0], rx, neume.zone.lry], {strokeWidth: 2, interact: true});
             elements.static.push(line);
+
+            this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
+
             break;
 
         // CLIVIS
         case Toe.Model.Neume.Type.clivis:
             // if clivis is the liquescence variant
+            var nc_x = new Array();
             if (neume.props.modifier == Toe.Model.Neume.Modifier.alt) {
                 // first punctum
                 var punct1 = this.rendEng.getGlyph("cephalicus");
-                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2});
+                nc_x.push(neume.zone.ulx + punct1.centre[0]);
+                var glyphPunct1 = punct1.clone().set({left: nc_x[0], top: nc_y[0] - punct1.centre[1]/2});
 
                 elements.modify.push(glyphPunct1);
 
                 // draw left line coming off first punctum
-                var lx = glyphPunct1.left-punct1.centre[0]+1;
+                var lx = nc_x[0]-punct1.centre[0]+1;
                 var line = this.rendEng.createLine([lx, nc_y[0], lx, neume.zone.lry], {strokeWidth: 2, interact: true});
                 elements.static.push(line);
 
@@ -198,13 +225,15 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
                 // second punctum
                 var punct2 = this.rendEng.getGlyph("liques_up");
-                var glyphPunct2 = punct2.clone().set({left: glyphPunct1.left + punct1.centre[0] - punct2.centre[0], top: nc_y[1] - punct2.centre[1]/2});
+                nc_x.push(nc_x[0] + punct1.centre[0] - punct2.centre[0]);
+                var glyphPunct2 = punct2.clone().set({left: nc_x[1], top: nc_y[1] - punct2.centre[1]/2});
 
                 elements.modify.push(glyphPunct2);
             }
             else {  // draw normally
                 // first punctum
-                var glyphPunct1 = ncGlyphs[0].clone().set({left: neume.zone.ulx + ncGlyphs[0].centre[0], top: nc_y[0]});
+                nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
+                var glyphPunct1 = ncGlyphs[0].clone().set({left: nc_x[0], top: nc_y[0]});
 
                 elements.modify.push(glyphPunct1);
 
@@ -219,7 +248,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 elements.static.push(line);
 
                 // second punctum
-                var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: nc_y[1]});
+                nc_x.push(nc_x[0] + (2*ncGlyphs[1].centre[0]));
+                var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1]});
 
                 elements.modify.push(glyphPunct2);
             }
@@ -234,6 +264,10 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                     }
                 }
             });
+
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
 
             break;
 
@@ -281,15 +315,21 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 }
             });
 
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
             break;
 
         // PODATUS
         case Toe.Model.Neume.Type.podatus:
+            var nc_x = new Array();
             // if podatus is the liquescence variant
             if (neume.props.modifier == Toe.Model.Neume.Modifier.alt) {
                 // first punctum
                 var punct1 = this.rendEng.getGlyph("podatus_ep");
-                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0]});
+                nc_x.push(neume.zone.ulx + punct1.centre[0]);
+                var glyphPunct1 = punct1.clone().set({left: nc_x[0], top: nc_y[0]});
 
                 elements.modify.push(glyphPunct1);
 
@@ -300,7 +340,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
                 // second punctum
                 var punct2 = this.rendEng.getGlyph("liques_down");
-                var glyphPunct2 = punct2.clone().set({left: glyphPunct1.left + punct1.centre[0] - punct2.centre[0], top: nc_y[1] + punct2.centre[1]/2});
+                nc_x.push(nc_x[0] + punct1.centre[0] - punct2.centre[0]);
+                var glyphPunct2 = punct2.clone().set({left: nc_x[1], top: nc_y[1] + punct2.centre[1]/2});
 
                 elements.modify.push(glyphPunct2);
             }
@@ -313,7 +354,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
                 // first punctum
                 var punct1 = this.rendEng.getGlyph("pes");
-                var glyphPunct1 = punct1.clone().set({left: neume.zone.ulx + punct1.centre[0], top: nc_y[0] - punct1.centre[1]/2 + yoffset});
+                nc_x.push(neume.zone.ulx + punct1.centre[0]);
+                var glyphPunct1 = punct1.clone().set({left: nc_x[0], top: nc_y[0] - punct1.centre[1]/2 + yoffset});
 
                 elements.modify.push(glyphPunct1);
 
@@ -323,7 +365,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 elements.static.push(line);
 
                 // second punctum
-                var glyphPunct2 = ncGlyphs[1].clone().set({left: glyphPunct1.left, top: nc_y[1] - yoffset});
+                nc_x.push(nc_x[0]);
+                var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1] - yoffset});
 
                 elements.modify.push(glyphPunct2);
             }
@@ -338,6 +381,10 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                     }
                 }
             });
+
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
 
             break;
 
@@ -359,7 +406,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             elements.static.push(line);
 
             // draw punctum
-            var glyphPunct = ncGlyphs[2].clone().set({left: glyphSwoosh.left + swoosh.centre[0] - ncGlyphs[2].centre[0], top: nc_y[2]});
+            var nc_x = glyphSwoosh.left + swoosh.centre[0] - ncGlyphs[2].centre[0];
+            var glyphPunct = ncGlyphs[2].clone().set({left: nc_x, top: nc_y[2]});
 
             // draw right line connecting swoosh and punctum
             var rx = glyphPunct.left + ncGlyphs[2].centre[0] - 1;
@@ -369,13 +417,16 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             elements.modify.push(glyphPunct);
 
             // only check last note has a dot
-            if(neume.components[2].hasOrnament('dot')) {
+            if (neume.components[2].hasOrnament('dot')) {
                 // get best spot for the dot
                 var bestDots = this.bestDotPlacements(staff, nc_y, 2);
                 if (bestDots.length > 0) {
                     elements.modify.push(glyphDot.clone().set({left: glyphPunct.left + (2*ncGlyphs[2].centre[0]), top: bestDots[0]}));
                 }
             }
+
+            // only draw ledger lines for 1st and 3rd neume components
+            this.drawLedgerLines([neume.rootStaffPos + neume.components[2].pitchDiff], [nc_x], ncGlyphs[2].centre[0]*2, staff);
 
             break;
 
@@ -385,6 +436,8 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             var numNC = neume.components.length;
             var pes = this.rendEng.getGlyph("pes");
             var lastX = neume.zone.ulx - ncGlyphs[0].centre[0];
+
+            var nc_x = new Array();
             
             // draw podatuses
             for (var i = 0; i < numNC-1; i+=2) {
@@ -396,6 +449,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
                 // pes
                 lastX += 2*pes.centre[0] - ncOverlap_x;
+                nc_x.push(lastX);
                 var glyphPes = pes.clone().set({left: lastX, top: nc_y[i] - pes.centre[1]/2 + yoffset});
                 elements.modify.push(glyphPes);
 
@@ -405,6 +459,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 elements.static.push(line1);
 
                 // second punctum
+                nc_x.push(lastX);
                 var glyphPunct2 = ncGlyphs[i+1].clone().set({left: lastX, top: nc_y[i+1] - yoffset});
                 elements.modify.push(glyphPunct2);
 
@@ -423,6 +478,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             if (neume.components.length % 2 == 1) {
                 // draw virga
                 lastX += 2*ncGlyphs[numNC-1].centre[0] - ncOverlap_x;
+                nc_x.push(lastX);
                 var glyphPunct3 = ncGlyphs[numNC-1].clone().set({left: lastX, top: nc_y[numNC-1]});
                 elements.modify.push(glyphPunct3);
 
@@ -441,6 +497,11 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                                                     {strokeWidth: 2, interact: true});
                 elements.static.push(line2);
             }
+
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
             break;
     }
     
@@ -468,6 +529,10 @@ Toe.View.NeumeView.prototype.updateDrawing = function(neume) {
     // by removing and drawing again.
     if (this.drawing) {
         this.rendEng.canvas.remove(this.drawing);
+    }
+    if (this.ledgerLines) {
+        this.rendEng.canvas.remove(this.ledgerLines);
+        this.ledgerLines = null;
     }
 
     this.drawNeume(neume);
