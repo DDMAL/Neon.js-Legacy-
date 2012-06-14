@@ -331,6 +331,38 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
                     ele.setStaffPosition(staffPos);
 
+                    var neumesOnStaff = ele.staff.getPitchedElements({neumes: true, custos: false});
+                    if (neumesOnStaff.length > 0 && ele.staff.getActingClefByEle(neumesOnStaff[0]) == ele) {
+                        // if the shift of the clef has affected the first neume on this staff
+                        // update the custos on the previous staff
+                        var prevStaff = gui.page.getPreviousStaff(ele.staff);
+                        if (prevStaff && prevStaff.custos) {
+                            var custos = prevStaff.custos;
+
+                            var newPname = neumesOnStaff[0].components[0].pname;
+                            var newOct = neumesOnStaff[0].components[0].oct;
+                            var actingClef = prevStaff.getActingClefByEle(custos);
+                            var newStaffPos = prevStaff.calcStaffPos(newPname, newOct, actingClef);
+
+                            custos.pname = newPname;
+                            custos.oct = newOct;
+                            custos.setRootStaffPos(newStaffPos);
+
+                            // the custos has been vertically moved
+                            // update the custos bounding box information in the model
+                            // do not need to update pitch name & octave since this does not change
+                            $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos",
+                                  {id: custos.id, pname: newPname, oct: newOct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
+                            .error(function() {
+                                // show alert to user
+                                // replace text with error message
+                                $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                                $("#alert").animate({opacity: 1.0}, 100);
+                            });
+
+                        }
+                    }
+
                     // gather new pitch information of affected pitched elements
                     var pitchInfo = $.map(ele.staff.getPitchedElements({clef: ele}), function(e) {
                         if (e instanceof Toe.Model.Neume) {
@@ -726,7 +758,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 var newPname = nextNeume.components[0].pname;
                 var newOct = nextNeume.components[0].oct;
                 
-                var actingClef = neume.staff.getActingClefByEle(nextNeume);
+                var actingClef = neume.staff.getActingClefByEle(custos);
                 var newStaffPos = prevStaff.calcStaffPos(newPname, newOct, actingClef);
 
                 custos.pname = newPname;
