@@ -336,30 +336,10 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         // if the shift of the clef has affected the first neume on this staff
                         // update the custos on the previous staff
                         var prevStaff = gui.page.getPreviousStaff(ele.staff);
-                        if (prevStaff && prevStaff.custos) {
-                            var custos = prevStaff.custos;
-
+                        if (prevStaff) {
                             var newPname = neumesOnStaff[0].components[0].pname;
                             var newOct = neumesOnStaff[0].components[0].oct;
-                            var actingClef = prevStaff.getActingClefByEle(custos);
-                            var newStaffPos = prevStaff.calcStaffPos(newPname, newOct, actingClef);
-
-                            custos.pname = newPname;
-                            custos.oct = newOct;
-                            custos.setRootStaffPos(newStaffPos);
-
-                            // the custos has been vertically moved
-                            // update the custos bounding box information in the model
-                            // do not need to update pitch name & octave since this does not change
-                            $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos",
-                                  {id: custos.id, pname: newPname, oct: newOct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
-                            .error(function() {
-                                // show alert to user
-                                // replace text with error message
-                                $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                                $("#alert").animate({opacity: 1.0}, 100);
-                            });
-
+                            gui.handleUpdatePrevCustos(newPname, newOct, prevStaff);
                         }
                     }
 
@@ -457,7 +437,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                             if (prevStaff) {
                                 var cPname = ele.components[0].pname;
                                 var cOct = ele.components[0].oct;
-                                gui.handleUpdateCustos(cPname, cOct, prevStaff);
+                                gui.handleUpdatePrevCustos(cPname, cOct, prevStaff);
                             }
                         }
                     }
@@ -626,6 +606,18 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
 
     if (clef.shape != cShape) {
         clef.setShape(cShape);
+
+        var neumesOnStaff = clef.staff.getPitchedElements({neumes: true, custos: false});
+        if (neumesOnStaff.length > 0 && clef.staff.getActingClefByEle(neumesOnStaff[0]) == clef) {
+            // if the shift of the clef has affected the first neume on this staff
+            // update the custos on the previous staff
+            var prevStaff = gui.page.getPreviousStaff(clef.staff);
+            if (prevStaff) {
+                var newPname = neumesOnStaff[0].components[0].pname;
+                var newOct = neumesOnStaff[0].components[0].oct;
+                gui.handleUpdatePrevCustos(newPname, newOct, prevStaff);
+            }
+        }
 
         var pitchInfo = $.map(clef.staff.getPitchedElements({clef: clef}), function(e) {
             if (e instanceof Toe.Model.Neume) {
@@ -1238,7 +1230,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         if (nInd == 1) {
             var prevStaff = gui.page.getPreviousStaff(sModel);
             if (prevStaff) {
-                gui.handleUpdateCustos(pname, oct, prevStaff);
+                gui.handleUpdatePrevCustos(pname, oct, prevStaff);
             }
         }
 
@@ -1683,7 +1675,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
     $("#rad_doh").trigger("click");
 }
 
-Toe.View.GUI.prototype.handleUpdateCustos = function(pname, oct, prevStaff) {
+Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) {
     var custos = prevStaff.custos;
     if (custos) {
         // update the custos
