@@ -55,6 +55,10 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
         cView.updateStaffPosition(custos);
     });
 
+    $(cModel).bind("vEraseDrawing", function(event) {
+        cView.eraseDrawing();
+    });
+
     $(cModel).bind("vSelectDrawing", function(event) {
         cView.selectDrawing();
     });

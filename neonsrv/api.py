@@ -1290,9 +1290,30 @@ class MoveCustosHandler(tornado.web.RequestHandler):
 
 class DeleteCustosHandler(tornado.web.RequestHandler):
 
+    def delete_custos(self, custos_id):
+        custos = self.mei.getElementById(custos_id)
+
+        facs_id = custos.getAttribute("facs").getValue()
+        zone = self.mei.getElementById(str(facs_id))
+        if zone:
+            zone.getParent().removeChild(zone)
+
+        custos.getParent().removeChild(custos)
+
     def post(self, file):
         '''
         Delete a given custos from the document.
         Also remove the element's bounding box information.
         '''
-        pass
+        
+        custos_id = str(self.get_argument("id", ""))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        self.delete_custos(custos_id)
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)

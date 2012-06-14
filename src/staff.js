@@ -100,7 +100,9 @@ Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
 // otherwise, return all pitched elements
 Toe.Model.Staff.prototype.getPitchedElements = function(options) {
     var opts = {
-        clef: null
+        clef: null,
+        neumes: true,
+        custos: true
     }
 
     $.extend(opts, options);
@@ -111,7 +113,7 @@ Toe.Model.Staff.prototype.getPitchedElements = function(options) {
         var cInd = $.inArray(opts.clef, this.elements);
         for (var i = cInd+1; i < this.elements.length && !(this.elements[i] instanceof Toe.Model.Clef); i++) {
             var e = this.elements[i];
-            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
+            if ((e instanceof Toe.Model.Neume && opts.neumes) || (e instanceof Toe.Model.Custos && opts.custos)) {
                 pitchedEles.push(e);
             }
         }
@@ -120,7 +122,7 @@ Toe.Model.Staff.prototype.getPitchedElements = function(options) {
     else {
         // return all pitched elements on the staff
         return $.grep(this.elements, function(e) {
-            if (e instanceof Toe.Model.Neume || e instanceof Toe.Model.Custos) {
+            if ((e instanceof Toe.Model.Neume && opts.neumes) || (e instanceof Toe.Model.Custos && opts.custos)) {
                 return e;
             }
         });
@@ -171,7 +173,7 @@ Toe.Model.Staff.prototype.updatePitchedElements = function(options) {
 
     // update pitched elements from the given clef to the next clef
     if (opts.clef) {
-        var pitchedEles = this.getPitchedElements(opts);
+        var pitchedEles = this.getPitchedElements({clef: opts.clef});
         
         // if the custos is under the given acting clef and opts.custos is false
         // (meaning we are not to overwrite its pitch content), then we need to shift

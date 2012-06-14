@@ -126,3 +126,10 @@ Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
 Toe.Model.Custos.prototype.selectDrawing = function() {
     $(this).trigger("vSelectDrawing");
 }
+
+/**
+ * Erase the custos on the drawing surface
+ */
+Toe.Model.Custos.prototype.eraseDrawing = function() {
+    $(this).trigger("vEraseDrawing");
+}

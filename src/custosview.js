@@ -73,6 +73,13 @@ Toe.View.CustosView.prototype.updateStaffPosition = function(custos) {
     $(custos).trigger("mUpdateBoundingBox", this.drawing);
 }
 
+Toe.View.CustosView.prototype.eraseDrawing = function() {
+    this.rendEng.canvas.remove(this.drawing);
+    this.drawing = null;
+
+    this.rendEng.repaint();
+}
+
 Toe.View.CustosView.prototype.selectDrawing = function() {
     this.rendEng.canvas.setActiveObject(this.drawing);
 }

@@ -688,11 +688,64 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
     var deleteNeume = function(drawing) {
         var neume = drawing.eleRef;
 
+        var neumesOnStaff = neume.staff.getPitchedElements({neumes: true, custos: false});
+
         neume.staff.removeElementByRef(neume);
         toDelete.nids.push(neume.id);
 
         gui.rendEng.canvas.remove(drawing);
         gui.rendEng.canvas.discardActiveObject();
+
+        if (neumesOnStaff.length == 1) {
+            // there are no neumes left on the staff
+            // remove the custos from the previous staff
+            var prevStaff = gui.page.getPreviousStaff(neume.staff);
+            if (prevStaff && prevStaff.custos) {
+                prevStaff.custos.eraseDrawing();
+                prevStaff.removeElementByRef(prevStaff.custos);
+
+                // send the custos delete command to the server to update the underlying MEI
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/custos", {id: prevStaff.custos.id})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
+
+                prevStaff.custos = null;
+            }
+        }
+        else if (neume == neumesOnStaff[0]) {
+            // if this neume is the first neume on the staff
+            // update the custos of the previous staff
+            var prevStaff = gui.page.getPreviousStaff(neume.staff);
+            var custos = prevStaff.custos;
+            if (prevStaff && custos) {
+                var nextNeume = neumesOnStaff[1];
+                var newPname = nextNeume.components[0].pname;
+                var newOct = nextNeume.components[0].oct;
+                
+                var actingClef = neume.staff.getActingClefByEle(nextNeume);
+                var newStaffPos = prevStaff.calcStaffPos(newPname, newOct, actingClef);
+
+                custos.pname = newPname;
+                custos.oct = newOct;
+                custos.setRootStaffPos(newStaffPos);
+
+                // the custos has been vertically moved
+                // update the custos bounding box information in the model
+                // do not need to update pitch name & octave since this does not change
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos",
+                      {id: custos.id, pname: newPname, oct: newOct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
+            }
+        }
     };
 
     var deleteDivision = function(drawing) {
@@ -1633,13 +1686,18 @@ Toe.View.GUI.prototype.handleUpdateCustos = function(pname, oct, prevStaff) {
         // mount the custos on the staff
         prevStaff.setCustos(cModel);
 
+        var args = {id: cModel.id, pname: pname, oct: oct, ulx: cModel.zone.ulx, uly: cModel.zone.uly, lrx: cModel.zone.lrx, lry: cModel.zone.lry};
+
+        // get id of the next staff element
+        var nextStaff = gui.page.getNextStaff(prevStaff);
+        if (nextStaff) {
+            args["beforeid"] = nextStaff.id;
+        }
+
         // update underlying MEI file
-        $.post(this.prefix + "/edit/" + this.fileName + "/insert/custos", 
-               {id: cModel.id, beforeid: sModel.id, pname: pname, oct: oct, ulx: cModel.zone.ulx, uly: cModel.zone.uly, lrx: cModel.zone.lrx, lry: cModel.zone.lry}, 
-               function(data) {
-                   cModel.id = JSON.parse(data).id;
-               }
-        ).error(function() {
+        $.post(this.prefix + "/edit/" + this.fileName + "/insert/custos", args, function(data) {
+            cModel.id = JSON.parse(data).id;
+        }).error(function() {
             // show alert to user
             // replace text with error message
             $("#alert > p").text("Server failed to insert custos. Client and server are not synchronized.");
