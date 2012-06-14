@@ -1592,6 +1592,18 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
             args["beforeid"] = sNextModel.id;
         }
 
+        var neumesOnStaff = staff.getPitchedElements({neumes: true, custos: false});
+        if (neumesOnStaff.length > 0 && staff.getActingClefByEle(neumesOnStaff[0]) == clef) {
+            // if the shift of the clef has affected the first neume on this staff
+            // update the custos on the previous staff
+            var prevStaff = gui.page.getPreviousStaff(staff);
+            if (prevStaff) {
+                var newPname = neumesOnStaff[0].components[0].pname;
+                var newOct = neumesOnStaff[0].components[0].oct;
+                gui.handleUpdatePrevCustos(newPname, newOct, prevStaff);
+            }
+        }
+
         // gather new pitch information of affected pitched elements
         args["pitchInfo"] = $.map(staff.getPitchedElements({clef: clef}), function(e) {
             if (e instanceof Toe.Model.Neume) {
