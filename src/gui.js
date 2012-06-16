@@ -409,7 +409,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var oldRootStaffPos = ele.rootStaffPos;
                     // derive pitch name and octave of notes in the neume on the appropriate staff
                     $.each(ele.components, function(ncInd, nc) {
-                        var noteInfo = sModel.calcNoteInfo({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
+                        var noteInfo = sModel.calcPitchFromCoords({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
                         nc.setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
                     });
 
@@ -744,14 +744,14 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
             // if this neume is the first neume on the staff
             // update the custos of the previous staff
             var prevStaff = gui.page.getPreviousStaff(neume.staff);
-            var custos = prevStaff.custos;
-            if (prevStaff && custos) {
+            if (prevStaff && prevStaff.custos) {
+                var custos = prevStaff.custos;
                 var nextNeume = neumesOnStaff[1];
                 var newPname = nextNeume.components[0].pname;
                 var newOct = nextNeume.components[0].oct;
                 
-                var actingClef = neume.staff.getActingClefByEle(custos);
-                var newStaffPos = prevStaff.calcStaffPos(newPname, newOct, actingClef);
+                var actingClef = prevStaff.getActingClefByEle(custos);
+                var newStaffPos = prevStaff.calcStaffPosFromPitch(newPname, newOct, actingClef);
 
                 custos.pname = newPname;
                 custos.oct = newOct;
@@ -1196,7 +1196,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         nModel.setBoundingBox(bb);
 
         // get pitch name and octave of snapped coords of note
-        var noteInfo = sModel.calcNoteInfo(snapCoords);
+        var noteInfo = sModel.calcPitchFromCoords(snapCoords);
         var pname = noteInfo["pname"];
         var oct = noteInfo["oct"];
 
@@ -1695,7 +1695,7 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
         
         // get acting clef for the custos 
         var actingClef = prevStaff.getActingClefByEle(custos);
-        custos.setRootStaffPos(prevStaff.calcStaffPos(pname, oct, actingClef));
+        custos.setRootStaffPos(prevStaff.calcStaffPosFromPitch(pname, oct, actingClef));
 
         $.post(this.prefix + "/edit/" + this.fileName + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
         .error(function() {

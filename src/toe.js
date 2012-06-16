@@ -66,6 +66,20 @@ Toe.View = {};
     }
 })(jQuery);
 
+/**
+ * Helper function to truncate a float
+ */
+(function($) {
+    $.truncateFloat = function(theFloat) {
+        if (theFloat > 0) {
+            return Math.floor(theFloat);
+        }
+        else {
+            return Math.ceil(theFloat);
+        }
+    }
+})(jQuery);
+
 Toe.validBoundingBox = function(bb) {
     return bb[0] <= bb[2] && bb[1] <= bb[3];
 }
