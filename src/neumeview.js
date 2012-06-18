@@ -103,6 +103,8 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) 
 }
 
 Toe.View.NeumeView.prototype.drawLedgerLines = function(ncStaffPos, centre, width, staff) {
+    width *= 0.75;
+
     var nv = this;
     var ledgers = new Array();
     var bottomStaffPos = 2*(1-staff.props.numLines);

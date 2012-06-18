@@ -36,6 +36,8 @@ Toe.View.CustosView = function(renderEngine) {
 Toe.View.CustosView.prototype.constructor = Toe.View.CustosView;
 
 Toe.View.CustosView.prototype.drawLedgerLines = function(staffPos, centre, width, staff) {
+    width *= 0.75;
+
     var cv = this;
     var ledgers = new Array();
     var bottomStaffPos = 2*(1-staff.props.numLines);
