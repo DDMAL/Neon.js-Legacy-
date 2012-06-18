@@ -60,6 +60,10 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
         nView.updateDrawing(neume);
     });
 
+    $(nModel).bind("vEraseDrawing", function(event) {
+        nView.eraseDrawing();
+    });
+
     $(nModel).bind("vSelectDrawing", function(event) {
         nView.selectDrawing();
     });

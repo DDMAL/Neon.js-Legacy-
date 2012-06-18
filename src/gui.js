@@ -717,7 +717,6 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         neume.staff.removeElementByRef(neume);
         toDelete.nids.push(neume.id);
 
-        gui.rendEng.canvas.remove(drawing);
         gui.rendEng.canvas.discardActiveObject();
 
         if (neumesOnStaff.length == 1) {

@@ -321,6 +321,8 @@ Toe.Model.Staff.prototype.insertElement = function(ele) {
 Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
     for (var i = this.elements.length-1; i >= 0; i--) {
         if (this.elements[i].id == eleID) {
+            // remove drawing
+            $(this.elements[i]).trigger("vEraseDrawing");
             this.elements.splice(i,1);
         }
     }
@@ -329,7 +331,12 @@ Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
 // remove element by reference
 Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
     var eleInd = $.inArray(ele, this.elements);
-    this.elements.splice(eleInd, 1);
+
+    if (eleInd >= 0) {
+        // remove drawing
+        $(this.elements[eleInd]).trigger("vEraseDrawing");
+        this.elements.splice(eleInd, 1);
+    }
 }
 
 /**

@@ -92,8 +92,13 @@ Toe.View.CustosView.prototype.updateStaffPosition = function(custos) {
 }
 
 Toe.View.CustosView.prototype.eraseDrawing = function() {
-    this.rendEng.canvas.remove(this.drawing);
-    this.drawing = null;
+    if (this.drawing) {
+        this.rendEng.canvas.remove(this.drawing);
+    }
+    if (this.ledgerLines) {
+        this.rendEng.canvas.remove(this.ledgerLines);
+        this.ledgerLines = null;
+    }
 
     this.rendEng.repaint();
 }
