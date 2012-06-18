@@ -37,11 +37,22 @@ Toe.View.CustosView.prototype.constructor = Toe.View.CustosView;
 
 Toe.View.CustosView.prototype.drawLedgerLines = function(staffPos, centre, width, staff) {
     var cv = this;
-    if ((staffPos > 0 || staffPos < staff.props.numLines) && staffPos % 2 == 0) {
-        var y = staff.zone.uly - (staffPos*staff.delta_y/2);
-        var ledger = cv.rendEng.createLine([centre-width, y, centre+width, y]);
-        this.ledgerLines = this.rendEng.draw({static: [ledger], modify: []}, {group: true, selectable: false})[0];
+    var ledgers = new Array();
+    var bottomStaffPos = 2*(1-staff.props.numLines);
+    if (staffPos > 0) {
+        for (var i = 0; i <= staffPos; i += 2) {
+            var line_y = staff.zone.uly - (i*staff.delta_y/2);
+            ledgers.push(cv.rendEng.createLine([centre-width, line_y, centre+width, line_y]));
+        }
     }
+    else if (staffPos < bottomStaffPos) {
+        for (var i = bottomStaffPos; i >= staffPos; i -= 2) {
+            var line_y = staff.zone.uly - (i*staff.delta_y/2);
+            ledgers.push(cv.rendEng.createLine([centre-width, line_y, centre+width, line_y]));
+        }
+    }
+
+    this.ledgerLines = this.rendEng.draw({static: ledgers, modify: []}, {group: true, selectable: false})[0];
 }
 
 /**

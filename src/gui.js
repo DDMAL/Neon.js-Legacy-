@@ -414,8 +414,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     });
 
                     // remove the old neume
+                    $(ele).trigger("vEraseDrawing");
                     ele.staff.removeElementByRef(ele);
-                    gui.rendEng.canvas.remove(element);
      
                     // mount the new neume on the most appropriate staff
                     var nInd = sModel.addNeume(ele);
