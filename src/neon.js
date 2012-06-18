@@ -93,7 +93,7 @@ THE SOFTWARE.
             return [ulx, uly, lrx, lry];
         };
 
-        var loadMeiPage = function(displayZones, page) {
+        var loadMeiPage = function(page) {
             var clefList = $("clef, sb", mei);
             // calculate sb indices in the clef list
             var clef_sbInd = new Array();
@@ -133,7 +133,10 @@ THE SOFTWARE.
     
             // for each system
             $("sb", mei).each(function(sit, sel) {
-                console.log("system " + (sit+1));
+                if (settings.debug) {
+                    console.log("system " + (sit+1));
+                }
+
                 // get facs data
                 var sbref = $(sel).attr("systemref");
                 var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
@@ -141,7 +144,7 @@ THE SOFTWARE.
 
                 // create staff
                 var s_bb = parseBoundingBox(sysFacs);
-                if (displayZones) {
+                if (settings.debug) {
                     rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
                 }
 
@@ -170,7 +173,7 @@ THE SOFTWARE.
                     var clefFacsId = $(cel).attr("facs");
                     var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
                     var c_bb = parseBoundingBox(clefFacs);
-                    if (displayZones) {
+                    if (settings.debug) {
                         rendEng.outlineBoundingBox(c_bb, {fill: "red"});
                     }
 
@@ -185,7 +188,10 @@ THE SOFTWARE.
                     // mount clef on the staff
                     sModel.addClef(cModel);
 
-                    console.log("clef: " + cModel.name);
+
+                    if (settings.debug) {
+                        console.log("clef: " + cModel.name);
+                    }
                 });
 
                 // load all neumes in the system
@@ -193,7 +199,7 @@ THE SOFTWARE.
                     var nModel = new Toe.Model.Neume();
                     var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
-                    if (displayZones) {
+                    if (settings.debug) {
                         rendEng.outlineBoundingBox(n_bb, {fill: "green"});
                     }
 
@@ -205,14 +211,16 @@ THE SOFTWARE.
                     // mount neume on the staff
                     sModel.addNeume(nModel);
 
-                    console.log("neume: " + nModel.props.type.name);
+                    if (settings.debug) {
+                        console.log("neume: " + nModel.props.type.name);
+                    }
                 });
 
                 // load all divisions in the system
                 $(divList).slice(div_sbInd[sit]+1, div_sbInd[sit+1]).each(function(dit, del) {
                     var divFacs = $(mei).find("zone[xml\\:id=" + $(del).attr("facs") + "]")[0];
                     var d_bb = parseBoundingBox(divFacs);
-                    if (displayZones) {
+                    if (settings.debug) {
                         rendEng.outlineBoundingBox(d_bb, {fill: "yellow"});
                     }
 
@@ -228,14 +236,16 @@ THE SOFTWARE.
                     // mount the division on the staff
                     sModel.addDivision(dModel);
     
-                    console.log("division: " + dType);
+                    if (settings.debug) {
+                        console.log("division: " + dType);
+                    }
                 });
 
                 // load custos for the system (if it exists)
                 $(custosList).slice(custos_sbInd[sit]+1, custos_sbInd[sit+1]).each(function(cit, cel) {
                     var custosFacs = $(mei).find("zone[xml\\:id=" + $(cel).attr("facs") + "]")[0];
                     var c_bb = parseBoundingBox(custosFacs);
-                    if (displayZones) {
+                    if (settings.debug) {
                         rendEng.outlineBoundingBox(c_bb, {fill: "purple"});
                     }
 
@@ -254,7 +264,9 @@ THE SOFTWARE.
                     // mount the custos on the staff
                     sModel.setCustos(cModel);
     
-                    console.log("custos");
+                    if (settings.debug) {
+                        console.log("custos");
+                    }
                 });
             });
             rendEng.repaint();
@@ -389,7 +401,7 @@ THE SOFTWARE.
             var pCtrl = new Toe.Ctrl.PageController(page, pView);
 
             if (settings.autoLoad && mei) {
-                loadMeiPage(settings.debug, page);
+                loadMeiPage(page);
             }
 
             // instantiate appropriate GUI elements
@@ -397,9 +409,8 @@ THE SOFTWARE.
                                       {sldr_bgImgOpacity: settings.backgroundImage, 
                                        initBgImgOpacity: settings.backgroundImageOpacity});
 
-            console.log("Load successful. Neon.js ready.");
             var runTime = new Date() - startTime;
-            console.log("loadtime: " + runTime + "ms");
+            console.log("Neon.js ready (" + runTime + "ms)");
         };
 
         // Call the init function when this object is created.

@@ -99,8 +99,6 @@ Toe.View.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 		this.setGlobalScale(scale);
 	}
 	
-	console.log("setting global scale: " + this.options.globScale);
-
 	return scale;
 }
 
