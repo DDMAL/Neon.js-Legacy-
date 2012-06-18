@@ -105,10 +105,19 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) 
 Toe.View.NeumeView.prototype.drawLedgerLines = function(ncStaffPos, centre, width, staff) {
     var nv = this;
     var ledgers = new Array();
+    var bottomStaffPos = 2*(1-staff.props.numLines);
     $.each(ncStaffPos, function(ncInd, staffPos) {
-        if ((staffPos > 0 || staffPos < staff.props.numLines) && staffPos % 2 == 0) {
-            var y = staff.zone.uly - (staffPos*staff.delta_y/2);
-            ledgers.push(nv.rendEng.createLine([centre[ncInd]-width, y, centre[ncInd]+width, y]));
+        if (staffPos > 0) {
+            for (var i = 0; i <= staffPos; i += 2) {
+                var line_y = staff.zone.uly - (i*staff.delta_y/2);
+                ledgers.push(nv.rendEng.createLine([centre[ncInd]-width, line_y, centre[ncInd]+width, line_y]));
+            }
+        }
+        else if (staffPos < bottomStaffPos) {
+            for (var i = bottomStaffPos; i >= staffPos; i -= 2) {
+                var line_y = staff.zone.uly - (i*staff.delta_y/2);
+                ledgers.push(nv.rendEng.createLine([centre[ncInd]-width, line_y, centre[ncInd]+width, line_y]));
+            }
         }
     });
 
