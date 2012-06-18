@@ -633,7 +633,10 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
         }
 
         // check left staff boundary
-        if (left <= this.zone.ulx) {
+        if (this.elements.length && this.elements[0] instanceof Toe.Model.Clef && left <= this.elements[0].zone.lrx) {
+            coordsPrime.x = this.elements[0].zone.lrx + width/2 + 1;
+        }
+        else if (left <= this.zone.ulx) {
             coordsPrime.x = this.zone.ulx + width/2 + 1;
         }
 
