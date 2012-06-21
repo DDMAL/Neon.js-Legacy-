@@ -177,7 +177,9 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     if ($("#sidebar-edit").length == 0) {
         $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
                               '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
-                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n</li>\n' +
+                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
+                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
+                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
                               '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }
     
@@ -552,6 +554,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
+    $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
 }
 
@@ -853,6 +856,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
 Toe.View.GUI.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
+    var modifier = e.data.modifier;
 
     // only need to neumify if a group of objects are selected
     var selection = gui.rendEng.canvas.getActiveGroup();
@@ -883,7 +887,7 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         });
 
         // begin the NEUMIFICATION
-        var newNeume = new Toe.Model.Neume();
+        var newNeume = new Toe.Model.Neume({modifier: modifier});
                         
         numPunct = 0;
         var nids = new Array();
