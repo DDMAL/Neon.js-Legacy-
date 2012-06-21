@@ -194,13 +194,13 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            $("#info > p").html("Selected: " + ele.props.type.name + "<br/> Pitche(s): " + 
+            $("#info > p").html("Selected: " + ele.name + "<br/> Pitche(s): " + 
                                 $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
             $("#info").animate({opacity: 1.0}, 100);
 
             $("#menu_editclef").remove();
 
-            if (ele.props.type == Toe.Model.Neume.Type.punctum) {
+            if (ele.name == "Punctum") {
                 if ($("#menu_editpunctum").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
                                               '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
@@ -928,10 +928,10 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         // get final bounding box information
         bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
 
-        // get neume key
-        var neumeKey = newNeume.props.key;
+        // TODO: send name and variant to server
+        var neumeName = newNeume.name.toLowerCase();
 
-        var args = {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        var args = {nids: nids.join(","), name: neumeName, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
         // call server neumify function to update MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", args, function(data) {
             // set id of the new neume with generated ID from the server

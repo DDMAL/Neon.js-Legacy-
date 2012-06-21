@@ -33,30 +33,22 @@ Toe.Model.Neume = function(options) {
     this.zone = new Object();
 
     this.props = {
-        key: null,
-        type: null,
         modifier: null,
         interact: true
     };
 
     $.extend(this.props, options);
 
-    if (this.props.key) {
-        this.props.key = this.props.key.toLowerCase();
-        this.props.type = Toe.Model.Neume.Type[this.props.key];
-
-        // check neume name is known
-        if (this.props.type == undefined) {
-            this.props.key = "compound";
-            this.props.type = Toe.Model.Neume.Type.compound;
-        }
-    }
-
     // check neume modifier is known
     this.props.modifier = Toe.Model.Neume.Modifier[this.props.modifier];
     if (this.props.modifier == undefined) {
         this.props.modifier = null;
     }
+
+    // name of the neume
+    this.name = null;
+    // if compound neume, the name of the neume prefix to draw
+    this.neumePrefix = null;
 
     // staff position of the root note of the neume
     // this is set when the neume is mounted onto a staff
@@ -90,191 +82,9 @@ Toe.Model.Neume.Modifier = {
     ctrl_shift: "variant 4"
 }
 
-/**
- * Neumes encoded from the Fundamental Neumes Board in Medieval Finale
- *
- * @constant
- * @public
- * @fieldOf Toe.Model.Neume
- */
-Toe.Model.Neume.Type = {
-    punctum: {
-        name: "Punctum",
-        melodicMove: [0]
-    },
-    virga: {
-        name: "Virga",
-        melodicMove: [0]
-    },
-    bivirga: {
-        name: "Bivirga",
-        melodicMove: [0, 0]
-    },
-    distropha: {
-        name: "Distropha",
-        melodicMove: [0, 0]
-    },
-    tristropha: {
-        name: "Tristropha",
-        melodicMove: [0, 0, 0]
-    },
-    clivis: {
-        name: "Clivis",
-        melodicMove: [0, -1]
-    },
-    climacus: {
-        name: "Climacus",
-        melodicMove: [0, -1, -1]
-    },
-    climacus2: {
-        name: "Climacus 2",
-        melodicMove: [0, -1, -1, -1]
-    },
-    climacus3: {
-        name: "Climacus 3",
-        melodicMove: [0, -1, -1, -1, -1]
-    },
-    climacus4: {
-        name: "Climacus 4",
-        melodicMove: [0, -1, -1, -1, -1, -1]
-    },
-    climacusresup: {
-        name: "Climacus resupinus",
-        melodicMove: [0, -1, -1, 1]
-    },
-    climacusresup2: {
-        name: "Climacus resupinus 2",
-        melodicMove: [0, -1, -1, -1, 1]
-    },
-    climacusresup3: {
-        name: "Climacus resupinus 3",
-        melodicMove: [0, -1, -1, -1, -1, 1]
-    },
-    climacusresup4: {
-        name: "Climacus resupinus 4",
-        melodicMove: [0, -1, -1, -1, -1, -1, 1]
-    },
-    podatus: {
-        name: "Podatus (Pes)",
-        melodicMove: [0, 1]
-    },
-    podatussub: {
-        name: "Podatus subpunctis",
-        melodicMove: [0, 1, -1, -1]
-    },
-    podatussub2: {
-        name: "Podatus subpunctis 2",
-        melodicMove: [0, 1, -1, -1, -1]
-    },
-    podatussub3: {
-        name: "Podatus subpunctis 3",
-        melodicMove: [0, 1, -1, -1, -1, -1]
-    },
-    podatussub4: {
-        name: "Podatus subpunctis 4",
-        melodicMove: [0, 1, -1, -1, -1, -1, -1]
-    },
-    podatussubresup: {
-        name: "Podatus Subpunctis resupinus",
-        melodicMove: [0, 1, -1, -1, 1]
-    },
-    podatussubresup2: {
-        name: "Podatus Subpunctis resupinus 2",
-        melodicMove: [0, 1, -1, -1, -1, 1]
-    },
-    podatussubresup3: {
-        name: "Podatus Subpunctis resupinus 3",
-        melodicMove: [0, 1, -1, -1, -1, -1, 1]
-    },
-    scandicus: {
-        name: "Scandicus",
-        melodicMove: [0, 1, 1]
-    },
-    scandicus2: {
-        name: "Scandicus 2",
-        melodicMove: [0, 1, 1, 1]
-    },
-    scandicus3: {
-        name: "Scandicus 3",
-        melodicMove: [0, 1, 1, 1, 1]
-    },
-    scandicusflex: {
-        name: "Scandicus flexus",
-        melodicMove: [0, 1, 1, -1]
-    },
-    scandicusflex2: {
-        name: "Scandicus flexus 2",
-        melodicMove: [0, 1, 1, 1, -1]
-    },
-    scandicusflex3: {
-        name: "Scandicus flexus 3",
-        melodicMove: [0, 1, 1, 1, 1, -1]
-    },
-    scandicussub: {
-        name: "Scandicus subpunctis",
-        melodicMove: [0, 1, 1, -1, -1]
-    },
-    scandicussub2: {
-        name: "Scandicus subpunctis 2",
-        melodicMove: [0, 1, 1, -1, -1, -1]
-    },
-    porrectus: {
-        name: "Porrectus",
-        melodicMove: [0, -1, 1]
-    },
-    porrectusflex: {
-        name: "Porrectus flexus",
-        melodicMove: [0, -1, 1, -1]
-    },
-    porrectussub: {
-        name: "Porrectus subpunctis",
-        melodicMove: [0, -1, 1, -1, -1]
-    },
-    porrectussub2: {
-        name: "Porrectus subpunctis 2",
-        melodicMove: [0, -1, 1, -1, -1, -1]
-    },
-    porrectussubresup: {
-        name: "Porrectus Subpunctis resupinus",
-        melodicMove: [0, -1, 1, -1, -1, 1]
-    },
-    porrecussubresup2: {
-        name: "Porrectus Subpunctis resupinus 2",
-        melodicMove: [0, -1, 1, -1, -1, -1, 1]
-    },
-    compound1: {
-        name: "Compound Neume 1",
-        melodicMove: [0, -1, 1, 1, -1]
-    },
-    compound2: {
-        name: "Compound Neume 2",
-        melodicMove: [0, -1, 1, 1]
-    },
-    torculus: {
-        name: "Torculus",
-        melodicMove: [0, 1, -1]
-    },
-    torculusresup: {
-        name: "Torculus resupinus",
-        melodicMove: [0, 1, -1, 1]
-    },
-    torculusresup2: {
-        name: "Torculus resupinus 2",
-        melodicMove: [0, 1, -1, 1, -1]
-    },
-    torculusresup3: {
-        name: "Torculus resupinus 3",
-        melodicMove: [0, 1, -1, 1, -1, -1]
-    },
-    torculusresup4: {
-        name: "Torculus resupinus 4",
-        melodicMove: [0, 1, -1, 1, -1, -1, -1]
-    },
-    compound: {
-        name: "Compound neume",
-        melodicMove: []
-    }
-};
+// Load neume search tree from json so the tree doesn't need to be populated on load
+Toe.Model.Neume.SearchTree = new SearchTree();
+Toe.Model.Neume.SearchTree.populateFromJSON('{"rootNode":{"payload":"Punctum","children":{"0":{"payload":"Distropha","children":{"0":{"payload":"Tristropha","children":{},"numChildren":0}},"numChildren":1},"1":{"payload":"Podatus","children":{"1":{"payload":"Scandicus","children":{"1":{"payload":"Scandicus 2","children":{"1":{"payload":"Scandicus 3","children":{"-1":{"payload":"Scandicus Flexus 3","children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":"Scandicus Flexus 2","children":{},"numChildren":0}},"numChildren":2},"-1":{"payload":"Scandicus Flexus","children":{"-1":{"payload":"Scandicus Subpunctis","children":{"-1":{"payload":"Scandicus Subpunctis 2","children":{},"numChildren":0}},"numChildren":1}},"numChildren":1}},"numChildren":2},"-1":{"payload":"Torculus","children":{"1":{"payload":"Torculus Resupinus","children":{"-1":{"payload":"Torculus Resupinus 2","children":{"-1":{"payload":"Torculus Resupinus 3","children":{"-1":{"payload":"Torculus Resupinus 4","children":{},"numChildren":0}},"numChildren":1}},"numChildren":1}},"numChildren":1},"-1":{"payload":"Podatus Subpunctis","children":{"1":{"payload":"Podatus Subpunctis Resupinus","children":{},"numChildren":0},"-1":{"payload":"Podatus Subpunctis 2","children":{"1":{"payload":"Podatus Subpunctis Resupinus 2","children":{},"numChildren":0},"-1":{"payload":"Podatus Subpunctis 3","children":{"1":{"payload":"Podatus Subpunctis Resupinus 3","children":{},"numChildren":0},"-1":{"payload":"Podatus Subpunctis 4","children":{},"numChildren":0}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2},"-1":{"payload":"Clivis","children":{"1":{"payload":"Porrectus","children":{"1":{"payload":"Compound Neume 2","children":{"-1":{"payload":"Compound Neume 1","children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":"Porrectus Flexus","children":{"-1":{"payload":"Porrectus Subpunctis","children":{"1":{"payload":"Porrectus Subpunctis Resupinus","children":{},"numChildren":0},"-1":{"payload":"Porrectus Subpunctis 2","children":{"1":{"payload":"Porrectus Subpunctis Resupinus 2","children":{},"numChildren":0}},"numChildren":1}},"numChildren":2}},"numChildren":1}},"numChildren":2},"-1":{"payload":"Climacus","children":{"1":{"payload":"Climacus Resupinus","children":{},"numChildren":0},"-1":{"payload":"Climacus 2","children":{"1":{"payload":"Climacus Resupinus 2","children":{},"numChildren":0},"-1":{"payload":"Climacus 3","children":{"1":{"payload":"Climacus Resupinus 3","children":{},"numChildren":0},"-1":{"payload":"Climacus 4","children":{"1":{"payload":"Climacus Resupinus 4","children":{},"numChildren":0}},"numChildren":1}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":3},"numNodes":1}');
 
 /**
  * Sets the id of the neume
@@ -332,18 +142,7 @@ Toe.Model.Neume.prototype.getRootPitchInfo = function() {
  * of the staff that this neume is mounted on.
  */
 Toe.Model.Neume.prototype.setRootStaffPos = function(staffPos) {
-    // only redraw the glyph if it needs to be redrawn
-    if (this.rootStaffPos == staffPos) {
-        return;
-    }
-
     this.rootStaffPos = staffPos;
-
-    // update pitch information of underlying notes
-    this.staff.updateElePitchInfo(this);
-
-    // redraw
-    $(this).trigger("vUpdateDrawing", [this]);
 }
 
 /**
@@ -361,7 +160,7 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
     }
 
     this.id = $(neumeData).attr("xml:id");
-    var nName = $(neumeData).attr("name");
+    var nName = $(neumeData).attr("name").toLowerCase();
     // perform neume -> neume & modifier transformations
     // For example, in the current MEI neumes module, cephalicus and epiphonus are their
     // own neumes. In the Medieval Finale plugin they are clivis and podatus neumes, respectively,
@@ -375,13 +174,6 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
         this.props.modifier = Toe.Model.Neume.Modifier["alt"];
     }
 
-    this.props.key = nName;
-    this.props.type = Toe.Model.Neume.Type[this.props.key];
-    // if neume is unknown
-    if (this.props.type == undefined) {
-        this.props.type = "unknown";
-    }
-    
     // set bounding box
     var ulx = parseInt($(facs).attr("ulx"));
     var uly = parseInt($(facs).attr("uly"));
@@ -399,6 +191,9 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
         var ncType = "punctum";
         if ($(this).parent().attr("inclinatum") == "true") {
             ncType = "inclinatum";
+        }
+        if (nName == "virga") {
+            ncType = "virga";
         }
 
         // add note ornaments
@@ -442,14 +237,15 @@ Toe.Model.Neume.prototype.addComponent = function(type, pname, oct, options) {
 }
 
 /**
- * Gets the pitch differences for each component
+ * Gets the pitch differences for each component. Ignore the first component since
+ * the first pitch difference is always 0 (since it is the root note)
  *
  * @methodOf Toe.Model.Neume
  * @returns {Array} array of pitch differences for each neume component
  */
 Toe.Model.Neume.prototype.getDifferences = function() {
     var diffs = new Array();
-    for(var i = 0; i < this.components.length; i++) {
+    for(var i = 1; i < this.components.length; i++) {
         diffs.push(this.components[i].pitchDiff);
     }
     return diffs;
@@ -466,7 +262,7 @@ Toe.Model.Neume.prototype.diffToMelodicMove = function() {
     var diffs = this.getDifferences();
 
     // convert to ups and downs
-    var prevDiff = diffs[0];
+    var prevDiff = 0;
     diffs = $.map(diffs, function(x, i) {
         var relation = 0;
         if (x > prevDiff) {
@@ -498,26 +294,34 @@ Toe.Model.Neume.prototype.deriveName = function() {
 
     var diffs = this.diffToMelodicMove();
 
-    // linear search for now
-    var found = false;
-    for(var key in Toe.Model.Neume.Type) {
-        var melody = Toe.Model.Neume.Type[key].melodicMove;
-        if($.arraysEqual(diffs, melody)) {
-            this.props.key = key;
-            this.props.type = Toe.Model.Neume.Type[key];
-            
-            found = true;
-            break;
-        }
+    // search the tree for the neume name
+    var res = Toe.Model.Neume.SearchTree.search(diffs, true);
+
+    if (res.prefix) {
+        this.neumePrefix = res.result;
+        this.name = "Compound";
+    }
+    else {
+        this.neumePrefix = null;
+        this.name = res.result;
     }
 
-    // if neume is not in the dictionary
-    if (!found) {
-        this.props.key = "compound";
-        this.props.type = Toe.Model.Neume.Type.compound;
+    // situations where name is modified
+    // VIRGA: punctum with different head shape
+    // EPIPHONUS: podatus with liquescence modifier
+    // CEPHALICUS: clivis with liquescence modifier
+    // SCANDICUS: scandicus continued
+    if (this.name == "Punctum" && this.components[0].props.type == "virga") {
+        this.name = "Virga";
+    }
+    else if (this.name == "Podatus" && this.props.modifier == Toe.Model.Neume.Modifier["alt"]) {
+        this.name = "Epiphonus";
+    }
+    else if (this.name == "Clivis" && this.props.modifier == Toe.Model.Neume.Modifier["alt"]) {
+        this.name = "Cephalicus";
     }
 
-    return this.props.type.name;
+    return this.name;
 }
 
 /**
@@ -529,11 +333,4 @@ Toe.Model.Neume.prototype.syncDrawing = function() {
     this.deriveName();
 
     $(this).trigger("vUpdateDrawing", [this]);
-}
-
-/**
- * Select neume on the drawing surface
- */
-Toe.Model.Neume.prototype.selectDrawing = function() {
-    $(this).trigger("vSelectDrawing");
 }

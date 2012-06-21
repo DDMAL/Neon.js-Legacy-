@@ -49,7 +49,7 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
      */
     $(nModel).bind("vRenderNeume", function(event, neume) {
         // make sure neume type is known for it to be drawn properly
-        if (!neume.props.type) {
+        if (!neume.name) {
             neume.deriveName();
         }
 

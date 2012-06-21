@@ -63,6 +63,7 @@ Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
  */
 Toe.Model.NeumeComponent.Type = {
     punctum: "Punctum",
+    virga: "Virga",
     whitepunct: "White Punctum",
     inclinatum: "Punctum Inclinatum",
     smallinclinatum: "Punctum Inclinatum Parvum",

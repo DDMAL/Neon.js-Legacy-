@@ -212,7 +212,7 @@ THE SOFTWARE.
                     sModel.addNeume(nModel);
 
                     if (settings.debug) {
-                        console.log("neume: " + nModel.props.type.name);
+                        console.log("neume: " + nModel.name);
                     }
                 });
 
