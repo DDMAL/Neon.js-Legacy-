@@ -175,9 +175,9 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
     // modify holds elements that will undergo global transformations
     var elements = {static: new Array(), modify: new Array()};
 
-    switch (neume.name) {
+    switch (neume.typeid) {
         // PUNCTUM
-        case "Punctum":
+        case "punctum":
             var left = neume.zone.ulx + ncGlyphs[0].centre[0];
             var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
             elements.modify.push(glyphPunct);
@@ -194,7 +194,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // VIRGA
-        case "Virga":
+        case "virga":
             var left = neume.zone.ulx + ncGlyphs[0].centre[0];
             var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
             elements.modify.push(glyphPunct);
@@ -216,7 +216,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // CLIVIS
-        case "Clivis":
+        case "clivis":
             // if clivis is the liquescence variant
             var nc_x = new Array();
             // first punctum
@@ -259,7 +259,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // CEPHALICUS
-        case "Cephalicus":
+        case "cephalicus":
             var nc_x = new Array();
             // first punctum
             var punct1 = this.rendEng.getGlyph("cephalicus");
@@ -303,7 +303,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // TORCULUS
-        case "Torculus":
+        case "torculus":
             // derive x positions
             var nc_x = new Array();
             nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
@@ -353,7 +353,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // PODATUS
-        case "Podatus":
+        case "podatus":
             var nc_x = new Array();
             // if punctums are right on top of each other, spread them out a bit
             var yoffset = 0;
@@ -397,7 +397,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // EPIPHONUS
-        case "Epiphonus":
+        case "epiphonus":
             var nc_x = new Array();
             // first punctum
             var punct1 = this.rendEng.getGlyph("podatus_ep");
@@ -436,7 +436,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // PORRECTUS
-        case "Porrectus":
+        case "porrectus":
             // draw swoosh
             var swoosh = this.rendEng.getGlyph("porrect_1");
             var glyphSwoosh = swoosh.clone().set({left: neume.zone.ulx + swoosh.centre[0], top: nc_y[0] + swoosh.centre[1]/2});
@@ -478,9 +478,10 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // SCANDICUS
-        case "Scandicus":
-        case "Scandicus 2":
-        case "Scandicus 3":
+        case "scandicus":
+        case "scandicus.2":
+        case "scandicus.3":
+        case "scandicus.4":
             // cache number of neume components
             var numNC = neume.components.length;
             var pes = this.rendEng.getGlyph("pes");

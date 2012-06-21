@@ -47,6 +47,8 @@ Toe.Model.Neume = function(options) {
 
     // name of the neume
     this.name = null;
+    // type id - from search tree
+    this.typeid = null;
     // if compound neume, the name of the neume prefix to draw
     this.neumePrefix = null;
 
@@ -84,7 +86,7 @@ Toe.Model.Neume.Modifier = {
 
 // Load neume search tree from json so the tree doesn't need to be populated on load
 Toe.Model.Neume.SearchTree = new SearchTree();
-Toe.Model.Neume.SearchTree.populateFromJSON('{"rootNode":{"payload":"Punctum","children":{"0":{"payload":"Distropha","children":{"0":{"payload":"Tristropha","children":{},"numChildren":0}},"numChildren":1},"1":{"payload":"Podatus","children":{"1":{"payload":"Scandicus","children":{"1":{"payload":"Scandicus 2","children":{"1":{"payload":"Scandicus 3","children":{"-1":{"payload":"Scandicus Flexus 3","children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":"Scandicus Flexus 2","children":{},"numChildren":0}},"numChildren":2},"-1":{"payload":"Scandicus Flexus","children":{"-1":{"payload":"Scandicus Subpunctis","children":{"-1":{"payload":"Scandicus Subpunctis 2","children":{},"numChildren":0}},"numChildren":1}},"numChildren":1}},"numChildren":2},"-1":{"payload":"Torculus","children":{"1":{"payload":"Torculus Resupinus","children":{"-1":{"payload":"Torculus Resupinus 2","children":{"-1":{"payload":"Torculus Resupinus 3","children":{"-1":{"payload":"Torculus Resupinus 4","children":{},"numChildren":0}},"numChildren":1}},"numChildren":1}},"numChildren":1},"-1":{"payload":"Podatus Subpunctis","children":{"1":{"payload":"Podatus Subpunctis Resupinus","children":{},"numChildren":0},"-1":{"payload":"Podatus Subpunctis 2","children":{"1":{"payload":"Podatus Subpunctis Resupinus 2","children":{},"numChildren":0},"-1":{"payload":"Podatus Subpunctis 3","children":{"1":{"payload":"Podatus Subpunctis Resupinus 3","children":{},"numChildren":0},"-1":{"payload":"Podatus Subpunctis 4","children":{},"numChildren":0}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2},"-1":{"payload":"Clivis","children":{"1":{"payload":"Porrectus","children":{"1":{"payload":"Compound Neume 2","children":{"-1":{"payload":"Compound Neume 1","children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":"Porrectus Flexus","children":{"-1":{"payload":"Porrectus Subpunctis","children":{"1":{"payload":"Porrectus Subpunctis Resupinus","children":{},"numChildren":0},"-1":{"payload":"Porrectus Subpunctis 2","children":{"1":{"payload":"Porrectus Subpunctis Resupinus 2","children":{},"numChildren":0}},"numChildren":1}},"numChildren":2}},"numChildren":1}},"numChildren":2},"-1":{"payload":"Climacus","children":{"1":{"payload":"Climacus Resupinus","children":{},"numChildren":0},"-1":{"payload":"Climacus 2","children":{"1":{"payload":"Climacus Resupinus 2","children":{},"numChildren":0},"-1":{"payload":"Climacus 3","children":{"1":{"payload":"Climacus Resupinus 3","children":{},"numChildren":0},"-1":{"payload":"Climacus 4","children":{"1":{"payload":"Climacus Resupinus 4","children":{},"numChildren":0}},"numChildren":1}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":3},"numNodes":1}');
+Toe.Model.Neume.SearchTree.populateFromJSON('{"rootNode":{"payload":{"typeid":"punctum","name":"Punctum"},"children":{"0":{"payload":{"typeid":"distropha","name":"Distropha"},"children":{"0":{"payload":{"typeid":"tristropha","name":"Tristropha"},"children":{},"numChildren":0}},"numChildren":1},"1":{"payload":{"typeid":"podatus","name":"Podatus"},"children":{"1":{"payload":{"typeid":"scandicus.1","name":"Scandicus"},"children":{"1":{"payload":{"typeid":"scandicus.2","name":"Scandicus"},"children":{"1":{"payload":{"typeid":"scandicus.3","name":"Scandicus"},"children":{"1":{"payload":{"typeid":"scandicus.4","name":"Scandicus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"scandicus.flexus.3","name":"Scandicus Flexus 3"},"children":{},"numChildren":0}},"numChildren":2},"-1":{"payload":{"typeid":"scandicus.flexus.2","name":"Scandicus Flexus"},"children":{},"numChildren":0}},"numChildren":2},"-1":{"payload":{"typeid":"scandicus.flexus.1","name":"Scandicus Flexus"},"children":{"-1":{"payload":{"typeid":"scandicus.subpunctis.1","name":"Scandicus Subpunctis"},"children":{"-1":{"payload":{"typeid":"scandicus.subpunctis.2","name":"Scandicus Subpunctis"},"children":{},"numChildren":0}},"numChildren":1}},"numChildren":1}},"numChildren":2},"-1":{"payload":{"typeid":"torculus","name":"Torculus"},"children":{"1":{"payload":{"typeid":"torculus.resupinus.1","name":"Torculus Resupinus"},"children":{"-1":{"payload":{"typeid":"torculus.resupinus.2","name":"Torculus Resupinus"},"children":{"-1":{"payload":{"typeid":"torculus.resupinus.3","name":"Torculus Resupinus 3"},"children":{"-1":{"payload":{"typeid":"torculus.resupinus.4","name":"Torculus Resupinus 4"},"children":{},"numChildren":0}},"numChildren":1}},"numChildren":1}},"numChildren":1},"-1":{"payload":{"typeid":"podatus.subpunctis.1","name":"Podatus Subpunctis"},"children":{"1":{"payload":{"typeid":"podatus.subpunctis.resupinus.1","name":"Podatus Subpunctis Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"podatus.subpunctis.2","name":"Podatus Subpunctis"},"children":{"1":{"payload":{"typeid":"podatus.subpunctis.resupinus.2","name":"Podatus Subpunctis Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"podatus.subpunctis.3","name":"Podatus Subpunctis"},"children":{"1":{"payload":{"typeid":"podatus.resupinus.3","name":"Podatus Subpunctis Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"podatus.subpunctis.4","name":"Podatus Subpunctis"},"children":{},"numChildren":0}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2},"-1":{"payload":{"typeid":"clivis","name":"Clivis"},"children":{"1":{"payload":{"typeid":"porrectus","name":"Porrectus"},"children":{"1":{"payload":{"typeid":"compound.2","name":"Compound Neume 2"},"children":{"-1":{"payload":{"typeid":"compound.1","name":"Compound"},"children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":{"typeid":"porrectus.flexus","name":"Porrectus Flexus"},"children":{"-1":{"payload":{"typeid":"porrectus.subpunctis.1","name":"Porrectus Subpunctis"},"children":{"1":{"payload":{"typeid":"porrectus.subpunctis.resupinus.1","name":"Porrectus Subpunctis Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"porrectus.subpunctis.2","name":"Porrectus Subpunctis"},"children":{"1":{"payload":{"typeid":"porrectus.subpunctis.resupinus.2","name":"Porrectus Subpunctis Resupinus"},"children":{},"numChildren":0}},"numChildren":1}},"numChildren":2}},"numChildren":1}},"numChildren":2},"-1":{"payload":{"typeid":"climacus.1","name":"Climacus"},"children":{"1":{"payload":{"typeid":"climacus.resupinus.1","name":"Climacus Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"climacus.2","name":"Climacus"},"children":{"1":{"payload":{"typeid":"climacus.resupinus.2","name":"Climacus Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"climacus.3","name":"Climacus"},"children":{"1":{"payload":{"typeid":"climacus.resupinus.3","name":"Climacus Resupinus"},"children":{},"numChildren":0},"-1":{"payload":{"typeid":"climacus.4","name":"Climacus"},"children":{"1":{"payload":{"typeid":"climacus.resupinus.4","name":"Climacus Resupinus"},"children":{},"numChildren":0}},"numChildren":1}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":2}},"numChildren":3},"numNodes":1}');
 
 /**
  * Sets the id of the neume
@@ -298,12 +300,14 @@ Toe.Model.Neume.prototype.deriveName = function() {
     var res = Toe.Model.Neume.SearchTree.search(diffs, true);
 
     if (res.prefix) {
-        this.neumePrefix = res.result;
+        this.neumePrefix = res.result.typeid;
         this.name = "Compound";
+        this.typeid = "compound";
     }
     else {
         this.neumePrefix = null;
-        this.name = res.result;
+        this.name = res.result.name;
+        this.typeid = res.result.typeid;
     }
 
     // situations where name is modified
@@ -313,12 +317,15 @@ Toe.Model.Neume.prototype.deriveName = function() {
     // SCANDICUS: scandicus continued
     if (this.name == "Punctum" && this.components[0].props.type == "virga") {
         this.name = "Virga";
+        this.typeid = "virga";
     }
     else if (this.name == "Podatus" && this.props.modifier == Toe.Model.Neume.Modifier["alt"]) {
         this.name = "Epiphonus";
+        this.typeid = "epiphonus";
     }
     else if (this.name == "Clivis" && this.props.modifier == Toe.Model.Neume.Modifier["alt"]) {
         this.name = "Cephalicus";
+        this.typeid = "cephalicus";
     }
 
     return this.name;
