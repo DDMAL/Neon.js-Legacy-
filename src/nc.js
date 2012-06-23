@@ -37,12 +37,8 @@ Toe.Model.NeumeComponent = function(pname, oct, options) {
 
     $.extend(this.props, options);
 
-    // check valid type
-    this.props.type = this.props.type.toLowerCase();
-    this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
-    if (this.props.name == undefined) {
-        throw new Error("NeumeComponent: undefined neume component");
-    }
+    // set head shape
+    this.setHeadShape(this.props.type);
 
     this.setPitchInfo(pname, oct);
 
@@ -64,11 +60,19 @@ Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 Toe.Model.NeumeComponent.Type = {
     punctum: "Punctum",
     virga: "Virga",
-    whitepunct: "White Punctum",
-    inclinatum: "Punctum Inclinatum",
-    smallinclinatum: "Punctum Inclinatum Parvum",
+    cavum: "Cavum",
+    punctum_inclinatum: "Punctum Inclinatum",
+    punctum_inclinatum_parvum: "Punctum Inclinatum Parva",
     quilisma: "Quilisma"
 };
+
+Toe.Model.NeumeComponent.prototype.setHeadShape = function(shape) {
+    this.props.type = shape.toLowerCase();
+    this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
+    if (this.props.name == undefined) {
+        throw new Error("NeumeComponent: undefined head shape");
+    }
+}
 
 // set integer pitch difference with respect to root note of the neume
 Toe.Model.NeumeComponent.prototype.setPitchDifference = function(pitchDiff) {

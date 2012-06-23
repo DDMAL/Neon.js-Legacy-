@@ -202,14 +202,23 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
             $("#menu_editclef").remove();
 
-            if (ele.name == "Punctum") {
+            if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
                 if ($("#menu_editpunctum").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
                                               '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                               '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
                                               '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
-                                              '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n' +
-                                              '</div></li></span>');
+                                              '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' + 
+                                              '<br/><li class="nav-header">Attributes</li>\n' +
+                                              '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
+                                              'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
+                                              '<li><a id="head_punctum">punctum</a></li>\n' +
+                                              '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
+                                              '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
+                                              '<li><a id="head_cavum">cavum</a></li>\n' +
+                                              '<li><a id="head_virga">virga</a></li>\n' +
+                                              '<li><a id="head_quilisma">quilisma</a></li>\n' +
+                                              '</ul></div></span>');
                 }
 
                 // toggle ornamentation
@@ -226,6 +235,20 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                 // remove onclick listener for previous selection
                 $("#edit_chk_dot").unbind("click");
                 $("#edit_chk_dot").bind("click.edit", {gui: gui, punctum: ele}, gui.handleDotToggle);
+
+                // Handle head shape change
+                $("#head_punctum").unbind("click");
+                $("#head_cavum").unbind("click");
+                $("#head_virga").unbind("click");
+                $("#head_quilisma").unbind("click");
+                $("#head_punctum_inclinatum").unbind("click");
+                $("#head_punctum_inclinatum_parvum").unbind("click");
+                $("#head_punctum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum"}, gui.handleHeadShapeChange);
+                $("#head_cavum").bind("click.edit", {gui: gui, punctum: ele, shape: "cavum"}, gui.handleHeadShapeChange);
+                $("#head_virga").bind("click.edit", {gui: gui, punctum: ele, shape: "virga"}, gui.handleHeadShapeChange);
+                $("#head_quilisma").bind("click.edit", {gui: gui, punctum: ele, shape: "quilisma"}, gui.handleHeadShapeChange);
+                $("#head_punctum_inclinatum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum"}, gui.handleHeadShapeChange);
+                $("#head_punctum_inclinatum_parvum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum_parvum"}, gui.handleHeadShapeChange);
             }
             else {
                 $("#menu_editpunctum").remove();
@@ -600,6 +623,39 @@ Toe.View.GUI.prototype.handleDotToggle = function(e) {
     }
 
     $(this).toggleClass("active");
+}
+
+Toe.View.GUI.prototype.handleHeadShapeChange = function(e) {
+    var gui = e.data.gui;
+    var shape = e.data.shape;
+    var punctum = e.data.punctum;
+    var nc = punctum.components[0];
+
+    nc.setHeadShape(shape);
+
+    // deal with head shapes that change the neume name
+    if (shape == "virga") {
+        punctum.name = "Virga";
+        punctum.typeid = "virga";
+    }
+    else if (shape == "cavum") {
+        punctum.name = "Cavum";
+        punctum.typeid = "cavum";
+    }
+
+    // update drawing
+    punctum.syncDrawing();
+
+    var args = {id: punctum.id, shape: shape, ulx: punctum.zone.ulx, uly: punctum.zone.uly, lrx: punctum.zone.lrx, lry: punctum.zone.lry};
+
+    // send change head command to server to change underlying MEI
+    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/neume/headshape", args)
+    .error(function() {
+        // show alert to user
+        // replace text with error message
+        $("#alert > p").text("Server failed to change note head shape. Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
 }
 
 Toe.View.GUI.prototype.handleClefShapeChange = function(e) {

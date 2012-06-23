@@ -153,14 +153,14 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             case Toe.Model.NeumeComponent.Type.virga:
                 svgKey = "punctum";
                 break;
-            case Toe.Model.NeumeComponent.Type.whitepunct:
+            case Toe.Model.NeumeComponent.Type.cavum:
                 svgKey = "whitepunct";
                 break;
-            case Toe.Model.NeumeComponent.Type.inclinatum:
+            case Toe.Model.NeumeComponent.Type.punctum_inclinatum:
                 svgKey = "diamond";
                 break;
-            case Toe.Model.NeumeComponent.Type.smallinclinatum:
-                svgKey = "smalldiamond";
+            case Toe.Model.NeumeComponent.Type.punctum_inclinatum_parvum:
+                svgKey = "diamond_small";
                 break;
             case Toe.Model.NeumeComponent.Type.quilisma:
                 svgKey = "quilisma";
@@ -193,6 +193,23 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
             break;
 
+        // CAVUM (white punctum)
+        case "cavum":
+            var left = neume.zone.ulx + ncGlyphs[0].centre[0];
+            var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
+            elements.modify.push(glyphPunct);
+
+            // render dots
+            if (neume.components[0].hasOrnament('dot')) {
+                // get best spot for one dot
+                var bestDots = this.bestDotPlacements(staff, nc_y, 0);
+                elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
+            }
+
+            this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
+
+            break;
+
         // VIRGA
         case "virga":
             var left = neume.zone.ulx + ncGlyphs[0].centre[0];
@@ -208,7 +225,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
             // draw right line coming off punctum
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
-            var line = this.rendEng.createLine([rx, nc_y[0], rx, neume.zone.lry], {strokeWidth: 2, interact: true});
+            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0]+ (3/2)*staff.delta_y], {strokeWidth: 2, interact: true});
             elements.static.push(line);
 
             this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
@@ -478,7 +495,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             break;
 
         // SCANDICUS
-        case "scandicus":
+        case "scandicus.1":
         case "scandicus.2":
         case "scandicus.3":
         case "scandicus.4":

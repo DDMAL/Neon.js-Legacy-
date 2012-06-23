@@ -33,6 +33,7 @@ rules = [
     (abs_path(r"/edit/(.*?)/insert/neume"), neonsrv.api.InsertNeumeHandler),
     (abs_path(r"/edit/(.*?)/move/neume"), neonsrv.api.ChangeNeumePitchHandler),
     (abs_path(r"/edit/(.*?)/delete/neume"), neonsrv.api.DeleteNeumeHandler),
+    (abs_path(r"/edit/(.*?)/update/neume/headshape"), neonsrv.api.UpdateNeumeHeadShapeHandler),
     (abs_path(r"/edit/(.*?)/neumify"), neonsrv.api.NeumifyNeumeHandler),
     (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.api.UngroupNeumeHandler),
     (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.api.InsertDivisionHandler),

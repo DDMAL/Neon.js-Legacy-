@@ -192,10 +192,16 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
 
         var ncType = "punctum";
         if ($(this).parent().attr("inclinatum") == "true") {
-            ncType = "inclinatum";
+            ncType = "punctum_inclinatum";
         }
-        if (nName == "virga") {
+        else if ($(this).parent().attr("quilisma") == "true") {
+            ncType = "quilisma";
+        }
+        else if (nName == "virga") {
             ncType = "virga";
+        }
+        else if (nName == "cavum") {
+            ncType = "cavum";
         }
 
         // add note ornaments
@@ -312,12 +318,17 @@ Toe.Model.Neume.prototype.deriveName = function() {
 
     // situations where name is modified
     // VIRGA: punctum with different head shape
+    // CAVUM: punctum with different head shape
     // EPIPHONUS: podatus with liquescence modifier
     // CEPHALICUS: clivis with liquescence modifier
     // SCANDICUS: scandicus continued
     if (this.name == "Punctum" && this.components[0].props.type == "virga") {
         this.name = "Virga";
         this.typeid = "virga";
+    }
+    else if (this.name == "Punctum" && this.components[0].props.type == "cavum") {
+        this.name = "Cavum";
+        this.typeid = "cavum";
     }
     else if (this.name == "Podatus" && this.props.modifier == Toe.Model.Neume.Modifier["alt"]) {
         this.name = "Epiphonus";

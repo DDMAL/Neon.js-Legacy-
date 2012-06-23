@@ -2,7 +2,7 @@ import os
 
 from pymei import XmlImport
 from pymei import XmlExport
-from pymei import MeiElement
+from pymei import MeiElement, MeiAttribute
 import tornado.web
 import json
 
@@ -243,6 +243,101 @@ class DeleteNeumeHandler(tornado.web.RequestHandler):
         fname = os.path.join(mei_directory, file)
         self.mei = XmlImport.read(fname)
         self.do_delete(todelete)
+
+        XmlExport.write(self.mei, fname)
+
+        self.set_status(200)
+
+class UpdateNeumeHeadShapeHandler(tornado.web.RequestHandler):
+
+    def update_head_shape(self, neume, shape):
+        nc = neume.getChildrenByName("nc")[0]
+
+        if shape == "punctum":
+            neume_name = "punctum"
+            self.modify_nc_attributes(nc, None)
+        elif shape == "punctum_inclinatum":
+            neume_name = "punctum"
+            attr = MeiAttribute("inclinatum", "true")
+            self.modify_nc_attributes(nc, attr)
+        elif shape == "punctum_inclinatum_parvum":
+            neume_name = "punctum"
+            attr = MeiAttribute("", "true")
+            self.modify_nc_attributes(nc, attr)
+        elif shape == "quilisma":
+            neume_name = "punctum"
+            attr = MeiAttribute("quilisma", "true")
+            self.modify_nc_attributes(nc, attr)
+        elif shape == "virga":
+            neume_name = "virga"
+            self.modify_nc_attributes(nc, None)
+        elif shape == "cavum":
+            neume_name = "cavum"
+            self.modify_nc_attributes(nc, None)
+
+
+        neume.addAttribute("name", neume_name)
+
+    def modify_nc_attributes(self, nc, attribute):
+        """
+        Strip all attributes but id, and add a given
+        attribute. If the attribute parameter is None,
+        just strip attributes.
+        """
+
+        attrs = nc.getAttributes()
+
+        # keep only id attribute
+        attrs = filter(lambda a: a.getName() == "xml:id", attrs)
+
+        # add new attribute
+        if attribute is not None:
+            attrs.append(attribute)
+            
+        nc.setAttributes(attrs)
+
+    def update_or_add_zone(self, neume, ulx, uly, lrx, lry):
+        facsid = neume.getAttribute("facs").getValue()
+        if facsid:
+            # the zone exists already
+            zone = self.mei.getElementById(facsid)
+        else:
+            # create a new zone
+            zone = MeiElement("zone")
+
+        # update bounding box data
+        zone.addAttribute("ulx", ulx)
+        zone.addAttribute("uly", uly)
+        zone.addAttribute("lrx", lrx)
+        zone.addAttribute("lry", lry)
+
+    def post(self, file):
+        """
+        Update the head shape of the given punctum.
+        Update bounding box, if it has changed.
+        Update neume name, if the new head shape changes the name.
+        """
+
+        # get parameters
+        neume_id = str(self.get_argument("id", ""))
+        head_shape = str(self.get_argument("shape", ""))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+
+        fname = os.path.join(mei_directory, file)
+        self.mei = XmlImport.read(fname)
+
+        neume = self.mei.getElementById(neume_id)
+
+        self.update_head_shape(neume, head_shape)
+
+        # update bounding box
+        if lrx and lry and ulx and uly:
+            zone = self.update_or_add_zone(neume, ulx, uly, lrx, lry)
 
         XmlExport.write(self.mei, fname)
 
