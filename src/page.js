@@ -28,6 +28,9 @@ THE SOFTWARE.
 Toe.Model.Page = function() {
     // initialize staves
     this.staves = new Array();
+
+    // no scaling by default
+    this.scale = 1.0;
 }
 
 Toe.Model.Page.prototype.constructor = Toe.Model.Page;
@@ -40,8 +43,8 @@ Toe.Model.Page.prototype.constructor = Toe.Model.Page;
  * @param {Number} height Height of the page
  */
 Toe.Model.Page.prototype.setDimensions = function(width, height) {
-    this.width = width;
-    this.height = height;
+    this.width = this.scale*width;
+    this.height = this.scale*height;
 }
 
 /**
@@ -73,6 +76,16 @@ Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
     
 	// return page properties
     return [max_x, max_y];
+}
+
+/**
+ * Set the scaling factor of the page, relative to the original document.
+ * Scales width and height identically to maintain aspect ratio.
+ *
+ * @methodOf Toe.Model.Page
+ */
+Toe.Model.Page.prototype.setPageScale = function(scale) {
+    this.scale = scale;
 }
 
 /**

@@ -26,6 +26,7 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var mei;
+        var imgDims = {};
         var rendEng;
         var startTime;
 
@@ -83,17 +84,21 @@ THE SOFTWARE.
             );
         };
 
-        // helper function
-        var parseBoundingBox = function(zoneFacs) {
-            var ulx = parseInt($(zoneFacs).attr("ulx"));
-            var uly = parseInt($(zoneFacs).attr("uly"));
-            var lrx = parseInt($(zoneFacs).attr("lrx"));
-            var lry = parseInt($(zoneFacs).attr("lry"));
-
-            return [ulx, uly, lrx, lry];
-        };
-
         var loadMeiPage = function(page) {
+            // helper function to parse bounding box information
+            function parseBoundingBox(zoneFacs) {
+                var ulx = parseInt($(zoneFacs).attr("ulx"));
+                var uly = parseInt($(zoneFacs).attr("uly"));
+                var lrx = parseInt($(zoneFacs).attr("lrx"));
+                var lry = parseInt($(zoneFacs).attr("lry"));
+
+                var bb = $.map([ulx, uly, lrx, lry], function(b) {
+                    return Math.round(page.scale*b);
+                });
+
+                return bb;
+            };
+
             var clefList = $("clef, sb", mei);
             // calculate sb indices in the clef list
             var clef_sbInd = new Array();
@@ -153,7 +158,7 @@ THE SOFTWARE.
                 sModel.setID($(sel).attr("xml:id"));
 
                 // set global scale using staff from first system
-                if(sit == 0) {
+                if (sit == 0) {
                     rendEng.calcScaleFromStaff(sModel, {overwrite: true});
                 }
 
@@ -203,7 +208,7 @@ THE SOFTWARE.
                         rendEng.outlineBoundingBox(n_bb, {fill: "green"});
                     }
 
-                    nModel.neumeFromMei(nel, $(neumeFacs), sModel);
+                    nModel.neumeFromMei(nel, n_bb, sModel);
                     // instantiate neume view and controller
                     var nView = new Toe.View.NeumeView(rendEng);
                     var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
@@ -300,13 +305,9 @@ THE SOFTWARE.
 
             if (settings.autoLoad && settings.backgroundImage) {
                 fabric.Image.fromURL(settings.prefix+"/file/"+filename, function(img) {
-                    if (img.width > settings.width) {
-                        settings.width = img.width;
-                    }
-                    if (img.height > settings.height) {
-                        settings.height = img.height;
-                    }
-
+                    imgDims.width = img.width;
+                    imgDims.height = img.height;
+                    img.scale(0.31717263253285);
                     dfd.resolve();
                 });
             }
@@ -352,17 +353,18 @@ THE SOFTWARE.
 
             var canvasDims = [settings.width, settings.height];
             if (settings.autoLoad) {
-                // derive canvas dimensions from mei facs
-                canvasDims = page.calcDimensions($(mei).find("zone"));
+                if (settings.backgroundImage) {
+                    canvasDims = [imgDims.width, imgDims.height];
+                }
+                else {
+                    // derive canvas dimensions from mei facs
+                    canvasDims = page.calcDimensions($(mei).find("zone"));
+                }
 
-                if (canvasDims[0] < settings.width) {
-                    canvasDims[0] = settings.width;
-                }
-                if (canvasDims[1] < settings.height) {
-                    canvasDims[1] = settings.height;
-                }
+                // calculate scale based on width, maintaining aspect ratio
+                page.setPageScale(settings.width/canvasDims[0]);
             }
-            page.setDimensions(canvasDims[0], canvasDims[1]);
+            page.setDimensions(Math.round(canvasDims[0]), Math.round(canvasDims[1]));
 
             // make canvas dimensions the size of the page
             canvas.attr("width", page.width);
@@ -375,8 +377,7 @@ THE SOFTWARE.
             if (settings.backgroundImage) {
                 $.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
                                       backgroundImageOpacity: settings.backgroundImageOpacity,
-                                      backgroundImageStretch: false});
-
+                                      backgroundImageStretch: true});
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
 

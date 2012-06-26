@@ -354,7 +354,7 @@ Toe.Model.Neume.prototype.setRootStaffPos = function(staffPos) {
  * @param {jQuery wrapped element set} facs the MEI facs data for the provided neume
  * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
  */
-Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
+Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, bb, staff) {
     // check the DOM element is in fact a neume
     if (neumeData.nodeName.toLowerCase() != "neume") {
         throw new Error("neumeFromMei: invalid neume data");
@@ -382,13 +382,7 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
         this.props.type = "unknown";
     }
     
-    // set bounding box
-    var ulx = parseInt($(facs).attr("ulx"));
-    var uly = parseInt($(facs).attr("uly"));
-    var lrx = parseInt($(facs).attr("lrx"));
-    var lry = parseInt($(facs).attr("lry"));
-
-    this.setBoundingBox([ulx, uly, lrx, lry]);
+    this.setBoundingBox(bb);
 
     // cache a local copy of this so the handle isn't overidden within the jquery function
     var theNeume = this;

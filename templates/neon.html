@@ -66,6 +66,7 @@
           debug: {{debug}},
           prefix: "{{prefix}}",
           filename: "{{page}}",
+          width: 800, // enforce width
           backgroundImage: "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
           backgroundImageOpacity: 0.0
         });
@@ -167,7 +168,7 @@
         </div>
         <div class="span10">
           <div class="row-fluid">
-            <div id="neon-wrapper">
+              <div id="neon-wrapper"></div>
           </div><!--/row-->
         </div><!--/span-->
       </div><!--/row-->

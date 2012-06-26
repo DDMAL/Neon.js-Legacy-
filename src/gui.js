@@ -356,7 +356,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                             // the custos has been vertically moved
                             // update the custos bounding box information in the model
                             // do not need to update pitch name & octave since this does not change
-                            $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                            var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                            $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                             .error(function() {
                                 // show alert to user
                                 // replace text with error message
@@ -368,7 +369,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
                     // convert staffPos to staffLine format used in MEI attribute
                     var staffLine = ele.staff.props.numLines + (ele.props.staffPos/2);
-                    var args = {id: ele.id, line: staffLine, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, pitchInfo: pitchInfo};
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                    var args = {id: ele.id, line: staffLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
                     // send pitch shift command to server to change underlying MEI
                     $.post(gui.prefix + "/edit/" + gui.fileName + "/move/clef", {data: JSON.stringify(args)})
@@ -423,7 +425,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         $(ele).trigger("vSelectDrawing");
                     }
 
-                    var args = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry};
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                    var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
                     if (oldRootStaffPos != newRootStaffPos) {
                         // this is a pitch shift
                         args.pitchInfo = new Array();
@@ -524,7 +527,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         beforeid = sNextModel.id;
                     }
 
-                    var data = {id: ele.id, ulx: ele.zone.ulx, uly: ele.zone.uly, lrx: ele.zone.lrx, lry: ele.zone.lry, beforeid: beforeid};
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                    var data = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], beforeid: beforeid};
 
                     // send move command to the server to change underlying MEI
                     $.post(gui.prefix + "/edit/" + gui.fileName + "/move/division", data)
@@ -574,7 +578,8 @@ Toe.View.GUI.prototype.handleDotToggle = function(e) {
     punctum.syncDrawing();
 
     // get final bounding box information
-    var args = {id: punctum.id, dotform: "aug", ulx: punctum.zone.ulx, uly: punctum.zone.uly, lrx: punctum.zone.lrx, lry: punctum.zone.lry};
+    var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    var args = {id: punctum.id, dotform: "aug", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
     if (!hasDot) {
         // send add dot command to server to change underlying MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/dot", args)
@@ -631,7 +636,8 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -641,7 +647,8 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
             }
         });
 
-        var args = {id: clef.id, shape: cShape, ulx: clef.zone.ulx, uly: clef.zone.uly, lrx: clef.zone.lrx, lry: clef.zone.lry, pitchInfo: pitchInfo};
+        var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+        var args = {id: clef.id, shape: cShape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
         // send pitch shift command to server to change underlying MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
@@ -693,7 +700,8 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -759,8 +767,9 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
+                var bb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
                 $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos",
-                      {id: custos.id, pname: newPname, oct: newOct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
+                      {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -926,12 +935,12 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         sModel.addNeume(newNeume);
 
         // get final bounding box information
-        bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
+        var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
 
         // get neume key
         var neumeKey = newNeume.props.key;
 
-        var args = {nids: nids.join(","), name: neumeKey, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        var args = {nids: nids.join(","), name: neumeKey, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // call server neumify function to update MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", args, function(data) {
             // set id of the new neume with generated ID from the server
@@ -1010,7 +1019,8 @@ Toe.View.GUI.prototype.handleUngroup = function(e) {
             o.eleRef.staff.addNeume(newPunct);
 
             // get final bounding box information
-            punctBoxes.push({"ulx": newPunct.zone.ulx, "uly": newPunct.zone.uly, "lrx": newPunct.zone.lrx, "lry": newPunct.zone.lry});
+            var outbb = gui.getOutputBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
+            punctBoxes.push({"ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
 
             punctums.push(newPunct);
         });
@@ -1235,10 +1245,11 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
 
         // now that final bounding box is calculated from the drawing
         // add the bounding box information to the server function arguments
-        args["ulx"] = nModel.zone.ulx;
-        args["uly"] = nModel.zone.uly;
-        args["lrx"] = nModel.zone.lrx;
-        args["lry"] = nModel.zone.lry;
+        var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+        args["ulx"] = outbb[0];
+        args["uly"] = outbb[1];
+        args["lrx"] = outbb[2];
+        args["lry"] = outbb[3];
 
         // get next element to insert before
         if (nInd + 1 < sModel.elements.length) {
@@ -1432,7 +1443,8 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
         // mount division on the staff
         var nInd = staff.addDivision(division);
 
-        var args = {type: division.key, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        var outbb = gui.getOutputBoundingBox(bb);
+        var args = {type: division.key, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
         if (nInd + 1 < staff.elements.length) {
             args["beforeid"] = staff.elements[nInd+1].id;   
@@ -1580,7 +1592,8 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
         var nInd = staff.addClef(clef);
 
         var staffLine = staff.props.numLines + staffPos/2;
-        var args = {shape: cShape, line: staffLine, ulx: clef.zone.ulx, uly: clef.zone.uly, lrx: clef.zone.lrx, lry: clef.zone.lry};
+        var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+        var args = {shape: cShape, line: staffLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
         if (nInd + 1 < staff.elements.length) {
             args["beforeid"] = staff.elements[nInd+1].id;
@@ -1616,7 +1629,8 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: e.zone.ulx, uly: e.zone.uly, lrx: e.zone.lrx, lry: e.zone.lry})
+                var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -1695,8 +1709,8 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
         // get acting clef for the custos 
         var actingClef = prevStaff.getActingClefByEle(custos);
         custos.setRootStaffPos(prevStaff.calcStaffPosFromPitch(pname, oct, actingClef));
-
-        $.post(this.prefix + "/edit/" + this.fileName + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: custos.zone.ulx, uly: custos.zone.uly, lrx: custos.zone.lrx, lry: custos.zone.lry})
+        var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+        $.post(this.prefix + "/edit/" + this.fileName + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -1721,7 +1735,8 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
         // mount the custos on the staff
         prevStaff.setCustos(cModel);
 
-        var args = {id: cModel.id, pname: pname, oct: oct, ulx: cModel.zone.ulx, uly: cModel.zone.uly, lrx: cModel.zone.lrx, lry: cModel.zone.lry};
+        var outbb = this.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+        var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
         // get id of the next staff element
         var nextStaff = gui.page.getNextStaff(prevStaff);
@@ -1739,4 +1754,11 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
             $("#alert").animate({opacity: 1.0}, 100);
         });
     }
+}
+
+Toe.View.GUI.prototype.getOutputBoundingBox = function(bb) {
+    gui = this;
+    return $.map(bb, function(b) {
+        return Math.round((2-gui.page.scale)*b);
+    });
 }
