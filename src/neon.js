@@ -33,7 +33,7 @@ THE SOFTWARE.
         // These are variables which can be overridden upon instantiation
         var defaults = {
             width: 800,
-            height: 600,
+            height: 1024,
             autoLoad: false,
             debug: false,
             filename: "",
@@ -307,7 +307,6 @@ THE SOFTWARE.
                 fabric.Image.fromURL(settings.prefix+"/file/"+filename, function(img) {
                     imgDims.width = img.width;
                     imgDims.height = img.height;
-                    img.scale(0.31717263253285);
                     dfd.resolve();
                 });
             }
@@ -363,21 +362,23 @@ THE SOFTWARE.
 
                 // calculate scale based on width, maintaining aspect ratio
                 page.setPageScale(settings.width/canvasDims[0]);
+                console.log("page scale: " + page.scale);
             }
             page.setDimensions(Math.round(canvasDims[0]), Math.round(canvasDims[1]));
+            console.log("page dims w: " + page.width + ", h: " + page.height);
 
             // make canvas dimensions the size of the page
             canvas.attr("width", page.width);
             canvas.attr("height", page.height);
-            canvas.attr("style", "border: 4px black solid;");
+            canvas.attr("style", "border: 0px black solid;");
 
             elem.prepend(canvas);
 
             var canvasOpts = {renderOnAddition: false};
             if (settings.backgroundImage) {
-                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
+                /*$.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
                                       backgroundImageOpacity: settings.backgroundImageOpacity,
-                                      backgroundImageStretch: true});
+                                      backgroundImageStretch: true});*/
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
 

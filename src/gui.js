@@ -135,8 +135,9 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
                                'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
 
         $("#sldr_bgImgOpacity").bind("change", function() {
-            gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
-            gui.rendEng.repaint();
+            $("#bg-img").css("opacity", $(this).val());
+            //gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
+            //gui.rendEng.repaint();
         });
     }
 
@@ -1759,6 +1760,6 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
 Toe.View.GUI.prototype.getOutputBoundingBox = function(bb) {
     gui = this;
     return $.map(bb, function(b) {
-        return Math.round((2-gui.page.scale)*b);
+        return Math.round(b/gui.page.scale);
     });
 }

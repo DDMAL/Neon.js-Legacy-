@@ -66,7 +66,7 @@
           debug: {{debug}},
           prefix: "{{prefix}}",
           filename: "{{page}}",
-          width: 800, // enforce width
+          width: 1200, // enforce width
           backgroundImage: "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
           backgroundImageOpacity: 0.0
         });
@@ -167,8 +167,11 @@
           </div>
         </div>
         <div class="span10">
-          <div class="row-fluid">
-              <div id="neon-wrapper"></div>
+            <div class="row-fluid">
+                <div style="position: absolute">
+                    <img id="bg-img" src="../file/0_CF-010r.jpg" width="1200px" height="1901px" style="opacity: 0;"></img>
+                </div>
+                <div id="neon-wrapper"></div>
           </div><!--/row-->
         </div><!--/span-->
       </div><!--/row-->
