@@ -192,7 +192,12 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, facs, staff) {
 
         var ncType = "punctum";
         if ($(this).parent().attr("inclinatum") == "true") {
-            ncType = "punctum_inclinatum";
+            if ($(this).parent().attr("deminutus") == "true") {
+                ncType = "punctum_inclinatum_parvum";
+            }
+            else {
+                ncType = "punctum_inclinatum";
+            }
         }
         else if ($(this).parent().attr("quilisma") == "true") {
             ncType = "quilisma";

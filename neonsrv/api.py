@@ -262,8 +262,8 @@ class UpdateNeumeHeadShapeHandler(tornado.web.RequestHandler):
             self.modify_nc_attributes(nc, attr)
         elif shape == "punctum_inclinatum_parvum":
             neume_name = "punctum"
-            attr = MeiAttribute("", "true")
-            self.modify_nc_attributes(nc, attr)
+            attrs = [MeiAttribute("inclinatum", "true"), MeiAttribute("deminutus", "true")];
+            self.modify_nc_attributes(nc, attrs)
         elif shape == "quilisma":
             neume_name = "punctum"
             attr = MeiAttribute("quilisma", "true")
@@ -292,7 +292,10 @@ class UpdateNeumeHeadShapeHandler(tornado.web.RequestHandler):
 
         # add new attribute
         if attribute is not None:
-            attrs.append(attribute)
+            if type(attribute) is list:
+                attrs.extend(attribute)
+            else:
+                attrs.append(attribute)
             
         nc.setAttributes(attrs)
 
