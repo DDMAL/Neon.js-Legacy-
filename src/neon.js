@@ -362,10 +362,8 @@ THE SOFTWARE.
 
                 // calculate scale based on width, maintaining aspect ratio
                 page.setPageScale(settings.width/canvasDims[0]);
-                console.log("page scale: " + page.scale);
             }
             page.setDimensions(Math.round(canvasDims[0]), Math.round(canvasDims[1]));
-            console.log("page dims w: " + page.width + ", h: " + page.height);
 
             // make canvas dimensions the size of the page
             canvas.attr("width", page.width);
