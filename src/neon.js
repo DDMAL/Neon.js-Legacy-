@@ -370,15 +370,15 @@ THE SOFTWARE.
             // make canvas dimensions the size of the page
             canvas.attr("width", page.width);
             canvas.attr("height", page.height);
-            canvas.attr("style", "border: 0px black solid;");
+            canvas.attr("style", "border: 4px black solid;");
 
             elem.prepend(canvas);
 
             var canvasOpts = {renderOnAddition: false};
             if (settings.backgroundImage) {
-                /*$.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
+                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
                                       backgroundImageOpacity: settings.backgroundImageOpacity,
-                                      backgroundImageStretch: true});*/
+                                      backgroundImageStretch: true});
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
 

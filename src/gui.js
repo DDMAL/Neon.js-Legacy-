@@ -135,9 +135,8 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
                                'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
 
         $("#sldr_bgImgOpacity").bind("change", function() {
-            $("#bg-img").css("opacity", $(this).val());
-            //gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
-            //gui.rendEng.repaint();
+            gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
+            gui.rendEng.repaint();
         });
     }
 
