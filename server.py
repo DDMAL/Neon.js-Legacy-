@@ -8,7 +8,7 @@ import tornado.web
 
 import conf
 import neonsrv.interface
-import neonsrv.api
+import neonsrv.tornadoapi
 
 assert tornado.version_info > (2, 0, 0)
 
@@ -30,23 +30,23 @@ rules = [
     (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
     (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
     (abs_path(r"/revert/(.*?)"), neonsrv.interface.FileRevertHandler),
-    (abs_path(r"/edit/(.*?)/insert/neume"), neonsrv.api.InsertNeumeHandler),
-    (abs_path(r"/edit/(.*?)/move/neume"), neonsrv.api.ChangeNeumePitchHandler),
-    (abs_path(r"/edit/(.*?)/delete/neume"), neonsrv.api.DeleteNeumeHandler),
-    (abs_path(r"/edit/(.*?)/neumify"), neonsrv.api.NeumifyNeumeHandler),
-    (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.api.UngroupNeumeHandler),
-    (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.api.InsertDivisionHandler),
-    (abs_path(r"/edit/(.*?)/move/division"), neonsrv.api.MoveDivisionHandler),
-    (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.api.DeleteDivisionHandler),
-    (abs_path(r"/edit/(.*?)/insert/dot"), neonsrv.api.AddDotHandler),
-    (abs_path(r"/edit/(.*?)/delete/dot"), neonsrv.api.DeleteDotHandler),
-    (abs_path(r"/edit/(.*?)/insert/clef"), neonsrv.api.InsertClefHandler),
-    (abs_path(r"/edit/(.*?)/move/clef"), neonsrv.api.MoveClefHandler),
-    (abs_path(r"/edit/(.*?)/update/clef/shape"), neonsrv.api.UpdateClefShapeHandler),
-    (abs_path(r"/edit/(.*?)/delete/clef"), neonsrv.api.DeleteClefHandler),
-    (abs_path(r"/edit/(.*?)/insert/custos"), neonsrv.api.InsertCustosHandler),
-    (abs_path(r"/edit/(.*?)/move/custos"), neonsrv.api.MoveCustosHandler),
-    (abs_path(r"/edit/(.*?)/delete/custos"), neonsrv.api.DeleteCustosHandler)
+    (abs_path(r"/edit/(.*?)/insert/neume"), neonsrv.tornadoapi.InsertNeumeHandler),
+    (abs_path(r"/edit/(.*?)/move/neume"), neonsrv.tornadoapi.ChangeNeumePitchHandler),
+    (abs_path(r"/edit/(.*?)/delete/neume"), neonsrv.tornadoapi.DeleteNeumeHandler),
+    (abs_path(r"/edit/(.*?)/neumify"), neonsrv.tornadoapi.NeumifyNeumeHandler),
+    (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.tornadoapi.UngroupNeumeHandler),
+    (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.tornadoapi.InsertDivisionHandler),
+    (abs_path(r"/edit/(.*?)/move/division"), neonsrv.tornadoapi.MoveDivisionHandler),
+    (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.tornadoapi.DeleteDivisionHandler),
+    (abs_path(r"/edit/(.*?)/insert/dot"), neonsrv.tornadoapi.AddDotHandler),
+    (abs_path(r"/edit/(.*?)/delete/dot"), neonsrv.tornadoapi.DeleteDotHandler),
+    (abs_path(r"/edit/(.*?)/insert/clef"), neonsrv.tornadoapi.InsertClefHandler),
+    (abs_path(r"/edit/(.*?)/move/clef"), neonsrv.tornadoapi.MoveClefHandler),
+    (abs_path(r"/edit/(.*?)/update/clef/shape"), neonsrv.tornadoapi.UpdateClefShapeHandler),
+    (abs_path(r"/edit/(.*?)/delete/clef"), neonsrv.tornadoapi.DeleteClefHandler),
+    (abs_path(r"/edit/(.*?)/insert/custos"), neonsrv.tornadoapi.InsertCustosHandler),
+    (abs_path(r"/edit/(.*?)/move/custos"), neonsrv.tornadoapi.MoveCustosHandler),
+    (abs_path(r"/edit/(.*?)/delete/custos"), neonsrv.tornadoapi.DeleteCustosHandler)
 ]
 
 # Set up tests if we're in debug mode

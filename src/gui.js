@@ -767,7 +767,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                var bb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+                var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
                 $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos",
                       {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
@@ -944,7 +944,7 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         // call server neumify function to update MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", args, function(data) {
             // set id of the new neume with generated ID from the server
-            newNeume.id = JSON.parse(data).nid;
+            newNeume.id = JSON.parse(data).id;
         })
         .error(function() {
             // show alert to user
@@ -1265,7 +1265,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
 
         // send insert command to server to change underlying MEI
         $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/neume", args, function(data) {
-            nModel.id = JSON.parse(data).nid;
+            nModel.id = JSON.parse(data).id;
         })
         .error(function() {
             // show alert to user
@@ -1343,7 +1343,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
         var snapCoords = pnt;
         var divProps = {strokeWidth: 4, opacity: 0.6};
         switch (divisionForm) {
-            case "small":
+            case "div_small":
                 snapCoords.y = staff.zone.uly;
 
                 if (!gui.divisionDwg) {
@@ -1355,7 +1355,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
                     gui.rendEng.draw({fixed: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                 }
                 break;
-            case "minor":
+            case "div_minor":
                 snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
                 if (!gui.divisionDwg) {
@@ -1367,7 +1367,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
                     gui.rendEng.draw({fixed: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                 }
                 break;
-            case "major":
+            case "div_major":
                 snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
                 if (!gui.divisionDwg) {
@@ -1379,7 +1379,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
                     gui.rendEng.draw({fixed: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                 }
                 break;
-            case "final":
+            case "div_final":
                 snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
 
                 if (!gui.divisionDwg) {
@@ -1444,7 +1444,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
         var nInd = staff.addDivision(division);
 
         var outbb = gui.getOutputBoundingBox(bb);
-        var args = {type: division.key, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+        var args = {type: division.key.slice(4), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
         if (nInd + 1 < staff.elements.length) {
             args["beforeid"] = staff.elements[nInd+1].id;   
@@ -1473,7 +1473,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.rendEng.canvas.remove(gui.divisionDwg);
             gui.divisionDwg = null;
         }
-        divisionForm = "small";
+        divisionForm = "div_small";
     });
 
     $("#rad_minor").bind("click.insert", function() {
@@ -1481,7 +1481,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.rendEng.canvas.remove(gui.divisionDwg);
             gui.divisionDwg = null;
         }
-        divisionForm = "minor";
+        divisionForm = "div_minor";
     });
 
     $("#rad_major").bind("click.insert", function() {
@@ -1489,7 +1489,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.rendEng.canvas.remove(gui.divisionDwg);
             gui.divisionDwg = null;
         }
-        divisionForm = "major";
+        divisionForm = "div_major";
     });
 
     $("#rad_final").bind("click.insert", function() {
@@ -1497,7 +1497,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.rendEng.canvas.remove(gui.divisionDwg);
             gui.divisionDwg = null;
         }
-        divisionForm = "final";
+        divisionForm = "div_final";
     });
 
     // toggle small division by default
