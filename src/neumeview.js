@@ -123,7 +123,7 @@ Toe.View.NeumeView.prototype.drawLedgerLines = function(ncStaffPos, centre, widt
         }
     });
 
-    this.ledgerLines = this.rendEng.draw({static: ledgers, modify: []}, {group: true, selectable: false})[0];
+    this.ledgerLines = this.rendEng.draw({fixed: ledgers, modify: []}, {group: true, selectable: false})[0];
 }
 
 Toe.View.NeumeView.prototype.drawNeume = function(neume) {
@@ -168,9 +168,9 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
     var glyphDot = this.rendEng.getGlyph("dot");
 
-    // static holds elements that will not undergo global transformations
+    // fixed holds elements that will not undergo global transformations
     // modify holds elements that will undergo global transformations
-    var elements = {static: new Array(), modify: new Array()};
+    var elements = {fixed: new Array(), modify: new Array()};
 
     switch (neume.props.type) {
         // PUNCTUM
@@ -206,7 +206,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             // draw right line coming off punctum
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
             var line = this.rendEng.createLine([rx, nc_y[0], rx, neume.zone.lry], {strokeWidth: 2, interact: true});
-            elements.static.push(line);
+            elements.fixed.push(line);
 
             this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
 
@@ -227,12 +227,12 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 // draw left line coming off first punctum
                 var lx = nc_x[0]-punct1.centre[0]+1;
                 var line = this.rendEng.createLine([lx, nc_y[0], lx, neume.zone.lry], {strokeWidth: 2, interact: true});
-                elements.static.push(line);
+                elements.fixed.push(line);
 
                 // draw right line coming off punctum
                 var rx = glyphPunct1.left+punct1.centre[0]-2;
                 line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-                elements.static.push(line);
+                elements.fixed.push(line);
 
                 // second punctum
                 var punct2 = this.rendEng.getGlyph("liques_up");
@@ -251,12 +251,12 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 // draw left line coming off first punctum
                 var lx = glyphPunct1.left-ncGlyphs[0].centre[0]+1;
                 var line = this.rendEng.createLine([lx, nc_y[0], lx, neume.zone.lry], {strokeWidth: 2, interact: true});
-                elements.static.push(line);
+                elements.fixed.push(line);
 
                 // draw right line coming off punctum
                 var rx = glyphPunct1.left+ncGlyphs[0].centre[0];
                 line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-                elements.static.push(line);
+                elements.fixed.push(line);
 
                 // second punctum
                 nc_x.push(nc_x[0] + (2*ncGlyphs[1].centre[0]));
@@ -298,7 +298,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             // draw right line coming off punctum1
             var rx = glyphPunct1.left+ncGlyphs[0].centre[0]-1;
             var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-            elements.static.push(line);
+            elements.fixed.push(line);
 
             // second punctum
             var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1]});
@@ -308,7 +308,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             // draw right line coming off punctum2
             rx = glyphPunct2.left+ncGlyphs[1].centre[0]-1;
             line = this.rendEng.createLine([rx, nc_y[1], rx, nc_y[2]], {strokeWidth: 2, interact: true});
-            elements.static.push(line);
+            elements.fixed.push(line);
 
             // third punctum
             var glyphPunct3 = ncGlyphs[2].clone().set({left: nc_x[2], top: nc_y[2]});
@@ -347,7 +347,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 // draw right line connecting two punctum
                 var rx = glyphPunct1.left + punct1.centre[0] - 2;
                 var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-                elements.static.push(line);
+                elements.fixed.push(line);
 
                 // second punctum
                 var punct2 = this.rendEng.getGlyph("liques_down");
@@ -373,7 +373,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 // draw right line connecting two punctum
                 var rx = glyphPunct1.left + punct1.centre[0] - 1;
                 var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-                elements.static.push(line);
+                elements.fixed.push(line);
 
                 // second punctum
                 nc_x.push(nc_x[0]);
@@ -414,7 +414,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 ly = swooshBot;
             }
             var line = this.rendEng.createLine([lx, nc_y[0], lx, ly], {strokeWidth: 2, interact: true});
-            elements.static.push(line);
+            elements.fixed.push(line);
 
             // draw punctum
             var nc_x = glyphSwoosh.left + swoosh.centre[0] - ncGlyphs[2].centre[0];
@@ -423,7 +423,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
             // draw right line connecting swoosh and punctum
             var rx = glyphPunct.left + ncGlyphs[2].centre[0] - 1;
             line = this.rendEng.createLine([rx, nc_y[2], rx, nc_y[1]], {strokeWidth: 2, interact: true});
-            elements.static.push(line);
+            elements.fixed.push(line);
 
             elements.modify.push(glyphPunct);
 
@@ -467,7 +467,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 // draw right line connecting two punctum
                 var rx1 = lastX + pes.centre[0] - 1;
                 var line1 = this.rendEng.createLine([rx1, nc_y[i], rx1, nc_y[i+1]], {strokeWidth: 2, interact: true});
-                elements.static.push(line1);
+                elements.fixed.push(line1);
 
                 // second punctum
                 nc_x.push(lastX);
@@ -506,7 +506,7 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
                 var rx2 = lastX + ncGlyphs[numNC-1].centre[0] - 2;
                 var line2 = this.rendEng.createLine([rx2, nc_y[numNC-1], rx2, neume.zone.lry - ((neume.zone.lry - neume.zone.uly)/2)], 
                                                     {strokeWidth: 2, interact: true});
-                elements.static.push(line2);
+                elements.fixed.push(line2);
             }
 
             this.drawLedgerLines($.map(neume.components, function(nc) {

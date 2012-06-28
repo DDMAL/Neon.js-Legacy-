@@ -46,37 +46,37 @@ Toe.View.DivisionView.prototype.renderDivision = function(division) {
 
     var staff = division.staff;
 
-    var elements = {static: new Array(), modify: new Array()};
+    var elements = {fixed: new Array(), modify: new Array()};
     
     // render division lines
     var x1 = division.zone.ulx;
     var divProps = {strokeWidth: 4};
     switch (division.type) {
-        case Toe.Model.Division.Type.small:
+        case Toe.Model.Division.Type.div_small:
             var y1 = staff.zone.uly - staff.delta_y/2;
             var y2 = staff.zone.uly + staff.delta_y/2;
-            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
-        case Toe.Model.Division.Type.minor:
+        case Toe.Model.Division.Type.div_minor:
             var y1 = staff.zone.uly + staff.delta_y/2;
             var y2 = y1 + 2*staff.delta_y;
-            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
-        case Toe.Model.Division.Type.major:
+        case Toe.Model.Division.Type.div_major:
             var y1 = staff.zone.uly;
             var y2 = staff.zone.lry;
-            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
-        case Toe.Model.Division.Type.final:
+        case Toe.Model.Division.Type.div_final:
             var y1 = staff.zone.uly;
             var y2 = staff.zone.lry;
-            elements.static.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
+            elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
 
             var x2 = division.zone.lrx;
-            elements.static.push(this.rendEng.createLine([x2, y1, x2, y2], divProps));
+            elements.fixed.push(this.rendEng.createLine([x2, y1, x2, y2], divProps));
             break;
     }
     

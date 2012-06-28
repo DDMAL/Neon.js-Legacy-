@@ -229,7 +229,7 @@ THE SOFTWARE.
                         rendEng.outlineBoundingBox(d_bb, {fill: "yellow"});
                     }
 
-                    var dType = $(del).attr("form");
+                    var dType = "div_" + $(del).attr("form");
                     var dModel = new Toe.Model.Division(dType);
                     dModel.setBoundingBox(d_bb);
                     dModel.setID($(del).attr("xml:id"));

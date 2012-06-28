@@ -54,7 +54,7 @@ Toe.View.CustosView.prototype.drawLedgerLines = function(staffPos, centre, width
         }
     }
 
-    this.ledgerLines = this.rendEng.draw({static: ledgers, modify: []}, {group: true, selectable: false})[0];
+    this.ledgerLines = this.rendEng.draw({fixed: ledgers, modify: []}, {group: true, selectable: false})[0];
 }
 
 /**
@@ -79,7 +79,7 @@ Toe.View.CustosView.prototype.renderCustos = function(custos) {
     var custosDwg = glyphCustos.clone().set({left: nc_x, top: custos_y - glyphCustos.centre[1]/2});
 
     this.drawLedgerLines(custos.rootStaffPos, nc_x, 4*glyphCustos.centre[0], staff);
-	this.drawing = this.rendEng.draw({static: [], modify: [custosDwg]}, {selectable: custos.props.interact, eleRef: custos})[0];
+	this.drawing = this.rendEng.draw({fixed: [], modify: [custosDwg]}, {selectable: custos.props.interact, eleRef: custos})[0];
 }
 
 Toe.View.CustosView.prototype.updateStaffPosition = function(custos) {

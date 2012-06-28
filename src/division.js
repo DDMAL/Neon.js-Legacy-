@@ -98,10 +98,10 @@ Toe.Model.Division.prototype.setStaff = function(staff) {
  * @fieldOf Toe.Model.Division
  */
 Toe.Model.Division.Type = {
-    small: "Small Division",
-    minor: "Minor Division",
-    major: "Major Division",
-    final: "Final Division"
+    div_small: "Small Division",
+    div_minor: "Minor Division",
+    div_major: "Major Division",
+    div_final: "Final Division"
 };
 
 /**

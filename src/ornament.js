@@ -64,5 +64,5 @@ Toe.Model.Ornament.prototype.constructor = Toe.Model.Ornament;
  */
 Toe.Model.Ornament.Type = {
     episema: "Episema",
-    dot: "Dot",
+    dot: "Dot"
 };

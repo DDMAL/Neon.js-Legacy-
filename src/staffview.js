@@ -49,12 +49,12 @@ Toe.View.StaffView.prototype.renderStaff = function(staff) {
         throw new Error("Staff: Invalid render context");
     }
 
-    var elements = {static: new Array(), modify: new Array()};
+    var elements = {fixed: new Array(), modify: new Array()};
 
     // render staff lines
     for (var li = 0; li < staff.props.numLines; li++) {
         var yval = staff.zone.uly+(li*staff.delta_y);
-        elements.static.push(this.rendEng.createLine([staff.zone.ulx, yval, staff.zone.lrx, yval]));
+        elements.fixed.push(this.rendEng.createLine([staff.zone.ulx, yval, staff.zone.lrx, yval]));
     }
     
 	this.rendEng.draw(elements, {selectable: staff.props.interact});

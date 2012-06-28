@@ -486,16 +486,16 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
                     // get vertical snap coordinates for the appropriate staff
                     switch (ele.type) {
-                        case Toe.Model.Division.Type.small:
+                        case Toe.Model.Division.Type.div_small:
                             snapCoords.y = staff.zone.uly;
                             break;
-                        case Toe.Model.Division.Type.minor:
+                        case Toe.Model.Division.Type.div_minor:
                             snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
                             break;
-                        case Toe.Model.Division.Type.major:
+                        case Toe.Model.Division.Type.div_major:
                             snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
                             break;
-                        case Toe.Model.Division.Type.final:
+                        case Toe.Model.Division.Type.div_final:
                             snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
                             break;
                     }
@@ -1136,7 +1136,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
     // to not pollute the global namespace when inserting other
     // musical elements
     var updateFollowPunct = function(initial) {
-        var elements = {modify: new Array(), static: new Array()};
+        var elements = {modify: new Array(), fixed: new Array()};
 
         var punctPos = null;
         var punctGlyph = gui.rendEng.getGlyph("punctum");
@@ -1352,7 +1352,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
                     var x1 = snapCoords.x;
 
                     gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                    gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
+                    gui.rendEng.draw({fixed: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                 }
                 break;
             case "minor":
@@ -1364,7 +1364,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
                     var x1 = snapCoords.x;
 
                     gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                    gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
+                    gui.rendEng.draw({fixed: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                 }
                 break;
             case "major":
@@ -1376,7 +1376,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
                     var x1 = snapCoords.x;
 
                     gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
-                    gui.rendEng.draw({static: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
+                    gui.rendEng.draw({fixed: [gui.divisionDwg], modify: []}, {selectable: false, opacity: 0.6});
                 }
                 break;
             case "final":
@@ -1391,7 +1391,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
 
                     var div1 = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
                     var div2 = gui.rendEng.createLine([x2, y1, x2, y2], divProps);
-                    gui.divisionDwg = gui.rendEng.draw({static: [div1, div2], modify: []}, {group: true, selectable: false, opacity: 0.6})[0];
+                    gui.divisionDwg = gui.rendEng.draw({fixed: [div1, div2], modify: []}, {group: true, selectable: false, opacity: 0.6})[0];
                 }
                 break;
         }                    
@@ -1670,7 +1670,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
 
             var cGlyph = gui.rendEng.getGlyph("c_clef");
             var clef = cGlyph.clone().set($.extend(cPos, {opacity: 0.6}));
-            gui.clefDwg = gui.rendEng.draw({static: [], modify: [clef]}, {opacity: 0.6, selectable: false, repaint: true})[0];
+            gui.clefDwg = gui.rendEng.draw({fixed: [], modify: [clef]}, {opacity: 0.6, selectable: false, repaint: true})[0];
 
             cShape = "c";
         }
@@ -1690,7 +1690,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
 
             var cGlyph = gui.rendEng.getGlyph("f_clef");
             var clef = cGlyph.clone().set($.extend(cPos, {opacity: 0.6}));
-            gui.clefDwg = gui.rendEng.draw({static: [], modify: [clef]}, {opacity: 0.6, selectable: false, repaint: true})[0];
+            gui.clefDwg = gui.rendEng.draw({fixed: [], modify: [clef]}, {opacity: 0.6, selectable: false, repaint: true})[0];
 
             cShape = "f";
         }

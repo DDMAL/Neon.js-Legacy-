@@ -140,8 +140,8 @@ Toe.View.RenderEngine.prototype.outlineBoundingBox = function(bb, options) {
 		opacity: opts.opacity 
 	});
 
-    var elements = {static: new Array(), modify: new Array()};
-    elements.static.push(bb);
+    var elements = {fixed: new Array(), modify: new Array()};
+    elements.fixed.push(bb);
 
 	this.draw(elements, {selectable: opts.interact, opacity: opts.opacity});
 }
@@ -170,8 +170,8 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
     // perform transformations
     elements.modify = this.preprocess(elements.modify);
 
-    // merge transformed elements with static elements
-    elements = $.merge($.merge([],elements.modify), elements.static);
+    // merge transformed elements with fixed elements
+    elements = $.merge($.merge([],elements.modify), elements.fixed);
 
     // make group if specified
     if (opts.group) {
