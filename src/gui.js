@@ -988,12 +988,16 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         // get final bounding box information
         bb = [newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry];
 
-        // TODO: send name and variant to server
-        var neumeName = newNeume.name.toLowerCase();
+        var typeid = newNeume.typeid;
 
-        var args = {nids: nids.join(","), name: neumeName, ulx: bb[0], uly: bb[1], lrx: bb[2], lry: bb[3]};
+        // get note head shapes to change in underlying mei
+        var headShapes = $.map(newNeume.components, function(nc) {
+            return nc.props.type;
+        });
+
+        var data = JSON.stringify({"nids": nids.join(","), "typeid": typeid, "headShapes": headShapes, "ulx": bb[0], "uly": bb[1], "lrx": bb[2], "lry": bb[3]});
         // call server neumify function to update MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", args, function(data) {
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", {data: data}, function(data) {
             // set id of the new neume with generated ID from the server
             newNeume.id = JSON.parse(data).nid;
         })

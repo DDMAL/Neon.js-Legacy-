@@ -299,7 +299,13 @@ Toe.Model.Neume.prototype.diffToMelodicMove = function() {
  * @methodOf Toe.Model.Neume
  * @returns {string} neume name
  */
-Toe.Model.Neume.prototype.deriveName = function() {
+Toe.Model.Neume.prototype.deriveName = function(options) {
+    var opts = {
+        enforceHeadShapes: true
+    };
+
+    $.extend(opts, options);
+
     // checks
     if (this.components.length == 0) {
         return "unknown";
@@ -327,9 +333,17 @@ Toe.Model.Neume.prototype.deriveName = function() {
     // EPIPHONUS: podatus with liquescence modifier
     // CEPHALICUS: clivis with liquescence modifier
     // SCANDICUS: scandicus continued
-    if (this.name == "Punctum" && this.components[0].props.type == "virga") {
+    if (this.typeid == "punctum" && this.components[0].props.type == "virga") {
         this.name = "Virga";
         this.typeid = "virga";
+    }
+    else if (this.typeid == "distropha" && this.components[0].props.type == "virga") {
+        this.name = "Bivirga";
+        this.typeid = "bivirga";
+    }
+    else if (this.typeid == "tristropha" && this.components[0].props.type == "virga") {
+        this.name = "Trivirga";
+        this.typeid = "trivirga";
     }
     else if (this.name == "Punctum" && this.components[0].props.type == "cavum") {
         this.name = "Cavum";
@@ -344,7 +358,75 @@ Toe.Model.Neume.prototype.deriveName = function() {
         this.typeid = "cephalicus";
     }
 
+    if (opts.enforceHeadShapes) {
+        this.enforceHeadShapes();
+    }
+
     return this.name;
+}
+
+/**
+ * Change head shapes of neume components in the model which are changed
+ * when neume type changes.
+ */
+Toe.Model.Neume.prototype.enforceHeadShapes = function() {
+    switch (this.typeid) {
+        case "climacus.1":
+        case "climacus.2":
+        case "climacus.3":
+        case "climacus.4":
+            for (var i = 1; i < this.components.length; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "climacus.resupinus.1":
+        case "climacus.resupinus.2":
+        case "climacus.resupinus.3":
+        case "climacus.resupinus.4":
+            for (var i = 1; i < this.components.length-1; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "podatus.subpunctis.1":
+        case "podatus.subpunctis.2":
+        case "podatus.subpunctis.3":
+        case "podatus.subpunctis.4":
+            for (var i = 2; i < this.components.length; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "podatus.subpunctis.resupinus.1":
+        case "podatus.subpunctis.resupinus.2":
+        case "podatus.subpunctis.resupinus.3":
+            for (var i = 2; i < this.components.length-1; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "scandicus.subpunctis.1":
+        case "scandicus.subpunctis.2":
+            for (var i = 3; i < this.components.length; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "porrectus.subpunctis.1":
+        case "porrectus.subpunctis.2":
+            for (var i = 3; i < this.components.length; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "porrectus.subpunctis.resupinus.1":
+        case "porrectus.subpunctis.resupinus.2":
+            for (var i = 3; i < this.components.length-1; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+        case "torculus.resupinus.3":
+        case "torculus.resupinus.4":
+            for (var i = 4; i < this.components.length; i++) {
+                this.components[i].setHeadShape("punctum_inclinatum");
+            }
+            break;
+    }
 }
 
 /**

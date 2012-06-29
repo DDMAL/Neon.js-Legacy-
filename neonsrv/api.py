@@ -348,24 +348,63 @@ class UpdateNeumeHeadShapeHandler(tornado.web.RequestHandler):
 
 class NeumifyNeumeHandler(tornado.web.RequestHandler):
 
-    def create_new_neume(self, neumeids, neume_name):
+    def create_new_neume(self, neumeids, neume_type, head_shapes):
         ''' 
         Make a new neume with notes from the neumes with
         ID's from neumeids and return the MEI object
         '''
+
+        # get neume name and variant from type id
+        type_split = neume_type.split(".")
+        if type_split[-1].isdigit():
+            type_split.pop()
+        if len(type_split) == 1:
+            attrs = [MeiAttribute("name", type_split[0])]
+        else:
+            variant = " ".join(type_split[1:])
+            attrs = [MeiAttribute("name", type_split[0]), MeiAttribute("variant", variant)]
+
         neume = MeiElement("neume")
-        neume.addAttribute("name", neume_name)
-        nc = MeiElement("nc")
-        
-        for i in neumeids:
-            ref_neume = self.mei.getElementById(str(i))
+        neume.setAttributes(attrs)
+        ncs = []
+        cur_nc = None
+
+        iNote = 0
+        for id in neumeids:
+            ref_neume = self.mei.getElementById(str(id))
             if ref_neume:
                 # get underlying notes
                 notes = ref_neume.getDescendantsByName("note")
                 for n in notes:
-                    nc.addChild(n)
+                    head = str(head_shapes[iNote])
+                    # check if a new nc must be opened
+                    if head == 'punctum' and cur_nc != 'punctum':
+                        ncs.append(MeiElement("nc"))
+                        cur_nc = head
+                    elif head == 'punctum_inclinatum' and cur_nc != 'punctum_inclinatum':
+                        new_nc = MeiElement("nc")
+                        new_nc.addAttribute("inclinatum", "true")
+                        ncs.append(new_nc)
+                        cur_nc = head
+                    elif head == 'punctum_inclinatum_parvum' and cur_nc != 'punctum_inclinatum_parvum':
+                        new_nc = MeiElement("nc")
+                        new_nc.addAttribute("inclinatum", "true")
+                        new_nc.addAttribute("deminutus", "true")
+                        ncs.append(new_nc)
+                        cur_nc = head 
+                    elif head == 'quilisma' and cur_nc != 'quilisma':
+                        new_nc = MeiElement("nc")
+                        new_nc.addAttribute("quilisma", "true")
+                        ncs.append(new_nc)
+                        cur_nc = head
+                    elif cur_nc is None:
+                        ncs.append(MeiElement("nc"))
+                        cur_nc = 'punctum'
 
-        neume.addChild(nc)
+                    ncs[-1].addChild(n)
+                    iNote += 1
+
+        neume.setChildren(ncs)
 
         return neume
 
@@ -426,22 +465,27 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         bounding box information.
         '''
 
-        nids = str(self.get_argument("nids", "")).split(",")
-        neume_name = str(self.get_argument("name", ""))
+        data = json.loads(self.get_argument("data", ""))
+        nids = str(data["nids"]).split(",")
+        type_id = str(data["typeid"])
+        head_shapes = data["headShapes"]
         
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         self.mei = XmlImport.read(fname)
 
-        neume = self.create_new_neume(nids, neume_name)
+        neume = self.create_new_neume(nids, type_id, head_shapes)
         self.insert_neume(neume, nids[0])
         self.delete_old_neumes(nids)
 
         # Bounding box
-        lrx = str(self.get_argument("lrx", None))
-        lry = str(self.get_argument("lry", None))
-        ulx = str(self.get_argument("ulx", None))
-        uly = str(self.get_argument("uly", None))
+        try:
+            lrx = str(data["lrx"])
+            lry = str(data["lry"])
+            ulx = str(data["ulx"])
+            uly = str(data["uly"])
+        except KeyError:
+            ulx = uly = lrx = lry = None
 
         if lrx and lry and ulx and uly:
             zone = self.get_new_zone(ulx, uly, lrx, lry)
