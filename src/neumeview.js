@@ -319,6 +319,54 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
 
             break;
 
+        // climacus
+        case "climacus.1":
+        case "climacus.2":
+        case "climacus.3":
+        case "climacus.4":
+            var nc_x = new Array();
+            // draw left punctum (will become a virga)
+            nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
+            var virga_pad = ncGlyphs[0].centre[0];
+
+            var glyphPunct = ncGlyphs[0].clone().set({left: nc_x[0], top: nc_y[0]});
+            elements.modify.push(glyphPunct);
+
+             // draw right line coming off punctum
+            var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
+            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0]+ (3/2)*staff.delta_y], {strokeWidth: 2, interact: true});
+            elements.static.push(line);
+
+            // now draw following punctum Inclinatum
+            for (var i = 1; i < neume.components.length; i++) {
+                nc_x.push(nc_x[i-1] + (2*ncGlyphs[i-1].centre[0])-ncOverlap_x);
+                if (i == 1) {
+                    nc_x[1] += virga_pad;
+                }
+
+                // draw punctum inclinatum
+                var glyphdiamond = ncGlyphs[i].clone().set({left: nc_x[i], top: nc_y[i]});
+                elements.modify.push(glyphdiamond);
+            }
+
+            // render dots
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            });
+
+            // draw ledger lines
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
+            break;
+            
         // TORCULUS
         case "torculus":
             // derive x positions
