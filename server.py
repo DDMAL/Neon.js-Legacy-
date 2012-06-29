@@ -33,6 +33,7 @@ rules = [
     (abs_path(r"/edit/(.*?)/insert/neume"), neonsrv.tornadoapi.InsertNeumeHandler),
     (abs_path(r"/edit/(.*?)/move/neume"), neonsrv.tornadoapi.ChangeNeumePitchHandler),
     (abs_path(r"/edit/(.*?)/delete/neume"), neonsrv.tornadoapi.DeleteNeumeHandler),
+    (abs_path(r"/edit/(.*?)/update/neume/headshape"), neonsrv.tornadoapi.UpdateNeumeHeadShapeHandler),
     (abs_path(r"/edit/(.*?)/neumify"), neonsrv.tornadoapi.NeumifyNeumeHandler),
     (abs_path(r"/edit/(.*?)/ungroup"), neonsrv.tornadoapi.UngroupNeumeHandler),
     (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.tornadoapi.InsertDivisionHandler),

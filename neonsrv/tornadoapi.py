@@ -70,13 +70,11 @@ class DeleteNeumeHandler(tornado.web.RequestHandler):
 
         self.set_status(200)
 
-class NeumifyNeumeHandler(tornado.web.RequestHandler):
+class UpdateNeumeHeadShapeHandler(tornado.web.RequestHandler):
 
-    def post(self, file):        
-        nids = str(self.get_argument("nids", "")).split(",")
-        neume_name = str(self.get_argument("name", ""))
-        
-        # Bounding box
+    def post(self, file):
+        id = str(self.get_argument("id", ""))
+        head_shape = str(self.get_argument("shape", ""))
         lrx = str(self.get_argument("lrx", None))
         lry = str(self.get_argument("lry", None))
         ulx = str(self.get_argument("ulx", None))
@@ -85,10 +83,35 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.neumify(nids, neume_name, ulx, uly, lrx, lry)
+        md.update_neume_head_shape(id, head_shape, ulx, uly, lrx, lry)
+        md.write_doc()
+
+        self.set_status(200)
+
+class NeumifyNeumeHandler(tornado.web.RequestHandler):
+
+    def post(self, file):        
+        data = json.loads(self.get_argument("data", ""))
+        nids = str(data["nids"]).split(",")
+        type_id = str(data["typeid"])
+        head_shapes = data["headShapes"]
+
+        try:
+            lrx = str(data["lrx"])
+            lry = str(data["lry"])
+            ulx = str(data["ulx"])
+            uly = str(data["uly"])
+        except KeyError:
+            ulx = uly = lrx = lry = None
+        
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        result = md.neumify(nids, type_id, head_shapes, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))
+
         self.set_status(200)
 
 class UngroupNeumeHandler(tornado.web.RequestHandler):

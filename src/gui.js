@@ -177,7 +177,9 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     if ($("#sidebar-edit").length == 0) {
         $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
                               '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
-                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n</li>\n' +
+                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
+                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
+                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
                               '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }
     
@@ -194,20 +196,29 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            $("#info > p").html("Selected: " + ele.props.type.name + "<br/> Pitche(s): " + 
+            $("#info > p").html("Selected: " + ele.name + "<br/> Pitche(s): " + 
                                 $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
             $("#info").animate({opacity: 1.0}, 100);
 
             $("#menu_editclef").remove();
 
-            if (ele.props.type == Toe.Model.Neume.Type.punctum) {
+            if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
                 if ($("#menu_editpunctum").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
                                               '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                               '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
                                               '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
-                                              '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n' +
-                                              '</div></li></span>');
+                                              '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' + 
+                                              '<br/><li class="nav-header">Attributes</li>\n' +
+                                              '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
+                                              'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
+                                              '<li><a id="head_punctum">punctum</a></li>\n' +
+                                              '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
+                                              '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
+                                              '<li><a id="head_cavum">cavum</a></li>\n' +
+                                              '<li><a id="head_virga">virga</a></li>\n' +
+                                              '<li><a id="head_quilisma">quilisma</a></li>\n' +
+                                              '</ul></div></span>');
                 }
 
                 // toggle ornamentation
@@ -224,6 +235,20 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                 // remove onclick listener for previous selection
                 $("#edit_chk_dot").unbind("click");
                 $("#edit_chk_dot").bind("click.edit", {gui: gui, punctum: ele}, gui.handleDotToggle);
+
+                // Handle head shape change
+                $("#head_punctum").unbind("click");
+                $("#head_cavum").unbind("click");
+                $("#head_virga").unbind("click");
+                $("#head_quilisma").unbind("click");
+                $("#head_punctum_inclinatum").unbind("click");
+                $("#head_punctum_inclinatum_parvum").unbind("click");
+                $("#head_punctum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum"}, gui.handleHeadShapeChange);
+                $("#head_cavum").bind("click.edit", {gui: gui, punctum: ele, shape: "cavum"}, gui.handleHeadShapeChange);
+                $("#head_virga").bind("click.edit", {gui: gui, punctum: ele, shape: "virga"}, gui.handleHeadShapeChange);
+                $("#head_quilisma").bind("click.edit", {gui: gui, punctum: ele, shape: "quilisma"}, gui.handleHeadShapeChange);
+                $("#head_punctum_inclinatum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum"}, gui.handleHeadShapeChange);
+                $("#head_punctum_inclinatum_parvum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum_parvum"}, gui.handleHeadShapeChange);
             }
             else {
                 $("#menu_editpunctum").remove();
@@ -556,6 +581,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
+    $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
 }
 
@@ -602,6 +628,40 @@ Toe.View.GUI.prototype.handleDotToggle = function(e) {
     }
 
     $(this).toggleClass("active");
+}
+
+Toe.View.GUI.prototype.handleHeadShapeChange = function(e) {
+    var gui = e.data.gui;
+    var shape = e.data.shape;
+    var punctum = e.data.punctum;
+    var nc = punctum.components[0];
+
+    nc.setHeadShape(shape);
+
+    // deal with head shapes that change the neume name
+    if (shape == "virga") {
+        punctum.name = "Virga";
+        punctum.typeid = "virga";
+    }
+    else if (shape == "cavum") {
+        punctum.name = "Cavum";
+        punctum.typeid = "cavum";
+    }
+
+    // update drawing
+    punctum.syncDrawing();
+
+    var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    var args = {id: punctum.id, shape: shape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+    // send change head command to server to change underlying MEI
+    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/neume/headshape", args)
+    .error(function() {
+        // show alert to user
+        // replace text with error message
+        $("#alert > p").text("Server failed to change note head shape. Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
 }
 
 Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
@@ -862,6 +922,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
 Toe.View.GUI.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
+    var modifier = e.data.modifier;
 
     // only need to neumify if a group of objects are selected
     var selection = gui.rendEng.canvas.getActiveGroup();
@@ -892,7 +953,7 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         });
 
         // begin the NEUMIFICATION
-        var newNeume = new Toe.Model.Neume();
+        var newNeume = new Toe.Model.Neume({modifier: modifier});
                         
         numPunct = 0;
         var nids = new Array();
@@ -937,12 +998,16 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         // get final bounding box information
         var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
 
-        // get neume key
-        var neumeKey = newNeume.props.key;
+        var typeid = newNeume.typeid;
 
-        var args = {nids: nids.join(","), name: neumeKey, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+        // get note head shapes to change in underlying mei
+        var headShapes = $.map(newNeume.components, function(nc) {
+            return nc.props.type;
+        });
+
+        var data = JSON.stringify({"nids": nids.join(","), "typeid": typeid, "headShapes": headShapes, "ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
         // call server neumify function to update MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", args, function(data) {
+        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", {data: data}, function(data) {
             // set id of the new neume with generated ID from the server
             newNeume.id = JSON.parse(data).id;
         })

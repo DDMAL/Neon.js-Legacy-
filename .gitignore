@@ -4,3 +4,4 @@ static/js/*.js
 .DS_Store
 docs/*
 *.swp
+*.swo
