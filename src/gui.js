@@ -1592,8 +1592,8 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
     if ($("#menu_insertclef").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertclef"><br/>\n<li class="nav-header">Clef Type</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
-                                    '<button id="rad_doh" class="btn">Doh</button>\n' +
-                                    '<button id="rad_fah" class="btn">Fah</button>\n' +
+                                    '<button id="rad_doh" class="btn">C</button>\n' +
+                                    '<button id="rad_fah" class="btn">F</button>\n' +
                                     '</div>\n</li>\n</span>');
     }
 
