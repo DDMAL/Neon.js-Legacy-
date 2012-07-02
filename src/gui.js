@@ -131,7 +131,7 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
     if (toggles.sldr_bgImgOpacity) {
         $(parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n' +
                                '<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n' +
-                               '<input id="sldr_bgImgOpacity" type="range" name="bgImgOpacity" ' +
+                               '<input id="sldr_bgImgOpacity" style="width: 95%;" type="range" name="bgImgOpacity" ' +
                                'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
 
         $("#sldr_bgImgOpacity").bind("change", function() {
