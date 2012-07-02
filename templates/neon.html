@@ -35,13 +35,6 @@
 
         // make side nav-bar scroll with the user
         var $scrollingDiv = $("#neon-sidebar-nav");
-
-        $(window).scroll(function () {
-            $scrollingDiv
-            .stop()
-            .animate({ "marginTop": ($(window).scrollTop() + 5) + "px" }, "200");
-        });
-
     });
 
     </script>
@@ -87,7 +80,7 @@
     
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span2">
+        <div class="span2" style="position: fixed;">
           <div class="row-fluid">
             <div class="span12">
               <h1>Editing {{page}}</h1>
@@ -128,7 +121,7 @@
             </div>
           </div>
         </div>
-        <div class="span10">
+        <div class="span10" style="margin-left: 17%;"> <!-- 17% comes from 2/12 fluid layout -->>
             <div class="row-fluid">
                 <div id="neon-wrapper"></div>
           </div><!--/row-->
