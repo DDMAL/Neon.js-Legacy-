@@ -99,6 +99,7 @@ THE SOFTWARE.
                 return bb;
             };
 
+            var surface = $(mei).find("surface")[0];
             var clefList = $("clef, sb", mei);
             // calculate sb indices in the clef list
             var clef_sbInd = new Array();
@@ -145,7 +146,7 @@ THE SOFTWARE.
                 // get facs data
                 var sbref = $(sel).attr("systemref");
                 var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
-                var sysFacs = $(mei).find("zone[xml\\:id=" + sysfacsid + "]")[0];
+                var sysFacs = $(surface).find("zone[xml\\:id=" + sysfacsid + "]")[0];
 
                 // create staff
                 var s_bb = parseBoundingBox(sysFacs);
@@ -176,7 +177,7 @@ THE SOFTWARE.
                     var staffPos = -(sModel.props.numLines - clefStaffLine) * 2;
 
                     var clefFacsId = $(cel).attr("facs");
-                    var clefFacs = $(mei).find("zone[xml\\:id=" + clefFacsId + "]")[0];
+                    var clefFacs = $(surface).find("zone[xml\\:id=" + clefFacsId + "]")[0];
                     var c_bb = parseBoundingBox(clefFacs);
                     if (settings.debug) {
                         rendEng.outlineBoundingBox(c_bb, {fill: "red"});
@@ -202,7 +203,7 @@ THE SOFTWARE.
                 // load all neumes in the system
                 $(neumeList).slice(neume_sbInd[sit]+1, neume_sbInd[sit+1]).each(function(nit, nel) {
                     var nModel = new Toe.Model.Neume();
-                    var neumeFacs = $(mei).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
+                    var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
                     var n_bb = parseBoundingBox(neumeFacs);
                     if (settings.debug) {
                         rendEng.outlineBoundingBox(n_bb, {fill: "green"});
@@ -223,7 +224,7 @@ THE SOFTWARE.
 
                 // load all divisions in the system
                 $(divList).slice(div_sbInd[sit]+1, div_sbInd[sit+1]).each(function(dit, del) {
-                    var divFacs = $(mei).find("zone[xml\\:id=" + $(del).attr("facs") + "]")[0];
+                    var divFacs = $(surface).find("zone[xml\\:id=" + $(del).attr("facs") + "]")[0];
                     var d_bb = parseBoundingBox(divFacs);
                     if (settings.debug) {
                         rendEng.outlineBoundingBox(d_bb, {fill: "yellow"});
@@ -248,7 +249,7 @@ THE SOFTWARE.
 
                 // load custos for the system (if it exists)
                 $(custosList).slice(custos_sbInd[sit]+1, custos_sbInd[sit+1]).each(function(cit, cel) {
-                    var custosFacs = $(mei).find("zone[xml\\:id=" + $(cel).attr("facs") + "]")[0];
+                    var custosFacs = $(surface).find("zone[xml\\:id=" + $(cel).attr("facs") + "]")[0];
                     var c_bb = parseBoundingBox(custosFacs);
                     if (settings.debug) {
                         rendEng.outlineBoundingBox(c_bb, {fill: "purple"});
