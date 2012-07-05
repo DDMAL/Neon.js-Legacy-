@@ -575,7 +575,25 @@ Toe.View.NeumeView.prototype.drawNeume = function(neume) {
         // PORRECTUS
         case "porrectus":
             // draw swoosh
-            var swoosh = this.rendEng.getGlyph("porrect_1");
+            var pitchDiff = neume.components[0].pitchDiff + neume.components[1].pitchDiff;
+            var swoosh = null;
+            switch (pitchDiff) {
+                case -1:
+                    swoosh = this.rendEng.getGlyph("porrect_1");
+                    break;
+                case -2:
+                    swoosh = this.rendEng.getGlyph("porrect_2");
+                    break;
+                case -3:
+                    swoosh = this.rendEng.getGlyph("porrect_3");
+                    break;
+                case -4:
+                    swoosh = this.rendEng.getGlyph("porrect_4");
+                    break;
+                default:
+                    swoosh = this.rendEng.getGlyph("porrect_4");
+            }
+
             var glyphSwoosh = swoosh.clone().set({left: neume.zone.ulx + swoosh.centre[0], top: nc_y[0] + swoosh.centre[1]/2});
             elements.modify.push(glyphSwoosh);
 
