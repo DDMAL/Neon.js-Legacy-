@@ -403,7 +403,7 @@ THE SOFTWARE.
             }
 
             // instantiate appropriate GUI elements
-            var gui = new Toe.View.GUI(settings.apiprefix, rendEng, page,
+            var gui = new Toe.View.GUI(settings.apiprefix, settings.meipath, settings.dwgLib, rendEng, page,
                                       {sldr_bgImgOpacity: settings.bgimgpath, 
                                        initBgImgOpacity: settings.bgimgopacity});
 

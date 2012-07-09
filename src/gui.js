@@ -26,7 +26,7 @@ THE SOFTWARE.
  * @class GUI handling
  * @param {Object} guiToggles Boolean values toggling instantiation of GUI elements
  */
-Toe.View.GUI = function(apiprefix, rendEng, page, guiToggles) {
+Toe.View.GUI = function(apiprefix, meipath, dwgLib, rendEng, page, guiToggles) {
     var toggles = {
         sldr_bgImgOpacity: true,
         initBgImgOpacity: 0.60,
@@ -38,6 +38,8 @@ Toe.View.GUI = function(apiprefix, rendEng, page, guiToggles) {
     this.rendEng = rendEng;
     this.page = page;
     this.apiprefix = apiprefix;
+    this.meipath = meipath;
+    this.dwgLib = dwgLib;
 
     // these are variables holding pointers to the drawings
     // that follow around the pointer in insert mode.
@@ -77,7 +79,7 @@ Toe.View.GUI.prototype.setupNavBar = function() {
 
     var nav_file_dropdown_parent = "#nav_file_dropdown";
     // check if the file menu is included in the template (avoid including bootstrap.js if possible)
-    if ($("#nav_file_dropdown_parent").length) {
+    if ($(nav_file_dropdown_parent).length) {
         $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li>' +
                                            '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
                                            '<li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
@@ -90,9 +92,9 @@ Toe.View.GUI.prototype.setupNavBar = function() {
                                                 delay: 100});
         $("#nav_file_dropdown_revert").click(function() {
             // move backup mei file to working directory
-            $.get(gui.prefix + "/revert/" + gui.fileName, function(data) {
+            $.get(gui.apiprefix + "/revert", function(data) {
                 // when the backup file has been restored, reload the page
-                window.location = gui.prefix + "/editor/" + gui.fileName;
+                window.location.reload();
             })
             .error(function() {
                 // show alert to user
@@ -110,7 +112,7 @@ Toe.View.GUI.prototype.setupNavBar = function() {
                                                 title: 'View the MEI file of the document being edited.',
                                                 delay: 100});
         // set the download path of the file
-        $("#nav_file_dropdown_getmei").attr("href", this.prefix + "/file/" + this.fileName);
+        $("#nav_file_dropdown_getmei").attr("href", gui.meipath);
 
         // Document image rasterize
         $("#nav_file_dropdown_getimg").tooltip({animation: true, 
@@ -1009,7 +1011,7 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         newNeume.setBoundingBox(bb);
 
         // instantiate neume view and controller
-        var nView = new Toe.View.NeumeView(gui.rendEng);
+        var nView = new Toe.View.NeumeView(gui.rendEng, gui.dwgLib);
         var nCtrl = new Toe.Ctrl.NeumeController(newNeume, nView);
 
         // render the new neume
@@ -1099,7 +1101,7 @@ Toe.View.GUI.prototype.handleUngroup = function(e) {
             newPunct.setBoundingBox(bb);
 
             // instantiate neume view and controller
-            var nView = new Toe.View.NeumeView(gui.rendEng);
+            var nView = new Toe.View.NeumeView(gui.rendEng, gui.dwgLib);
             var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
 
             // add the punctum to the staff and draw it
@@ -1320,7 +1322,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         nModel.addComponent("punctum", pname, oct, {ornaments: ornaments});
 
         // instantiate neume view and controller
-        var nView = new Toe.View.NeumeView(gui.rendEng);
+        var nView = new Toe.View.NeumeView(gui.rendEng, gui.dwgLib);
         var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
         
         // mount neume on the staff
