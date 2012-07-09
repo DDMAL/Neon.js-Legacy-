@@ -34,7 +34,6 @@ THE SOFTWARE.
         var defaults = {
             width: 800,
             height: 1024,
-            autoLoad: false,
             debug: false,
             filename: "",
             backgroundImage: "",
@@ -304,7 +303,7 @@ THE SOFTWARE.
             console.log("loading background image ...");
             var dfd = $.Deferred();
 
-            if (settings.autoLoad && settings.backgroundImage) {
+            if (settings.backgroundImage) {
                 fabric.Image.fromURL(settings.prefix+"/file/"+filename, function(img) {
                     imgDims.width = img.width;
                     imgDims.height = img.height;
@@ -324,7 +323,7 @@ THE SOFTWARE.
         var loadPage = function(fileName) {
             var dfd = $.Deferred();
 
-            if (settings.autoLoad && settings.filename) {
+            if (settings.filename) {
                 $.get(settings.prefix+"/file/"+fileName, function(data) {
                     console.log("loading MEI file ...");
 
@@ -352,18 +351,16 @@ THE SOFTWARE.
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
             var canvasDims = [settings.width, settings.height];
-            if (settings.autoLoad) {
-                if (settings.backgroundImage) {
-                    canvasDims = [imgDims.width, imgDims.height];
-                }
-                else {
-                    // derive canvas dimensions from mei facs
-                    canvasDims = page.calcDimensions($(mei).find("zone"));
-                }
-
-                // calculate scale based on width, maintaining aspect ratio
-                page.setPageScale(settings.width/canvasDims[0]);
+            if (settings.backgroundImage) {
+                canvasDims = [imgDims.width, imgDims.height];
             }
+            else {
+                // derive canvas dimensions from mei facs
+                canvasDims = page.calcDimensions($(mei).find("zone"));
+            }
+
+            // calculate scale based on width, maintaining aspect ratio
+            page.setPageScale(settings.width/canvasDims[0]);
             page.setDimensions(Math.round(canvasDims[0]), Math.round(canvasDims[1]));
 
             // make canvas dimensions the size of the page
@@ -401,7 +398,7 @@ THE SOFTWARE.
             // CONTROLLERS
             var pCtrl = new Toe.Ctrl.PageController(page, pView);
 
-            if (settings.autoLoad && mei) {
+            if (mei) {
                 loadMeiPage(page);
             }
 
