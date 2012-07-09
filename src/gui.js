@@ -1821,7 +1821,7 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
         var actingClef = prevStaff.getActingClefByEle(custos);
         custos.setRootStaffPos(prevStaff.calcStaffPosFromPitch(pname, oct, actingClef));
         var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
-        $.post(this.prefix + "/edit/" + this.fileName + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+        $.post(this.apiprefix + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -1856,7 +1856,7 @@ Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) 
         }
 
         // update underlying MEI file
-        $.post(this.prefix + "/edit/" + this.fileName + "/insert/custos", args, function(data) {
+        $.post(this.apiprefix + "/insert/custos", args, function(data) {
             cModel.id = JSON.parse(data).id;
         }).error(function() {
             // show alert to user
