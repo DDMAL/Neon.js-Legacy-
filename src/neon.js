@@ -26,20 +26,21 @@ THE SOFTWARE.
     {
         var elem = $(element);
         var mei;
-        var imgDims = {};
         var rendEng;
         var startTime;
 
         // These are variables which can be overridden upon instantiation
         var defaults = {
-            width: 800,
-            height: 1024,
             debug: false,
             glyphpath: "",
             meipath: "",
             bgimgpath: "",
             bgimgopacity: 0.60,
-            apiprefix: ""
+            apiprefix: "",
+            origwidth: null,
+            origheight: null,
+            dwgLib: "liber",
+            width: 1000
         };
 
         var settings = $.extend({}, defaults, options);
@@ -212,7 +213,7 @@ THE SOFTWARE.
 
                     nModel.neumeFromMei(nel, n_bb, sModel);
                     // instantiate neume view and controller
-                    var nView = new Toe.View.NeumeView(rendEng);
+                    var nView = new Toe.View.NeumeView(rendEng, settings.dwgLib);
                     var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
                     // mount neume on the staff
@@ -305,10 +306,10 @@ THE SOFTWARE.
             console.log("loading background image ...");
             var dfd = $.Deferred();
 
-            if (settings.bgimgpath) {
+            if (settings.bgimgpath && !settings.origwidth && !settings.origheight) {
                 fabric.Image.fromURL(settings.bgimgpath, function(img) {
-                    imgDims.width = img.width;
-                    imgDims.height = img.height;
+                    settings.origwidth = img.width;
+                    settings.origheight = img.height;
                     dfd.resolve();
                 });
             }
@@ -352,11 +353,8 @@ THE SOFTWARE.
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
-            var canvasDims = [settings.width, settings.height];
-            if (settings.bgimgpath) {
-                canvasDims = [imgDims.width, imgDims.height];
-            }
-            else {
+            var canvasDims = [settings.origwidth, settings.origheight];
+            if (!settings.bgimgpath) {
                 // derive canvas dimensions from mei facs
                 canvasDims = page.calcDimensions($(mei).find("zone"));
             }
