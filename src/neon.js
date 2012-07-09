@@ -35,9 +35,9 @@ THE SOFTWARE.
             width: 800,
             height: 1024,
             debug: false,
-            meipath: ""
-            backgroundImage: "",
-            backgroundImageOpacity: 0.60
+            meipath: "",
+            bgimgpath: "",
+            bgimgopacity: 0.60
         };
 
         var settings = $.extend({}, defaults, options);
@@ -74,8 +74,8 @@ THE SOFTWARE.
              * on failure, print error message
              */
             $.when(loadGlyphs(rendEng),
-                   loadPage(settings.filename),
-                   handleBackgroundImage(settings.backgroundImage)
+                   loadPage(),
+                   handleBackgroundImage()
             ).then(loadSuccess,
                    function() {
                        console.log("Failure to load the mei file, glyphs, or background image");
@@ -299,12 +299,12 @@ THE SOFTWARE.
         };
 
         // asynchronous function
-        var handleBackgroundImage = function(filename) {
+        var handleBackgroundImage = function() {
             console.log("loading background image ...");
             var dfd = $.Deferred();
 
-            if (settings.backgroundImage) {
-                fabric.Image.fromURL(settings.prefix+"/file/"+filename, function(img) {
+            if (settings.bgimgpath) {
+                fabric.Image.fromURL(settings.bgimgpath, function(img) {
                     imgDims.width = img.width;
                     imgDims.height = img.height;
                     dfd.resolve();
@@ -351,7 +351,7 @@ THE SOFTWARE.
             var canvas = $("<canvas>").attr("id", settings.canvasid);
 
             var canvasDims = [settings.width, settings.height];
-            if (settings.backgroundImage) {
+            if (settings.bgimgpath) {
                 canvasDims = [imgDims.width, imgDims.height];
             }
             else {
@@ -371,9 +371,9 @@ THE SOFTWARE.
             elem.prepend(canvas);
 
             var canvasOpts = {renderOnAddition: false};
-            if (settings.backgroundImage) {
-                $.extend(canvasOpts, {backgroundImage: settings.prefix+"/file/"+settings.backgroundImage,
-                                      backgroundImageOpacity: settings.backgroundImageOpacity,
+            if (settings.bgimgpath) {
+                $.extend(canvasOpts, {backgroundImage: settings.bgimgpath,
+                                      backgroundImageOpacity: settings.bgimgopacity,
                                       backgroundImageStretch: true});
             }
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
@@ -404,8 +404,8 @@ THE SOFTWARE.
 
             // instantiate appropriate GUI elements
             var gui = new Toe.View.GUI(settings.prefix, settings.filename, rendEng, page,
-                                      {sldr_bgImgOpacity: settings.backgroundImage, 
-                                       initBgImgOpacity: settings.backgroundImageOpacity});
+                                      {sldr_bgImgOpacity: settings.bgimgpath, 
+                                       initBgImgOpacity: settings.bgimgopacity});
 
             var runTime = new Date() - startTime;
             console.log("Neon.js ready (" + runTime + "ms)");

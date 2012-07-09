@@ -27,9 +27,9 @@
           debug: {{debug}},
           prefix: "{{prefix}}",
           meipath: "{{prefix}}/file/{{page}}",
+          bgimgpath: "{{prefix}}/file/" + "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
+          bgimgopacity: 0.0,
           width: 1200, // enforce width
-          backgroundImage: "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
-          backgroundImageOpacity: 0.0
         });
     });
     </script>
