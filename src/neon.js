@@ -35,7 +35,7 @@ THE SOFTWARE.
             width: 800,
             height: 1024,
             debug: false,
-            filename: "",
+            meipath: ""
             backgroundImage: "",
             backgroundImageOpacity: 0.60
         };
@@ -320,11 +320,11 @@ THE SOFTWARE.
         };
 
         // asynchronous function
-        var loadPage = function(fileName) {
+        var loadPage = function() {
             var dfd = $.Deferred();
 
-            if (settings.filename) {
-                $.get(settings.prefix+"/file/"+fileName, function(data) {
+            if (settings.meipath) {
+                $.get(settings.meipath, function(data) {
                     console.log("loading MEI file ...");
 
                     // save mei data

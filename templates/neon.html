@@ -26,16 +26,12 @@
         $('#neon-wrapper').neon({
           debug: {{debug}},
           prefix: "{{prefix}}",
-          filename: "{{page}}",
+          meipath: "{{prefix}}/file/{{page}}",
           width: 1200, // enforce width
           backgroundImage: "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
           backgroundImageOpacity: 0.0
         });
-
-        // make side nav-bar scroll with the user
-        var $scrollingDiv = $("#neon-sidebar-nav");
     });
-
     </script>
 </head>
 <body>
