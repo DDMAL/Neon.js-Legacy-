@@ -266,8 +266,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
             if ($("#menu_editclef").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n' +
                                               '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
-                                              '<button id="edit_rad_c" class="btn">Doh</button>\n' +
-                                              '<button id="edit_rad_f" class="btn">Fah</button>\n</div></li></span>');
+                                              '<button id="edit_rad_c" class="btn">C</button>\n' +
+                                              '<button id="edit_rad_f" class="btn">F</button>\n</div></li></span>');
             }
 
             // activate appropriate radio button
