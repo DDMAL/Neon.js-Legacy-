@@ -97,6 +97,8 @@ Toe.View.GUI.prototype.setupNavBar = function() {
             $("#alert > p").text("Server failed to restore backup MEI file.");
             $("#alert").animate({opacity: 1.0}, 100);
         });
+
+        return false;
     });
 
     // MEI download
@@ -120,6 +122,8 @@ Toe.View.GUI.prototype.setupNavBar = function() {
         else {
             window.open(gui.rendEng.canvas.toDataURL('png'));
         }
+
+        return false;
     });
 }
 
@@ -137,6 +141,8 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
         $("#sldr_bgImgOpacity").bind("change", function() {
             gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
             gui.rendEng.repaint();
+
+            return false;
         });
     }
 
@@ -583,6 +589,8 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
     $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleDotToggle = function(e) {
@@ -628,6 +636,8 @@ Toe.View.GUI.prototype.handleDotToggle = function(e) {
     }
 
     $(this).toggleClass("active");
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleHeadShapeChange = function(e) {
@@ -662,6 +672,8 @@ Toe.View.GUI.prototype.handleHeadShapeChange = function(e) {
         $("#alert > p").text("Server failed to change note head shape. Client and server are not synchronized.");
         $("#alert").animate({opacity: 1.0}, 100);
     });
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
@@ -721,6 +733,8 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
 
         $(this).toggleClass("active");
     }
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleDelete = function(e) {
@@ -918,6 +932,8 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
             $("#alert").animate({opacity: 1.0}, 100);
         });
     }
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleNeumify = function(e) {
@@ -1025,6 +1041,8 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
 
         gui.rendEng.repaint();
     }
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleUngroup = function(e) {
@@ -1119,6 +1137,8 @@ Toe.View.GUI.prototype.handleUngroup = function(e) {
     gui.rendEng.canvas.discardActiveObject();
     gui.rendEng.canvas.discardActiveGroup();
     gui.rendEng.repaint();
+
+    return false;
 }
 
 /**************************************************
@@ -1162,6 +1182,8 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
 
     // toggle punctum insert by default
     $("#rad_punctum").trigger('click');
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
@@ -1365,6 +1387,8 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
     $("#chk_vertepisema").bind("click.insert", function() {
     });
     */
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleInsertDivision = function(e) {
@@ -1539,6 +1563,8 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.divisionDwg = null;
         }
         divisionForm = "div_small";
+
+        return false;
     });
 
     $("#rad_minor").bind("click.insert", function() {
@@ -1547,6 +1573,8 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.divisionDwg = null;
         }
         divisionForm = "div_minor";
+
+        return false;
     });
 
     $("#rad_major").bind("click.insert", function() {
@@ -1555,6 +1583,8 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.divisionDwg = null;
         }
         divisionForm = "div_major";
+
+        return false;
     });
 
     $("#rad_final").bind("click.insert", function() {
@@ -1563,10 +1593,14 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
             gui.divisionDwg = null;
         }
         divisionForm = "div_final";
+
+        return false;
     });
 
     // toggle small division by default
     $("#rad_small").trigger('click');
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleInsertClef = function(e) {
@@ -1739,6 +1773,8 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
 
             cShape = "c";
         }
+
+        return false;
     });
 
     $("#rad_fah").bind("click.insert", function() {
@@ -1759,10 +1795,14 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
 
             cShape = "f";
         }
+
+        return false;
     });
 
     // toggle doh clef by default
     $("#rad_doh").trigger("click");
+
+    return false;
 }
 
 Toe.View.GUI.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) {
