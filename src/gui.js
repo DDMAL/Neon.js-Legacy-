@@ -26,7 +26,7 @@ THE SOFTWARE.
  * @class GUI handling
  * @param {Object} guiToggles Boolean values toggling instantiation of GUI elements
  */
-Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
+Toe.View.GUI = function(apiprefix, rendEng, page, guiToggles) {
     var toggles = {
         sldr_bgImgOpacity: true,
         initBgImgOpacity: 0.60,
@@ -37,8 +37,7 @@ Toe.View.GUI = function(prefix, fileName, rendEng, page, guiToggles) {
 
     this.rendEng = rendEng;
     this.page = page;
-    this.prefix = prefix;
-    this.fileName = fileName;
+    this.apiprefix = apiprefix;
 
     // these are variables holding pointers to the drawings
     // that follow around the pointer in insert mode.
@@ -388,7 +387,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                             // update the custos bounding box information in the model
                             // do not need to update pitch name & octave since this does not change
                             var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                            $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                            $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                             .error(function() {
                                 // show alert to user
                                 // replace text with error message
@@ -404,7 +403,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var args = {id: ele.id, line: staffLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
                     // send pitch shift command to server to change underlying MEI
-                    $.post(gui.prefix + "/edit/" + gui.fileName + "/move/clef", {data: JSON.stringify(args)})
+                    $.post(gui.apiprefix + "/move/clef", {data: JSON.stringify(args)})
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -490,7 +489,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     }
 
                     // send pitch shift command to server to change underlying MEI
-                    $.post(gui.prefix + "/edit/" + gui.fileName + "/move/neume", {data: JSON.stringify(args)})
+                    $.post(gui.apiprefix + "/move/neume", {data: JSON.stringify(args)})
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -562,7 +561,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     var data = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], beforeid: beforeid};
 
                     // send move command to the server to change underlying MEI
-                    $.post(gui.prefix + "/edit/" + gui.fileName + "/move/division", data)
+                    $.post(gui.apiprefix + "/move/division", data)
                     .error(function() {
                         // show alert to user
                         // replace text with error message
@@ -616,7 +615,7 @@ Toe.View.GUI.prototype.handleDotToggle = function(e) {
     var args = {id: punctum.id, dotform: "aug", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
     if (!hasDot) {
         // send add dot command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/dot", args)
+        $.post(gui.apiprefix + "/insert/dot", args)
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -626,7 +625,7 @@ Toe.View.GUI.prototype.handleDotToggle = function(e) {
     }
     else {
         // send remove dot command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/dot", args)
+        $.post(gui.apiprefix + "/delete/dot", args)
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -665,7 +664,7 @@ Toe.View.GUI.prototype.handleHeadShapeChange = function(e) {
     var args = {id: punctum.id, shape: shape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
     // send change head command to server to change underlying MEI
-    $.post(gui.prefix + "/edit/" + gui.fileName + "/update/neume/headshape", args)
+    $.post(gui.apiprefix + "/update/neume/headshape", args)
     .error(function() {
         // show alert to user
         // replace text with error message
@@ -709,7 +708,7 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
                 var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -723,7 +722,7 @@ Toe.View.GUI.prototype.handleClefShapeChange = function(e) {
         var args = {id: clef.id, shape: cShape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
         // send pitch shift command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/update/clef/shape", {data: JSON.stringify(args)})
+        $.post(gui.apiprefix + "/update/clef/shape", {data: JSON.stringify(args)})
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -775,7 +774,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
                 var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -810,7 +809,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 prevStaff.removeElementByRef(prevStaff.custos);
 
                 // send the custos delete command to the server to update the underlying MEI
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/custos", {id: prevStaff.custos.id})
+                $.post(gui.apiprefix + "/delete/custos", {id: prevStaff.custos.id})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -842,7 +841,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
                 var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos",
+                $.post(gui.apiprefix + "/move/custos",
                       {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
@@ -903,7 +902,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
     if (toDelete.clefs.length > 0) {
         // send delete command to the server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
+        $.post(gui.apiprefix + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -914,7 +913,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
     if (toDelete.nids.length > 0) {
         // send delete command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/neume",  {ids: toDelete.nids.join(",")})
+        $.post(gui.apiprefix + "/delete/neume",  {ids: toDelete.nids.join(",")})
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -924,7 +923,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
     }
     if (toDelete.dids.length > 0) {
         // send delete command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/delete/division", {ids: toDelete.dids.join(",")})
+        $.post(gui.apiprefix + "/delete/division", {ids: toDelete.dids.join(",")})
         .error(function() {
             // show alert to user
             // replace text with error message
@@ -1023,7 +1022,7 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
 
         var data = JSON.stringify({"nids": nids.join(","), "typeid": typeid, "headShapes": headShapes, "ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
         // call server neumify function to update MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/neumify", {data: data}, function(data) {
+        $.post(gui.apiprefix + "/neumify", {data: data}, function(data) {
             // set id of the new neume with generated ID from the server
             newNeume.id = JSON.parse(data).id;
         })
@@ -1115,7 +1114,7 @@ Toe.View.GUI.prototype.handleUngroup = function(e) {
     var data = JSON.stringify({"nids": nids.join(","), "bbs": bbs});
 
     // call server ungroup function to update MEI
-    $.post(gui.prefix + "/edit/" + gui.fileName + "/ungroup", {data: data}, function(data) {
+    $.post(gui.apiprefix + "/ungroup", {data: data}, function(data) {
         // set ids of the new puncta from the IDs generated from the server
         var nids = JSON.parse(data).nids;
         // flatten array of nested nid arrays (if ungrouping more than one neume)
@@ -1351,7 +1350,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         }
 
         // send insert command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/neume", args, function(data) {
+        $.post(gui.apiprefix + "/insert/neume", args, function(data) {
             nModel.id = JSON.parse(data).id;
         })
         .error(function() {
@@ -1545,7 +1544,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
         }
 
         // send insert division command to server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/division", args, function(data) {
+        $.post(gui.apiprefix + "/insert/division", args, function(data) {
             division.id = JSON.parse(data).id;
         })
         .error(function() {
@@ -1729,7 +1728,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
                 var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                $.post(gui.prefix + "/edit/" + gui.fileName + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -1740,7 +1739,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
         });
 
         // send insert clef command to the server to change underlying MEI
-        $.post(gui.prefix + "/edit/" + gui.fileName + "/insert/clef", {data: JSON.stringify(args)}, function(data) {
+        $.post(gui.apiprefix + "/insert/clef", {data: JSON.stringify(args)}, function(data) {
             clef.id = JSON.parse(data).id;
         })
         .error(function() {

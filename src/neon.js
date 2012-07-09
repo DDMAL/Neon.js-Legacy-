@@ -35,9 +35,11 @@ THE SOFTWARE.
             width: 800,
             height: 1024,
             debug: false,
+            glyphpath: "",
             meipath: "",
             bgimgpath: "",
-            bgimgopacity: 0.60
+            bgimgopacity: 0.60,
+            apiprefix: ""
         };
 
         var settings = $.extend({}, defaults, options);
@@ -282,7 +284,7 @@ THE SOFTWARE.
             console.log("loading SVG glyphs ...");
 
             // return deferred promise
-            return $.get(settings.prefix+"/static/img/neumes_concat.svg", function(svg) {
+            return $.get(settings.glyphpath, function(svg) {
                 var glyphs = new Object();
 
                 // for each glyph, load it into fabric
@@ -403,7 +405,7 @@ THE SOFTWARE.
             }
 
             // instantiate appropriate GUI elements
-            var gui = new Toe.View.GUI(settings.prefix, settings.filename, rendEng, page,
+            var gui = new Toe.View.GUI(settings.apiprefix, rendEng, page,
                                       {sldr_bgImgOpacity: settings.bgimgpath, 
                                        initBgImgOpacity: settings.bgimgopacity});
 
