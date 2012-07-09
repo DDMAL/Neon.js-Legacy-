@@ -96,15 +96,20 @@ Toe.Model.Page.prototype.setPageScale = function(scale) {
  * @returns {Number} sInd
  */
 Toe.Model.Page.prototype.getClosestStaff = function(coords) {
-    var sInd = this.staves.length-1;
-    // for each staff, except the last
-    for (var i = 0; i < this.staves.length-1; i++) {
-        if (coords.y < this.staves[i].zone.lry + (this.staves[i+1].zone.uly - this.staves[i].zone.lry)/2) {
-            // this is the correct staƒf
-            sInd = i;
-            break;
+    var distances = $.map(this.staves, function(s) {
+        var dist = Math.abs(coords.y - (s.zone.lry - (s.zone.lry - s.zone.uly)/2));
+        if (coords.x < s.zone.ulx) {
+            dist += s.zone.ulx - coords.x;
         }
-    }
+        else if (coords.x > s.zone.lrx) {
+            dist += coords.x - s.zone.ulx;
+        }
+
+        return dist;
+    });
+
+    sInd = $.inArray(Math.min.apply(Math, distances), distances);
+
     return this.staves[sInd];
 }
 
