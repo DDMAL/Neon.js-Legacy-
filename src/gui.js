@@ -166,6 +166,11 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
 
+    // activate all objects on the canvas 
+    // so they can be modified in edit mode
+    gui.rendEng.canvas.selection = true;
+    gui.rendEng.canvas.HOVER_CURSOR = "pointer";
+
     // first remove insert options
     $("#sidebar-insert").remove();
 
@@ -1153,6 +1158,12 @@ Toe.View.GUI.prototype.handleUngroup = function(e) {
 Toe.View.GUI.prototype.handleInsert = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
+
+    // deactivate all objects on the canvas 
+    // so they can't be modified in insert mode
+    gui.rendEng.canvas.selection = false;
+    gui.rendEng.canvas.deactivateAll();
+    gui.rendEng.canvas.HOVER_CURSOR = null;
 
     // first remove edit options
     $("#sidebar-edit").remove();
