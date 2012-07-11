@@ -209,6 +209,12 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         gui.objMoving = true;
     });
 
+    gui.rendEng.canvas.observe('selection:created', function(e) {
+        var selection = e.memo.target;
+        selection.hasControls = false;
+        selection.borderColor = 'rgba(102,153,255,1.0)';
+    });
+
     gui.rendEng.canvas.observe('object:selected', function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
