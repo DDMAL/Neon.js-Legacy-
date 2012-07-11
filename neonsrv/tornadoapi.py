@@ -361,12 +361,12 @@ class MoveCustosHandler(tornado.web.RequestHandler):
 class DeleteCustosHandler(tornado.web.RequestHandler):
 
     def post(self, file):
-        custos_id = str(self.get_argument("id", ""))
+        custos_ids = str(self.get_argument("ids", "")).split(",")
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        md.delete_custos(custos_id)
+        md.delete_custos(custos_ids)
         md.write_doc()
 
         self.set_status(200)

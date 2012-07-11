@@ -765,7 +765,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
 
     // get current canvas selection
     // check individual selection and group selections
-    toDelete = {clefs: new Array(), nids: new Array(), dids: new Array()};
+    toDelete = {clefs: new Array(), nids: new Array(), dids: new Array(), cids: new Array()};
 
     var deleteClef = function(drawing) {
         var clef = drawing.eleRef;
@@ -833,7 +833,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 prevStaff.removeElementByRef(prevStaff.custos);
 
                 // send the custos delete command to the server to update the underlying MEI
-                $.post(gui.apiprefix + "/delete/custos", {id: prevStaff.custos.id})
+                $.post(gui.apiprefix + "/delete/custos", {ids: prevStaff.custos.id})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -887,6 +887,16 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         gui.rendEng.canvas.discardActiveObject();
     };
 
+    var deleteCustos = function(drawing) {
+        var custos = drawing.eleRef;
+
+        custos.staff.removeElementByRef(custos);
+        toDelete.cids.push(custos.id);
+
+        gui.rendEng.canvas.remove(drawing);
+        gui.rendEng.canvas.discardActiveObject();
+    }
+
     var selection = gui.rendEng.canvas.getActiveObject();
     if (selection) {
         // ignore the first clef, since this should never be deleted
@@ -898,6 +908,9 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         }
         else if (selection.eleRef instanceof Toe.Model.Division) {
             deleteDivision(selection);
+        }
+        else if (selection.eleRef instanceof Toe.Model.Custos) {
+            deleteCustos(selection);
         }
 
         gui.rendEng.repaint();
@@ -916,6 +929,9 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
                 }
                 else if (o.eleRef instanceof Toe.Model.Division) {
                     deleteDivision(o);
+                }
+                else if (o.eleRef instanceof Toe.Model.Custos) {
+                    deleteCustos(o);
                 }
             });
 
@@ -952,6 +968,16 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
             // show alert to user
             // replace text with error message
             $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+    if (toDelete.cids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(gui.apiprefix + "/delete/custos", {ids: toDelete.cids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
             $("#alert").animate({opacity: 1.0}, 100);
         });
     }
