@@ -200,6 +200,12 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                               '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }
     
+    // grey out edit buttons by default
+    $('#btn_delete').toggleClass('disabled', true);
+    $('#btn_neumify').toggleClass('disabled', true);
+    $('#btn_neumify_liquescence').toggleClass('disabled', true);
+    $('#btn_ungroup').toggleClass('disabled', true);
+
     gui.rendEng.canvas.observe('mouse:down', function(e) {
         // cache pointer coordinates for mouse up
         gui.downCoords = gui.rendEng.canvas.getPointer(e.memo.e);
@@ -213,15 +219,55 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         var selection = e.memo.target;
         selection.hasControls = false;
         selection.borderColor = 'rgba(102,153,255,1.0)';
+
+        // disable/enable buttons
+        var toNeumify = 0;
+        var toUngroup = 0;
+        var sModel = null;
+        $.each(selection.getObjects(), function (oInd, o) {
+            if (o.eleRef instanceof Toe.Model.Neume) {
+                if (!sModel) {
+                    sModel = o.eleRef.staff;
+                }
+                
+                toUngroup++;
+
+                if (o.eleRef.staff == sModel) {
+                    toNeumify++;
+                }
+            }
+        });
+
+        $('#btn_delete').toggleClass('disabled', false);
+
+        if (toNeumify < 2) {
+            $('#btn_neumify').toggleClass('disabled', true);
+            $('#btn_neumify_liquescence').toggleClass('disabled', true);
+        }
+        else {
+            $('#btn_neumify').toggleClass('disabled', false);
+            $('#btn_neumify_liquescence').toggleClass('disabled', false);
+        }
+
+        if (toUngroup > 0) {
+            $('#btn_ungroup').toggleClass('disabled', false);
+        }
+        else {
+            $('#btn_ungroup').toggleClass('disabled', true);
+        }
     });
 
     gui.rendEng.canvas.observe('object:selected', function(e) {
+        $('#btn_delete').toggleClass('disabled', false);
+
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
             $("#info > p").html("Selected: " + ele.name + "<br/> Pitche(s): " + 
                                 $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
             $("#info").animate({opacity: 1.0}, 100);
+
+            $('#btn_ungroup').toggleClass('disabled', false);
 
             $("#menu_editclef").remove();
 
@@ -330,6 +376,11 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         // remove selection specific editing options
         $("#menu_editpunctum").remove();
         $("#menu_editclef").remove();
+
+        $('#btn_delete').toggleClass('disabled', true);
+        $('#btn_neumify').toggleClass('disabled', true);
+        $('#btn_neumify_liquescence').toggleClass('disabled', true);
+        $('#btn_ungroup').toggleClass('disabled', true);
     });
 
     gui.rendEng.canvas.observe('mouse:up', function(e) {
