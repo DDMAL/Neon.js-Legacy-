@@ -581,6 +581,18 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                         $("#alert").animate({opacity: 1.0}, 100);
                     });
                 }
+                else if (ele instanceof Toe.Model.Custos) {
+                    var left = element.left;
+                    var top = element.top;
+
+                    // only need to reset position if part of a selection with multiple elements
+                    // since single selection move disabling is handled by the lockMovementX/Y parameters.
+                    if (elements.length > 1) {
+                        // return the custos to the original position
+                        element.left = left + delta_x;
+                        element.top = top + delta_y;
+                    }
+                }
             });
             if (elements.length > 1) {
                 gui.rendEng.canvas.discardActiveGroup();
