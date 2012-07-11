@@ -53,6 +53,10 @@ Toe.View.RenderEngine.prototype.setGlyphs = function(glyphs) {
     
     // set canvas properties
     this.canvas.HOVER_CURSOR = "pointer";
+
+    // set selection line width
+    this.canvas.selectionLineWidth = 3;
+    this.canvas.selectionBorderColor = 'black';
 }
 
 Toe.View.RenderEngine.prototype.setGlobalScale = function(scale) {
@@ -186,6 +190,7 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.lockScale = true;
         val.lockMovementX = opts.lockMovementX;
         val.lockMovementY = opts.lockMovementY;
+        val.borderColor = 'rgba(102,153,255,1.0)';
         val.opacity = opts.opacity;
         val.eleRef = opts.eleRef; // important: attaches element reference to fabric group
     });
