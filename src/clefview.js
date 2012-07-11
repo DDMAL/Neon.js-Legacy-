@@ -61,7 +61,7 @@ Toe.View.ClefView.prototype.drawClef = function(clef) {
 
     var svgClef = cGlyph.clone().set({left: glyphLeft, top: glyphTop}); // offset centre
 
-    this.drawing = this.rendEng.draw({fixed: [], modify: [svgClef]}, {selectable: clef.props.interact, eleRef: clef})[0];
+    this.drawing = this.rendEng.draw({fixed: [], modify: [svgClef]}, {selectable: clef.props.interact, group: true, eleRef: clef})[0];
 
     // update model
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
