@@ -483,6 +483,9 @@ var drawLiberNeume = function(neume) {
         case "podatus.subpunctis.2":
         case "podatus.subpunctis.3":
         case "podatus.subpunctis.4":
+        case "podatus.subpunctis.resupinus.1":
+        case "podatus.subpunctis.resupinus.2":
+        case "podatus.subpunctis.resupinus.3":
             var nc_x = new Array();
             // if punctums are right on top of each other, spread them out a bit
             var yoffset = 0;
