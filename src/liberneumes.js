@@ -266,6 +266,10 @@ var drawLiberNeume = function(neume) {
         case "climacus.2":
         case "climacus.3":
         case "climacus.4":
+        case "climacus.resupinus.1":
+        case "climacus.resupinus.2":
+        case "climacus.resupinus.3":
+        case "climacus.resupinus.4":
             var nc_x = new Array();
             // draw left punctum (will become a virga)
             nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
@@ -274,7 +278,7 @@ var drawLiberNeume = function(neume) {
             var glyphPunct = ncGlyphs[0].clone().set({left: nc_x[0], top: nc_y[0]});
             elements.modify.push(glyphPunct);
 
-             // draw right line coming off punctum
+            // draw right line coming off punctum
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
             var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0]+ (3/2)*staff.delta_y], {strokeWidth: 2, interact: true});
             elements.fixed.push(line);
@@ -308,7 +312,7 @@ var drawLiberNeume = function(neume) {
             }), nc_x, ncGlyphs[0].centre[0]*2, staff);
 
             break;
-            
+        
         // TORCULUS
         case "torculus":
             // derive x positions
