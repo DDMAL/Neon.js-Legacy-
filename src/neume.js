@@ -196,7 +196,7 @@ Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, bb, staff) {
         else if ($(this).parent().attr("quilisma") == "true") {
             ncType = "quilisma";
         }
-        else if (nName == "virga") {
+        else if (nName == "virga" || nName == "bivirga" || nName == "trivirga") {
             ncType = "virga";
         }
         else if (nName == "cavum") {
