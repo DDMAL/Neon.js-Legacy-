@@ -13,9 +13,11 @@ Requirements
  * tornado (pip install tornado)
  * python bindings of the experimental-meisolesmes branch of libmei (https://github.com/DDMAL/libmei)
 
-Running the server
-------------------
-
+Setup
+-----
+    cd build
+    ./build.sh {liber, salzinnes}
+    ln -s neon.min.js ../src/neon.min.js
     cp conf.py{.dist,}
     # edit conf.py and set MEI_DIRECTORY somewhere writable
     python server.py [port]
