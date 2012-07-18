@@ -846,8 +846,65 @@ var drawLiberNeume = function(neume) {
             }), nc_x, ncGlyphs[0].centre[0]*2, staff);
 
             break;
+
         case "scandicus.flexus.2":
-            break;
+            // cache number of neume components
+            var numNC = neume.components.length;
+            var pes = this.rendEng.getGlyph("pes");
+
+            var nc_x = new Array();
+            nc_x.push(neume.zone.ulx + pes.centre[0]);
+
+            // if punctums are right on top of each other, spread them out a bit
+            yoffset = 0;
+            if (Math.abs(neume.components[1].pitchDiff - neume.components[0].pitchDiff) == 1) {
+                yoffset = 1
+            }
+
+            // pes
+            var glyphPes = pes.clone().set({left: nc_x[0], top: nc_y[0] - pes.centre[1]/2 + yoffset});
+            elements.modify.push(glyphPes);
+
+            // draw right line connecting two punctum
+            var rx1 = nc_x[0] + pes.centre[0] - 1;
+            var line1 = this.rendEng.createLine([rx1, nc_y[0], rx1, nc_y[1]], {strokeWidth: 2, interact: true});
+            elements.fixed.push(line1);
+
+            // second punctum
+            nc_x.push(nc_x[0]);
+            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1] - yoffset});
+            elements.modify.push(glyphPunct2);
+
+            // now draw the torculus
+            for (var i = 2; i < neume.components.length; i++) {
+                // punctum
+                nc_x.push(nc_x[i-1] + (2*ncGlyphs[i-1].centre[0])-ncOverlap_x);
+                var glyphPunct = ncGlyphs[i].clone().set({left: nc_x[i], top: nc_y[i]});
+                elements.modify.push(glyphPunct);
+
+                if (i+1 < neume.components.length) {
+                    // if there is a following punctum, draw right line coming off punctum
+                    var rx = nc_x[i]+ncGlyphs[i].centre[0]-1;
+                    var line = this.rendEng.createLine([rx, nc_y[i], rx, nc_y[i+1]], {strokeWidth: 2, interact: true});
+                    elements.fixed.push(line);
+                }
+            }
+
+            // render dots
+            for (var it = 0; it < neume.components.length; it++) {
+                if (neume.components[it].hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            };
+
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
         case "scandicus.flexus.3":
             break;
 
