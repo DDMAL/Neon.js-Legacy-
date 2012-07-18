@@ -479,6 +479,66 @@ var drawLiberNeume = function(neume) {
 
             break;
 
+        case "podatus.subpunctis.1":
+        case "podatus.subpunctis.2":
+        case "podatus.subpunctis.3":
+        case "podatus.subpunctis.4":
+            var nc_x = new Array();
+            // if punctums are right on top of each other, spread them out a bit
+            var yoffset = 0;
+            if (Math.abs(neume.components[1].pitchDiff) == 1) {
+                yoffset = 1;
+            }
+
+            var podatus_pad = ncGlyphs[0].centre[0];
+
+            // first punctum
+            var punct1 = this.rendEng.getGlyph("pes");
+            nc_x.push(neume.zone.ulx + punct1.centre[0]);
+            var glyphPunct1 = punct1.clone().set({left: nc_x[0], top: nc_y[0] - punct1.centre[1]/2 + yoffset});
+
+            elements.modify.push(glyphPunct1);
+
+            // draw right line connecting two punctum
+            var rx = glyphPunct1.left + punct1.centre[0] - 1;
+            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[1]], {strokeWidth: 2, interact: true});
+            elements.fixed.push(line);
+
+            // second punctum
+            nc_x.push(nc_x[0]);
+            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1] - yoffset});
+
+            elements.modify.push(glyphPunct2);
+
+            // drawing trailing diamonds/punctum
+            for (var i = 2; i < neume.components.length; i++) {
+                nc_x.push(nc_x[i-1] + (2*ncGlyphs[i-1].centre[0])-ncOverlap_x);
+                if (i == 2) {
+                    nc_x[i] += podatus_pad;
+                }
+
+                // draw punctum inclinatum
+                var glyphdiamond = ncGlyphs[i].clone().set({left: nc_x[i], top: nc_y[i]});
+                elements.modify.push(glyphdiamond);
+            }
+
+            // render dots
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    if (bestDots.length > 0) {
+                        elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[it].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            });
+
+            this.drawLedgerLines($.map(neume.components, function(nc) {
+                return neume.rootStaffPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
+            break;
+
         // EPIPHONUS
         case "epiphonus":
             var nc_x = new Array();
