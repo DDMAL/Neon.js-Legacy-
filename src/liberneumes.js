@@ -645,6 +645,7 @@ var drawLiberNeume = function(neume) {
         case "porrectus.flexus":
             // draw swoosh
             var swoosh = null;
+            var pitchDiff = neume.components[0].pitchDiff + neume.components[1].pitchDiff;
             switch (pitchDiff) {
                 case -1:
                     swoosh = this.rendEng.getGlyph("porrect_1");
@@ -705,6 +706,12 @@ var drawLiberNeume = function(neume) {
                     }
                 }
             };
+
+            this.drawLedgerLines($.map(neume.components, function(nc, ncInd) {
+                if (ncInd >= 2) {
+                    return neume.rootStaffPos + nc.pitchDiff;
+                }
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
 
             break;
 
@@ -780,6 +787,88 @@ var drawLiberNeume = function(neume) {
                 }
             }
 
+            this.drawLedgerLines($.map(neume.components, function(nc, ncInd) {
+                if (ncInd >= 2) {
+                    return neume.rootStaffPos + nc.pitchDiff;
+                }
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
+            break;
+
+        case "compound.1":
+            // draw swoosh
+            var swoosh = null;
+            var pitchDiff = neume.components[0].pitchDiff + neume.components[1].pitchDiff;
+            switch (pitchDiff) {
+                case -1:
+                    swoosh = this.rendEng.getGlyph("porrect_1");
+                    break;
+                case -2:
+                    swoosh = this.rendEng.getGlyph("porrect_2");
+                    break;
+                case -3:
+                    swoosh = this.rendEng.getGlyph("porrect_3");
+                    break;
+                case -4:
+                    swoosh = this.rendEng.getGlyph("porrect_4");
+                    break;
+                default:
+                    swoosh = this.rendEng.getGlyph("porrect_4");
+            }
+
+            var glyphSwoosh = swoosh.clone().set({left: neume.zone.ulx + swoosh.centre[0], top: nc_y[0] + swoosh.centre[1]/2});
+            elements.modify.push(glyphSwoosh);
+
+            // draw left line coming off swoosh
+            var lx = glyphSwoosh.left - swoosh.centre[0] + 1;
+            var ly = neume.zone.lry;
+            var swooshBot = glyphSwoosh.top + swoosh.centre[1];
+            if (neume.zone.lry < glyphSwoosh.top + swooshBot) {
+                ly = swooshBot;
+            }
+            var line = this.rendEng.createLine([lx, nc_y[0], lx, ly], {strokeWidth: 2, interact: true});
+            elements.fixed.push(line);
+
+            // draw punctum to the right
+            var nc_x = new Array();
+            nc_x.push(glyphSwoosh.left + swoosh.centre[0] + ncGlyphs[2].centre[0]);
+
+            // draw trailing punctum
+            for (var i = 2; i < neume.components.length; i++) {
+                var glyphtrail = ncGlyphs[i].clone().set({left: nc_x[i-2], top: nc_y[i]});
+                elements.modify.push(glyphtrail);
+
+                // draw stems
+                var rx = nc_x[i] - ncGlyphs[2].centre[0] - 1;
+                line = this.rendEng.createLine([rx, nc_y[i], rx, nc_y[i-1]], {strokeWidth: 2, interact: true});
+                elements.fixed.push(line);
+
+                if (i+1 < neume.components.length) {
+                    nc_x.push(nc_x[i-2] + 2*ncGlyphs[i].centre[0] - ncOverlap_x);
+                }
+            }
+
+            // render dots for everything after the swoosh
+            for (var i = 2; i < neume.components.length; i++) {
+                var el = neume.components[i];
+                if (el.hasOrnament('dot')) {
+                    // get best spot for one dot
+                    var bestDots = nv.bestDotPlacements(staff, nc_y, i);
+                    if (bestDots.length > 0) {
+                        elements.modify.push(glyphDot.clone().set({left: nc_x[i-2]+(2*ncGlyphs[i].centre[0]), top: bestDots[0]}));
+                    }
+                }
+            }
+
+            this.drawLedgerLines($.map(neume.components, function(nc, ncInd) {
+                if (ncInd >= 2) {
+                    return neume.rootStaffPos + nc.pitchDiff;
+                }
+            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+
+            break;
+
+        case "compound.2":
             break;
 
         // SCANDICUS
