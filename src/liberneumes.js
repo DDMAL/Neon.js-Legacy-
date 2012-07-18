@@ -70,8 +70,8 @@ var drawLiberNeume = function(neume) {
     var elements = {fixed: new Array(), modify: new Array()};
 
     switch (neume.typeid) {
-        // PUNCTUM
         case "punctum":
+        case "cavum":
             var left = neume.zone.ulx + ncGlyphs[0].centre[0];
             var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
             elements.modify.push(glyphPunct);
@@ -89,51 +89,17 @@ var drawLiberNeume = function(neume) {
 
         // DISTROPHA
         case "distropha":
-            var nc_x = new Array();
-            
-            // draw first punctum
-            nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
-            var glyphPunct = ncGlyphs[0].clone().set({left: nc_x[0], top: nc_y[0]});
-            elements.modify.push(glyphPunct);
-
-            // draw second punctum
-            nc_x.push(nc_x[0] + (3*ncGlyphs[1].centre[0]));
-            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1]});
-            elements.modify.push(glyphPunct2);
-
-            // render dots
-            $.each(neume.components, function(it,el) {
-                if (el.hasOrnament('dot')) {
-                    // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
-                    if (bestDots.length > 0) {
-                        elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
-                    }
-                }
-            });
-
-            this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
-            break;
-
         case "tristropha":
             var nc_x = new Array();
-            
-            // draw first punctum
             nc_x.push(neume.zone.ulx + ncGlyphs[0].centre[0]);
-            var glyphPunct = ncGlyphs[0].clone().set({left: nc_x[0], top: nc_y[0]});
-            elements.modify.push(glyphPunct);
 
-            // draw second punctum
-            nc_x.push(nc_x[0] + (3*ncGlyphs[1].centre[0]));
-            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1]});
-            elements.modify.push(glyphPunct2);
+            for (var it=0; it < neume.components.length; it++) {
+                var glyphPunct = ncGlyphs[it].clone().set({left: nc_x[it], top: nc_y[it]});
+                elements.modify.push(glyphPunct);
 
-            // draw third punctum
-            nc_x.push(nc_x[1] + (3*ncGlyphs[1].centre[0]));
-            var glyphPunct3 = ncGlyphs[2].clone().set({left: nc_x[2], top: nc_y[2]});
-            elements.modify.push(glyphPunct3);
+                // calculate nc_x for following punctum
+                nc_x.push(nc_x[it] + (3*ncGlyphs[1].centre[0]));
+            };
 
             // render dots
             $.each(neume.components, function(it,el) {
@@ -141,7 +107,7 @@ var drawLiberNeume = function(neume) {
                     // get best spot for one dot
                     var bestDots = nv.bestDotPlacements(staff, nc_y, it);
                     if (bestDots.length > 0) {
-                        elements.modify.push(glyphDot.clone().set({left: glyphPunct3.left+(2*ncGlyphs[2].centre[0]), top: bestDots[0]}));
+                        elements.modify.push(glyphDot.clone().set({left: nc_x[nc_x.length-1], top: bestDots[0]}));
                     }
                 }
             });
@@ -149,23 +115,6 @@ var drawLiberNeume = function(neume) {
             this.drawLedgerLines($.map(neume.components, function(nc) {
                 return neume.rootStaffPos + nc.pitchDiff;
             }), nc_x, ncGlyphs[0].centre[0]*2, staff);
-            break;
-
-        // CAVUM (white punctum)
-        case "cavum":
-            var left = neume.zone.ulx + ncGlyphs[0].centre[0];
-            var glyphPunct = ncGlyphs[0].clone().set({left: left, top: nc_y[0]});
-            elements.modify.push(glyphPunct);
-
-            // render dots
-            if (neume.components[0].hasOrnament('dot')) {
-                // get best spot for one dot
-                var bestDots = this.bestDotPlacements(staff, nc_y, 0);
-                elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
-            }
-
-            this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
-
             break;
 
         // VIRGA
