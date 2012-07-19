@@ -1,12 +1,24 @@
 (function() {
-    var meiFacsRef = '<facsimile xml:id="m-1c0ae9e6-d941-4587-80a2-13d7925d162b"><surface xml:id="m-4954b1c5-9c05-4963-accb-b6e351e3b6b4"><graphic xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="m-3280ce80-c645-4931-b945-2b0c00ca771f" xlink:href="400_original_image.tiff"/><zone lry="331" lrx="208" xml:id="m-5ff17ad0-6396-4f4b-9c99-de55e140ee97" uly="278" ulx="190"/><zone lry="349" lrx="258" xml:id="m-df35aa9a-9155-4c89-a8b2-a05688156807" uly="328" ulx="240"/><zone lry="376" lrx="315" xml:id="m-b06676a3-4aa1-430d-b1c8-3d3fcf606f0e" uly="326" ulx="265"/><zone lry="417" lrx="379" xml:id="m-e56a80e9-0fe3-4946-a9f5-6124e6b115c3" uly="385" ulx="349"/><zone lry="321" lrx="445" xml:id="m-237f98b6-0714-42ad-a1ac-e1fa376b0ac3" uly="288" ulx="440"/></surface></facsimile>';
+    var testMeiPath = 'test/data/0400_segment.mei';
 
-    module("Page");
+    module("Page", {
+        setup: function() {
+            var module = this;
+
+            // make the test mei document available to all tests
+            stop();
+            $.get(testMeiPath, function(data) {
+                module.mei = data;
+                start();
+            });
+        }
+    });
 
     test("Constructor", function() {
         var pModel = new Toe.Model.Page();
 
         equal(pModel.staves.length, 0);
+        equal(pModel.scale, 1.0);
     });
 
     test("Set Dimensions", function() {
@@ -22,10 +34,17 @@
 
     test("Calc Dimensions MEI", function() {
         var pModel = new Toe.Model.Page();
-        var dims = pModel.calcDimensions($(meiFacsRef).find("zone"));
-        
-        equal(dims[0], 445);
-        equal(dims[1], 417);
+        var dims = pModel.calcDimensions($(this.mei).find("zone"));
+
+        equal(dims[0], 1450);
+        equal(dims[1], 406);
+    });
+
+    test("Set Page Scale", function() {
+        var pModel = new Toe.Model.Page();
+        pModel.setPageScale(0.5);
+
+        equal(pModel.scale, 0.5);
     });
 
     test("Add Staves", function() {
@@ -39,4 +58,70 @@
 
         equal(pModel.staves.length, numStaves);
     });
+
+    test("Get Next Staff", function() {
+        var numStaves = 4;
+
+        var pModel = new Toe.Model.Page();
+        for (var i = 0; i < numStaves; i++) {
+            var sModel = new Toe.Model.Staff([0, 0, 100, 100]);
+            pModel.addStaff(sModel);
+        }
+
+        var anchorStaff = pModel.staves[1];
+        deepEqual(pModel.getNextStaff(anchorStaff), pModel.staves[2]);
+
+        // boundary condition
+        anchorStaff = pModel.staves[3];
+        equal(pModel.getNextStaff(anchorStaff), null);
+    });
+
+    test("Get Previous Staff", function() {
+        var numStaves = 4;
+
+        var pModel = new Toe.Model.Page();
+        for (var i = 0; i < numStaves; i++) {
+            var sModel = new Toe.Model.Staff([0, 0, 100, 100]);
+            pModel.addStaff(sModel);
+        }
+
+        var anchorStaff = pModel.staves[3];
+        deepEqual(pModel.getPreviousStaff(anchorStaff), pModel.staves[2]);
+
+        // boundary condition
+        anchorStaff = pModel.staves[0];
+        equal(pModel.getPreviousStaff(anchorStaff), null);
+    });
+
+    test("Get Closest Staff", function() {
+        /* Taken from 0453_corr.mei Liber Usualis (Staves split by ornate letter)
+         * <zone lry="1457" lrx="944" xml:id="m-9ebdc549-659c-4fff-977f-dc1bef338e0f" uly="1356" ulx="185"/>
+         * <zone lry="1457" lrx="1434" xml:id="m-030e1b43-18a3-4992-a063-821ed1a0de7a" uly="1358" ulx="1160"/>
+         * <zone lry="1782" lrx="1434" xml:id="m-f3f72f73-e37f-4bb9-aa16-45acc58d17f5" uly="1679" ulx="23"/>
+         */
+
+        var pModel = new Toe.Model.Page();
+        s1 = new Toe.Model.Staff([185,1356,944,1457]);
+        s2 = new Toe.Model.Staff([1160,1358,1434,1457]);
+        s3 = new Toe.Model.Staff([23,1679,1434,1782]);
+        pModel.addStaff(s1);
+        pModel.addStaff(s2);
+        pModel.addStaff(s3);
+
+        // click above first staff to the left
+        equal(pModel.getClosestStaff({x: 300, y: 1200}), s1);
+
+        // click inside first Staff
+        equal(pModel.getClosestStaff({x: 500, y: 1400}), s1);
+
+        // click above first two staves between the two but closer to the right one
+        equal(pModel.getClosestStaff({x: 1100, y: 1300}), s2);
+
+        // click between two staves on same x plane, but closer to left one
+        equal(pModel.getClosestStaff({x: 1000, y: 1400}), s1);
+
+        // click between the top and bottom row of staves, closer to bottom
+        equal(pModel.getClosestStaff({x: 800, y: 1600}), s3); 
+    });
+
 })();
