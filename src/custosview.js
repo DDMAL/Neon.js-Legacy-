@@ -94,7 +94,7 @@ Toe.View.CustosView.prototype.updateStaffPosition = function(custos) {
     var staff = custos.staff;
 
     var glyphTop = staff.zone.uly - custos.rootStaffPos*staff.delta_y/2 - this.drawing.currentHeight/4;
-    this.drawing.set({top: glyphTop});
+    this.drawing.top = glyphTop;
 
     this.drawLedgerLines(custos.rootStaffPos, this.drawing.left, (3/2)*this.drawing.currentWidth, staff);
 
