@@ -116,8 +116,11 @@ Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
     // reset staff position of custos
     this.rootStaffPos = staffPos;
 
-    $(this).trigger("vUpdateStaffPosition", [this]);
+    var actingClef = this.staff.getActingClefByEle(this);
+    var pitchInfo = this.staff.calcPitchFromStaffPos(this.rootStaffPos, actingClef);
+    this.setRootNote(pitchInfo["pname"], pitchInfo["oct"]);
 
+    $(this).trigger("vUpdateStaffPosition", [this]);
 }
 
 /**
