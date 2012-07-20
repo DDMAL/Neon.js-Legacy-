@@ -140,11 +140,27 @@ Toe.Model.Neume.prototype.getRootPitchInfo = function() {
 }
 
 /**
- * Sets the integer pitch difference of the root note in relation to the clef
- * of the staff that this neume is mounted on.
+ * Sets the staff position of the root note
  */
 Toe.Model.Neume.prototype.setRootStaffPos = function(staffPos) {
+    if (this.rootStaffPos == staffPos) {
+        return;
+    }
+
     this.rootStaffPos = staffPos;
+
+    var actingClef = this.staff.getActingClefByEle(this);
+    var pitchInfo = this.staff.calcPitchFromStaffPos(this.rootStaffPos, actingClef);
+    var neume = this;
+    $.each(this.components, function(ncInd, nc) {
+        var staffPos = neume.rootStaffPos + nc.pitchDiff;
+        var pitchInfo = neume.staff.calcPitchFromStaffPos(staffPos, actingClef);
+
+        // update the pitch information
+        nc.setPitchInfo(pitchInfo["pname"], pitchInfo["oct"]);
+    });
+
+    this.syncDrawing();
 }
 
 /**
