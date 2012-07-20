@@ -139,6 +139,17 @@ Toe.Model.Neume.prototype.getRootPitchInfo = function() {
     return {pname: pname, oct: oct};
 }
 
+// get the pitch name and octave of all neume notes
+Toe.Model.Neume.prototype.getPitchInfo = function() {
+    var pitchInfo = new Array();
+
+    $.each(this.components, function(ncInd, nc) {
+        pitchInfo.push({pname: nc.pname, oct: nc.oct});
+    });
+
+    return pitchInfo;
+}
+
 /**
  * Sets the staff position of the root note
  */
