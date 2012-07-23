@@ -1,5 +1,5 @@
 (function() {
-    var testMeiPath = 'test/data/0400_segment.mei';
+    var testMeiPath = 'test/data/0400_modified.mei';
 
     module("Page", {
         setup: function() {
@@ -36,8 +36,8 @@
         var pModel = new Toe.Model.Page();
         var dims = pModel.calcDimensions($(this.mei).find("zone"));
 
-        equal(dims[0], 1450);
-        equal(dims[1], 406);
+        equal(dims[0], 1458);
+        equal(dims[1], 2399);
     });
 
     test("Set Page Scale", function() {
