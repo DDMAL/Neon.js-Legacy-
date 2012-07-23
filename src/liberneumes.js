@@ -839,7 +839,7 @@ var drawLiberNeume = function(neume) {
                 elements.modify.push(glyphtrail);
 
                 // draw stems
-                var rx = nc_x[i] - ncGlyphs[2].centre[0] - 1;
+                var rx = nc_x[i-2] - ncGlyphs[2].centre[0] - 1;
                 line = this.rendEng.createLine([rx, nc_y[i], rx, nc_y[i-1]], {strokeWidth: 2, interact: true});
                 elements.fixed.push(line);
 
