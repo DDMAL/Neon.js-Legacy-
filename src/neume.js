@@ -262,8 +262,6 @@ Toe.Model.Neume.prototype.addComponent = function(type, pname, oct, options) {
 
     $.extend(opts, options);
 
-    // TODO: check that diff corresponds with the neume melodic move
-
     var nc = new Toe.Model.NeumeComponent(pname, oct, {type: type, ornaments: opts.ornaments});
 
     this.components.splice(opts.ncInd, 0, nc);
