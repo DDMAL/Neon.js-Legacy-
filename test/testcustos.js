@@ -1,6 +1,4 @@
 (function() {
-    var testMeiPath = 'test/data/0400_segment.mei';
-
     module("Custos");
   
     // <zone lry="331" lrx="208" xml:id="m-5ff17ad0-6396-4f4b-9c99-de55e140ee97" uly="278" ulx="190"/>
