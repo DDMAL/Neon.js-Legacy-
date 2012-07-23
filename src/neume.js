@@ -180,9 +180,8 @@ Toe.Model.Neume.prototype.setRootStaffPos = function(staffPos) {
  * @methodOf Toe.Model.Neume
  * @param {jQuery wrapped element set} neumeData the MEI neume data
  * @param {jQuery wrapped element set} facs the MEI facs data for the provided neume
- * @param {Toe.Model.Staff} staff Staff the neume is on to get the clef position information
  */
-Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, bb, staff) {
+Toe.Model.Neume.prototype.neumeFromMei = function(neumeData, bb) {
     // check the DOM element is in fact a neume
     if (neumeData.nodeName.toLowerCase() != "neume") {
         throw new Error("neumeFromMei: invalid neume data");
