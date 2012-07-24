@@ -948,6 +948,7 @@ Toe.View.GUI.prototype.handleDelete = function(e) {
         var custos = drawing.eleRef;
 
         custos.staff.removeElementByRef(custos);
+        custos.staff.custos = null;
         toDelete.cids.push(custos.id);
 
         gui.rendEng.canvas.remove(drawing);
