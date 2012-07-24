@@ -330,40 +330,38 @@ class ModifyDocument:
                 # insert new staff into the document
                 staves = section_parent.getChildrenByName("staff")
                 s_ind = list(staves).index(staff)
-                before_staff = None
                 if s_ind+1 < len(staves):
+                    # there are staff elements after the new staff to insert
                     before_staff = staves[s_ind+1]
 
+                    # update staff numbers staves
+                    for i, s in enumerate(staves[s_ind+1:]):
+                        s.addAttribute("n", str(s_ind+i+3))
+
+                    section_parent.addChildBefore(before_staff, new_staff)
+                else:
+                    section_parent.addChild(new_staff)
+
+                new_staff.addAttribute("n", str(s_ind+2))
+                
                 # insert and update staff definitions
                 staff_group = self.mei.getElementsByName("staffGrp")
                 if len(staff_group):
                     staff_defs = staff_group[0].getChildrenByName("staffDef")
                     if len(staff_defs) == len(staves):
-                        for i, sd in enumerate(staff_defs[s_ind+1:]):
-                            sd.addAttribute("n", str(s_ind+i+3))
                         staff_def = MeiElement("staffDef")
                         staff_def.addAttribute("n", str(s_ind+2))
-                        before_staff_def = None
                         if s_ind+1 < len(staff_defs):
                             before_staff_def = staff_defs[s_ind+1]
 
-                if before_staff_def:
-                    staff_group[0].addChildBefore(before_staff_def, staff_def)
-                else:
-                    staff_group[0].addChild(staff_def)
+                            # update staff number for all following staff defs
+                            for i, sd in enumerate(staff_defs[s_ind+1:]):
+                                sd.addAttribute("n", str(s_ind+i+3))
 
-                # update staff numbers of subsequent staves
-                for i, s in enumerate(staves[s_ind+1:]):
-                    s.addAttribute("n", str(s_ind+i+3))
+                            staff_group[0].addChildBefore(before_staff_def, staff_def)
+                        else:
+                            staff_group[0].addChild(staff_def)
 
-                new_staff.addAttribute("n", str(s_ind+2))
-
-                # insert the new staff
-                if before_staff:
-                    section_parent.addChildBefore(before_staff, new_staff)
-                else:
-                    section_parent.addChild(staff)
-    
         result = {"id": division.getId()}
         return result
 
