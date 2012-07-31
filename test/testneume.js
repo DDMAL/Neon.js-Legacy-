@@ -1,7 +1,7 @@
 (function() {
     module("Neume");
 
-    var testMeiPath = 'test/data/0400_modified.mei';
+    var testMeiPath = 'test/data/allneumes.mei';
 
     // <zone lry="331" lrx="208" xml:id="m-5ff17ad0-6396-4f4b-9c99-de55e140ee97" uly="278" ulx="190"/>
     var clef_bb = [190, 278, 208, 331];
@@ -129,17 +129,17 @@
 
             // test constructing a neume from a wrong mei element
             raises(function() {
-                var d_mei = $(mei).find("division[xml\\:id=m-efd74668-dbb9-4c06-8768-61ca77e1349f]")[0];
-                // <zone lry="321" lrx="445" xml:id="m-237f98b6-0714-42ad-a1ac-e1fa376b0ac3" uly="288" ulx="440"/>
+                var d_mei = $(mei).find("division[xml\\:id=m-e9c811f4-d126-492b-9939-fa2ada4a5b78]")[0];
+                // <zone xml:id="m-abdc88db-ac94-4153-8575-ac86b7afa75e" ulx="503" uly="320" lrx="505" lry="388"/>
                 n.neumeFromMei(d_mei, [440, 288, 445, 321]);
             });
 
             // test constructing a torculus with different head shapes from mei
             n = new Toe.Model.Neume();
-            nid = "m-2cbbaf14-99c1-43f7-af53-238966e62021";
+            nid = "m-ab889897-6fbe-425f-8051-4312bdcbb1e2";
             var n_mei = $(mei).find("neume[xml\\:id=" + nid + "]")[0];
-            // <zone lry="433" lrx="1282" xml:id="m-1c4a2280-f2e3-4daf-9312-e223a74d478a" uly="379" ulx="1231"/>
-            var torculus_bb = [1231, 379, 1282, 433];
+            // <zone xml:id="m-2fb29e73-b97a-4ca5-91bd-4324220693b3" ulx="100" uly="1938" lrx="150" lry="2047"/>
+            var torculus_bb = [100, 1938, 150, 2047];
             n.neumeFromMei(n_mei, torculus_bb);
 
             equal(n.id, nid);
@@ -150,24 +150,24 @@
             equal(n.components.length, 3);
 
             var pitchInfo = n.getPitchInfo();
-            equal(pitchInfo[0]["pname"], "f");
+            equal(pitchInfo[0]["pname"], "g");
             equal(pitchInfo[0]["oct"], 3);
-            equal(pitchInfo[1]["pname"], "g");
-            equal(pitchInfo[1]["oct"], 3);
-            equal(pitchInfo[2]["pname"], "f");
+            equal(pitchInfo[1]["pname"], "c");
+            equal(pitchInfo[1]["oct"], 4);
+            equal(pitchInfo[2]["pname"], "e");
             equal(pitchInfo[2]["oct"], 3);
 
             // test head shapes are correct
             equal(n.components[0].props.type, "punctum_inclinatum");
             equal(n.components[1].props.type, "quilisma");
-            equal(n.components[2].props.type, "punctum_inclinatum_parvum");
+            equal(n.components[2].props.type, "punctum_inclinatum");
 
             // test cavum
             n = new Toe.Model.Neume();
-            nid = "m-231cd6eb-cdc8-4018-bb56-3b14902cf131";
+            nid = "m-4e7be433-7e4b-4caf-97f2-32e711a9eb74";
             n_mei = $(mei).find("neume[xml\\:id=" + nid + "]")[0];
-            // <zone xml:id="m-e56a80e9-0fe3-4946-a9f5-6124e6b115c3" ulx="349" uly="383" lrx="380" lry="416"/>
-            var cavum_bb = [349, 383, 380, 416];
+            // <zone xml:id="m-7e519001-1bfd-4435-b23b-7766a9eaf3f3" ulx="264" uly="315" lrx="295" lry="348"/>
+            var cavum_bb = [264, 315, 295, 348];
             n.neumeFromMei(n_mei, cavum_bb);
 
             equal(n.id, nid);
@@ -178,7 +178,7 @@
             equal(n.components.length, 1);
 
             var rootPitchInfo = n.getRootPitchInfo();
-            equal(rootPitchInfo["pname"], "d");
+            equal(rootPitchInfo["pname"], "a");
             equal(rootPitchInfo["oct"], 3);
 
             // test note head shape
@@ -189,10 +189,10 @@
 
             // test virga
             n = new Toe.Model.Neume();
-            nid = "m-804cd452-967d-46ac-a446-3b861a8fc8bd";
+            nid = "m-ab23d739-29e7-434e-b5d7-7e3a2135a405";
             n_mei = $(mei).find("neume[xml\\:id=" + nid + "]")[0];
-            // <zone xml:id="m-b040b49b-418e-4d19-ac80-4497fc53385f" ulx="399" uly="360" lrx="417" lry="423"/>
-            var virga_bb = [399, 360, 417, 423];
+            // <zone xml:id="m-21263449-bc2c-45f0-b331-ee05aa5e59da" ulx="355" uly="349" lrx="386" lry="423"/>
+            var virga_bb = [355, 349, 386, 423];
             n.neumeFromMei(n_mei, virga_bb);
 
             equal(n.id, nid);

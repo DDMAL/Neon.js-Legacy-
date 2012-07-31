@@ -1,5 +1,5 @@
 (function() {
-    var testMeiPath = 'test/data/0400_modified.mei';
+    var testMeiPath = 'test/data/allneumes.mei';
 
     module("Page", {
         setup: function() {
@@ -36,7 +36,7 @@
         var pModel = new Toe.Model.Page();
         var dims = pModel.calcDimensions($(this.mei).find("zone"));
 
-        equal(dims[0], 1458);
+        equal(dims[0], 1462);
         equal(dims[1], 2399);
     });
 
