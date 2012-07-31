@@ -9,7 +9,7 @@
     var custos_bb = [1439, 310, 1446, 345];
 
     test("Constructor", function() {
-        cModel = new Toe.Model.Custos("a", 3);
+        var cModel = new Toe.Model.Custos("a", 3);
 
         ok(cModel.props.interact);
         equal(cModel.pname, "a");
@@ -24,7 +24,7 @@
     });
 
     test("Set Bounding Box", function() {
-        cModel = new Toe.Model.Custos("f", 2);
+        var cModel = new Toe.Model.Custos("f", 2);
 
         // test invalid bounding box argument
         raises(function() { 
