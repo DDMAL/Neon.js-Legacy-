@@ -622,7 +622,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
                     }
                     else {
                         // insert before the next system break staff
-                        var sNextModel = gui.page.getNextStaff(sModel);
+                        var sNextModel = gui.page.getNextStaff(staff);
                         beforeid = sNextModel.id;
                     }
 
