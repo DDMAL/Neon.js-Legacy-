@@ -58,18 +58,18 @@
         <zone xml:id="m-0580b1b9-e01d-49b6-8016-debab02a074c" ulx="1008" uly="360" lrx="1079" lry="423"/>
         <zone xml:id="m-1b3ec52f-fa8b-439c-ba09-603332b0707a" ulx="1167" uly="302" lrx="1191" lry="405"/>
         <zone xml:id="m-362b74b5-8426-404c-abc2-8023d7ba8cd0" ulx="1442" uly="327" lrx="1449" lry="363"/>
-        <zone xml:id="m-cd65d3c1-df0b-4eea-9b58-fec430599927" ulx="87" uly="539" lrx="122" lry="600"/>
-        <zone xml:id="m-9852d690-d906-4724-bda7-a7fae91c73d4" ulx="237" uly="557" lrx="298" lry="619"/>
-        <zone xml:id="m-2542e331-072c-45ba-9378-1369fb72c7cd" ulx="345" uly="506" lrx="423" lry="579"/>
+        <zone xml:id="m-cd65d3c1-df0b-4eea-9b58-fec430599927" ulx="116" uly="539" lrx="152" lry="603"/>
+        <zone xml:id="m-9852d690-d906-4724-bda7-a7fae91c73d4" ulx="450" uly="557" lrx="510" lry="619"/>
+        <zone xml:id="m-2542e331-072c-45ba-9378-1369fb72c7cd" ulx="606" uly="506" lrx="684" lry="579"/>
         <zone xml:id="m-5ec2f53a-6db9-4c3c-adf5-0935d9c1f331" ulx="792" uly="320" lrx="793" lry="388"/>
-        <zone xml:id="m-e203dfd7-a5b0-4465-8d07-3df849c7cd2b" ulx="167" uly="534" lrx="169" lry="635"/>
-        <zone xml:id="m-a571ce95-e898-4513-886f-d4e0fcec1f4c" ulx="510" uly="591" lrx="606" lry="681"/>
-        <zone xml:id="m-d0552025-03a7-43d4-8d29-4e34e1c53829" ulx="690" uly="539" lrx="803" lry="647"/>
+        <zone xml:id="m-e203dfd7-a5b0-4465-8d07-3df849c7cd2b" ulx="385" uly="534" lrx="386" lry="635"/>
+        <zone xml:id="m-a571ce95-e898-4513-886f-d4e0fcec1f4c" ulx="766" uly="591" lrx="862" lry="681"/>
+        <zone xml:id="m-d0552025-03a7-43d4-8d29-4e34e1c53829" ulx="908" uly="539" lrx="1021" lry="647"/>
         <zone xml:id="m-19e574db-45fb-46c8-b03f-4235606fbd92" ulx="77" uly="781" lrx="155" lry="843"/>
         <zone xml:id="m-16ea2b35-92ac-4e29-a0b0-e98517481a58" ulx="218" uly="730" lrx="312" lry="803"/>
         <zone xml:id="m-3812029b-148e-4df9-bd3e-f252ed49dc5a" ulx="371" uly="781" lrx="483" lry="871"/>
         <zone xml:id="m-8e41ebf7-7924-4936-beb4-677f0a296b4b" ulx="1439" uly="473" lrx="1446" lry="509"/>
-        <zone xml:id="m-c5764981-cde5-42de-9ad1-20e38ce0819d" ulx="859" uly="534" lrx="878" lry="635"/>
+        <zone xml:id="m-c5764981-cde5-42de-9ad1-20e38ce0819d" ulx="1077" uly="534" lrx="1098" lry="635"/>
         <zone xml:id="m-22e4d081-a5ac-48e7-bcc3-17b9c9012a87" ulx="542" uly="747" lrx="672" lry="855"/>
         <zone xml:id="m-a63b5074-0bd5-435d-a78b-a0452ea81580" ulx="1442" uly="849" lrx="1449" lry="886"/>
         <zone xml:id="m-57c0998f-df28-4e3b-a388-f768ccae0db9" ulx="69" uly="988" lrx="87" lry="1077"/>
@@ -83,7 +83,7 @@
         <zone xml:id="m-030e0807-ec7b-4ba8-844b-b068a5f3beb3" ulx="1176" uly="971" lrx="1288" lry="1095"/>
         <zone xml:id="m-d2fad737-20c0-4416-ad9d-0c3aa154b67d" ulx="1364" uly="982" lrx="1383" lry="1084"/>
         <zone xml:id="m-eba2fad0-768c-4c4b-8c2d-415e2738afa3" ulx="1442" uly="971" lrx="1449" lry="1008"/>
-        <zone xml:id="m-a04c5596-6282-494a-81bd-db69821a9a08" ulx="87" uly="1223" lrx="121" lry="1313"/>
+        <zone xml:id="m-a04c5596-6282-494a-81bd-db69821a9a08" ulx="84" uly="1223" lrx="118" lry="1313"/>
         <zone xml:id="m-5ee8fd5b-efc8-48c8-a7db-3aa657f7c6b5" ulx="198" uly="1206" lrx="231" lry="1331"/>
         <zone xml:id="m-ce599c2f-395b-4395-b6c3-257c28de7d03" ulx="310" uly="1206" lrx="360" lry="1332"/>
         <zone xml:id="m-60092fcd-e0fd-40b6-b468-af800288af79" ulx="422" uly="1217" lrx="424" lry="1320"/>
@@ -111,12 +111,13 @@
         <zone xml:id="m-d3f2dde6-ac52-4f69-b3b5-82a57971208d" ulx="471" uly="1702" lrx="490" lry="1809"/>
         <zone xml:id="m-dcf4d85b-6506-43e3-a5f8-e7bc1c00f509" ulx="318" uly="1680" lrx="417" lry="1766"/>
         <zone xml:id="m-7381e302-23fb-4eb7-b99e-a12eb08c8c61" ulx="1445" uly="1702" lrx="1462" lry="1725"/>
-        <zone xml:id="m-d1e291e8-71bd-44bb-9067-ef6858ddfb27" ulx="259" uly="1938" lrx="326" lry="2047"/>
+        <zone xml:id="m-d1e291e8-71bd-44bb-9067-ef6858ddfb27" ulx="261" uly="1938" lrx="327" lry="2047"/>
         <zone xml:id="m-c5379a24-3167-4ff8-b081-33e3cd1d5cb0" ulx="414" uly="1956" lrx="514" lry="2030"/>
         <zone xml:id="m-57aad657-cde0-4eeb-82bc-51affccdefc8" ulx="206" uly="1949" lrx="207" lry="2055"/>
         <zone xml:id="m-4bc7e67e-66a5-4ab7-8235-2d535c975f06" ulx="590" uly="1921" lrx="709" lry="1994"/>
         <zone xml:id="m-fce0c9ee-b51a-4696-ac76-bc68907b59c4" ulx="755" uly="1974" lrx="890" lry="2049"/>
         <zone xml:id="m-7e253cf6-108c-4805-8be6-dacd9249d5f0" ulx="93" uly="1938" lrx="146" lry="2049"/>
+        <zone xml:id="m-fef95841-541a-4091-b354-7b66d4e8561a" ulx="261" uly="569" lrx="279" lry="646"/>
       </surface>
     </facsimile>
     <layout xml:id="m-9b682d5c-cbae-444f-9f1d-684a12ce4ba4">
@@ -234,6 +235,12 @@
                     <note xml:id="m-b667df51-11c6-4802-94fc-706698c48100" pname="e" oct="3"/>
                   </nc>
                 </neume>
+                <neume xml:id="m-9074b982-4e55-48c7-adb2-5a1f559477a0" name="cephalicus" facs="m-fef95841-541a-4091-b354-7b66d4e8561a">
+                  <nc xml:id="m-8e64ca63-e929-4064-bce8-b1dec718523e">
+                    <note xml:id="m-c01a1bfb-86ff-4a04-90a8-e153a948396b" pname="e" oct="3"/>
+                    <note xml:id="m-073811e1-d352-4b36-aaca-534a2f224590" pname="b" oct="2"/>
+                  </nc>
+                </neume>
                 <division xml:id="m-8e423d13-2e19-421c-9704-c73b72ff726c" form="major" facs="m-e203dfd7-a5b0-4465-8d07-3df849c7cd2b"/>
                 <neume xml:id="m-ff178914-56ab-42b1-a24d-43f4e12a9279" name="climacus" facs="m-9852d690-d906-4724-bda7-a7fae91c73d4">
                   <nc xml:id="m-c402e814-5b9d-4308-95f6-53e326c036f1">
@@ -280,8 +287,8 @@
                 <division xml:id="m-cdc120f4-3cb3-4806-8d83-b2a101c2319b" form="final" facs="m-c5764981-cde5-42de-9ad1-20e38ce0819d"/>
               </layer>
             </staff>
-            <staff xml:id="m-7d3241c0-2aa2-4b82-8bfd-2ff315efdda7" n="3">
-              <layer xml:id="m-3136c5e5-8bef-4670-a473-add6aa21b37e" n="1">
+            <staff xml:id="m-891b7a8f-9d0a-442a-994a-ceb911018713" n="3">
+              <layer xml:id="m-f19a2f69-5c7e-4ab9-983d-02417667c48b" n="1">
                 <custos xml:id="m-4b8a56d7-7c7a-4b5d-815a-e03b4327dd05" facs="m-8e41ebf7-7924-4936-beb4-677f0a296b4b" pname="c" oct="4"/>
                 <sb xml:id="m-19925ffd-5112-4251-97dc-82c9a812d34d" systemref="m-f99601d3-a4e9-4c4d-9acc-b1845ba51b41" n="3"/>
                 <clef xml:id="m-7a80e690-8581-4d40-b1ef-50cad5864c9e" facs="m-a6d97961-7bbb-4f11-9fee-e139edddad7d" shape="C" line="3"/>
