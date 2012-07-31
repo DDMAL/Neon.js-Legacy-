@@ -7,6 +7,10 @@
     var clef_bb = [190, 278, 208, 331];
     // <zone xml:id="m-0ac66c2a-bebd-493a-94bc-cfa2a0ba0489" lry="406" lrx="1450" uly="302" ulx="190"/>
     var staff_bb = [190, 302, 406, 1450];
+    // <zone xml:id="m-2bd4d2bd-1645-4651-80cf-73acbe632c35" ulx="31" uly="545" lrx="59" lry="612"/>
+    var clef2_bb = [31, 545, 59, 612];
+    // <zone xml:id="m-148e5db0-8f9b-49de-ba1b-9fdec93ec173" lry="635" lrx="1447" uly="534" ulx="22"/>
+    var staff2_bb = [22, 534, 1447, 635];
     // <zone lry="349" lrx="258" xml:id="m-df35aa9a-9155-4c89-a8b2-a05688156807" uly="328" ulx="240"/>
     var neume1_bb = [240, 328, 258, 349];
     // <zone lry="376" lrx="315" xml:id="m-b06676a3-4aa1-430d-b1c8-3d3fcf606f0e" uly="326" ulx="265"/>
@@ -287,8 +291,494 @@
         deepEqual(n2.diffToMelodicMove(), [-1, -1]);
     });
 
-    test("Derive Neume Name", function() {
-        
+    asyncTest("Derive Neume Name", function() {
+        // test neume with no neume components
+        var n = new Toe.Model.Neume();
+        equal(n.deriveName(), "unknown");
+
+        // read the test mei document to grab a neume
+        var sModel = new Toe.Model.Staff(staff2_bb);
+        var cModel = new Toe.Model.Clef("c", {staffPos: 0});
+        cModel.setBoundingBox(clef2_bb);
+        sModel.addClef(cModel);
+
+        // declare all neumes that are present in the mei file
+        meiNeumes = [
+            {name: 'Punctum', id: 'punctum'},
+            {name: 'Cavum', id: 'cavum'},
+            {name: 'Punctum', id: 'punctum'},
+            {name: 'Virga', id: 'virga'},
+            {name: 'Punctum', id: 'punctum'},
+            {name: 'Punctum', id: 'punctum'},
+            {name: 'Distropha', id: 'distropha'},
+            {name: 'Bivirga', id: 'bivirga'},
+            {name: 'Tristropha', id: 'tristropha'},
+            {name: 'Trivirga', id: 'trivirga'},
+            {name: 'Clivis', id: 'clivis'},
+            {name: 'Cephalicus', id: 'cephalicus'},
+            {name: 'Climacus', id: 'climacus.1'},
+            {name: 'Climacus', id: 'climacus.2'},
+            {name: 'Climacus', id: 'climacus.3'},
+            {name: 'Climacus', id: 'climacus.4'},
+            {name: 'Climacus Resupinus', id: 'climacus.resupinus.1'},
+            {name: 'Climacus Resupinus', id: 'climacus.resupinus.2'},
+            {name: 'Climacus Resupinus', id: 'climacus.resupinus.3'},
+            {name: 'Climacus Resupinus', id: 'climacus.resupinus.4'},
+            {name: 'Podatus', id: 'podatus'},
+            {name: 'Epiphonus', id: 'epiphonus'},
+            {name: 'Podatus Subpunctis', id: 'podatus.subpunctis.1'},
+            {name: 'Podatus Subpunctis', id: 'podatus.subpunctis.2'},
+            {name: 'Podatus Subpunctis', id: 'podatus.subpunctis.3'},
+            {name: 'Podatus Subpunctis', id: 'podatus.subpunctis.4'},
+            {name: 'Podatus Subpunctis Resupinus', id: 'podatus.subpunctis.resupinus.1'},
+            {name: 'Podatus Subpunctis Resupinus', id: 'podatus.subpunctis.resupinus.2'},
+            {name: 'Podatus Subpunctis Resupinus', id: 'podatus.subpunctis.resupinus.3'},
+            {name: 'Scandicus', id: 'scandicus.1'},
+            {name: 'Scandicus', id: 'scandicus.2'},
+            {name: 'Scandicus', id: 'scandicus.3'},
+            {name: 'Scandicus Flexus', id: 'scandicus.flexus.1'},
+            {name: 'Scandicus Flexus', id: 'scandicus.flexus.2'},
+            {name: 'Scandicus Flexus', id: 'scandicus.flexus.3'},
+            {name: 'Scandicus Subpunctis', id: 'scandicus.subpunctis.1'},
+            {name: 'Scandicus Subpunctis', id: 'scandicus.subpunctis.2'},
+            {name: 'Porrectus', id: 'porrectus'},
+            {name: 'Porrectus Flexus', id: 'porrectus.flexus'},
+            {name: 'Porrectus Subpunctis', id: 'porrectus.subpunctis.1'},
+            {name: 'Porrectus Subpunctis', id: 'porrectus.subpunctis.2'},
+            {name: 'Porrectus Subpunctis Resupinus', id: 'porrectus.subpunctis.resupinus.1'},
+            {name: 'Porrectus Subpunctis Resupinus', id: 'porrectus.subpunctis.resupinus.2'},
+            {name: 'Compound', id: 'compound.1'},
+            {name: 'Compound', id: 'compound.2'},
+            {name: 'Torculus', id: 'torculus'},
+            {name: 'Torculus Resupinus', id: 'torculus.resupinus.1'},
+            {name: 'Torculus Resupinus', id: 'torculus.resupinus.2'},
+            {name: 'Torculus Resupinus', id: 'torculus.resupinus.3'},
+            {name: 'Torculus Resupinus', id: 'torculus.resupinus.4'},
+        ];
+
+        // read all neumes in the test file
+        $.get(testMeiPath, function(mei) {
+            var neumes = $(mei).find("neume");
+            var surface = $(mei).find("surface");
+            $.each(neumes, function(nInd, nel) {
+                var n = new Toe.Model.Neume();
+                var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
+                var ulx = parseInt($(neumeFacs).attr("ulx"));
+                var uly = parseInt($(neumeFacs).attr("uly"));
+                var lrx = parseInt($(neumeFacs).attr("lrx"));
+                var lry = parseInt($(neumeFacs).attr("lry"));
+                var bb = [ulx, uly, lrx, lry];
+
+                n.neumeFromMei(nel, bb);
+                sModel.addNeume(n);
+
+                // derive the neume name
+                n.deriveName();
+
+                equal(n.name, meiNeumes[nInd].name);
+                equal(n.typeid, meiNeumes[nInd].id);
+
+                sModel.removeElementByRef(n);
+            });
+
+            start();
+        });
+    });
+
+    test("Enforce Head Shape", function() {
+        // climacus.1
+        var n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.typeid = 'climacus.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+
+        // climacus.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'd', 3);
+        n.typeid = 'climacus.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+
+        // climacus.3
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'd', 3);
+        n.addComponent('punctum', 'c', 3);
+        n.typeid = 'climacus.3';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+
+        // climacus.4
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'd', 3);
+        n.addComponent('punctum', 'c', 3);
+        n.addComponent('punctum', 'b', 2);
+        n.typeid = 'climacus.4';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+
+        // climacus.resupinus.1
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'b', 3);
+        n.typeid = 'climacus.resupinus.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum');
+
+        // climacus.resupinus.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'f', 4);
+        n.addComponent('punctum', 'e', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.typeid = 'climacus.resupinus.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum');
+
+        // climacus.resupinus.3
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.typeid = 'climacus.resupinus.3';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum');
+
+        // climacus.resupinus.4
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'e', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.typeid = 'climacus.resupinus.4';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum_inclinatum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+        equal(n.components[6].props.type, 'punctum');
+
+        // podatus.subpunctis.1
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.typeid = 'podatus.subpunctis.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+
+        // podatus.subpunctis.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'd', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.typeid = 'podatus.subpunctis.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+
+        // podatus.subpunctis.3
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.typeid = 'podatus.subpunctis.3';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+
+        // podatus.subpunctis.4
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'd', 3);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'd', 3);
+        n.typeid = 'podatus.subpunctis.4';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+        equal(n.components[6].props.type, 'punctum_inclinatum');
+
+        // podatus.subpunctis.resupinus.1
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'b', 3);
+        n.typeid = 'podatus.subpunctis.resupinus.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum');
+
+        // podatus.subpunctis.resupinus.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'g', 4);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'd', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.typeid = 'podatus.subpunctis.resupinus.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum');
+
+        // podatus.subpunctis.resupinus.3
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'd', 3);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.typeid = 'podatus.subpunctis.resupinus.3';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum_inclinatum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+        equal(n.components[6].props.type, 'punctum');
+
+        // scandicus.subpunctis.1
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'f', 4);
+        n.addComponent('punctum', 'e', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.typeid = 'scandicus.subpunctis.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+
+        // scandicus.subpunctis.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'f', 4);
+        n.addComponent('punctum', 'g', 4);
+        n.addComponent('punctum', 'f', 4);
+        n.addComponent('punctum', 'e', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.typeid = 'scandicus.subpunctis.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+
+        // porrectus.subpunctis.1
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.typeid = 'porrectus.subpunctis.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+
+        // porrectus.subpunctis.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.typeid = 'porrectus.subpunctis.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+
+        // porrectus.subpunctis.resupinus.1
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.typeid = 'porrectus.subpunctis.resupinus.1';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum');
+
+        // porrectus.subpunctis.resupinus.2
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.addComponent('punctum', 'f', 3);
+        n.addComponent('punctum', 'e', 3);
+        n.addComponent('punctum', 'g', 3);
+        n.typeid = 'porrectus.subpunctis.resupinus.2';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum_inclinatum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+        equal(n.components[6].props.type, 'punctum');
+
+        // torculus.resupinus.3
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.typeid = 'torculus.resupinus.3';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+
+        // torculus.resupinus.4
+        n = new Toe.Model.Neume();
+        n.addComponent('punctum', 'a', 3);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'd', 4);
+        n.addComponent('punctum', 'c', 4);
+        n.addComponent('punctum', 'b', 3);
+        n.addComponent('punctum', 'a', 3);
+        n.typeid = 'torculus.resupinus.4';
+        n.enforceHeadShapes();
+
+        equal(n.components[0].props.type, 'punctum');
+        equal(n.components[1].props.type, 'punctum');
+        equal(n.components[2].props.type, 'punctum');
+        equal(n.components[3].props.type, 'punctum');
+        equal(n.components[4].props.type, 'punctum_inclinatum');
+        equal(n.components[5].props.type, 'punctum_inclinatum');
+        equal(n.components[6].props.type, 'punctum_inclinatum');
     });
 
 })();
