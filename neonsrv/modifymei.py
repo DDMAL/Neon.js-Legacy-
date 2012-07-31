@@ -432,28 +432,26 @@ class ModifyDocument:
                     # add element to the new staff/layer
                     new_layer.addChild(e)
                     # remove element from the current staff/layer
-                    layer_before.removeChild(e)
+                    layer.removeChild(e)
 
                 new_staff.addChild(new_layer)
 
                 # insert new staff into the document
                 staves = section.getChildrenByName("staff")
                 s_ind = list(staves).index(staff)
-                before_staff = None
                 if s_ind+1 < len(staves):
+                    # there are staff elements after the new staff to insert
                     before_staff = staves[s_ind+1]
 
-                # update staff numbers of subsequent staves
-                for i, s in enumerate(staves[s_ind+1:]):
-                    s.addAttribute("n", str(s_ind+i+3))
+                    # update staff numbers staves
+                    for i, s in enumerate(staves[s_ind+1:]):
+                        s.addAttribute("n", str(s_ind+i+3))
 
-                new_staff.addAttribute("n", str(s_ind+2))
-
-                # insert the new staff
-                if before_staff:
                     section.addChildBefore(before_staff, new_staff)
                 else:
-                    section.addChild(staff)
+                    section.addChild(new_staff)
+
+                new_staff.addAttribute("n", str(s_ind+2))
 
     def delete_division(self, ids):
         '''
@@ -476,31 +474,32 @@ class ModifyDocument:
 
                 # get elements from next staff/layer, if any
                 # and move them to the previous staff/layer
-                next_layer = staves[s_ind+1].getChildrenByName("layer")
-                if len(next_layer):
-                    elements = next_layer[0].getChildren()
+                if s_ind+1 < len(staves):
+                    next_layer = staves[s_ind+1].getChildrenByName("layer")
+                    if len(next_layer):
+                        elements = next_layer[0].getChildren()
 
-                    # remove the next staff/layer
-                    section.removeChild(staves[s_ind+1])
+                        # remove the next staff/layer
+                        section.removeChild(staves[s_ind+1])
 
-                    # add these elements to the previous staff/layer
-                    for e in elements:
-                        layer.addChild(e)
+                        # add these elements to the previous staff/layer
+                        for e in elements:
+                            layer.addChild(e)
 
-                    # remove the staffDef for the removed layer
-                    staff_group = self.mei.getElementsByName("staffGrp")
-                    if len(staff_group):
-                        staff_defs = staff_group[0].getChildrenByName("staffDef")
-                        if len(staff_defs) == len(staves):
-                            # renumber subsequent staff defs
-                            for i, sd in enumerate(staff_defs[s_ind+2:]):
-                                sd.addAttribute("n", str(s_ind+i+2))
+                        # remove the staffDef for the removed layer
+                        staff_group = self.mei.getElementsByName("staffGrp")
+                        if len(staff_group):
+                            staff_defs = staff_group[0].getChildrenByName("staffDef")
+                            if len(staff_defs) == len(staves):
+                                # renumber subsequent staff defs
+                                for i, sd in enumerate(staff_defs[s_ind+2:]):
+                                    sd.addAttribute("n", str(s_ind+i+2))
 
-                            staff_group[0].removeChild(staff_defs[s_ind+1])
+                                staff_group[0].removeChild(staff_defs[s_ind+1])
 
-                    # renumber subsequent staves
-                    for i, s in enumerate(staves[s_ind+2:]):
-                        s.addAttribute("n", str(s_ind+i+2))
+                        # renumber subsequent staves
+                        for i, s in enumerate(staves[s_ind+2:]):
+                            s.addAttribute("n", str(s_ind+i+2))
 
             # delete the division
             division.getParent().removeChild(division)
@@ -511,15 +510,15 @@ class ModifyDocument:
         '''
 
         punctum = self.mei.getElementById(id)
-        # check that a punctum element was provided
-        if punctum.getName() == "neume" and punctum.getAttribute("name").getValue() == "punctum":
-            note = punctum.getDescendantsByName("note")
-            if len(note):
+        # check that a neume with one note is given
+        notes = punctum.getDescendantsByName("note")
+        if punctum.getName() == "neume" and len(notes) == 1:
+            if len(notes):
                 # if a dot does not already exist on the note
-                if len(note[0].getChildrenByName("dot")) == 0:
+                if len(notes[0].getChildrenByName("dot")) == 0:
                     dot = MeiElement("dot")
                     dot.addAttribute("form", form)
-                    note[0].addChild(dot)
+                    notes[0].addChild(dot)
 
             self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
