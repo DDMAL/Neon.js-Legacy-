@@ -34,6 +34,14 @@ Toe.View.ClefView = function(renderEngine) {
 
 Toe.View.ClefView.prototype.constructor = Toe.View.ClefView;
 
+/**
+ * Draws a clef on the drawing surface and updates the model's bounding box.
+ * This is an internal function that is called by {@link Toe.View.ClefView#renderClef} and {@link Toe.View.ClefView#updateShape}
+ * and shouldn't be called directly.
+ *
+ * @methodOf Toe.View.ClefView
+ * @param {Toe.Model.Clef} clef The clef model
+ */
 Toe.View.ClefView.prototype.drawClef = function(clef) {
     if (!this.rendEng) {
         throw new Error("Clef: Invalid render context");
@@ -68,14 +76,22 @@ Toe.View.ClefView.prototype.drawClef = function(clef) {
 }
 
 /**
- * Renders the clef
+ * Renders the clef on the canvas. Calls {@link Toe.View.ClefView#drawClef}.
+ *
  * @methodOf Toe.View.ClefView
- * @param {Toe.Model.Clef} clef Clef to render
+ * @param {Toe.Model.Clef} clef The clef to render.
  */
 Toe.View.ClefView.prototype.renderClef = function(clef) {
     this.drawClef(clef);
 }
 
+/**
+ * Updates the shape of a clef on the drawing surface.
+ * For example, changing from a "C" to an "F" clef.
+ *
+ * @methodOf Toe.View.ClefView
+ * @param {Toe.Model.Clef} clef The clef to render.
+ */
 Toe.View.ClefView.prototype.updateShape = function(clef) {
     if (!this.drawing) {
         throw new Error("Clef: update method called, but there exists no drawing to update.");
@@ -93,6 +109,12 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
     this.rendEng.repaint();
 }
 
+/**
+ * Updates the vertical position of a clef on the drawing surface.
+ *
+ * @methodOf Toe.View.ClefView
+ * @param {Toe.Model.Clef} clef The clef whose staff position is to be modified.
+ */
 Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
     if (!this.drawing) {
         throw new Error("Clef: update method called, but there exists no drawing to update.");
@@ -112,6 +134,11 @@ Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
 }
 
+/**
+ * Selects the clef on the drawing surface.
+ *
+ * @methodOf Toe.View.ClefView
+ */
 Toe.View.ClefView.prototype.selectDrawing = function() {
     this.rendEng.canvas.setActiveObject(this.drawing);
 }

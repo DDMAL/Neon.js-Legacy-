@@ -162,6 +162,8 @@ Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
 
 /**
  * Select clef on the drawing surface
+ *
+ * @methodOf Toe.Model.Clef
  */
 Toe.Model.Clef.prototype.selectDrawing = function() {
     $(this).trigger("vSelectDrawing");

@@ -23,10 +23,11 @@ THE SOFTWARE.
 /**
  * Creates a new custos 
  *
- * @class Models a custos, a neume at the end of a staff that represents the first
- * note in the next staff.
+ * @class Models a custos, a neume at the end of a staff that represents the pitch 
+ * of the first note in the next staff.
  * @param {String} pname pitch name of the next note
  * @param {Integer} oct octave of the next note
+ * @param {Object} options key: {Boolean} interact Whether the glyph can be interacted with.
  */
 Toe.Model.Custos = function(pname, oct, options) {
     this.props = {
@@ -55,7 +56,7 @@ Toe.Model.Custos = function(pname, oct, options) {
 Toe.Model.Custos.prototype.constructor = Toe.Model.Custos;
 
 /**
- * Sets the bounding box of the custos 
+ * Sets the bounding box of the custos.
  *
  * @methodOf Toe.Model.Custos
  * @param {Array} bb [ulx, uly, lrx, lry]
@@ -74,7 +75,7 @@ Toe.Model.Custos.prototype.setBoundingBox = function(bb) {
 }
 
 /**
- * Sets the id of the custos element.
+ * Sets the ID of the custos element.
  * 
  * @methodOf Toe.Model.Custos
  * @param {String} id
@@ -83,6 +84,12 @@ Toe.Model.Custos.prototype.setID = function(cid) {
     this.id = cid;
 }
 
+/**
+ * Sets the staff that this custos element is attached to.
+ *
+ * @methodOf Toe.Model.Custos
+ * @param {Toe.Model.Staff} staff The staff model to attach the custos to.
+ */
 Toe.Model.Custos.prototype.setStaff = function(staff) {
     if (!(staff instanceof Toe.Model.Staff)) {
         throw new Error("Custos: invalid staff reference");
@@ -92,7 +99,7 @@ Toe.Model.Custos.prototype.setStaff = function(staff) {
 }
 
 /**
- * Sets the pitch name and octave of the custos
+ * Sets the pitch name and octave of the custos.
  *
  * @methodOf Toe.Model.Custos
  * @param {String} pname pitch name
@@ -105,7 +112,7 @@ Toe.Model.Custos.prototype.setRootNote = function(pname, oct) {
 
 /**
  * Sets the pitch difference of the custos in relation to the clef of the staff the
- * custos is mounted on
+ * custos is mounted on.
  */
 Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
     // only redraw the glyph if it needs to be redrawn

@@ -23,8 +23,8 @@ THE SOFTWARE.
 /**
  * Creates a neume
  * Each neume has: name, root pitch, list of neume elements, each element has difference from root pitch (int)
- *                 modifier (liquescence etc.) - alt, shift, ctrl, ctrl+shift
- * @class Neume
+ *                 modifier (liquescence etc.) - alt, shift, ctrl, ctrl+shift in the Medieval Final Plugin.
+ * @class Models a neume-a container for one or more notes.
  * @param {Object} options key {string}, type {Toe.Model.Neume.Type}, rootNote.pitch {string}, 
  *                 rootNote.octave {number}, modifier {Toe.Model.Neume.Modifier}, interact {Boolean}
  */
