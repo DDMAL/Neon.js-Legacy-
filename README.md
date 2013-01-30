@@ -56,3 +56,8 @@ We're using Qunit for unit testing. Load `test/neontest.html` in a browser to ru
 
 2. Server testing  
 To run server tests, install [python-nose](https://github.com/nose-devs/nose) and run `nosetests`
+
+License
+-------
+
+Neon.js is distributed under the [MIT license](http://en.wikipedia.org/wiki/MIT_License).
