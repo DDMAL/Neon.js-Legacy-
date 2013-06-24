@@ -55,7 +55,7 @@ Toe.View.RenderEngine.prototype.setGlyphs = function(glyphs) {
     this.canvas.HOVER_CURSOR = "pointer";
 
     // set selection line width
-    this.canvas.selectionLineWidth = 3;
+    this.canvas.selectionLineWidth = 2;
     this.canvas.selectionBorderColor = 'black';
 }
 
@@ -118,6 +118,7 @@ Toe.View.RenderEngine.prototype.createLine = function(coords, options) {
 
 	return new fabric.Line(coords, {
 		fill: opts.fill,
+        stroke: opts.fill,
         strokeWidth: opts.strokeWidth,
         opacity: opts.opacity,
         selectable: opts.interact

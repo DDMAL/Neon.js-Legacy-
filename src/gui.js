@@ -160,10 +160,11 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
                                    'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
 
             $("#sldr_glyphOpacity").bind("change", function() {
-                glyphs = gui.rendEng.canvas.getObjects();
-                for (var i = 0; i < glyphs.length; i++) {
-                    glyphs[i].opacity = $(this).val();
-                }
+                var opacity = $(this).val();
+                gui.rendEng.canvas.forEachObject(function(obj) {
+                    obj.setOpacity(opacity);
+                });
+
                 gui.rendEng.repaint();
             });
         }
@@ -255,7 +256,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
 
     gui.rendEng.canvas.observe('mouse:down', function(e) {
         // cache pointer coordinates for mouse up
-        gui.downCoords = gui.rendEng.canvas.getPointer(e.memo.e);
+        gui.downCoords = gui.rendEng.canvas.getPointer(e.e);
     });
 
     gui.rendEng.canvas.observe('object:moving', function(e) {
@@ -263,7 +264,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     });
 
     gui.rendEng.canvas.observe('selection:created', function(e) {
-        var selection = e.memo.target;
+        var selection = e.target;
         selection.hasControls = false;
         selection.borderColor = 'rgba(102,153,255,1.0)';
 
@@ -272,6 +273,9 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         var toUngroup = 0;
         var sModel = null;
         $.each(selection.getObjects(), function (oInd, o) {
+            // don't draw a selection border around each object in the selection
+            o.borderColor = 'rgba(0,0,0,0)'; 
+
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
                     sModel = o.eleRef.staff;
@@ -431,7 +435,7 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
     });
 
     gui.rendEng.canvas.observe('mouse:up', function(e) {
-        var upCoords = gui.rendEng.canvas.getPointer(e.memo.e);
+        var upCoords = gui.rendEng.canvas.getPointer(e.e);
 
         // get delta of the mouse movement
         var delta_x = gui.downCoords.x - upCoords.x;
@@ -442,7 +446,13 @@ Toe.View.GUI.prototype.handleEdit = function(e) {
         }
         
         // if something is selected we need to do some housekeeping
+        // check for single selection
         var selection = gui.rendEng.canvas.getActiveObject();
+        if (!selection) {
+            // check for group selection
+            selection = gui.rendEng.canvas.getActiveGroup();
+        }
+
         if (selection) {
             var elements = new Array();
             if (selection.eleRef) {
@@ -1415,7 +1425,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
 
     // render transparent punctum at pointer location
     gui.rendEng.canvas.observe('mouse:move', function(e) {
-        var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
         gui.punctDwg.left = pnt.x - gui.punctDwg.currentWidth/4;
         gui.punctDwg.top = pnt.y - gui.punctDwg.currentHeight/4;
 
@@ -1570,7 +1580,7 @@ Toe.View.GUI.prototype.handleInsertDivision = function(e) {
     var staff = null;
 
     gui.rendEng.canvas.observe('mouse:move', function(e) {
-        var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
 
         // get closest staff
         staff = gui.page.getClosestStaff(pnt);
@@ -1772,7 +1782,7 @@ Toe.View.GUI.prototype.handleInsertClef = function(e) {
 
     // move the drawing with the pointer
     gui.rendEng.canvas.observe("mouse:move", function(e) {
-        var pnt = gui.rendEng.canvas.getPointer(e.memo.e);
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
 
         var xOffset = 0;
         var yOffset = 0;
