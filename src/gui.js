@@ -29,6 +29,8 @@ THE SOFTWARE.
 Toe.View.GUI = function(apiprefix, meipath, dwgLib, rendEng, page, guiToggles) {
     var toggles = {
         sldr_bgImgOpacity: true,
+        sldr_glyphOpacity: true,
+        initGlyphOpacity: 1.0,
         initBgImgOpacity: 0.60,
         initMode: "edit"
     };
@@ -135,17 +137,36 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
     // cache instance variable
     var gui = this;
 
-    // create background image opacity slider
-    if (toggles.sldr_bgImgOpacity) {
-        $(parentDivId).prepend('<span id="sidebar-bg"><li class="nav-header">Background</li>\n' +
-                               '<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n' +
-                               '<input id="sldr_bgImgOpacity" style="width: 95%;" type="range" name="bgImgOpacity" ' +
-                               'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li></span>');
+    // create container for appearance sliders
+    if (toggles.sldr_bgImgOpacity || toggles.sldr_glyphOpacity) {
+        $(parentDivId).prepend('<span id="sidebar-app"><li class="nav-header">Appearance</li>\n</span>');
 
-        $("#sldr_bgImgOpacity").bind("change", function() {
-            gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
-            gui.rendEng.repaint();
-        });
+        // create background image opacity slider
+        if (toggles.sldr_bgImgOpacity) {
+            $("#sidebar-app").append('<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n' +
+                                   '<input id="sldr_bgImgOpacity" style="width: 95%;" type="range" name="bgImgOpacity" ' +
+                                   'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li>');
+
+            $("#sldr_bgImgOpacity").bind("change", function() {
+                gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
+                gui.rendEng.repaint();
+            });
+        }
+
+        // create glyph opacity slider
+        if (toggles.sldr_glyphOpacity) {
+            $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' + 
+                                   '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' + 
+                                   'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
+
+            $("#sldr_glyphOpacity").bind("change", function() {
+                glyphs = gui.rendEng.canvas.getObjects();
+                for (var i = 0; i < glyphs.length; i++) {
+                    glyphs[i].opacity = $(this).val();
+                }
+                gui.rendEng.repaint();
+            });
+        }
     }
 
     // switch to edit mode
