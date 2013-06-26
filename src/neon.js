@@ -292,9 +292,10 @@ THE SOFTWARE.
                 $(svg).find("svg").each(function(it, el) {
                     // http://stackoverflow.com/questions/652763/jquery-object-to-string
                     var rawSVG = $("<lol>").append($(el).clone()).remove().html();
-                    fabric.loadSVGFromString(rawSVG, function(objects) {
-                        gID = $(el).find("path").attr("id");
-                        glyphs[gID] = new Toe.Model.Glyph(gID, objects[0]);
+                    fabric.loadSVGFromString(rawSVG, function(objects, options) {
+                        var gID = $(el).attr("id");
+                        var obj = fabric.util.groupSVGElements(objects, options);
+                        glyphs[gID] = new Toe.Model.Glyph(gID, obj);
                     });
                 });
                 rendEng.setGlyphs(glyphs);
