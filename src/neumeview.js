@@ -36,6 +36,9 @@ Toe.View.NeumeView = function(renderEngine, drawingLibrary) {
     else if (drawingLibrary == "salzinnes") {
         Toe.View.NeumeView.prototype.drawNeume = drawSalzinnesNeume;
     }
+    else if (drawingLibrary == "hartker") {
+        Toe.View.NeumeView.prototype.drawNeume = drawHartkerNeume;
+    }
     else {
         throw "Invalid Drawing Library";
     }
