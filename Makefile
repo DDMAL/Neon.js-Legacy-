@@ -1,8 +1,9 @@
+BUILD_DIR = build
 
 all: doc
 
-#dist:
-#	java -jar compiler.jar --compilation_level XXX --js <files> <output?>
+dist:
+	cd $(BUILD_DIR); ./build.sh
 
 doc:
 	java -jar support/jsdoc/jsrun.jar \

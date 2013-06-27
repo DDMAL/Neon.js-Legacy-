@@ -26,11 +26,9 @@ cp conf.py{.dist,}
 
 3. Now compile the Neon.js code. Yes, compiling JavaScript. Wierd, right?  
 ```
-cd build  
-./build.sh {liber, salzinnes}  
-ln -s neon.min.js ../src/neon.min.js  
-```  
-This script automatically downloads the latest google closure compiler, builds the drawing code for the liber or salzinnes manuscript, and places the minified JavaScript file into the proper location.
+make dist
+```
+This script downloads the latest google closure compiler and uses it to minify the Neon.js source code into the proper location.
 
 4. Now, start up the server:  
 ```
@@ -46,7 +44,9 @@ Development
 Documentation is provided by [jsdoc-toolkit](http://code.google.com/p/jsdoc-toolkit/)
 
 Build docs with (java required):  
-    `make doc`
+```
+make doc
+```
 
 Tests
 -----
