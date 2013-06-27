@@ -21,32 +21,25 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a new division controller that listens to the model and the view
+ * A St. Gallen music score. 
  *
- * @class Controller for the division
- * @param {Toe.Model.Division} pModel The division model
- * @param {Toe.View.Division} pView The division view
+ * @class Represents a page of music from the St. Gallen manuscript
+ * @extends Toe.Model.Page
  */
-Toe.Ctrl.DivisionController = function(dModel, dView) {
-    // LISTEN TO THE VIEW
-
-    // LISTEN TO THE MODEL
-    /** 
-     * @event
-     * event type: vRenderDivision
-     * @param {Toe.Model.Division} division Division to render
-     */
-    $(dModel).bind("vRenderDivision", function(event, division) {
-        if (Toe.debug) {
-            dView.renderBoundingBox(division);
-        }
-
-        dView.renderDivision(division);
-    });
-
-    $(dModel).bind("vSelectDrawing", function(event) {
-        dView.selectDrawing();
-    });
+Toe.Model.StGallenPage = function() {
 }
 
-Toe.Ctrl.DivisionController.prototype.constructor = Toe.Ctrl.DivisionController;
+// inherit prototype from page object
+Toe.Model.StGallenPage.prototype = new Toe.Model.Page();
+
+Toe.Model.StGallenPage.prototype.constructor = Toe.StGallenPage;
+
+/**
+ * Loads the page of music from an MEI file.
+ *
+ * @methodOf Toe.Model.StGallenPage
+ */
+Toe.Model.StGallenPage.prototype.loadMei = function(mei) {
+    // cache page reference
+    var page = this;
+};

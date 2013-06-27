@@ -157,3 +157,21 @@ Toe.Model.Page.prototype.addStaff = function(staff) {
 
     return this;
 }
+
+// helper function to parse bounding box information
+// "static" function
+Toe.Model.Page.prototype.parseBoundingBox = function(zoneFacs) {
+    // cache page reference
+    var page = this;
+
+    var ulx = parseInt($(zoneFacs).attr("ulx"));
+    var uly = parseInt($(zoneFacs).attr("uly"));
+    var lrx = parseInt($(zoneFacs).attr("lrx"));
+    var lry = parseInt($(zoneFacs).attr("lry"));
+
+    var bb = $.map([ulx, uly, lrx, lry], function(b) {
+        return Math.round(page.scale*b);
+    });
+
+    return bb;
+};

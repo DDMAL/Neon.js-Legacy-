@@ -37,6 +37,10 @@ Toe.Ctrl.StaffController = function(sModel, sView) {
      * @param {Toe.Model.Staff} staff Staff to render
      */
     $(sModel).bind("vRenderStaff", function(event, staff) {
+        if (Toe.debug) {
+            sView.renderStaffBoundingBox(staff);
+        }
+
         sView.renderStaff(staff);
     });
 }

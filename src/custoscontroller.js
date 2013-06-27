@@ -48,6 +48,10 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
      * @param {Toe.Model.Custos} custos Custos to render
      */
     $(cModel).bind("vRenderCustos", function(event, custos) {
+        if (Toe.debug) {
+            cView.renderBoundingBox(custos);
+        }
+
         cView.renderCustos(custos);
     });
 

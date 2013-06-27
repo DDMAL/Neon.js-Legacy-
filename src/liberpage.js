@@ -1,0 +1,189 @@
+/*
+Copyright (C) 2011 by Gregory Burlet, Alastair Porter
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+/**
+ * A Liber Usualis music score. 
+ *
+ * @class Represents a page of music from the Liber Usualis
+ * @extends Toe.Model.Page
+ */
+Toe.Model.LiberPage = function() {
+}
+
+// inherit prototype from page object
+Toe.Model.LiberPage.prototype = new Toe.Model.Page();
+
+Toe.Model.LiberPage.prototype.constructor = Toe.LiberPage;
+
+/**
+ * Loads the page of music from an MEI file. The render engine is required
+ * as a parameter because the glyph scaling factor is derived from the
+ * size of the first staff that is loaded in this function.
+ *
+ * @methodOf Toe.Model.LiberPage
+ * @param {Toe.View.RenderEngine} rendEng the rendering engine
+ */
+Toe.Model.LiberPage.prototype.loadMei = function(mei, rendEng) {
+    // cache page reference
+    var page = this;
+
+    var surface = $(mei).find("surface")[0];
+    var clefList = $("clef, sb", mei);
+    // calculate sb indices in the clef list
+    var clef_sbInd = new Array();
+    $(clefList).each(function(cit, cel) {
+        if ($(cel).is("sb")) {
+            clef_sbInd.push(cit);
+        }
+    });
+
+    var neumeList = $("neume, sb", mei);
+    // calculate sb indices in the neume list
+    // precomputing will render better performance than a filter operation in the loops
+    var neume_sbInd = new Array();
+    $(neumeList).each(function(nit, nel)  {
+        if ($(nel).is("sb")) {
+            neume_sbInd.push(nit);
+        }
+    });
+
+    var divList = $("division, sb", mei);
+    // calculate sb indices in the division list
+    var div_sbInd = new Array();
+    $(divList).each(function(dit, del) {
+        if ($(del).is("sb")) {
+            div_sbInd.push(dit);
+        }
+    });
+
+    var custosList = $("custos, sb", mei);
+    // calculate sb indices in the custos list
+    var custos_sbInd = new Array();
+    $(custosList).each(function(cit, cel) {
+        if ($(cel).is("sb")) {
+            custos_sbInd.push(cit);
+        }
+    });
+
+    // for each system
+    $("sb", mei).each(function(sit, sel) {
+        // get facs data
+        var sbref = $(sel).attr("systemref");
+        var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
+        var sysFacs = $(surface).find("zone[xml\\:id=" + sysfacsid + "]")[0];
+
+        // create staff
+        var s_bb = page.parseBoundingBox(sysFacs);
+
+        // get id of parent layer
+        var sModel = new Toe.Model.Staff(s_bb);
+        sModel.setID($(sel).attr("xml:id"));
+
+        // set global scale using staff from first system
+        if (sit == 0) {
+            rendEng.calcScaleFromStaff(sModel, {overwrite: true});
+        }
+
+        // instantiate staff view and controller
+        var sView = new Toe.View.StaffView(rendEng);
+        var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
+        page.addStaff(sModel);
+
+        // load all clefs in the system
+        $(clefList).slice(clef_sbInd[sit]+1, clef_sbInd[sit+1]).each(function(cit, cel) {
+            var clefShape = $(cel).attr("shape");
+            var clefStaffLine = parseInt($(cel).attr("line"));
+
+            // convert mei line attribute to staffPos attribute used in the internal clef Model
+            var staffPos = -(sModel.props.numLines - clefStaffLine) * 2;
+
+            var clefFacsId = $(cel).attr("facs");
+            var clefFacs = $(surface).find("zone[xml\\:id=" + clefFacsId + "]")[0];
+            var c_bb = page.parseBoundingBox(clefFacs);
+
+            var cModel = new Toe.Model.Clef(clefShape, {"staffPos": staffPos});
+            cModel.setID($(cel).attr("xml:id"));
+            cModel.setBoundingBox(c_bb);
+
+            // instantiate clef view and controller
+            var cView = new Toe.View.ClefView(rendEng);
+            var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
+
+            // mount clef on the staff
+            sModel.addClef(cModel);
+        });
+
+        // load all neumes in the system
+        $(neumeList).slice(neume_sbInd[sit]+1, neume_sbInd[sit+1]).each(function(nit, nel) {
+            var nModel = new Toe.Model.Neume();
+            var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
+            var n_bb = page.parseBoundingBox(neumeFacs);
+
+            nModel.neumeFromMei(nel, n_bb);
+            // instantiate neume view and controller
+            var nView = new Toe.View.NeumeView(rendEng, "liber");
+            var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+            // mount neume on the staff
+            sModel.addNeume(nModel);
+        });
+
+        // load all divisions in the system
+        $(divList).slice(div_sbInd[sit]+1, div_sbInd[sit+1]).each(function(dit, del) {
+            var divFacs = $(surface).find("zone[xml\\:id=" + $(del).attr("facs") + "]")[0];
+            var d_bb = page.parseBoundingBox(divFacs);
+
+            var dType = "div_" + $(del).attr("form");
+            var dModel = new Toe.Model.Division(dType);
+            dModel.setBoundingBox(d_bb);
+            dModel.setID($(del).attr("xml:id"));
+
+            // instantiate division view and controller
+            var dView = new Toe.View.DivisionView(rendEng);
+            var dCtrl = new Toe.Ctrl.DivisionController(dModel, dView);
+
+            // mount the division on the staff
+            sModel.addDivision(dModel);
+        });
+
+        // load custos for the system (if it exists)
+        $(custosList).slice(custos_sbInd[sit]+1, custos_sbInd[sit+1]).each(function(cit, cel) {
+            var custosFacs = $(surface).find("zone[xml\\:id=" + $(cel).attr("facs") + "]")[0];
+            var c_bb = page.parseBoundingBox(custosFacs);
+
+            // get pitch name and octave
+            var pname = $(cel).attr("pname");
+            var oct = parseInt($(cel).attr("oct"));
+
+            var cModel = new Toe.Model.Custos(pname, oct);
+            cModel.setBoundingBox(c_bb);
+            cModel.setID($(cel).attr("xml:id"));
+
+            // instantiate division view and controller
+            var cView = new Toe.View.CustosView(rendEng);
+            var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+
+            // mount the custos on the staff
+            sModel.setCustos(cModel);
+        });
+    });
+};

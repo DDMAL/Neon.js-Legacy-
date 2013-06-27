@@ -53,6 +53,10 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
             neume.deriveName();
         }
 
+        if (Toe.debug) {
+            nView.renderBoundingBox(neume);
+        }
+
         nView.render(neume);
     });
 

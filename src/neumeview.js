@@ -153,6 +153,17 @@ Toe.View.NeumeView.prototype.render = function(neume) {
     this.drawNeume(neume);
 }
 
+/**
+ * Renders the bounding box of the neume
+ *
+ * @methodOf Toe.View.NeumeView
+ * @param {Toe.Model.Neume} neume Neume to render the bounding box
+ */
+Toe.View.NeumeView.prototype.renderBoundingBox = function(neume) {
+    var n_bb = [neume.zone.ulx, neume.zone.uly, neume.zone.lrx, neume.zone.lry];
+    this.rendEng.outlineBoundingBox(n_bb, {fill: "green"});
+}
+
 Toe.View.NeumeView.prototype.updateDrawing = function(neume) {
     // if a drawing exists for this neume, update it
     // by removing and drawing again.

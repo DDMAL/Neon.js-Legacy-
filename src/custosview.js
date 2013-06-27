@@ -82,6 +82,17 @@ Toe.View.CustosView.prototype.renderCustos = function(custos) {
 	this.drawing = this.rendEng.draw({fixed: [], modify: [custosDwg]}, {selectable: custos.props.interact, group: true, lockMovementX: true, lockMovementY: true, eleRef: custos})[0];
 }
 
+/**
+ * Renders the bounding box of the custos
+ *
+ * @methodOf Toe.View.CustosView
+ * @param {Toe.Model.Custos} custos Custos to render the bounding box
+ */
+Toe.View.CustosView.prototype.renderBoundingBox = function(custos) {
+    var c_bb = [custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry];
+    this.rendEng.outlineBoundingBox(c_bb, {fill: "purple"});
+}
+
 Toe.View.CustosView.prototype.updateStaffPosition = function(custos) {
     if (!this.drawing) {
         throw new Error("Custos: update method called, but there exists no drawing to update.");

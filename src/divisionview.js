@@ -37,7 +37,6 @@ Toe.View.DivisionView.prototype.constructor = Toe.View.DivisionView;
  *
  * @methodOf Toe.View.DivisionView
  * @param {Toe.Model.Division} division Division to render
- * @param {Toe.Model.Staff} staff Staff context in which to render the provided division
  */
 Toe.View.DivisionView.prototype.renderDivision = function(division) {
     if (!this.rendEng) {
@@ -83,6 +82,17 @@ Toe.View.DivisionView.prototype.renderDivision = function(division) {
 	this.drawing = this.rendEng.draw(elements, {group: true, selectable: division.props.interact, eleRef: division})[0];
 }
 
+/**
+ * Render the bounding box of the division
+ *
+ * @methodOf Toe.View.DivisionView
+ * @param {Toe.Model.Division} division Division to render the bounding box
+ */
+Toe.View.DivisionView.prototype.renderBoundingBox = function(division) {
+    var d_bb = [division.zone.ulx, division.zone.uly, division.zone.lrx, division.zone.lry];
+    this.rendEng.outlineBoundingBox(d_bb, {fill: "yellow"});
+}
+
 Toe.View.DivisionView.prototype.selectDrawing = function() {
-    this.rendEng.canvas.setActiveObject(this.drawing);
+this.rendEng.canvas.setActiveObject(this.drawing);
 }

@@ -59,3 +59,14 @@ Toe.View.StaffView.prototype.renderStaff = function(staff) {
     
 	this.rendEng.draw(elements, {selectable: staff.props.interact});
 }
+
+/**
+ * Renders the bounding box of the staff
+ *
+ * @methodOf Toe.View.StaffView
+ * @param {Toe.Model.Staff} staff Staff to render the bounding box
+ */
+Toe.View.StaffView.prototype.renderStaffBoundingBox = function(staff) {
+    var s_bb = [staff.zone.ulx, staff.zone.uly, staff.zone.lrx, staff.zone.lry];
+    this.rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
+}

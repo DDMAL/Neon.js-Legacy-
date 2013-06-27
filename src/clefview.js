@@ -86,6 +86,17 @@ Toe.View.ClefView.prototype.renderClef = function(clef) {
 }
 
 /**
+ * Renders the bounding box of the clef on the canvas
+ *
+ * @methodOf Toe.View.ClefView
+ * @param {Toe.Model.Clef} clef The clef to render the bounding box
+ */
+Toe.View.ClefView.prototype.renderClefBoundingBox = function(clef) {
+    var c_bb = [clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry];
+    this.rendEng.outlineBoundingBox(c_bb, {fill: "red"});
+}
+
+/**
  * Updates the shape of a clef on the drawing surface.
  * For example, changing from a "C" to an "F" clef.
  *
