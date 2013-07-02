@@ -21,28 +21,29 @@ THE SOFTWARE.
 */
 
 /**
- * A Liber Usualis music score. 
+ * A music score in square note notation. 
  *
- * @class Represents a page of music from the Liber Usualis
+ * @class Represents a page of music in square note notation. 
  * @extends Toe.Model.Page
  */
-Toe.Model.LiberPage = function() {
+Toe.Model.SquareNotePage = function(documentType) {
+    this.documentType = documentType;
 }
 
 // inherit prototype from page object
-Toe.Model.LiberPage.prototype = new Toe.Model.Page();
+Toe.Model.SquareNotePage.prototype = new Toe.Model.Page();
 
-Toe.Model.LiberPage.prototype.constructor = Toe.LiberPage;
+Toe.Model.SquareNotePage.prototype.constructor = Toe.SquareNotePage;
 
 /**
  * Loads the page of music from an MEI file. The render engine is required
  * as a parameter because the glyph scaling factor is derived from the
  * size of the first staff that is loaded in this function.
  *
- * @methodOf Toe.Model.LiberPage
+ * @methodOf Toe.Model.SquareNotePage
  * @param {Toe.View.RenderEngine} rendEng the rendering engine
  */
-Toe.Model.LiberPage.prototype.loadMei = function(mei, rendEng) {
+Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
     // cache page reference
     var page = this;
 
@@ -95,7 +96,7 @@ Toe.Model.LiberPage.prototype.loadMei = function(mei, rendEng) {
         var s_bb = page.parseBoundingBox(sysFacs);
 
         // get id of parent layer
-        var sModel = new Toe.Model.Staff(s_bb);
+        var sModel = new Toe.Model.SquareNoteStaff(s_bb);
         sModel.setID($(sel).attr("xml:id"));
 
         // set global scale using staff from first system
@@ -140,7 +141,7 @@ Toe.Model.LiberPage.prototype.loadMei = function(mei, rendEng) {
 
             nModel.neumeFromMei(nel, n_bb);
             // instantiate neume view and controller
-            var nView = new Toe.View.NeumeView(rendEng, "liber");
+            var nView = new Toe.View.NeumeView(rendEng, page.documentType);
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
             // mount neume on the staff

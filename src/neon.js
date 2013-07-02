@@ -162,13 +162,11 @@ THE SOFTWARE.
             
             switch (settings.documentType) {
                 case "liber":
-                    page = new Toe.Model.LiberPage();
-                    break;
                 case "salzinnes":
-                    page = new Toe.Model.SalzinnesPage();
+                    page = new Toe.Model.SquareNotePage(settings.documentType);
                     break;
                 case "stgallen":
-                    page = new Toe.Model.StGallenPage();
+                    page = new Toe.Model.StafflessPage(settings.documentType);
                     break;
             }
 
