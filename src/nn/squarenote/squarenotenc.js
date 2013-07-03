@@ -28,25 +28,38 @@ THE SOFTWARE.
  * @param {Object} options type {string} corresponding to Toe.Model.NeumeComponent.Type
  *                         ornaments {Array} list of Toe.Model.Ornaments
  */
-Toe.Model.NeumeComponent = function(options) {
-    // prevent construction of prototype object without parameters
-    if (!arguments.length) return;
+Toe.Model.SquareNoteNeumeComponent = function(pname, oct, options) {
+    // call super constructor
+    Toe.Model.NeumeComponent.call(this, options);
 
-    this.props = {
-        type: "punctum",
-        ornaments: [],
-        interact: true
-    };
+    this.setPitchInfo(pname, oct);
 
-    $.extend(this.props, options);
-
-    // set head shape
-    this.setHeadShape(this.props.type);
+    // the integer pitch difference is set when the neume is mounted onto a staff
+    // since calculating this difference with respect to the root note of the neume
+    // requires clef information.
+    this.pitchDiff = null;
 }
 
-Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
+Toe.Model.SquareNoteNeumeComponent.prototype = new Toe.Model.NeumeComponent();
+Toe.Model.SquareNoteNeumeComponent.prototype.constructor = Toe.Model.SquareNoteNeumeComponent;
 
-Toe.Model.NeumeComponent.prototype.setHeadShape = function(shape) {
+/**
+ * Known types of neume components
+ *
+ * @constant
+ * @public
+ * @fieldOf Toe.Model.NeumeComponent
+ */
+Toe.Model.NeumeComponent.Type = {
+    punctum: "Punctum",
+    virga: "Virga",
+    cavum: "Cavum",
+    punctum_inclinatum: "Punctum Inclinatum",
+    punctum_inclinatum_parvum: "Punctum Inclinatum Parva",
+    quilisma: "Quilisma"
+};
+
+Toe.Model.SquareNoteNeumeComponent.prototype.setHeadShape = function(shape) {
     this.props.type = shape.toLowerCase();
     this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
     if (this.props.name == undefined) {
@@ -54,14 +67,25 @@ Toe.Model.NeumeComponent.prototype.setHeadShape = function(shape) {
     }
 }
 
+// set integer pitch difference with respect to root note of the neume
+Toe.Model.SquareNoteNeumeComponent.prototype.setPitchDifference = function(pitchDiff) {
+    this.pitchDiff = pitchDiff;
+}
+
+// set pitch information
+Toe.Model.SquareNoteNeumeComponent.prototype.setPitchInfo = function(pname, oct) {
+    this.pname = pname;
+    this.oct = oct;
+}
+
 /**
  * Check if the neume component has the specified ornament
  *
- * @methodOf Toe.Model.NeumeComponent
+ * @methodOf Toe.Model.SquareNoteNeumeComponent
  * @param {String} oType ornament type
  * @return {Number} 1 if ornament exists, 0 if does not exist 
  */
-Toe.Model.NeumeComponent.prototype.hasOrnament = function(oType) {
+Toe.Model.SquareNoteNeumeComponent.prototype.hasOrnament = function(oType) {
     return $.grep(this.props.ornaments, function(o) {
         return o.key == oType.toLowerCase();
     }).length;
@@ -70,10 +94,10 @@ Toe.Model.NeumeComponent.prototype.hasOrnament = function(oType) {
 /**
  * Add an ornament to the neume component.
  *
- * @methodOf Toe.Model.NeumeComponent
+ * @methodOf Toe.Model.SquareNoteNeumeComponent
  * @param {Toe.Model.Ornament}
  */
-Toe.Model.NeumeComponent.prototype.addOrnament = function(ornament) {
+Toe.Model.SquareNoteNeumeComponent.prototype.addOrnament = function(ornament) {
     // check argument is an ornament
     if (!(ornament instanceof Toe.Model.Ornament)) {
         throw new Error("NeumeComponent: Invalid ornament");
@@ -89,10 +113,10 @@ Toe.Model.NeumeComponent.prototype.addOrnament = function(ornament) {
 /**
  * Remove an ornament from the neume component
  *
- * @methodOf Toe.Model.NeumeComponent
+ * @methodOf Toe.Model.SquareNoteNeumeComponent
  * @param {String} oType ornament type (dot, horizEpisema, vertEpisema)
  */
-Toe.Model.NeumeComponent.prototype.removeOrnament = function(oType) {
+Toe.Model.SquareNoteNeumeComponent.prototype.removeOrnament = function(oType) {
     // filter out ornaments with the type "oType"
     this.props.ornaments = $.grep(this.props.ornaments, function(o) {
         return o.key == oType.toLowerCase();

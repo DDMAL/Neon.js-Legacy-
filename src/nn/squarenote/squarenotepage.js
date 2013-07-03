@@ -135,7 +135,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
 
         // load all neumes in the system
         $(neumeList).slice(neume_sbInd[sit]+1, neume_sbInd[sit+1]).each(function(nit, nel) {
-            var nModel = new Toe.Model.Neume();
+            var nModel = new Toe.Model.SquareNoteNeume();
             var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
             var n_bb = page.parseBoundingBox(neumeFacs);
 
