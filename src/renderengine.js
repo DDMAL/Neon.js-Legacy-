@@ -212,7 +212,7 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
 
 // wrapper for fabric canvas unobserve event listener
 Toe.View.RenderEngine.prototype.unObserve = function(event) {
-    delete this.canvas.__eventListeners[event];
+    this.canvas.off(event);
 }
 
 Toe.View.RenderEngine.prototype.repaint = function() {

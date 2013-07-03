@@ -1321,6 +1321,7 @@ Toe.View.GUI.prototype.handleInsert = function(e) {
     gui.rendEng.unObserve("object:moving");
     gui.rendEng.unObserve("object:selected");
     gui.rendEng.unObserve("selection:cleared");
+    gui.rendEng.unObserve("selection:created");
 
     // then add insert options
     if ($("#sidebar-insert").length == 0) {
