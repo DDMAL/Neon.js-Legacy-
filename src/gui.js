@@ -1125,7 +1125,7 @@ Toe.View.GUI.prototype.handleNeumify = function(e) {
         });
 
         // begin the NEUMIFICATION
-        var newNeume = new Toe.Model.Neume({modifier: modifier});
+        var newNeume = new Toe.Model.SquareNoteNeume({modifier: modifier});
                         
         numPunct = 0;
         var nids = new Array();
@@ -1240,7 +1240,7 @@ Toe.View.GUI.prototype.handleUngroup = function(e) {
         gui.rendEng.canvas.remove(o);
 
         $.each(o.eleRef.components, function(ncInd, nc) {
-            var newPunct = new Toe.Model.Neume();
+            var newPunct = new Toe.Model.SquareNoteNeume();
             newPunct.components.push(nc);
 
             var uly = o.eleRef.staff.zone.uly - (o.eleRef.rootStaffPos + nc.pitchDiff)*o.eleRef.staff.delta_y/2 - gui.punctHeight/2;
@@ -1438,7 +1438,7 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         var sModel = gui.page.getClosestStaff(coords);
 
         // instantiate a punctum
-        var nModel = new Toe.Model.Neume();
+        var nModel = new Toe.Model.SquareNoteNeume();
 
         // calculate snapped coords
         var snapCoords = sModel.ohSnap(coords, gui.punctDwg.currentWidth);
@@ -1471,7 +1471,8 @@ Toe.View.GUI.prototype.handleInsertPunctum = function(e) {
         }
         */
 
-        nModel.addComponent("punctum", pname, oct, {ornaments: ornaments});
+        var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: "punctum", ornaments: ornaments});
+        nModel.addComponent(nc);
 
         // instantiate neume view and controller
         var nView = new Toe.View.NeumeView(gui.rendEng, gui.dwgLib);

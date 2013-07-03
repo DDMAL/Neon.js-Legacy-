@@ -32,6 +32,9 @@ Toe.Model.SquareNoteNeumeComponent = function(pname, oct, options) {
     // call super constructor
     Toe.Model.NeumeComponent.call(this, options);
 
+    // set head shape
+    this.setHeadShape(this.props.type);
+
     this.setPitchInfo(pname, oct);
 
     // the integer pitch difference is set when the neume is mounted onto a staff

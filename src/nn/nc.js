@@ -29,9 +29,6 @@ THE SOFTWARE.
  *                         ornaments {Array} list of Toe.Model.Ornaments
  */
 Toe.Model.NeumeComponent = function(options) {
-    // prevent construction of prototype object without parameters
-    if (!arguments.length) return;
-
     this.props = {
         type: "punctum",
         ornaments: [],
@@ -39,20 +36,9 @@ Toe.Model.NeumeComponent = function(options) {
     };
 
     $.extend(this.props, options);
-
-    // set head shape
-    this.setHeadShape(this.props.type);
 }
 
 Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
-
-Toe.Model.NeumeComponent.prototype.setHeadShape = function(shape) {
-    this.props.type = shape.toLowerCase();
-    this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
-    if (this.props.name == undefined) {
-        throw new Error("NeumeComponent: undefined head shape");
-    }
-}
 
 /**
  * Check if the neume component has the specified ornament

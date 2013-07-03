@@ -29,9 +29,6 @@ THE SOFTWARE.
  *                 rootNote.octave {number}, modifier {Toe.Model.Neume.Modifier}, interact {Boolean}
  */
 Toe.Model.Neume = function(options) {
-    // prevent construction of prototype object without parameters
-    if (!arguments.length) return;
-
     // initialize bounding box
     this.zone = new Object();
 
