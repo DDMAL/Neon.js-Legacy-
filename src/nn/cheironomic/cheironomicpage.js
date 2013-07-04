@@ -21,25 +21,72 @@ THE SOFTWARE.
 */
 
 /**
- * A St. Gallen music score. 
+ * A music score in staffless neume notation. 
  *
- * @class Represents a page of music from the St. Gallen manuscript
+ * @class Represents a page of music in staffless neume notation
  * @extends Toe.Model.Page
  */
-Toe.Model.StGallenPage = function() {
+Toe.Model.CheironomicPage = function(documentType) {
+    this.documentType = documentType;
 }
 
 // inherit prototype from page object
-Toe.Model.StGallenPage.prototype = new Toe.Model.Page();
-
-Toe.Model.StGallenPage.prototype.constructor = Toe.StGallenPage;
+Toe.Model.CheironomicPage.prototype = new Toe.Model.Page();
+Toe.Model.CheironomicPage.prototype.constructor = Toe.Model.CheironomicPage;
 
 /**
  * Loads the page of music from an MEI file.
  *
- * @methodOf Toe.Model.StGallenPage
+ * @methodOf Toe.Model.CheironomicPage
  */
-Toe.Model.StGallenPage.prototype.loadMei = function(mei) {
+Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
     // cache page reference
     var page = this;
+
+    // TODO: derive global scale from neume dimensions
+    // since it can't be figured out from the intra-staffline distance
+    rendEng.setGlobalScale(0.04);
+
+    var surface = $(mei).find("surface")[0];
+    var section = $(mei).find("section")[0];
+    var eles = $(section).children();
+
+    var sbInds = new Array();
+    $(eles).each(function(eit, eel) {
+        if ($(eel).is("sb")) {
+            sbInds.push(eit);
+        }
+    });
+    sbInds.push(eles.length);
+
+    var prevInd = 0;
+    $(sbInds).each(function(sit, sel) {
+        var neumes = $(eles).slice(prevInd, sel);
+
+        // create staff with no stafflines as a container for the neumes
+        var s_bb = [0,0,0,0];
+        var sModel = new Toe.Model.CheironomicStaff(s_bb, {numLines: 0});
+        sModel.setID($($(eles)[sel]).attr("xml:id"));
+
+        // instantiate staff view and controller
+        var sView = new Toe.View.StaffView(rendEng);
+        var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
+        page.addStaff(sModel);
+
+        $(neumes).each(function(nit, nel) {
+            var nModel = new Toe.Model.CheironomicNeume();
+            var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs").slice(1) + "]")[0];
+            var n_bb = page.parseBoundingBox(neumeFacs);
+
+            nModel.neumeFromMei(nel, n_bb);
+            // instantiate neume view and controller
+            var nView = new Toe.View.NeumeView(rendEng, page.documentType);
+            var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+            // mount neume on the staff
+            sModel.addNeume(nModel, {justPush: true});
+        });
+
+        prevInd = sel+1;
+    });
 };

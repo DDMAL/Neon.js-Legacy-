@@ -166,7 +166,7 @@ THE SOFTWARE.
                     page = new Toe.Model.SquareNotePage(settings.documentType);
                     break;
                 case "stgallen":
-                    page = new Toe.Model.StafflessPage(settings.documentType);
+                    page = new Toe.Model.CheironomicPage(settings.documentType);
                     break;
             }
 

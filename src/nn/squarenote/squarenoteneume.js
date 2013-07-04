@@ -158,7 +158,7 @@ Toe.Model.SquareNoteNeume.prototype.neumeFromMei = function(neumeData, bb) {
             ornaments.push(new Toe.Model.Ornament("dot", {form: dotForm}));
         }
 
-        var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: ncType, ornaments: opts.ornaments});
+        var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: ncType, ornaments: ornaments});
 
         theNeume.addComponent(nc);
     });

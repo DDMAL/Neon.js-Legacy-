@@ -32,7 +32,6 @@ Toe.Model.SquareNotePage = function(documentType) {
 
 // inherit prototype from page object
 Toe.Model.SquareNotePage.prototype = new Toe.Model.Page();
-
 Toe.Model.SquareNotePage.prototype.constructor = Toe.SquareNotePage;
 
 /**

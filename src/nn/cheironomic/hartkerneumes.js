@@ -35,63 +35,37 @@ var drawHartkerNeume = function(neume) {
     // modify holds elements that will undergo global transformations
     var elements = {fixed: new Array(), modify: new Array()};
 
+    var glyph = null;
     switch (neume.typeid) {
         case "punctum":
-            var punctum = this.rendEng.getGlyph("punctum");
-            var left = neume.zone.ulx + punctum.centre[0];
-            var top = neume.zone.uly + punctum.centre[1];
-            var glyphPunct = punctum.clone().set({left: left, top: top});
-
-            elements.modify.push(glyphPunct);
-
+            glyph = this.rendEng.getGlyph("punctum");
             break;
         case "virga":
-            var virga = this.rendEng.getGlyph("virga");
-            var left = neume.zone.ulx + virga.centre[0];
-            var top = neume.zone.uly + virga.centre[1];
-            var glyphVirga = virga.clone().set({left: left, top: top});
-
-            elements.modify.push(glyphVirga);
-
+            glyph = this.rendEng.getGlyph("virga");
             break;
         case "clivis":
-            var clivis = this.rendEng.getGlyph("clivis");
-            var left = neume.zone.ulx + clivis.centre[0];
-            var top = neume.zone.uly + clivis.centre[1];
-            var glyphClivis = clivis.clone().set({left: left, top: top});
-
-            elements.modify.push(glyphClivis);
-
+            glyph = this.rendEng.getGlyph("clivis");
             break;
         case "podatus":
-            var podatus = this.rendEng.getGlyph("podatus");
-            var left = neume.zone.ulx + podatus.centre[0];
-            var top = neume.zone.uly + podatus.centre[1];
-            var glyphPodatus = podatus.clone().set({left: left, top: top});
-
-            elements.modify.push(glyphPodatus);
-
+        case "pes":
+            glyph = this.rendEng.getGlyph("podatus");
             break;
         case "porrectus":
-            var porrectus = this.rendEng.getGlyph("porrectus");
-            var left = neume.zone.ulx + porrectus.centre[0];
-            var top = neume.zone.uly + porrectus.centre[1];
-            var glyphPorrectus = porrectus.clone().set({left: left, top: top});
-
-            elements.modify.push(glyphPorrectus);
-
+            glyph = this.rendEng.getGlyph("porrectus");
             break;
         case "torculus":
-            var torculus = this.rendEng.getGlyph("torculus");
-            var left = neume.zone.ulx + torculus.centre[0];
-            var top = neume.zone.uly + torculus.centre[1];
-            var glyphTorculus = torculus.clone().set({left: left, top: top});
-
-            elements.modify.push(glyphTorculus);
-
+            glyph = this.rendEng.getGlyph("torculus");
+            break;
+        default:
+            glyph = this.rendEng.getGlyph("punctum");
             break;
     }
-    
+
+    var left = neume.zone.ulx + glyph.centre[0];
+    var top = neume.zone.uly + glyph.centre[1];
+    var glyphDwg = glyph.clone().set({left: left, top: top});
+    elements.modify.push(glyphDwg);
+
     this.drawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, eleRef: neume})[0];
 
     // update model

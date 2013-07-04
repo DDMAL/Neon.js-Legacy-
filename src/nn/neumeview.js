@@ -26,21 +26,22 @@ THE SOFTWARE.
  * @class View for the neume
  * @param {Toe.View.RenderEngine} renderEngine The rendering engine
  */
-Toe.View.NeumeView = function(renderEngine, drawingLibrary) {
+Toe.View.NeumeView = function(renderEngine, documentType) {
     this.rendEng = renderEngine;
     
     // dynamically call the drawing function for the right manuscript
-    if (drawingLibrary == "liber") {
-        Toe.View.NeumeView.prototype.drawNeume = drawLiberNeume;
-    }
-    else if (drawingLibrary == "salzinnes") {
-        Toe.View.NeumeView.prototype.drawNeume = drawSalzinnesNeume;
-    }
-    else if (drawingLibrary == "hartker") {
-        Toe.View.NeumeView.prototype.drawNeume = drawHartkerNeume;
-    }
-    else {
-        throw "Invalid Drawing Library";
+    switch (documentType) {
+        case "liber":
+            Toe.View.NeumeView.prototype.drawNeume = drawLiberNeume;
+            break;
+        case "salzinnes":
+            Toe.View.NeumeView.prototype.drawNeume = drawSalzinnesNeume;
+            break;
+        case "stgallen":
+            Toe.View.NeumeView.prototype.drawNeume = drawHartkerNeume;
+            break;
+        default:
+            throw "Invalid Drawing Library";
     }
 
     this.drawing = null;
