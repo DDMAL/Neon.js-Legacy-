@@ -42,11 +42,7 @@ Toe.Model.CheironomicPage.prototype.constructor = Toe.Model.CheironomicPage;
 Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
     // cache page reference
     var page = this;
-
-    // TODO: derive global scale from neume dimensions
-    // since it can't be figured out from the intra-staffline distance
-    rendEng.setGlobalScale(0.04);
-
+    
     var surface = $(mei).find("surface")[0];
     var section = $(mei).find("section")[0];
     var eles = $(section).children();
@@ -82,6 +78,12 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
             // instantiate neume view and controller
             var nView = new Toe.View.NeumeView(rendEng, page.documentType);
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+            // derive global scale from dimensions of the first neume
+            // since it can't be figured out from the intra-staffline distance
+            if (sit == 0 && nit == 0) {
+                rendEng.calcScaleFromNeume(nModel, {overwrite: true});
+            }
 
             // mount neume on the staff
             sModel.addNeume(nModel, {justPush: true});

@@ -106,6 +106,35 @@ Toe.View.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
 	return scale;
 }
 
+/*
+ * Calculate the glyph scaling from the bounding box of a neume. The neume should
+ * be an elementary neume such as a punctum, such that the scaling of the individual 
+ * SVG glyph can be calculated from the bounding box of the neume from the MEI document.
+ * This is the method of calculating the glyph scaling for staffless neume
+ * notation, where the distance between stafflines is not available to calculate the 
+ * proper glyph scalings.
+ */
+Toe.View.RenderEngine.prototype.calcScaleFromNeume = function(neume, options) {
+    opts = {
+        overwrite: false
+    };
+
+    $.extend(opts, options);
+
+    var glyph = this.getGlyph(neume.typeid).clone();
+    var glyphHeight = glyph.height;
+
+    var zoneHeight = neume.zone.lry - neume.zone.uly;
+
+    var scale = Math.abs((neume.zone.lry - neume.zone.uly) / glyph.height);
+
+    if (opts.overwrite) {
+        this.setGlobalScale(scale);
+    }
+
+    return scale;
+}
+
 // [x1, y1, x2, y2]
 Toe.View.RenderEngine.prototype.createLine = function(coords, options) {
 	var opts = {
