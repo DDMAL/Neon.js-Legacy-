@@ -40,6 +40,9 @@ var drawHartkerNeume = function(neume) {
         case "punctum":
             glyph = this.rendEng.getGlyph("punctum");
             break;
+        case "tractulus":
+            glyph = this.rendEng.getGlyph("tractulus");
+            break;
         case "virga":
             glyph = this.rendEng.getGlyph("virga");
             break;
@@ -56,18 +59,17 @@ var drawHartkerNeume = function(neume) {
         case "torculus":
             glyph = this.rendEng.getGlyph("torculus");
             break;
-        default:
-            glyph = this.rendEng.getGlyph("punctum");
-            break;
     }
 
-    var left = neume.zone.ulx + glyph.centre[0];
-    var top = neume.zone.uly + glyph.centre[1];
-    var glyphDwg = glyph.clone().set({left: left, top: top});
-    elements.modify.push(glyphDwg);
+    if (glyph) {
+        var left = neume.zone.ulx + glyph.centre[0];
+        var top = neume.zone.uly + glyph.centre[1];
+        var glyphDwg = glyph.clone().set({left: left, top: top});
+        elements.modify.push(glyphDwg);
 
-    this.drawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, eleRef: neume})[0];
+        this.drawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, eleRef: neume})[0];
 
-    // update model
-    $(neume).trigger("mUpdateBoundingBox", this.drawing);
+        // update model
+        $(neume).trigger("mUpdateBoundingBox", this.drawing);
+    }
 }
