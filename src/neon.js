@@ -223,9 +223,19 @@ THE SOFTWARE.
             }
 
             // instantiate appropriate GUI elements
-            var gui = new Toe.View.GUI(settings.apiprefix, settings.meipath, settings.documentType, rendEng, page,
+            var gui = new Toe.View.GUI(settings.apiprefix, settings.meipath, rendEng,
                                       {sldr_bgImgOpacity: settings.bgimgpath, 
                                        initBgImgOpacity: settings.bgimgopacity});
+
+            // handle user interactions with glyphs on the digital music score
+            switch (settings.documentType) {
+                case "liber":
+                case "salzinnes":
+                    var interaction = new Toe.View.SquareNoteInteraction(rendEng, page, settings.apiprefix);
+                    break;
+                case "stgallen":
+                    break;
+            }
 
             var runTime = new Date() - startTime;
             console.log("Neon.js ready (" + runTime + "ms)");
