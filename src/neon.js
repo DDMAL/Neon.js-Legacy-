@@ -234,6 +234,7 @@ THE SOFTWARE.
                     var interaction = new Toe.View.SquareNoteInteraction(rendEng, page, settings.apiprefix);
                     break;
                 case "stgallen":
+                    var interaction = new Toe.View.CheironomicInteraction(rendEng, page, settings.apiprefix);
                     break;
             }
 
