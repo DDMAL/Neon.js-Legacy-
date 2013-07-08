@@ -10,7 +10,7 @@ then
 fi
 
 echo "Compiling Neon.js with google closure ..."
-java -jar compiler.jar --js ../src/*.js --js_output_file ../static/js/neon.min.js
+java -jar compiler.jar --js ../src/{*.js,nn/*.js,nn/squarenote/*.js,nn/cheironomic/*.js} --js_output_file ../static/js/neon.min.js
 if [ -a ../static/js/neon.min.js ]; then
     echo "Built to static/js/neon.min.js"
 fi
