@@ -71,6 +71,7 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
     }
     
     this.typeid = nName;
+    this.name = nName;
 
     this.setBoundingBox(bb);
 
