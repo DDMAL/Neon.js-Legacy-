@@ -146,8 +146,6 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
             });
         }
     }
-
-
 }
 
 Toe.View.GUI.prototype.bindHotkeys = function() {
@@ -160,22 +158,6 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
     // insert mode hotkey
     Mousetrap.bind(['i', 'Ctrl+i', 'Command+i'], function() {
         $("#btn_insert").click();
-        return false;
-    });
-
-    // delete hotkey
-    Mousetrap.bind(['del', 'backspace'], function() {
-        $("#btn_delete").trigger('click.edit', {gui:gui}, gui.handleDelete);
-        return false;
-    });
-
-    Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
-        $("#btn_neumify").trigger('click.edit', {gui:gui}, gui.handleNeumify);
-        return false;
-    });
-
-    Mousetrap.bind(['u', 'Ctrl+u', 'Command+u'], function() {
-        $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
     });
 }

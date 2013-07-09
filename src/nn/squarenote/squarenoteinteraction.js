@@ -55,6 +55,9 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
 
     // set active button on startup
     $("#btn_" + toggles.initMode).trigger('click');
+
+    // bind hotkeys
+    this.bindHotKeys();
 }
 
 Toe.View.SquareNoteInteraction.prototype.constructor = Toe.View.SquareNoteInteraction;
@@ -574,10 +577,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_neumify").unbind("click");
     $("#btn_ungroup").unbind("click");
 
-    $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
-    $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
-    $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
-    $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
+    $("#btn_delete").bind("click.edit", {gui: this}, this.handleDelete);
+    $("#btn_neumify").bind("click.edit", {gui: this}, this.handleNeumify);
+    $("#btn_neumify_liquescence").bind("click.edit", {gui: this, modifier: "alt"}, this.handleNeumify);
+    $("#btn_ungroup").bind("click.edit", {gui: this}, this.handleUngroup);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
@@ -940,8 +943,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
             $("#alert").animate({opacity: 1.0}, 100);
         });
     }
-
-    
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
@@ -1859,5 +1860,25 @@ Toe.View.SquareNoteInteraction.prototype.getOutputBoundingBox = function(bb) {
     gui = this;
     return $.map(bb, function(b) {
         return Math.round(b/gui.page.scale);
+    });
+}
+
+Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
+    var gui = this;
+
+    // delete hotkey
+    Mousetrap.bind(['del', 'backspace'], function() {
+        $("#btn_delete").trigger('click.edit', {gui:gui}, gui.handleDelete);
+        return false;
+    });
+
+    Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
+        $("#btn_neumify").trigger('click.edit', {gui:gui}, gui.handleNeumify);
+        return false;
+    });
+
+    Mousetrap.bind(['u', 'Ctrl+u', 'Command+u'], function() {
+        $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
+        return false;
     });
 }

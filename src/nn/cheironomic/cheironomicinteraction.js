@@ -54,6 +54,8 @@ Toe.View.CheironomicInteraction = function(rendEng, page, apiprefix, guiToggles)
 
     // set active button on startup
     $("#btn_" + toggles.initMode).trigger('click');
+
+    this.bindHotKeys();
 }
 
 Toe.View.CheironomicInteraction.prototype.constructor = Toe.View.CheironomicInteraction;
@@ -381,6 +383,56 @@ Toe.View.CheironomicInteraction.prototype.handleDotToggle = function(e) {
     $(this).toggleClass("active");
 }
 
+Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {
+    var gui = e.data.gui;
+
+    // get current canvas selection
+    // check individual selection and group selections
+    var nids = new Array();
+
+    var deleteNeume = function(drawing) {
+        var neume = drawing.eleRef;
+
+        neume.staff.removeElementByRef(neume);
+        nids.push(neume.id);
+
+        gui.rendEng.canvas.discardActiveObject();
+    };
+
+    var selection = gui.rendEng.canvas.getActiveObject();
+    if (selection) {
+        if (selection.eleRef instanceof Toe.Model.Neume) {
+            deleteNeume(selection);
+        }
+        gui.rendEng.repaint();
+    }
+    else {
+        selection = gui.rendEng.canvas.getActiveGroup();
+        if (selection) {
+            // group of elements selected
+            $.each(selection.getObjects(), function(oInd, o) {
+                if (o.eleRef instanceof Toe.Model.Neume) {
+                    deleteNeume(o);
+                }
+            });
+
+            gui.rendEng.canvas.discardActiveGroup();
+            gui.rendEng.repaint();
+        }
+    }
+
+    if (nids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(gui.apiprefix + "/delete/neume",  {ids: nids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+}
+
 /**************************************************
  *                  INSERT                        *
  **************************************************/
@@ -391,5 +443,25 @@ Toe.View.CheironomicInteraction.prototype.getOutputBoundingBox = function(bb) {
     gui = this;
     return $.map(bb, function(b) {
         return Math.round(b/gui.page.scale);
+    });
+}
+
+Toe.View.CheironomicInteraction.prototype.bindHotKeys = function() {
+    var gui = this;
+
+    // delete hotkey
+    Mousetrap.bind(['del', 'backspace'], function() {
+        $("#btn_delete").trigger('click.edit', {gui:gui}, gui.handleDelete);
+        return false;
+    });
+
+    Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
+        $("#btn_neumify").trigger('click.edit', {gui:gui}, gui.handleNeumify);
+        return false;
+    });
+
+    Mousetrap.bind(['u', 'Ctrl+u', 'Command+u'], function() {
+        $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
+        return false;
     });
 }
