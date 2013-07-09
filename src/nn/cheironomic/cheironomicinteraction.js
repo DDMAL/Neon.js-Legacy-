@@ -166,7 +166,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
             $("#menu_editclef").remove();
 
-            if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
+            if (ele.typeid == "punctum" || ele.typeid == "tractulus" || ele.typeid == "cavum" || ele.typeid == "virga") {
                 if ($("#menu_editpunctum").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
                                               '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
@@ -269,8 +269,51 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
             $.each(elements, function(ind, element) {
                 var ele = element.eleRef;
 
+                // move neume
                 if (ele instanceof Toe.Model.Neume) {
-                    // TODO: move neume 
+                    // snap to staff
+                    var finalCoords = {x: element.left, y: element.top};
+                    var sModel = gui.page.getClosestStaff(finalCoords);
+                    var snapCoords = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele, y: false});
+
+                    // set the bounding box hint for the neume
+                    var ulx = snapCoords.x-(element.currentWidth/2);
+                    var uly = snapCoords.y-(element.currentHeight/2);
+                    var lrx = ulx + element.currentWidth;
+                    var lry = uly + element.currentWidth;
+                    ele.setBoundingBox([ulx, uly, lrx, lry]);
+
+                    // remove the old neume
+                    $(ele).trigger("vEraseDrawing");
+                    ele.staff.removeElementByRef(ele);
+     
+                    // mount the new neume on the most appropriate staff
+                    var nInd = sModel.addNeume(ele);
+                    if (elements.length == 1) {
+                        $(ele).trigger("vSelectDrawing");
+                    }
+
+                    // send pitch shift command to server to change underlying MEI
+                    var outbb = gui.getOutputBoundingBox([ulx, uly, lrx, lry]);
+                    var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: null};
+
+                    // get next element to insert before
+                    if (nInd + 1 < sModel.elements.length) {
+                        args["beforeid"] = sModel.elements[nInd+1].id;
+                    }
+                    else {
+                        // insert before the next system break (staff)
+                        var sNextModel = gui.page.getNextStaff(sModel);
+                        args["beforeid"] = sNextModel.id;
+                    }
+
+                    $.post(gui.apiprefix + "/move/neume", {data: JSON.stringify(args)})
+                    .error(function() {
+                        // show alert to user
+                        // replace text with error message
+                        $("#alert > p").text("Server failed to move neume. Client and server are not synchronized.");
+                        $("#alert").animate({opacity: 1.0}, 100);
+                    });
                 }
             });
             if (elements.length > 1) {
@@ -297,4 +340,11 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
  *                  INSERT                        *
  **************************************************/
 Toe.View.CheironomicInteraction.prototype.handleInsert = function(e) {
+}
+
+Toe.View.CheironomicInteraction.prototype.getOutputBoundingBox = function(bb) {
+    gui = this;
+    return $.map(bb, function(b) {
+        return Math.round(b/gui.page.scale);
+    });
 }

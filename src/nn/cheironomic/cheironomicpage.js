@@ -69,10 +69,20 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
         var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
         page.addStaff(sModel);
 
+        var uly_lb = Number.MAX_VALUE;
+        var lry_ub = 0;
         $(neumes).each(function(nit, nel) {
             var nModel = new Toe.Model.CheironomicNeume();
-            var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs").slice(1) + "]")[0];
+            var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
             var n_bb = page.parseBoundingBox(neumeFacs);
+            
+            // track upper and lower y-position bounds of staff container
+            if (n_bb[1] < uly_lb) {
+                uly_lb = n_bb[1];
+            }
+            if (n_bb[3] > lry_ub) {
+                lry_ub = n_bb[3];
+            }
 
             nModel.neumeFromMei(nel, n_bb);
             // instantiate neume view and controller
@@ -88,6 +98,15 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
             // mount neume on the staff
             sModel.addNeume(nModel, {justPush: true});
         });
+
+        // update bounding box of staff container based on contents
+        if (sModel.elements.length) {
+            var ulx = sModel.elements[0].zone.ulx;
+            var lrx = sModel.elements[sModel.elements.length-1].zone.lrx;
+            sModel.setBoundingBox([ulx, uly_lb, lrx, lry_ub]);
+
+            $(sModel).trigger("vRenderStaff", [sModel]);
+        }
 
         prevInd = sel+1;
     });
