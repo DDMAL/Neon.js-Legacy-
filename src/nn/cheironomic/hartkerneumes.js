@@ -31,6 +31,8 @@ var drawHartkerNeume = function(neume) {
 
     var ncOverlap_x = 1; // (pixels)
     
+    var glyphDot = this.rendEng.getGlyph("dot");
+
     // fixed holds elements that will not undergo global transformations
     // modify holds elements that will undergo global transformations
     var elements = {fixed: new Array(), modify: new Array()};
@@ -66,6 +68,13 @@ var drawHartkerNeume = function(neume) {
         var top = neume.zone.uly + glyph.centre[1];
         var glyphDwg = glyph.clone().set({left: left, top: top});
         elements.modify.push(glyphDwg);
+
+        // render dots
+        for (var i = 0; i < neume.components.length; i++) {
+            if (neume.components[i].hasOrnament('dot')) {
+                elements.modify.push(glyphDot.clone().set({left: left+(2*glyph.centre[0]), top: top+(glyph.centre[1])}));
+            }
+        }
 
         this.drawing = this.rendEng.draw(elements, {group: true, selectable: neume.props.interact, eleRef: neume})[0];
 

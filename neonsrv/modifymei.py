@@ -529,7 +529,7 @@ class ModifyDocument:
 
         punctum = self.mei.getElementById(id)
         # check that a punctum element was provided
-        if punctum.getName() == "neume" and punctum.getAttribute("name").getValue() == "punctum":
+        if punctum.getName() == "neume":
             note = punctum.getDescendantsByName("note")
             if len(note):
                 dot = note[0].getChildrenByName("dot")
