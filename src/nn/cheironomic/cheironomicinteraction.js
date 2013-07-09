@@ -437,6 +437,227 @@ Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {
  *                  INSERT                        *
  **************************************************/
 Toe.View.CheironomicInteraction.prototype.handleInsert = function(e) {
+    var gui = e.data.gui;
+    var parentDivId = e.data.parentDivId;
+
+    // deactivate all objects on the canvas 
+    // so they can't be modified in insert mode
+    gui.rendEng.canvas.selection = false;
+    gui.rendEng.canvas.deactivateAll();
+    gui.rendEng.canvas.HOVER_CURSOR = null;
+
+    // first remove edit options
+    $("#sidebar-edit").remove();
+
+    // unbind edit event handlers
+    $("#btn_delete").unbind("click.edit");
+    $("#btn_neumify").unbind("click.edit");
+    $("#btn_ungroup").unbind("click.edit");
+
+    // unbind move event handlers
+    gui.rendEng.unObserve("mouse:down");
+    gui.rendEng.unObserve("mouse:up");
+    gui.rendEng.unObserve("object:moving");
+    gui.rendEng.unObserve("object:selected");
+    gui.rendEng.unObserve("selection:cleared");
+    gui.rendEng.unObserve("selection:created");
+
+    // then add insert options
+    if ($("#sidebar-insert").length == 0) {
+        $(parentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
+                              '<li><div class="btn-group" data-toggle="buttons-radio">' +
+                              '<button id="rad_punctum" class="btn"><i class="icon-bookmark icon-black"></i> Punctum</button>\n' +
+                              '\n</div>\n</li>\n</span>');
+    }
+
+    // update click handlers
+    $("#rad_punctum").unbind("click");
+    $("#rad_punctum").bind("click.insert", {gui: gui}, gui.handleInsertPunctum);
+
+    // toggle punctum insert by default
+    $("#rad_punctum").trigger('click');
+}
+
+Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
+    var gui = e.data.gui;
+
+    // unbind other event handlers
+    gui.rendEng.unObserve("mouse:move");
+    gui.rendEng.unObserve("mouse:up");
+
+    // add ornamentation toggles
+    if ($("#menu_insertpunctum").length == 0) {
+        $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
+                                    '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
+                                    '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
+                                    '<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
+                                    '<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
+    }
+
+    // ornamentation toggle flags
+    var hasDot = false;
+    var hasHorizEpisema = false;
+    var hasVertEpisema = false;
+
+    // keep the scope of the punctum drawing insert local
+    // to not pollute the global namespace when inserting other
+    // musical elements
+    var updateFollowPunct = function(initial) {
+        var elements = {modify: new Array(), fixed: new Array()};
+
+        var punctPos = null;
+        var punctGlyph = gui.rendEng.getGlyph("punctum");
+        if (initial) {
+            // draw the punctum off the screen, initially
+            var punctPos = {left: -50, top: -50};
+        }
+        else {
+            var punctPos = {left: gui.punctDwg.left, top: gui.punctDwg.top};
+
+            if (hasDot) {
+                var glyphDot = gui.rendEng.getGlyph("dot");
+                var dot = glyphDot.clone().set({left: punctPos.left + gui.punctWidth, top: punctPos.top + (gui.punctHeight/2), opacity: 0.6});
+                elements.modify.push(dot);
+            }
+
+            /* TODO: deal with episemata
+            if (hasHorizEpisema) {
+            }
+
+            if (hasVertEpisema) {
+            }
+            */
+        }
+
+        // create clean punctum glyph with no ornamentation
+        var punct = punctGlyph.clone().set({left: punctPos.left, top: punctPos.top, opacity: 0.6});
+        elements.modify.push(punct);
+
+        // remove old punctum drawing following the pointer
+        if (gui.punctDwg) {
+            gui.rendEng.canvas.remove(gui.punctDwg);
+        }
+
+        // replace with new punctum drawing
+        gui.punctDwg = gui.rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0]; 
+    };
+
+    // put the punctum off the screen for now
+    updateFollowPunct(true);
+
+    // render transparent punctum at pointer location
+    gui.rendEng.canvas.observe('mouse:move', function(e) {
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
+        gui.punctDwg.left = pnt.x - gui.punctDwg.currentWidth/4;
+        gui.punctDwg.top = pnt.y - gui.punctDwg.currentHeight/4;
+
+        gui.rendEng.repaint();
+    });
+
+    // deal with punctum insert
+    gui.rendEng.canvas.observe('mouse:up', function(e) {
+        var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
+        var sModel = gui.page.getClosestStaff(coords);
+
+        // instantiate a punctum
+        var nModel = new Toe.Model.CheironomicNeume();
+
+        // calculate snapped coords
+        var snapCoords = sModel.ohSnap(coords, gui.punctDwg.currentWidth, {y: false});
+
+        // update bounding box with physical position on the page
+        var ulx = snapCoords.x - gui.punctDwg.currentWidth/2;
+        var uly = snapCoords.y - gui.punctDwg.currentHeight/2;
+        var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
+        nModel.setBoundingBox(bb);
+
+        //  start forming arguments for the server function call
+        var args = {};
+
+        // check ornamentation toggles to add to component
+        var ornaments = new Array();
+        if (hasDot) {
+            ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
+            args["dotform"] = "aug";
+        }
+        
+        /* TODO: deal with episemata
+        if (hasHorizEpisema) {
+        }
+        if (hasVertEpisema) {
+        }
+        */
+
+        var nc = new Toe.Model.CheironomicNeumeComponent({type: "punctum", ornaments: ornaments});
+        nModel.addComponent(nc);
+
+        // TODO: remove manually specifying neume id in lieu of trie search
+        nModel.typeid = nModel.name = "punctum";
+
+        // instantiate neume view and controller
+        var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+        var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+        
+        // mount neume on the staff
+        var nInd = sModel.addNeume(nModel);
+
+        // now that final bounding box is calculated from the drawing
+        // add the bounding box information to the server function arguments
+        var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+        args["ulx"] = outbb[0];
+        args["uly"] = outbb[1];
+        args["lrx"] = outbb[2];
+        args["lry"] = outbb[3];
+
+        // get next element to insert before
+        if (nInd + 1 < sModel.elements.length) {
+            args["beforeid"] = sModel.elements[nInd+1].id;
+        }
+        else {
+            // insert before the next system break (staff)
+            var sNextModel = gui.page.getNextStaff(sModel);
+            if (sNextModel) {
+                args["beforeid"] = sNextModel.id;
+            }
+        }
+
+        // send insert command to server to change underlying MEI
+        $.post(gui.apiprefix + "/insert/neume", args, function(data) {
+            nModel.id = JSON.parse(data).id;
+        })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to insert neume. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    });
+
+    $("#chk_dot").bind("click.insert", function() {
+        // toggle dot
+        if (!hasDot) {
+            hasDot = true;
+        }
+        else {
+            hasDot = false;
+        }
+
+        updateFollowPunct(false);
+    });
+
+    /* TODO: insert with episemata
+    $("#chk_horizepisema").bind("click.insert", function() {
+        if ($(this).hasClass("active")) {
+            hasHorizEpisema = true;
+        }
+        else {
+            hasHorizEpisema = false;
+        }
+    });
+
+    $("#chk_vertepisema").bind("click.insert", function() {
+    });
+    */
 }
 
 Toe.View.CheironomicInteraction.prototype.getOutputBoundingBox = function(bb) {
