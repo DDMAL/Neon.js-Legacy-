@@ -239,7 +239,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
     if (opts.x) {
         // CALCULATE NEW HORIZONTAL POSITION
         // go through each element in staff element list to see if the inserted element 
-        // temporally intersects with others. If so, offset it.
+        // intersects with others. If so, offset it.
         var left = coords.x-(width/2);
         var right = coords.x+(width/2);
         for (var i = 0; i < this.elements.length; i++) {
