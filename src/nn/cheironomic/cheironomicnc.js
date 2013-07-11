@@ -32,6 +32,9 @@ Toe.Model.CheironomicNeumeComponent = function(options) {
     // call super constructor
     Toe.Model.NeumeComponent.call(this, options);
 
+    // relative pitch with respect to previous neume component
+    this.relativePitch = null;
+
     // set head shape
     this.setHeadShape(this.props.type);
 }

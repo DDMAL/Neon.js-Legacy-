@@ -31,9 +31,6 @@ THE SOFTWARE.
 Toe.Model.CheironomicNeume = function(options) {
     // call super constructor
     Toe.Model.Neume.call(this, options);
-
-    // relative pitch with respect to previous neume component
-    this.melodicMovement = null;
 }
 
 // inherit prototype from generic neume model
@@ -106,6 +103,21 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 }
 
 /**
+ * Gets the pitch differences for each component. Ignore the first component since
+ * the first pitch difference is always 0 (since it is the root note)
+ *
+ * @methodOf Toe.Model.SquareNoteNeume
+ * @returns {Array} array of pitch differences for each neume component
+ */
+Toe.Model.CheironomicNeume.prototype.getRelativePitches = function() {
+    var diffs = new Array();
+    for(var i = 1; i < this.components.length; i++) {
+        diffs.push(this.components[i].relativePitch);
+    }
+    return diffs;
+}
+    
+/**
  * Derives the name of the neume using the pitch differences
  * and sets the name on the model.
  * 
@@ -119,6 +131,27 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
     };
 
     $.extend(opts, options);
+
+    // checks
+    if (this.components.length == 0) {
+        return "unknown";
+    }
+
+    var relativePitches = this.getRelativePitches();
+
+    // search the tree for the neume name
+    var res = Toe.Model.CheironomicNeume.SearchTree.search(diffs, true);
+
+    if (res.prefix) {
+        this.neumePrefix = res.result.typeid;
+        this.name = "Compound";
+        this.typeid = "compound";
+    }
+    else {
+        this.neumePrefix = null;
+        this.name = res.result.name;
+        this.typeid = res.result.typeid;
+    }
 
     return this.name;
 }

@@ -591,7 +591,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
         var nc = new Toe.Model.CheironomicNeumeComponent({type: "punctum", ornaments: ornaments});
         nModel.addComponent(nc);
 
-        // TODO: remove manually specifying neume id in lieu of trie search
+        // TODO: remove manually specifying neume type in lieu of trie search
         nModel.typeid = nModel.name = "punctum";
 
         // instantiate neume view and controller
