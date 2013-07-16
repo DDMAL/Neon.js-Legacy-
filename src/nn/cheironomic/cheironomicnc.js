@@ -55,7 +55,8 @@ Toe.Model.NeumeComponent.Type = {
     cavum: "Cavum",
     punctum_inclinatum: "Punctum Inclinatum",
     punctum_inclinatum_parvum: "Punctum Inclinatum Parva",
-    quilisma: "Quilisma"
+    quilisma: "Quilisma",
+    tractulus: "Tractulus"
 };
 
 Toe.Model.CheironomicNeumeComponent.prototype.setHeadShape = function(shape) {

@@ -56,32 +56,58 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 
     this.id = $(neumeData).attr("xml:id");
     var nName = $(neumeData).attr("name").toLowerCase();
-    // perform neume -> neume & modifier transformations
-    // For example, in the current MEI neumes module, cephalicus and epiphonus are their
-    // own neumes. In the Medieval Finale plugin they are clivis and podatus neumes, respectively,
-    // with an alt (liquescence) modifier.
-    if (nName == "epiphonus") {
-        nName = "podatus";
-        this.props.modifier = "liquescence";
-    }
-    else if (nName == "cephalicus") {
-        nName = "clivis";
-        this.props.modifier = "liquescence";
-    }
     
-    this.typeid = this.name = nName;
+    // derive keyword for searching the neume tree
+    var key = nName;
+    switch (nName) {
+        case "virga":
+        case "tractulus":
+            key = "punctum";
+            break;
+        case "podatus":
+            key = nName = "pes";
+            break;
+        case "epiphonus":
+            key = nName = "pes";
+            this.props.modifier = "liquescence";
+            break;
+        case "cephalicus":
+            key = nName = "clivis";
+            this.props.modifier = "liquescence";
+            break;
+    }
 
     this.setBoundingBox(bb);
 
+    this.typeid = nName;
+
+    // search the neume tree for the expected melodic movement of the neume
+    var res = Toe.Model.CheironomicNeume.SearchTree.dfs(key);
+    if (!res.node) {
+        // neume is not found in the search tree, abort
+        return;
+    }
+
+    var notes = $(neumeData).find("note");
+    if (notes.length != res.edges.length + 1) {
+        // the number of expected notes does not match what is in mei document
+        // abort, for now
+        // TODO: do something to mediate the differences between the search tree and the mei doc
+        return;
+    }
+
     // cache a local copy of this so the handle isn't overidden within the jquery function
     var theNeume = this;
-    $(neumeData).find("note").each(function(it, el) {
+    $(notes).each(function(it, el) {
         var ncType = "punctum";
         if ($(this).parent().attr("quilisma") == "true") {
             ncType = "quilisma";
         }
         else if (nName == "virga" || nName == "bivirga" || nName == "trivirga") {
             ncType = "virga";
+        }
+        else if (nName == "tractulus") {
+            ncType = "tractulus";
         }
 
         // add note ornaments
@@ -94,6 +120,11 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
         }
 
         var nc = new Toe.Model.CheironomicNeumeComponent({type: ncType, ornaments: ornaments});
+        
+        // set melodic movement for the neume
+        if (it > 0) {
+            nc.relativePitch = parseInt(res.edges[it-1]);
+        }
 
         theNeume.addComponent(nc);
     });
