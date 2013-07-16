@@ -179,9 +179,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                                               '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
                                               'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
                                               '<li><a id="head_punctum">punctum</a></li>\n' +
-                                              '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
-                                              '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
-                                              '<li><a id="head_cavum">cavum</a></li>\n' +
+                                              '<li><a id="head_tractulus">tractulus</a></li>\n' +
                                               '<li><a id="head_virga">virga</a></li>\n' +
                                               '<li><a id="head_quilisma">quilisma</a></li>\n' +
                                               '</ul></div></span>');
@@ -204,17 +202,13 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
                 // Handle head shape change
                 $("#head_punctum").unbind("click");
-                $("#head_cavum").unbind("click");
+                $("#head_tractulus").unbind("click");
                 $("#head_virga").unbind("click");
                 $("#head_quilisma").unbind("click");
-                $("#head_punctum_inclinatum").unbind("click");
-                $("#head_punctum_inclinatum_parvum").unbind("click");
                 $("#head_punctum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum"}, gui.handleHeadShapeChange);
-                $("#head_cavum").bind("click.edit", {gui: gui, punctum: ele, shape: "cavum"}, gui.handleHeadShapeChange);
+                $("#head_tractulus").bind("click.edit", {gui: gui, punctum: ele, shape: "tractulus"}, gui.handleHeadShapeChange);
                 $("#head_virga").bind("click.edit", {gui: gui, punctum: ele, shape: "virga"}, gui.handleHeadShapeChange);
                 $("#head_quilisma").bind("click.edit", {gui: gui, punctum: ele, shape: "quilisma"}, gui.handleHeadShapeChange);
-                $("#head_punctum_inclinatum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum"}, gui.handleHeadShapeChange);
-                $("#head_punctum_inclinatum_parvum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum_parvum"}, gui.handleHeadShapeChange);
             }
             else {
                 $("#menu_editpunctum").remove();
@@ -381,6 +375,44 @@ Toe.View.CheironomicInteraction.prototype.handleDotToggle = function(e) {
     }
 
     $(this).toggleClass("active");
+}
+
+Toe.View.CheironomicInteraction.prototype.handleHeadShapeChange = function(e) {
+    var gui = e.data.gui;
+    var shape = e.data.shape;
+    var punctum = e.data.punctum;
+    var nc = punctum.components[0];
+
+    nc.setHeadShape(shape);
+
+    // deal with head shapes that change the neume name
+    if (shape == "punctum") {
+        punctum.name = "Punctum";
+        punctum.typeid = "punctum";
+    }
+    else if (shape == "tractulus") {
+        punctum.name = "Tractulus";
+        punctum.typeid = "tractulus";
+    }
+    else if (shape == "virga") {
+        punctum.name = "Virga";
+        punctum.typeid = "virga";
+    }
+
+    // update drawing
+    punctum.syncDrawing();
+
+    var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    var args = {id: punctum.id, shape: shape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+    // send change head command to server to change underlying MEI
+    $.post(gui.apiprefix + "/update/neume/headshape", args)
+    .error(function() {
+        // show alert to user
+        // replace text with error message
+        $("#alert > p").text("Server failed to change note head shape. Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
 }
 
 Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {

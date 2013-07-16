@@ -148,6 +148,9 @@ class ModifyDocument:
         elif shape == "cavum":
             neume_name = "cavum"
             nc.setAttributes([])
+        elif shape == "tractulus":
+            neume_name = "tractulus"
+            nc.setAttributes([])
 
         neume.addAttribute("name", neume_name)
 
