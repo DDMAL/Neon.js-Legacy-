@@ -1144,8 +1144,6 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
     gui.rendEng.canvas.discardActiveObject();
     gui.rendEng.canvas.discardActiveGroup();
     gui.rendEng.repaint();
-
-    
 }
 
 /**************************************************

@@ -559,6 +559,104 @@ Toe.View.CheironomicInteraction.prototype.handleNeumify = function(e) {
     }
 }
 
+Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
+    var gui = e.data.gui;
+
+    var neumes = new Array();
+
+    var selection = gui.rendEng.canvas.getActiveObject();
+    if (selection) {
+        if (selection.eleRef instanceof Toe.Model.Neume && selection.eleRef.components.length > 1) {
+            neumes.push(selection);
+        }
+    }
+    else {
+        selection = gui.rendEng.canvas.getActiveGroup();
+        if (selection) {
+            // group of elements selected
+            $.each(selection.getObjects(), function(oInd, o) {
+                // only deal with neumes with that have more components than a punctum
+                if (o.eleRef instanceof Toe.Model.Neume && o.eleRef.components.length > 1) {
+                    neumes.push(o);
+                }
+            });
+        }
+    }
+
+    var nids = new Array();
+    var bbs = new Array();
+    var punctums = new Array();
+
+    // ungroup each selected neume
+    $.each(neumes, function(oInd, o) {
+        // add to list of neume ids
+        nids.push(o.eleRef.id);
+
+        var punctBoxes = new Array();
+        var ulx = o.eleRef.zone.ulx;
+
+        // remove the old neume
+        o.eleRef.staff.removeElementByRef(o.eleRef);
+        gui.rendEng.canvas.remove(o);
+
+        $.each(o.eleRef.components, function(ncInd, nc) {
+            var newPunct = new Toe.Model.CheironomicNeume();
+            newPunct.addComponent(nc);
+
+            var uly = o.eleRef.zone.uly;
+            if (o.eleRef.components[ncInd].relativePitch) {
+                uly += (-o.eleRef.components[ncInd].relativePitch * gui.punctHeight);
+            }
+
+            // set the bounding box hint of the new neume for drawing
+            var bb = [ulx+(ncInd*gui.punctWidth), uly, ulx+((ncInd+1)*gui.punctWidth), uly+gui.punctHeight];
+            newPunct.setBoundingBox(bb);
+
+            // instantiate neume view and controller
+            var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+            var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
+
+            // add the punctum to the staff and draw it
+            o.eleRef.staff.addNeume(newPunct);
+
+            // get final bounding box information
+            var outbb = gui.getOutputBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
+            punctBoxes.push({"ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
+
+            punctums.push(newPunct);
+        });
+
+        // add to list of neume bounding boxes
+        bbs.push(punctBoxes);
+    });
+
+    var data = JSON.stringify({"nids": nids.join(","), "bbs": bbs});
+
+    // call server ungroup function to update MEI
+    $.post(gui.apiprefix + "/ungroup", {data: data}, function(data) {
+        // set ids of the new puncta from the IDs generated from the server
+        var nids = JSON.parse(data).nids;
+        // flatten array of nested nid arrays (if ungrouping more than one neume)
+        nids = $.map(nids, function(n) {
+            return n;
+        });
+
+        $.each(punctums, function(i, punct) {
+            punct.id = nids[i];
+        });
+    })
+    .error(function() {
+        // show alert to user
+        // replace text with error message
+        $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
+
+    gui.rendEng.canvas.discardActiveObject();
+    gui.rendEng.canvas.discardActiveGroup();
+    gui.rendEng.repaint();
+}
+
 /**************************************************
  *                  INSERT                        *
  **************************************************/
