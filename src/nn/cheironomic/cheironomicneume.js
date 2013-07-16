@@ -79,8 +79,6 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 
     this.setBoundingBox(bb);
 
-    this.typeid = nName;
-
     // search the neume tree for the expected melodic movement of the neume
     var res = Toe.Model.CheironomicNeume.SearchTree.dfs(key);
     if (!res.node) {
@@ -129,6 +127,8 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
         theNeume.addComponent(nc);
     });
 
+    this.deriveName();
+
     // for chaining
     return this;
 }
@@ -171,7 +171,7 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
     var relativePitches = this.getRelativePitches();
 
     // search the tree for the neume name
-    var res = Toe.Model.CheironomicNeume.SearchTree.search(diffs, true);
+    var res = Toe.Model.CheironomicNeume.SearchTree.search(relativePitches, true);
 
     if (res.prefix) {
         this.neumePrefix = res.result.typeid;
@@ -182,6 +182,28 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
         this.neumePrefix = null;
         this.name = res.result.name;
         this.typeid = res.result.typeid;
+    }
+
+    // situations where name is modified
+    // VIRGA: punctum with different head shape
+    // TRACTULUS: punctum with different head shape
+    // EPIPHONUS: pes with liquescence modifier
+    // CEPHALICUS: clivis with liquescence modifier
+    if (this.typeid == "punctum" && this.components[0].props.type == "virga") {
+        this.name = "Virga";
+        this.typeid = "virga";
+    }
+    else if (this.typeid == "punctum" && this.components[0].props.type == "tractulus") {
+        this.name = "Tractulus";
+        this.typeid = "tractulus";
+    }
+    else if (this.typeid == "pes" && this.props.modifier == "liquescence") {
+        this.name = "Epiphonus";
+        this.typeid = "epiphonus";
+    }
+    else if (this.typeid == "clivis" && this.props.modifier == "liquescence") {
+        this.name = "Cephalicus";
+        this.typeid = "cephalicus";
     }
 
     return this.name;

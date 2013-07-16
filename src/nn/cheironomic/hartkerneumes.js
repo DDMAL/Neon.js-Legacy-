@@ -49,10 +49,12 @@ var drawHartkerNeume = function(neume) {
             glyph = this.rendEng.getGlyph("virga");
             break;
         case "clivis":
+        case "cephalicus":
             glyph = this.rendEng.getGlyph("clivis");
             break;
         case "podatus":
         case "pes":
+        case "epiphonus":
             glyph = this.rendEng.getGlyph("podatus");
             break;
         case "porrectus":
