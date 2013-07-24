@@ -58,6 +58,8 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
     var nName = $(neumeData).attr("name").toLowerCase();
     
     // derive keyword for searching the neume tree
+    var notes = $(neumeData).find("note");
+
     var key = nName;
     switch (nName) {
         case "virga":
@@ -75,6 +77,12 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
             key = nName = "clivis";
             this.props.modifier = "liquescence";
             break;
+        case "climacus":
+            key += "." + (notes.length-2);
+            break;
+        case "scandicus":
+            key += "." + (notes.length-2);
+            break;
     }
 
     this.setBoundingBox(bb);
@@ -86,7 +94,6 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
         return;
     }
 
-    var notes = $(neumeData).find("note");
     if (notes.length != res.edges.length + 1) {
         // the number of expected notes does not match what is in mei document
         // abort, for now
@@ -154,7 +161,6 @@ Toe.Model.CheironomicNeume.prototype.getRelativePitches = function() {
  * 
  * @methodOf Toe.Model.CheironomicNeume
  * @returns {string} neume name
- * TODO: search the new tree for deriving the neume typeid
  */
 Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
     var opts = {

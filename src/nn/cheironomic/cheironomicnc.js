@@ -52,9 +52,6 @@ Toe.Model.CheironomicNeumeComponent.prototype.constructor = Toe.Model.Cheironomi
 Toe.Model.NeumeComponent.Type = {
     punctum: "Punctum",
     virga: "Virga",
-    cavum: "Cavum",
-    punctum_inclinatum: "Punctum Inclinatum",
-    punctum_inclinatum_parvum: "Punctum Inclinatum Parva",
     quilisma: "Quilisma",
     tractulus: "Tractulus"
 };

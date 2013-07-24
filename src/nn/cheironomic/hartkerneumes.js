@@ -63,6 +63,12 @@ var drawHartkerNeume = function(neume) {
         case "torculus":
             glyph = this.rendEng.getGlyph("torculus");
             break;
+        case "scandicus.1":
+            glyph = this.rendEng.getGlyph("scandicus");
+            break;
+        case "climacus.1":
+            glyph = this.rendEng.getGlyph("climacus");
+            break;
     }
 
     if (glyph) {
