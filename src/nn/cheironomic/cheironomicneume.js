@@ -56,6 +56,10 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 
     this.id = $(neumeData).attr("xml:id");
     var nName = $(neumeData).attr("name").toLowerCase();
+    var variant = $(neumeData).attr("variant");
+    if (variant) {
+        variant = variant.toLowerCase();
+    }
     
     // derive keyword for searching the neume tree
     var notes = $(neumeData).find("note");
@@ -82,6 +86,11 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
             break;
         case "scandicus":
             key += "." + (notes.length-2);
+            break;
+        case "torculus":
+            if (variant == "resupinus") {
+                key += "." + variant + (notes.length-3);
+            }
             break;
     }
 
