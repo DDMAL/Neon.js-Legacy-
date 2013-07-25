@@ -59,11 +59,15 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
     var variant = $(neumeData).attr("variant");
     if (variant) {
         variant = variant.toLowerCase();
+
+        // handle liquescent neumes that don't have a special name
+        if (variant == "liquescent") {
+            this.props.modifier = "liquescence";
+        }
     }
-    
+
     // derive keyword for searching the neume tree
     var notes = $(neumeData).find("note");
-
     var key = nName;
     switch (nName) {
         case "virga":
@@ -89,7 +93,7 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
             break;
         case "torculus":
             if (variant == "resupinus") {
-                key += "." + variant + (notes.length-3);
+                key += ".resupinus" + (notes.length-3);
             }
             break;
     }

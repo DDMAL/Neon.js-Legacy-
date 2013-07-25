@@ -49,19 +49,35 @@ var drawHartkerNeume = function(neume) {
             glyph = this.rendEng.getGlyph("virga");
             break;
         case "clivis":
-        case "cephalicus":
             glyph = this.rendEng.getGlyph("clivis");
+            break;
+        case "cephalicus":
+            glyph = this.rendEng.getGlyph("clivis_liquescent");
             break;
         case "podatus":
         case "pes":
-        case "epiphonus":
             glyph = this.rendEng.getGlyph("podatus");
             break;
+        case "epiphonus":
+            glyph = this.rendEng.getGlyph("pes_liquescent");
+            break;
         case "porrectus":
-            glyph = this.rendEng.getGlyph("porrectus");
+            if (neume.props.modifier == "liquescence") {
+                glyph = this.rendEng.getGlyph("porrectus_liquescent");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("porrectus");
+            }
+
             break;
         case "torculus":
-            glyph = this.rendEng.getGlyph("torculus");
+            if (neume.props.modifier == "liquescence") {
+                glyph = this.rendEng.getGlyph("torculus_liquescent");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("torculus");
+            }
+
             break;
         case "scandicus.1":
             glyph = this.rendEng.getGlyph("scandicus");
