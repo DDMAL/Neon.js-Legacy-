@@ -191,7 +191,6 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
 
     // search the tree for the neume name
     var res = Toe.Model.CheironomicNeume.SearchTree.search(relativePitches, true);
-
     if (res.prefix) {
         this.neumePrefix = res.result.typeid;
         this.name = "Compound";

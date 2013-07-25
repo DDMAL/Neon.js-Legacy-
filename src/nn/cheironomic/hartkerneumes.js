@@ -46,7 +46,13 @@ var drawHartkerNeume = function(neume) {
             glyph = this.rendEng.getGlyph("tractulus");
             break;
         case "virga":
-            glyph = this.rendEng.getGlyph("virga");
+            if (neume.props.modifier == "liquescence") {
+                glyph = this.rendEng.getGlyph("virga_liquescent");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("virga");
+            }
+
             break;
         case "clivis":
             glyph = this.rendEng.getGlyph("clivis");
