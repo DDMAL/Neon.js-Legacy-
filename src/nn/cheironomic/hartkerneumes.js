@@ -65,7 +65,13 @@ var drawHartkerNeume = function(neume) {
             break;
         case "podatus":
         case "pes":
-            glyph = this.rendEng.getGlyph("podatus");
+            if (neume.props.modifier == "quassus") {
+                glyph = this.rendEng.getGlyph("pes_quassus");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("podatus");
+            }
+
             break;
         case "epiphonus":
             glyph = this.rendEng.getGlyph("pes_liquescent");
