@@ -56,6 +56,7 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 
     this.id = $(neumeData).attr("xml:id");
     var nName = $(neumeData).attr("name").toLowerCase();
+
     var variant = $(neumeData).attr("variant");
     if (variant) {
         variant = variant.toLowerCase();
@@ -63,6 +64,9 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
         // handle liquescent neumes that don't have a special name
         if (variant == "liquescent") {
             this.props.modifier = "liquescence";
+        }
+        else {
+            this.props.modifier = variant;
         }
     }
 

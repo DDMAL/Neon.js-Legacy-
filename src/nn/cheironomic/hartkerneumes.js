@@ -49,6 +49,9 @@ var drawHartkerNeume = function(neume) {
             if (neume.props.modifier == "liquescence") {
                 glyph = this.rendEng.getGlyph("virga_liquescent");
             }
+            else if (neume.props.modifier == "strata") {
+                glyph = this.rendEng.getGlyph("virga_strata");
+            }
             else {
                 glyph = this.rendEng.getGlyph("virga");
             }
