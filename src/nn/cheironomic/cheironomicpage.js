@@ -62,7 +62,14 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
         // create staff with no stafflines as a container for the neumes
         var s_bb = [0,0,0,0];
         var sModel = new Toe.Model.CheironomicStaff(s_bb, {numLines: 0});
-        sModel.setID($($(eles)[sel]).attr("xml:id"));
+        var sbID = null;
+        if (sit == 0) {
+            sbID = $(section).attr("xml:id");
+        }
+        else {
+            sbID = $($(eles)[sbInds[sit-1]]).attr("xml:id");
+        }
+        sModel.setID(sbID);
 
         // instantiate staff view and controller
         var sView = new Toe.View.StaffView(rendEng);
