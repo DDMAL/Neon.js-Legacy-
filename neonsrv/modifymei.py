@@ -156,22 +156,26 @@ class ModifyDocument:
 
         self.update_or_add_zone(neume, ulx, uly, lrx, lry)
         
-    def neumify(self, ids, type_id, head_shapes, ulx, uly, lrx, lry):
+    def neumify(self, ids, type_id, liquescence, head_shapes, ulx, uly, lrx, lry):
         '''
         Neumify a group of neumes (with provided ids)
         and give it the given neume name. Also update
         bounding box information.
         '''
         
-        # get neume name and variant from type id
-        type_split = type_id.split(".")
+        # get neume name and variant from type i        
+        type_split = type_id.translate(None, ".")
         if type_split[-1].isdigit():
             type_split.pop()
-        if len(type_split) == 1:
-            attrs = [MeiAttribute("name", type_split[0])]
-        else:
-            variant = " ".join(type_split[1:])
-            attrs = [MeiAttribute("name", type_split[0]), MeiAttribute("variant", variant)]
+
+        attrs = [MeiAttribute("name", type_split)]
+        if liquescence:
+            if liquescence == "alt":
+                attrs.append(MeiAttribute("variant", "liquescence"))
+            elif liquescence == "aug":
+                attrs.append(MeiAttribute("variant", "liquescence_aug"))
+            elif liquescence == "dim":
+                attrs.append(MeiAttribute("variant", "liquescence_dim"))
 
         new_neume = MeiElement("neume")
         new_neume.setAttributes(attrs)

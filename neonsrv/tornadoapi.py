@@ -94,6 +94,7 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         data = json.loads(self.get_argument("data", ""))
         nids = str(data["nids"]).split(",")
         type_id = str(data["typeid"])
+        liquescence = str(data.get("liquescence", None))
         head_shapes = data["headShapes"]
 
         try:
@@ -107,7 +108,7 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.neumify(nids, type_id, head_shapes, ulx, uly, lrx, lry)
+        result = md.neumify(nids, type_id, liquescence, head_shapes, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))

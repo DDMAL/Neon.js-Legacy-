@@ -91,14 +91,15 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                               '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                               '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
                               '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
-                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
+                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence_aug">liquescence augmented</a></li>\n' +
+                              '<li><a id="btn_neumify_liquescence_dim">liquescence diminished</a></li></ul></li>\n' +
                               '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }
     
     // grey out edit buttons by default
     $('#btn_delete').toggleClass('disabled', true);
     $('#btn_neumify').toggleClass('disabled', true);
-    $('#btn_neumify_liquescence').toggleClass('disabled', true);
+    //$('#btn_neumify_liquescence').toggleClass('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
 
     gui.rendEng.canvas.observe('mouse:down', function(e) {
@@ -140,11 +141,12 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
         if (toNeumify < 2) {
             $('#btn_neumify').toggleClass('disabled', true);
-            $('#btn_neumify_liquescence').toggleClass('disabled', true);
+            //$('#btn_neumify_liquescence').toggleClass('disabled', true);
         }
         else {
             $('#btn_neumify').toggleClass('disabled', false);
-            $('#btn_neumify_liquescence').toggleClass('disabled', false);
+            $('#btn_neumify_liquescence_aug').toggleClass('disabled', false);
+            $('#btn_neumify_liquescence_dim').toggleClass('disabled', false);
         }
 
         if (toUngroup > 0) {
@@ -228,7 +230,8 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
         $('#btn_delete').toggleClass('disabled', true);
         $('#btn_neumify').toggleClass('disabled', true);
-        $('#btn_neumify_liquescence').toggleClass('disabled', true);
+        $('#btn_neumify_liquescence_aug').toggleClass('disabled', true);
+        $('#btn_neumify_liquescence_dim').toggleClass('disabled', true);
         $('#btn_ungroup').toggleClass('disabled', true);
     });
 
@@ -328,7 +331,8 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
-    $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
+    $("#btn_neumify_liquescence_aug").bind("click.edit", {gui: gui, modifier: "aug"}, gui.handleNeumify);
+    $("#btn_neumify_liquescence_dim").bind("click.edit", {gui: gui, modifier: "dim"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
 }
 
@@ -566,7 +570,7 @@ Toe.View.CheironomicInteraction.prototype.handleNeumify = function(e) {
             return nc.props.type;
         });
 
-        var data = JSON.stringify({"nids": nids.join(","), "typeid": typeid, "headShapes": headShapes, "ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
+        var data = JSON.stringify({"nids": nids.join(","), "typeid": typeid, "liquescence": modifier, "headShapes": headShapes, "ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
         // call server neumify function to update MEI
         $.post(gui.apiprefix + "/neumify", {data: data}, function(data) {
             // set id of the new neume with generated ID from the server

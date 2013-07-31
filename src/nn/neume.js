@@ -74,7 +74,9 @@ Toe.Model.Neume.prototype.constructor = Toe.Model.Neume;
  * @fieldOf Toe.Model.Neume
  */
 Toe.Model.Neume.Modifier = {
-    alt: "liquescence"
+    alt: "liquescence",
+    aug: "liquescence_aug",
+    dim: "liquescence_dim"
 }
 
 /**

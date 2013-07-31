@@ -40,14 +40,26 @@ var drawHartkerNeume = function(neume) {
     var glyph = null;
     switch (neume.typeid) {
         case "punctum":
-            glyph = this.rendEng.getGlyph("punctum");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("punctum");
+            }
+
             break;
         case "tractulus":
-            glyph = this.rendEng.getGlyph("tractulus");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("tractulus");
+            }
+
             break;
         case "virga":
-            if (neume.props.modifier == "liquescence") {
-                glyph = this.rendEng.getGlyph("virga_liquescent");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("virga_liquescence_aug");
             }
             else if (neume.props.modifier == "strata") {
                 glyph = this.rendEng.getGlyph("virga_strata");
@@ -58,27 +70,48 @@ var drawHartkerNeume = function(neume) {
 
             break;
         case "clivis":
-            glyph = this.rendEng.getGlyph("clivis");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("clivis_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("virga_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("clivis");
+            }
+
+            break;
+        case "ancus":
+            glyph = this.rendEng.getGlyph("clivis_liquescence_aug");
             break;
         case "cephalicus":
-            glyph = this.rendEng.getGlyph("clivis_liquescent");
+            glyph = this.rendEng.getGlyph("clivis_liquescence_aug");
             break;
         case "podatus":
         case "pes":
-            if (neume.props.modifier == "quassus") {
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("pes_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else if (neume.props.modifier == "quassus") {
                 glyph = this.rendEng.getGlyph("pes_quassus");
             }
             else {
-                glyph = this.rendEng.getGlyph("podatus");
+                glyph = this.rendEng.getGlyph("pes");
             }
 
             break;
         case "epiphonus":
-            glyph = this.rendEng.getGlyph("pes_liquescent");
+            glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
             break;
         case "porrectus":
-            if (neume.props.modifier == "liquescence") {
-                glyph = this.rendEng.getGlyph("porrectus_liquescent");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("porrectus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("porrectus_liquescence_dim");
             }
             else {
                 glyph = this.rendEng.getGlyph("porrectus");
@@ -86,8 +119,11 @@ var drawHartkerNeume = function(neume) {
 
             break;
         case "torculus":
-            if (neume.props.modifier == "liquescence") {
-                glyph = this.rendEng.getGlyph("torculus_liquescent");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("torculus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("pes_liquescence_aug");
             }
             else {
                 glyph = this.rendEng.getGlyph("torculus");
@@ -95,10 +131,84 @@ var drawHartkerNeume = function(neume) {
 
             break;
         case "scandicus.1":
-            glyph = this.rendEng.getGlyph("scandicus");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("scandicus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("scandicus_liquescence_dim");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("scandicus");
+            }
+
             break;
         case "climacus.1":
-            glyph = this.rendEng.getGlyph("climacus");
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("climacus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("clivis_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("climacus");
+            }
+
+            break;
+        case "torculus.resupinus":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("torculusresupinus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("torculusresupinus_liquescence_dim");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("torculusresupinus");
+            }
+
+            break;
+        case "torculus.resupinus.flexus":
+            if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("torculusresupinus_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("torculusresupinusflexus");
+            }
+
+            break;
+        case "porrectus.flexus":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("porrectusflexus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("porrectus_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("porrectusflexus");
+            }
+            break;
+        case "scandicus.flexus":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("scandicusflexus_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("scandicus_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("scandicusflexus");
+            }
+
+            break;
+        case "pes.subbipunctis":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("pessubbipunctis_liquescence_aug");
+            }
+            else if (neume.props.modifier == "liquescence_dim") {
+                glyph = this.rendEng.getGlyph("torculus_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("pessubbipunctis");
+            }
+
             break;
     }
 

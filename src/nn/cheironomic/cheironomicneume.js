@@ -63,7 +63,13 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 
         // handle liquescent neumes that don't have a special name
         if (variant == "liquescent") {
-            this.props.modifier = "liquescence";
+            this.props.modifier = Toe.Model.Neume.Modifier["alt"];
+        }
+        else if (variant == "liquescent_aug") {
+            this.props.modifier = Toe.Model.Neume.Modifier["aug"];
+        }
+        else if (variant == "liquescent_dim") {
+            this.props.modifier = Toe.Model.Neume.Modifier["dim"];
         }
         else {
             this.props.modifier = variant;
@@ -91,6 +97,10 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
             break;
         case "climacus":
             key += "." + (notes.length-2);
+            break;
+        case "ancus":
+            key = "climacus.1";
+            this.props.modifier = "liquescence";
             break;
         case "scandicus":
             key += "." + (notes.length-2);
@@ -226,6 +236,10 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
     else if (this.typeid == "clivis" && this.props.modifier == "liquescence") {
         this.name = "Cephalicus";
         this.typeid = "cephalicus";
+    }
+    else if (this.typeid == "climacus" && this.props.modifier == "liquescence") {
+        this.name = "Ancus";
+        this.typeid = "ancus";
     }
 
     return this.name;
