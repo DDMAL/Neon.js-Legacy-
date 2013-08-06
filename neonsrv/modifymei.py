@@ -166,7 +166,7 @@ class ModifyDocument:
         # get neume name and variant from type i        
         type_split = type_id.translate(None, ".")
         if type_split[-1].isdigit():
-            type_split.pop()
+            type_split = type_split[:-1]
 
         attrs = [MeiAttribute("name", type_split)]
         if liquescence:
