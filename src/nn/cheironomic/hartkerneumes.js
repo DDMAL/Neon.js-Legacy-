@@ -154,7 +154,7 @@ var drawHartkerNeume = function(neume) {
             }
 
             break;
-        case "torculus.resupinus":
+        case "torculus.resupinus.1":
             if (neume.props.modifier == "liquescence_aug") {
                 glyph = this.rendEng.getGlyph("torculusresupinus_liquescence_aug");
             }
