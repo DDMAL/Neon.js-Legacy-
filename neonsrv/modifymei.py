@@ -163,12 +163,19 @@ class ModifyDocument:
         bounding box information.
         '''
         
-        # get neume name and variant from type i        
-        type_split = type_id.translate(None, ".")
+        # get neume name and variant from type id
+        type_split = type_id.split(".")
         if type_split[-1].isdigit():
-            type_split.pop()
+             type_split.pop()
 
-        attrs = [MeiAttribute("name", type_split)]
+        if len(type_split) == 1:
+            attrs = [MeiAttribute("name", type_split[0])]
+        else:
+            variant = " ".join(type_split[1:])
+            attrs = [MeiAttribute("name", type_split[0]), MeiAttribute("variant", variant)]
+
+        '''
+        # need to determine how to encode these different types of liquescence in the MEI document
         if liquescence:
             if liquescence == "alt":
                 attrs.append(MeiAttribute("variant", "liquescence"))
@@ -176,6 +183,7 @@ class ModifyDocument:
                 attrs.append(MeiAttribute("variant", "liquescence_aug"))
             elif liquescence == "dim":
                 attrs.append(MeiAttribute("variant", "liquescence_dim"))
+        '''
 
         new_neume = MeiElement("neume")
         new_neume.setAttributes(attrs)
