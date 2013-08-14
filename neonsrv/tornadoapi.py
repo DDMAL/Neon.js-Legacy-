@@ -342,8 +342,8 @@ class MoveCustosHandler(tornado.web.RequestHandler):
 
     def post(self, file):
         custos_id = str(self.get_argument("id", ""))
-        pname = self.get_argument("pname", None)
-        oct = self.get_argument("oct", None)
+        pname = self.get_argument("pname", "")
+        oct = self.get_argument("oct", "")
 
         # bounding box
         ulx = str(self.get_argument("ulx", None))

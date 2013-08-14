@@ -33,8 +33,9 @@ class ModifyDocument:
         punctum.addAttribute("name", "punctum")
         nc = MeiElement("nc")
         note = MeiElement("note")
-        note.addAttribute("pname", pname)
-        note.addAttribute("oct", oct)
+        if pname and oct:
+            note.addAttribute("pname", pname)
+            note.addAttribute("oct", oct)
 
         # add ornamentation
         if dot_form is not None:
@@ -645,8 +646,9 @@ class ModifyDocument:
 
         # create custos
         custos = MeiElement("custos")
-        custos.addAttribute("pname", pname)
-        custos.addAttribute("oct", oct)
+        if pname and oct:
+            custos.addAttribute("pname", pname)
+            custos.addAttribute("oct", oct)
 
         # insert the custos
         before = self.mei.getElementById(before_id)
@@ -670,7 +672,7 @@ class ModifyDocument:
         '''
 
         custos = self.mei.getElementById(id)
-        if pname is not None and oct is not None:
+        if pname and oct:
             custos.addAttribute("pname", str(pname))
             custos.addAttribute("oct", str(oct))
 
