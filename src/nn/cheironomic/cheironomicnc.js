@@ -51,9 +51,12 @@ Toe.Model.CheironomicNeumeComponent.prototype.constructor = Toe.Model.Cheironomi
  */
 Toe.Model.NeumeComponent.Type = {
     punctum: "Punctum",
+    tractulus: "Tractulus",
     virga: "Virga",
-    quilisma: "Quilisma",
-    tractulus: "Tractulus"
+    gravis: "Gravis",
+    oriscus: "Oriscus",
+    stropha: "Stropha",
+    quilisma: "Quilisma"
 };
 
 Toe.Model.CheironomicNeumeComponent.prototype.setHeadShape = function(shape) {

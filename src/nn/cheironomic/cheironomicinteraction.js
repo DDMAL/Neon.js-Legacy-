@@ -170,7 +170,10 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
             $("#menu_editclef").remove();
 
-            if (ele.typeid == "punctum" || ele.typeid == "tractulus" || ele.typeid == "cavum" || ele.typeid == "virga") {
+            if (ele.typeid == "punctum" || ele.typeid == "tractulus" || 
+                ele.typeid == "cavum" || ele.typeid == "virga" ||
+                ele.typeid == "gravis" || ele.typeid == "oriscus" || ele.typeid == "stropha") {
+
                 if ($("#menu_editpunctum").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
                                               '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
@@ -183,6 +186,9 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                                               '<li><a id="head_punctum">punctum</a></li>\n' +
                                               '<li><a id="head_tractulus">tractulus</a></li>\n' +
                                               '<li><a id="head_virga">virga</a></li>\n' +
+                                              '<li><a id="head_gravis">gravis</a></li>\n' +
+                                              '<li><a id="head_oriscus">oriscus</a></li>\n' +
+                                              '<li><a id="head_stropha">stropha</a></li>\n' +
                                               '<li><a id="head_quilisma">quilisma</a></li>\n' +
                                               '</ul></div></span>');
                 }
@@ -210,6 +216,9 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                 $("#head_punctum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum"}, gui.handleHeadShapeChange);
                 $("#head_tractulus").bind("click.edit", {gui: gui, punctum: ele, shape: "tractulus"}, gui.handleHeadShapeChange);
                 $("#head_virga").bind("click.edit", {gui: gui, punctum: ele, shape: "virga"}, gui.handleHeadShapeChange);
+                $("#head_gravis").bind("click.edit", {gui: gui, punctum: ele, shape: "gravis"}, gui.handleHeadShapeChange);
+                $("#head_oriscus").bind("click.edit", {gui: gui, punctum: ele, shape: "oriscus"}, gui.handleHeadShapeChange);
+                $("#head_stropha").bind("click.edit", {gui: gui, punctum: ele, shape: "stropha"}, gui.handleHeadShapeChange);
                 $("#head_quilisma").bind("click.edit", {gui: gui, punctum: ele, shape: "quilisma"}, gui.handleHeadShapeChange);
             }
             else {
@@ -390,17 +399,31 @@ Toe.View.CheironomicInteraction.prototype.handleHeadShapeChange = function(e) {
     nc.setHeadShape(shape);
 
     // deal with head shapes that change the neume name
-    if (shape == "punctum") {
-        punctum.name = "Punctum";
-        punctum.typeid = "punctum";
-    }
-    else if (shape == "tractulus") {
-        punctum.name = "Tractulus";
-        punctum.typeid = "tractulus";
-    }
-    else if (shape == "virga") {
-        punctum.name = "Virga";
-        punctum.typeid = "virga";
+    switch (shape) {
+        case "punctum":
+            punctum.name = "Punctum";
+            punctum.typeid = "punctum";
+            break;
+        case "tractulus":
+            punctum.name = "Tractulus";
+            punctum.typeid = "tractulus";
+            break;
+        case "virga":
+            punctum.name = "Virga";
+            punctum.typeid = "virga";
+            break;
+        case "gravis":
+            punctum.name = "Gravis";
+            punctum.typeid = "gravis";
+            break;
+        case "oriscus":
+            punctum.name = "Oriscus";
+            punctum.typeid = "oriscus";
+            break;
+        case "stropha":
+            punctum.name = "Stropha";
+            punctum.typeid = "stropha";
+            break;
     }
 
     // update drawing

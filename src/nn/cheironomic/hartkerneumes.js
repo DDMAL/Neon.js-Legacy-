@@ -43,6 +43,9 @@ var drawHartkerNeume = function(neume) {
             if (neume.props.modifier == "liquescence_aug") {
                 glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
             }
+            else if (neume.components[0].props.name == Toe.Model.NeumeComponent.Type.quilisma) {
+                glyph = this.rendEng.getGlyph("quilisma");
+            }
             else {
                 glyph = this.rendEng.getGlyph("punctum");
             }
@@ -69,6 +72,42 @@ var drawHartkerNeume = function(neume) {
             }
 
             break;
+        case "gravis":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("gravis");
+            }
+
+            break;
+        case "oriscus":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("oriscus");
+            }
+
+            break;
+        case "stropha":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("stropha");
+            }
+
+            break;
+        case "quilisma":
+            if (neume.props.modifier == "liquescence_aug") {
+                glyph = this.rendEng.getGlyph("punctum_liquescence_aug");
+            }
+            else {
+                glyph = this.rendEng.getGlyph("quilisma");
+            }
+
+            break;
         case "clivis":
             if (neume.props.modifier == "liquescence_aug") {
                 glyph = this.rendEng.getGlyph("clivis_liquescence_aug");
@@ -89,6 +128,7 @@ var drawHartkerNeume = function(neume) {
             break;
         case "podatus":
         case "pes":
+            // pes is another common name for the podatus neume
             if (neume.props.modifier == "liquescence_aug") {
                 glyph = this.rendEng.getGlyph("pes_liquescence_aug");
             }

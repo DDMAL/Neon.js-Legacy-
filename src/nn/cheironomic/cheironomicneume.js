@@ -82,6 +82,9 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
     switch (nName) {
         case "virga":
         case "tractulus":
+        case "gravis":
+        case "oriscus":
+        case "stropha":
             key = "punctum";
             break;
         case "podatus":
@@ -140,6 +143,15 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
         }
         else if (nName == "tractulus") {
             ncType = "tractulus";
+        }
+        else if (nName == "gravis") {
+            ncType = "gravis";
+        }
+        else if (nName == "oriscus") {
+            ncType = "oriscus";
+        }
+        else if (nName == "stropha") {
+            ncType = "stropha";
         }
 
         // add note ornaments
@@ -228,6 +240,18 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
     else if (this.typeid == "punctum" && this.components[0].props.type == "tractulus") {
         this.name = "Tractulus";
         this.typeid = "tractulus";
+    }
+    else if (this.typeid == "punctum" && this.components[0].props.type == "gravis") {
+        this.name = "Gravis";
+        this.typeid = "gravis";
+    }
+    else if (this.typeid == "punctum" && this.components[0].props.type == "oriscus") {
+        this.name = "Oriscus";
+        this.typeid = "oriscus";
+    }
+    else if (this.typeid == "punctum" && this.components[0].props.type == "stropha") {
+        this.name = "Stropha";
+        this.typeid = "stropha";
     }
     else if (this.typeid == "pes" && this.props.modifier == "liquescence") {
         this.name = "Epiphonus";
