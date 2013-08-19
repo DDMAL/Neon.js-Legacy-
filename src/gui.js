@@ -31,7 +31,7 @@ Toe.View.GUI = function(apiprefix, meipath, rendEng, guiToggles) {
         sldr_bgImgOpacity: true,
         sldr_glyphOpacity: true,
         initGlyphOpacity: 1.0,
-        initBgImgOpacity: 0.60,
+        initBgImgOpacity: 0.60
     };
 
     $.extend(toggles, guiToggles);

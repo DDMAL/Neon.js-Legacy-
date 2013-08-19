@@ -577,10 +577,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_neumify").unbind("click");
     $("#btn_ungroup").unbind("click");
 
-    $("#btn_delete").bind("click.edit", {gui: this}, this.handleDelete);
-    $("#btn_neumify").bind("click.edit", {gui: this}, this.handleNeumify);
-    $("#btn_neumify_liquescence").bind("click.edit", {gui: this, modifier: "alt"}, this.handleNeumify);
-    $("#btn_ungroup").bind("click.edit", {gui: this}, this.handleUngroup);
+    $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
+    $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
+    $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
+    $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {

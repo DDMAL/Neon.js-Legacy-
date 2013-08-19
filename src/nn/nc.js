@@ -40,6 +40,19 @@ Toe.Model.NeumeComponent = function(options) {
 
 Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 
+Toe.Model.NeumeComponent.Type = {
+    punctum: "Punctum",
+    virga: "Virga",
+    cavum: "Cavum",
+    punctum_inclinatum: "Punctum Inclinatum",
+    punctum_inclinatum_parvum: "Punctum Inclinatum Parva",
+    quilisma: "Quilisma",
+    tractulus: "Tractulus",
+    gravis: "Gravis",
+    oriscus: "Oriscus",
+    stropha: "Stropha"
+};
+
 /**
  * Check if the neume component has the specified ornament
  *

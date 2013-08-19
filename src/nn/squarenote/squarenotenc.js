@@ -46,22 +46,6 @@ Toe.Model.SquareNoteNeumeComponent = function(pname, oct, options) {
 Toe.Model.SquareNoteNeumeComponent.prototype = new Toe.Model.NeumeComponent();
 Toe.Model.SquareNoteNeumeComponent.prototype.constructor = Toe.Model.SquareNoteNeumeComponent;
 
-/**
- * Known types of neume components
- *
- * @constant
- * @public
- * @fieldOf Toe.Model.NeumeComponent
- */
-Toe.Model.NeumeComponent.Type = {
-    punctum: "Punctum",
-    virga: "Virga",
-    cavum: "Cavum",
-    punctum_inclinatum: "Punctum Inclinatum",
-    punctum_inclinatum_parvum: "Punctum Inclinatum Parva",
-    quilisma: "Quilisma"
-};
-
 Toe.Model.SquareNoteNeumeComponent.prototype.setHeadShape = function(shape) {
     this.props.type = shape.toLowerCase();
     this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];

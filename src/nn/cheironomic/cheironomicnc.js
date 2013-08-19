@@ -42,23 +42,6 @@ Toe.Model.CheironomicNeumeComponent = function(options) {
 Toe.Model.CheironomicNeumeComponent.prototype = new Toe.Model.NeumeComponent();
 Toe.Model.CheironomicNeumeComponent.prototype.constructor = Toe.Model.CheironomicNeumeComponent;
 
-/**
- * Known types of neume components
- *
- * @constant
- * @public
- * @fieldOf Toe.Model.NeumeComponent
- */
-Toe.Model.NeumeComponent.Type = {
-    punctum: "Punctum",
-    tractulus: "Tractulus",
-    virga: "Virga",
-    gravis: "Gravis",
-    oriscus: "Oriscus",
-    stropha: "Stropha",
-    quilisma: "Quilisma"
-};
-
 Toe.Model.CheironomicNeumeComponent.prototype.setHeadShape = function(shape) {
     this.props.type = shape.toLowerCase();
     this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];
