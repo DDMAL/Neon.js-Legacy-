@@ -57,24 +57,34 @@
                     <div class="row-fluid">
                         <div class="span12">
                             Neon.js is a web-based music notation editor for early music scores. Upload an image of a music score and a corresponding MEI file that describes the position of neumes on the page and then edit the digital score. Changes made within the editor will be reflected in the underlying MEI file.
-
                             <hr/>
                         </div>
                     </div>
                     <div class="row-fluid">
                         <div class="span12">
                             <h2>Score Selection</h2>
-                            <p>Choose a page of music to view or edit</p>
+                            Choose a page of music in square-note notation to view or edit
                             <ul>
-                            {% for f in files %}
-                            <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a>
+                            {% for f in squarenotefiles %}
+                            <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a></li>
+                            {% end %}
+                            </ul>
+
+                            <hr/>
+
+                            <h2>Staffless Neume Demo (alpha)</h2>
+                            Choose a page of music from the St. Gallen manuscript to view or edit
+                            <ul>
+                            {% for f in stafflessfiles %}
+                                <li><a href="{{prefix}}/stafflesseditor/{{f}}">{{ f }}</a></li>
                             {% end %}
                             </ul>
 
                             <hr/>
 
                             <h2>Score Upload</h2>
-                            <p>Upload a symbolic music file (.mei) and an image of the page of music</p>
+                            Upload a symbolic music file (.mei) and an image of the page of music
+                            <br/><br/>
                             {% if errors %}
                             <span style="color:red">{{errors}}</span>
                             {% end %}
@@ -92,6 +102,15 @@
                                 </tr>
                                 <tr>
                                     <td><input type="file" name="mei_img"></td>
+                                </tr>
+                                <tr>
+                                    <td>Document type: 
+                                        <select name="document_type">
+                                            {% for d in document_types %}
+                                                <option value="{{d}}">{{ d }}</option>
+                                            {% end %}
+                                        </select>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><input class="btn btn-primary" type="submit" name="submit" value="Upload"></td>

@@ -68,12 +68,12 @@ Toe.View.GUI.prototype.setupNavBar = function() {
         
         $("#nav_file_dropdown_revert").tooltip({animation: true,
                                                 placement: 'right', 
-                                                title: '<br/><br/>Revert the current MEI file to the original version. ' +
+                                                title: 'Revert the current MEI file to the original version. ' +
                                                        'Warning: this will revert all changes made in the editor.', 
                                                 delay: 100});
         $("#nav_file_dropdown_revert").click(function() {
             // move backup mei file to working directory
-            $.get(gui.apiprefix + "/revert", function(data) {
+            $.post(gui.apiprefix + "/revert", function(data) {
                 // when the backup file has been restored, reload the page
                 window.location.reload();
             })

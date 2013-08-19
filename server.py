@@ -27,9 +27,10 @@ def abs_path(relpath):
 
 rules = [
     (abs_path(r"/?"), neonsrv.interface.RootHandler),
-    (abs_path(r"/editor/(.*?)"), neonsrv.interface.EditorHandler),
-    (abs_path(r"/file/(.*?)"), neonsrv.interface.FileHandler),
-    (abs_path(r"/edit/(.*?)/revert"), neonsrv.interface.FileRevertHandler),
+    (abs_path(r"/editor/(.*?)"), neonsrv.interface.SquareNoteEditorHandler),
+    (abs_path(r"/stafflesseditor/(.*?)"), neonsrv.interface.StafflessEditorHandler),
+    (abs_path(r"/file/(.*?)/(.*?)"), neonsrv.interface.FileHandler),
+    (abs_path(r"/edit/(.*?)/(.*?)/revert"), neonsrv.interface.FileRevertHandler),
     (abs_path(r"/edit/(.*?)/insert/neume"), neonsrv.tornadoapi.InsertNeumeHandler),
     (abs_path(r"/edit/(.*?)/move/neume"), neonsrv.tornadoapi.ChangeNeumePitchHandler),
     (abs_path(r"/edit/(.*?)/delete/neume"), neonsrv.tornadoapi.DeleteNeumeHandler),
