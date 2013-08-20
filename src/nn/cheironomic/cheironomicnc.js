@@ -21,10 +21,10 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a new neume component
+ * Creates a new unpitched neume component within a cheironomic (staffless) neume.
  *
  * @class Represents a neume component
- * @param {Number} diff Difference from root note
+ * @extends Toe.Model.NeumeComponent
  * @param {Object} options type {string} corresponding to Toe.Model.NeumeComponent.Type
  *                         ornaments {Array} list of Toe.Model.Ornaments
  */
@@ -42,6 +42,13 @@ Toe.Model.CheironomicNeumeComponent = function(options) {
 Toe.Model.CheironomicNeumeComponent.prototype = new Toe.Model.NeumeComponent();
 Toe.Model.CheironomicNeumeComponent.prototype.constructor = Toe.Model.CheironomicNeumeComponent;
 
+/**
+ * Set the head shape of the neume component
+ * For cheironomic neumes, this could be a punctum, virga, quilisma, tractulus, gravis, oriscus, stropha
+ *
+ * @methodOf Toe.Model.CheironomicNeumeComponent
+ * @param {String} shape Key for the neume component head shape (@see Toe.Model.NeumeComponent.Type)  
+ */
 Toe.Model.CheironomicNeumeComponent.prototype.setHeadShape = function(shape) {
     this.props.type = shape.toLowerCase();
     this.props.name = Toe.Model.NeumeComponent.Type[this.props.type];

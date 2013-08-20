@@ -22,11 +22,9 @@ THE SOFTWARE.
 
 /**
  * Creates a neume
- * Each neume has: name, root pitch, list of neume elements, each element has difference from root pitch (int)
- *                 modifier (liquescence etc.) - alt, shift, ctrl, ctrl+shift in the Medieval Final Plugin.
- * @class Models a neume-a container for one or more notes.
- * @param {Object} options key {string}, type {Toe.Model.Neume.Type}, rootNote.pitch {string}, 
- *                 rootNote.octave {number}, modifier {Toe.Model.Neume.Modifier}, interact {Boolean}
+ * Each neume has: name, list of neume elements, and liquescent modifier.
+ * @class Models a neume: a container for one or more notes.
+ * @param {Object} options modifier {Toe.Model.Neume.Modifier}, interact {Boolean}
  */
 Toe.Model.Neume = function(options) {
     // initialize bounding box
@@ -65,9 +63,10 @@ Toe.Model.Neume = function(options) {
 Toe.Model.Neume.prototype.constructor = Toe.Model.Neume;
 
 /**
- * Types of neume variants: alt is the keyboard
- * shortcuts used in the Medieval Finale plugin for selection neume variants.
- * The major variant 'liquescence' occurs when the user holds down alt while 'neumifying'
+ * Types of neume variants: 
+ * alt: regular liquescence (for square-note notation)
+ * aug: augmented liquescence
+ * dim: diminished liquescence
  *
  * @constant
  * @public

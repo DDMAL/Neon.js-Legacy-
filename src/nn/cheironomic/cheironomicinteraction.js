@@ -20,6 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+/**
+ * This class handles interactions, such as neumify, ungroup, head shape changes, deletions, etc., 
+ * with the GUI to editing a page of cheironomic (staffless) neumes.
+ * 
+ * @class Handles interactions with cheironomic (staffless) neumes
+ * @param {Toe.View.RenderEngine} rendEng The rendering engine for glyphs on the page
+ * @param {Toe.Model.Page} page The model of the page of music being edited
+ * @param {String} apiprefix The prefix for each API function call
+ * @param {Object} guiToggles Various presets and options for the starting state of the GUI
+ */
 Toe.View.CheironomicInteraction = function(rendEng, page, apiprefix, guiToggles) {
     var toggles = {
         initMode: "edit"
@@ -63,6 +73,13 @@ Toe.View.CheironomicInteraction.prototype.constructor = Toe.View.CheironomicInte
 /**************************************************
  *                  EDIT                          *
  **************************************************/
+/**
+ * Handler that sets up the GUI for editing the page of music by disabling the
+ * handlers for insert mode and setting up handlers for edit mode.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e JavaScript event for the edit button push
+ */
 Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
@@ -102,15 +119,18 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
     //$('#btn_neumify_liquescence').toggleClass('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
 
+    // on mouse down get pointer coordinates
     gui.rendEng.canvas.observe('mouse:down', function(e) {
         // cache pointer coordinates for mouse up
         gui.downCoords = gui.rendEng.canvas.getPointer(e.e);
     });
 
+    // set a flag when an object on the canvas is moving
     gui.rendEng.canvas.observe('object:moving', function(e) {
         gui.objMoving = true;
     });
 
+    // when a selection is created, update the appearance of GUI widgets 
     gui.rendEng.canvas.observe('selection:created', function(e) {
         var selection = e.target;
         selection.hasControls = false;
@@ -122,7 +142,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
         var sModel = null;
         $.each(selection.getObjects(), function (oInd, o) {
             // don't draw a selection border around each object in the selection
-            o.borderColor = 'rgba(0,0,0,0)'; 
+            o.borderColor = 'rgba(0,0,0,0)';
 
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
@@ -157,6 +177,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
         }
     });
 
+    // when a single object is selected, update GUI widgets 
     gui.rendEng.canvas.observe('object:selected', function(e) {
         $('#btn_delete').toggleClass('disabled', false);
 
@@ -230,6 +251,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
         }
     });
 
+    // when a set of objects are deselected, update the GUI widgets
     gui.rendEng.canvas.observe('selection:cleared', function(e) {
         // close info alert
         $("#info").animate({opacity: 0.0}, 100);
@@ -345,6 +367,12 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
 }
 
+/**
+ * Handler for toggling a dot on a single punctum neume.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event of the dot toggle button
+ */
 Toe.View.CheironomicInteraction.prototype.handleDotToggle = function(e) {
     var gui = e.data.gui;
     var punctum = e.data.punctum;
@@ -390,6 +418,12 @@ Toe.View.CheironomicInteraction.prototype.handleDotToggle = function(e) {
     $(this).toggleClass("active");
 }
 
+/**
+ * Handler for changing the head shape of a single punctum neume.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event for the head shape change selection box
+ */
 Toe.View.CheironomicInteraction.prototype.handleHeadShapeChange = function(e) {
     var gui = e.data.gui;
     var shape = e.data.shape;
@@ -442,6 +476,12 @@ Toe.View.CheironomicInteraction.prototype.handleHeadShapeChange = function(e) {
     });
 }
 
+/**
+ * Handler for deleting a set of neumes from the page
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event for pressing the delete button
+ */
 Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {
     var gui = e.data.gui;
 
@@ -492,6 +532,12 @@ Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {
     }
 }
 
+/**
+ * Handler for neumifying a group of selected neumes on the canvas
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event for pressing the neumify button
+ */
 Toe.View.CheironomicInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
@@ -618,6 +664,12 @@ Toe.View.CheironomicInteraction.prototype.handleNeumify = function(e) {
     }
 }
 
+/**
+ * Handler for ungrouping a set of neumes to punctums on the canvas.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event for pressing the ungroup button
+ */
 Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
     var gui = e.data.gui;
 
@@ -719,6 +771,13 @@ Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
 /**************************************************
  *                  INSERT                        *
  **************************************************/
+/**
+ * Handler for inserting a punctum neume on the canvas, which removes edit GUI widgets
+ * and adds insert GUI widgets.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event from pressing the insert button
+ */
 Toe.View.CheironomicInteraction.prototype.handleInsert = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
@@ -761,6 +820,12 @@ Toe.View.CheironomicInteraction.prototype.handleInsert = function(e) {
     $("#rad_punctum").trigger('click');
 }
 
+/**
+ * Handler for inserting a punctum neume on the canvas.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Event} e Event for clicking on the canvas to insert a punctum
+ */
 Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
     var gui = e.data.gui;
 
@@ -943,6 +1008,13 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
     */
 }
 
+/**
+ * Helper function to translate the coordinates of the bounding box to incorporate
+ * the scale of the page to fit on the fixed canvas size.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ * @param {Array} bb Array of bounding box coordinates [ulx, uly, lrx, lry]
+ */
 Toe.View.CheironomicInteraction.prototype.getOutputBoundingBox = function(bb) {
     gui = this;
     return $.map(bb, function(b) {
@@ -950,6 +1022,12 @@ Toe.View.CheironomicInteraction.prototype.getOutputBoundingBox = function(bb) {
     });
 }
 
+/**
+ * Helper function to set up hotkeys for interacting with the GUI widgets
+ * as an alternative to clicking buttons with the mouse.
+ *
+ * @methodOf Toe.View.CheironomicInteraction
+ */
 Toe.View.CheironomicInteraction.prototype.bindHotKeys = function() {
     var gui = this;
 
@@ -959,11 +1037,13 @@ Toe.View.CheironomicInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
+    // neumify hotkey
     Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
         $("#btn_neumify").trigger('click.edit', {gui:gui}, gui.handleNeumify);
         return false;
     });
 
+    // ungroup hotkey
     Mousetrap.bind(['u', 'Ctrl+u', 'Command+u'], function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;

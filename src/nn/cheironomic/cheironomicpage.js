@@ -21,10 +21,11 @@ THE SOFTWARE.
 */
 
 /**
- * A music score in staffless neume notation. 
+ * A music score in cheironomic (staffless) neume notation. 
  *
- * @class Represents a page of music in staffless neume notation
+ * @class Represents a page of music in cheironomic (staffless) neume notation
  * @extends Toe.Model.Page
+ * @param {String} documentType Type of the page of music (liber, salzinnes, stgallen)
  */
 Toe.Model.CheironomicPage = function(documentType) {
     this.documentType = documentType;
@@ -38,6 +39,8 @@ Toe.Model.CheironomicPage.prototype.constructor = Toe.Model.CheironomicPage;
  * Loads the page of music from an MEI file.
  *
  * @methodOf Toe.Model.CheironomicPage
+ * @param {jQuery wrapped element set} mei The MEI neume data
+ * @param {Toe.View.RenderEngine} rendEng The rendering engine for the canvas
  */
 Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
     // cache page reference

@@ -21,12 +21,11 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a neume
- * Each neume has: name, root pitch, list of neume elements, each element has difference from root pitch (int)
- *                 modifier (liquescence etc.) - alt, shift, ctrl, ctrl+shift in the Medieval Final Plugin.
- * @class Models a neume-a container for one or more notes.
- * @param {Object} options key {string}, type {Toe.Model.CheironomicNeume.Type}, rootNote.pitch {string}, 
- *                 rootNote.octave {number}, modifier {Toe.Model.CheironomicNeume.Modifier}, interact {Boolean}
+ * Creates a cheironomic (staffless) neume
+ * Each neume has: name, list of neume components, and liquescent modifier.
+ * @class Models a neume: a container for one or more notes.
+ * @extends Toe.Model.Neume
+ * @param {Object} options modifier {Toe.Model.Neume.Modifier}, interact {Boolean}
  */
 Toe.Model.CheironomicNeume = function(options) {
     // call super constructor
@@ -42,11 +41,11 @@ Toe.Model.CheironomicNeume.SearchTree = new SearchTree();
 Toe.Model.CheironomicNeume.SearchTree.populateFromJSON('{"rootNode":{"payload":{"typeid":"punctum","name":"Punctum"},"children":{"1":{"payload":{"typeid":"pes","name":"Pes"},"children":{"1":{"payload":{"typeid":"scandicus.1","name":"Scandicus"},"children":{"-1":{"payload":{"typeid":"scandicus.flexus","name":"Scandicus Flexus"},"children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":{"typeid":"torculus","name":"Torculus"},"children":{"1":{"payload":{"typeid":"torculus.resupinus.1","name":"Torculus Resupinus"},"children":{"-1":{"payload":{"typeid":"torculus.resupinus.flexus","name":"Torculus Resupinus Flexus"},"children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":{"typeid":"pes.subbipunctis","name":"Pes Subbipunctis"},"children":{},"numChildren":0}},"numChildren":2}},"numChildren":2},"-1":{"payload":{"typeid":"clivis","name":"Clivis"},"children":{"1":{"payload":{"typeid":"porrectus","name":"Porrectus"},"children":{"-1":{"payload":{"typeid":"porrectus.flexus","name":"Porrectus Flexus"},"children":{},"numChildren":0}},"numChildren":1},"-1":{"payload":{"typeid":"climacus.1","name":"Climacus"},"children":{},"numChildren":0}},"numChildren":2}},"numChildren":2},"numNodes":1}');
 
 /**
- * Fills the neume with data from an MEI neume element
+ * Fills the cheironomic neume with data from an MEI neume element
  *
  * @methodOf Toe.Model.CheironomicNeume
  * @param {jQuery wrapped element set} neumeData the MEI neume data
- * @param {jQuery wrapped element set} facs the MEI facs data for the provided neume
+ * @param {Array} bb Array of bounding box coordinates [ulx, uly, lrx, lry]
  */
 Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
     // check the DOM element is in fact a neume
@@ -180,11 +179,11 @@ Toe.Model.CheironomicNeume.prototype.neumeFromMei = function(neumeData, bb) {
 }
 
 /**
- * Gets the pitch differences for each component. Ignore the first component since
+ * Gets the relative pitch differences for each component. Ignore the first component since
  * the first pitch difference is always 0 (since it is the root note)
  *
- * @methodOf Toe.Model.SquareNoteNeume
- * @returns {Array} array of pitch differences for each neume component
+ * @methodOf Toe.Model.CheironomicNeume
+ * @returns {Array} array of relative pitch differences for each neume component
  */
 Toe.Model.CheironomicNeume.prototype.getRelativePitches = function() {
     var diffs = new Array();
@@ -195,19 +194,13 @@ Toe.Model.CheironomicNeume.prototype.getRelativePitches = function() {
 }
     
 /**
- * Derives the name of the neume using the pitch differences
- * and sets the name on the model.
+ * Derives the name of the neume using the relative pitch differences
+ * and sets the neume name and neume tree id on the model.
  * 
  * @methodOf Toe.Model.CheironomicNeume
  * @returns {string} neume name
  */
-Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
-    var opts = {
-        enforceHeadShapes: true
-    };
-
-    $.extend(opts, options);
-
+Toe.Model.CheironomicNeume.prototype.deriveName = function() {
     // checks
     if (this.components.length == 0) {
         return "unknown";
@@ -267,12 +260,4 @@ Toe.Model.CheironomicNeume.prototype.deriveName = function(options) {
     }
 
     return this.name;
-}
-
-/**
- * Change head shapes of neume components in the model which are changed
- * when neume type changes.
- * TODO
- */
-Toe.Model.CheironomicNeume.prototype.enforceHeadShapes = function() {
 }

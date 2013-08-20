@@ -20,6 +20,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+/**
+ * Helper function for the class @see Toe.View.Neume for drawing neume glyphs
+ * in the style of the Saint Gallen manuscript.
+ */
 var drawHartkerNeume = function(neume) {
     if (!this.rendEng) {
         throw new Error("Neume: Invalid render context");

@@ -22,9 +22,11 @@ THE SOFTWARE.
 
 /**
  * Creates a cheironomic notation staff without stafflines
- * @class Represents a Staff
+ * @class Represents a staff container with no stafflines
+ * @extends Toe.Model.Staff
  * 
- * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
+ * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box, which encompasses a line
+ * of music on the page.
  * (.) <ulx,uly>        (.)
  *
  *
@@ -32,7 +34,7 @@ THE SOFTWARE.
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
  *
- * The staff has list of elements on the staff, sorted by horizontal position.
+ * The staff has a list of elements (neumes) on the staff, sorted by horizontal position.
  */
 Toe.Model.CheironomicStaff = function(bb, options) {
     // call super constructor
