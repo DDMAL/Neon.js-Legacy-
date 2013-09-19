@@ -7,5 +7,14 @@ APP_ROOT = "/"
 # Tornado server debug
 DEBUG = True
 
+# Neon debug
+DEBUG_NEON = True
+
 def get_prefix():
     return APP_ROOT.rstrip("/")
+
+def get_neonHtmlFileName():
+    if DEBUG_NEON:
+        return "neon_devel.html"
+    else:
+        return "neon.html"

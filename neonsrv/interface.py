@@ -93,7 +93,7 @@ class SquareNoteEditorHandler(tornado.web.RequestHandler):
             dstr = "true"
         else:
             dstr = "false"
-        self.render("neon.html", page=page, debug=dstr, prefix=conf.get_prefix())
+        self.render(conf.get_neonHtmlFileName(), page=page, debug=dstr, prefix=conf.get_prefix())
 
 class StafflessEditorHandler(tornado.web.RequestHandler):
     def get(self, page):
