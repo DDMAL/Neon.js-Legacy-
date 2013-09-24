@@ -57,7 +57,11 @@ Toe.View.StaffView.prototype.renderStaff = function(staff) {
         elements.fixed.push(this.rendEng.createLine([staff.zone.ulx, yval, staff.zone.lrx, yval]));
     }
     
-	this.rendEng.draw(elements, {selectable: staff.props.interact, group: staff.props.group, eleRef: staff});
+	this.rendEng.draw(elements, {selectable: staff.props.interact, 
+                                 group: staff.props.group, 
+                                 eleRef: staff,
+                                 lockMovementX: true, 
+                                 lockMovementY: true});
 }
 
 /**
