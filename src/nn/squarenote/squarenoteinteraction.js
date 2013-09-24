@@ -562,6 +562,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         element.top = top + delta_y;
                     }
                 }
+                else if (ele instanceof Toe.Model.Staff) {
+                }
             });
             if (elements.length > 1) {
                 gui.rendEng.canvas.discardActiveGroup();

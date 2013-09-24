@@ -42,7 +42,8 @@ Toe.Model.Staff = function(bb, options) {
     // default 4 stafflines
     this.props = {
         numLines: 4,
-        interact: false
+        interact: true,
+        group: true
     };
 
     $.extend(this.props, options);
