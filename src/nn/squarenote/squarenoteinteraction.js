@@ -1154,68 +1154,19 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
 Toe.View.SquareNoteInteraction.prototype.handleInsert = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
-
-    // deactivate all objects on the canvas 
-    // so they can't be modified in insert mode
-    gui.rendEng.canvas.selection = false;
-    gui.rendEng.canvas.deactivateAll();
-    gui.rendEng.canvas.HOVER_CURSOR = null;
-
-    // first remove edit options
-    $("#sidebar-edit").remove();
-
-    // unbind edit event handlers
-    $("#btn_delete").unbind("click.edit");
-    $("#btn_neumify").unbind("click.edit");
-
-    // unbind move event handlers
-    gui.rendEng.unObserve("mouse:down");
-    gui.rendEng.unObserve("mouse:up");
-    gui.rendEng.unObserve("object:moving");
-    gui.rendEng.unObserve("object:selected");
-    gui.rendEng.unObserve("selection:cleared");
-    gui.rendEng.unObserve("selection:created");
-
-    // then add insert options
-    if ($("#sidebar-insert").length == 0) {
-        $(parentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
-                              '<li><div class="btn-group" data-toggle="buttons-radio">' +
-                              '<button id="rad_punctum" class="btn"><i class="icon-bookmark icon-black"></i> Punctum</button>\n' +
-                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
-                              '<button id="rad_clef" class="btn">Clef</button>\n</div>\n</li>\n</span>');
-    }
-
-    // update click handlers
-    $("#rad_punctum").unbind("click");
-    $("#rad_division").unbind("click");
-    $("#rad_clef").unbind("click");
-
-    $("#rad_punctum").bind("click.insert", {gui: gui}, gui.handleInsertPunctum);
-    $("#rad_division").bind("click.insert", {gui: gui}, gui.handleInsertDivision);
-    $("#rad_clef").bind("click.insert", {gui: gui}, gui.handleInsertClef);
-
-    // toggle punctum insert by default
-    $("#rad_punctum").trigger('click');
+    gui.deactivateCanvasObjects(gui);
+    gui.removeInsertControls(gui);
+    gui.unbindInsertControls();
+    gui.removeEditControls(gui);
+    gui.unbindEditControls();
+    gui.unbindMouseEventHandlers(gui);
+    gui.insertInsertControls(gui, parentDivId);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     var gui = e.data.gui;
-
-    // unbind other event handlers
-    gui.rendEng.unObserve("mouse:move");
-    gui.rendEng.unObserve("mouse:up");
-
-    // remove insert menus not for punctums
-    $("#menu_insertdivision").remove();
-    $("#menu_insertclef").remove();
-
-    // remove division/clef following the punctum
-    if (gui.divisionDwg) {
-        gui.rendEng.canvas.remove(gui.divisionDwg);
-    }
-    if (gui.clefDwg) {
-        gui.rendEng.canvas.remove(gui.clefDwg);
-    }
+    gui.unbindMouseEventHandlers(gui);
+    gui.removeInsertControls(gui);
 
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
@@ -1404,22 +1355,8 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     var gui = e.data.gui;
-
-    // unbind other insert event handlers
-    gui.rendEng.unObserve("mouse:move");
-    gui.rendEng.unObserve("mouse:up");
-
-    // remove the punctum/clef following the pointer
-    if (gui.punctDwg) {
-        gui.rendEng.canvas.remove(gui.punctDwg);
-    }
-    if (gui.clefDwg) {
-        gui.rendEng.canvas.remove(gui.clefDwg);
-    }
-
-    // remove ornamentation UI elements - not needed for divisions
-    $("#menu_insertpunctum").remove();
-    $("#menu_insertclef").remove();
+    gui.unbindMouseEventHandlers(gui);
+    gui.removeInsertControls(gui);
 
     // add division type toggles
     if ($("#menu_insertdivision").length == 0) {
@@ -1604,24 +1541,16 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     $("#rad_small").trigger('click');
 }
 
+Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
+    var gui = e.data.gui;
+    gui.unbindMouseEventHandlers(gui);
+    gui.removeInsertControls(gui);
+}
+
 Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     var gui = e.data.gui;
-
-    // unbind other insert event handlers
-    gui.rendEng.unObserve("mouse:move");
-    gui.rendEng.unObserve("mouse:up");
-
-    // remove the punctum/division following the pointer
-    if (gui.punctDwg) {
-        gui.rendEng.canvas.remove(gui.punctDwg);
-    }
-    if (gui.divisionDwg) {
-        gui.rendEng.canvas.remove(gui.divisionDwg);
-    }
-
-    // remove insert menus not for clefs
-    $("#menu_insertpunctum").remove();
-    $("#menu_insertdivision").remove();
+    gui.unbindMouseEventHandlers(gui);
+    gui.removeInsertControls(gui);
 
     // add clef type toggles
     if ($("#menu_insertclef").length == 0) {
@@ -1881,4 +1810,71 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
     });
+}
+
+Toe.View.SquareNoteInteraction.prototype.deactivateCanvasObjects = function(aGui) {
+    aGui.rendEng.canvas.selection = false;
+    aGui.rendEng.canvas.deactivateAll();
+    aGui.rendEng.canvas.HOVER_CURSOR = null;
+}
+
+Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aGui, aParentDivId) {
+    if ($("#sidebar-insert").length == 0) {
+        $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
+                              '<li><div class="btn-group" data-toggle="buttons-radio">' +
+                              '<button id="rad_punctum" class="btn"><b>■</b> Punctum</button>\n' +
+                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
+                       //       '<button id="rad_staff" class="btn"><b><i class="icon-align-justify icon-black"></i></b>Staff</button>\n' + 
+                              '<button id="rad_clef" class="btn"><b>C/F</b> Clef</button>\n</div>\n</li>\n</span>');
+    }
+    $("#rad_punctum").bind("click.insert", {gui: aGui}, aGui.handleInsertPunctum);
+    $("#rad_division").bind("click.insert", {gui: aGui}, aGui.handleInsertDivision);
+  //  $("#rad_staff").bind("click.insert", {gui: aGui}, aGui.handleInsertStaff);
+    $("#rad_clef").bind("click.insert", {gui: aGui}, aGui.handleInsertClef);
+    $("#rad_punctum").trigger('click');
+}
+
+Toe.View.SquareNoteInteraction.prototype.removeInsertControls = function(aGui) {
+    $("#menu_insertdivision").remove();
+    $("#menu_insertclef").remove();
+    $("#menu_insertpunctum").remove();
+    $("#menu_insertstaff").remove();
+    if (aGui.divisionDwg) {
+        aGui.rendEng.canvas.remove(aGui.divisionDwg);
+    }
+    if (aGui.clefDwg) {
+        aGui.rendEng.canvas.remove(aGui.clefDwg);
+    }
+    if (aGui.punctDwg) {
+        aGui.rendEng.canvas.remove(aGui.punctDwg);
+    }
+  /*  if (aGui.staffDwg) {
+        aGui.rendEng.canvas.remove(aGui.staffDwg);
+    }*/
+    $("#info").animate({opacity: 0.0}, 100);
+}
+
+Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
+    $("#rad_punctum").unbind("click");
+    $("#rad_division").unbind("click");
+  //  $("#rad_staff").unbind("click");
+    $("#rad_clef").unbind("click");
+}
+
+Toe.View.SquareNoteInteraction.prototype.removeEditControls = function(aGui) {
+    $("#sidebar-edit").remove();
+}
+
+Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function(aGui) {
+    $("#btn_delete").unbind("click.edit");
+    $("#btn_neumify").unbind("click.edit");
+}
+
+Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function(aGui) {
+    aGui.rendEng.unObserve("mouse:down");
+    aGui.rendEng.unObserve("mouse:up");
+    aGui.rendEng.unObserve("object:moving");
+    aGui.rendEng.unObserve("object:selected");
+    aGui.rendEng.unObserve("selection:cleared");
+    aGui.rendEng.unObserve("selection:created");
 }
