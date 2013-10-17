@@ -64,17 +64,49 @@ Toe.Model.Staff = function(bb, options) {
         this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
     }
 
-    // id of the staff
+    // id of the system.
     this.id = null;
 
+    // Order number (system break/sb number).
+    this.orderNumber = null;
+
+    // Associated system ID.
+    this.systemId = null;
+
     this.elements = new Array();
-}
+};
 
 Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
 
+/**
+ * Sets ID of staff (system break).
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {String} id
+ */
 Toe.Model.Staff.prototype.setID = function(sid) {
     this.id = sid;
-}
+};
+
+/**
+ * Sets ID of associated system element.
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {String} system id
+ */
+Toe.Model.Staff.prototype.setSystemID = function(aSystemId) {
+    this.systemId = aSystemId;
+};
+
+/**
+ * Sets order number of staff (system break).
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {int} aOrderNumber
+ */
+Toe.Model.Staff.prototype.setOrderNumber = function(aOrderNumber) {
+    this.orderNumber = aOrderNumber;
+};
 
 /**
  * Sets the bounding box of the staff
@@ -193,6 +225,40 @@ Toe.Model.Staff.prototype.getPreviousClef = function(clef) {
     // if no clef is found
     return null;
 }
+
+/**
+ * Returns width of staff.
+ *
+ * @methodOf Toe.Model.Staff
+ * @returns {int} width of staff
+ */
+Toe.Model.Staff.prototype.getWidth = function() {
+    return this.zone.lrx - this.zone.ulx;
+}
+
+/**
+ * Returns height of staff.
+ *
+ * @methodOf Toe.Model.Staff
+ * @returns {int} height of staff
+ */
+Toe.Model.Staff.prototype.getHeight = function() {
+    return this.zone.lry - this.zone.uly;
+};
+
+/**
+ * Given a staff, computes the vertical distance between the two.
+ *
+ * @methodOf Toe.Model.Staff
+ * @param {Toe.Model.Staff} aStaff
+ * @returns {int} vertical distance between staff (top of one to bottom of other); it CAN return negative if overlap
+ */
+Toe.Model.Staff.prototype.getDistanceFromStaff = function(aStaff) {
+    if (aStaff.zone.uly > this.zone.uly) {
+        return aStaff.zone.uly - this.zone.lry;
+    }
+    return this.zone.uly - aStaff.zone.lry;
+};
 
 /**
  * Given a set of coordinates, returns snapped coordinates

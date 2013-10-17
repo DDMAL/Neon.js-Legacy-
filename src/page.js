@@ -31,9 +31,39 @@ Toe.Model.Page = function() {
 
     // no scaling by default
     this.scale = 1.0;
-}
+
+    // Index of staves with largest dimensions.
+    this.staffIndexLargestWidth = -1;
+    this.staffIndexLargestHeight = -1;
+
+    // Average staff height.
+    this.staffAverageHeight = 0;
+
+    // id of the page
+    this.id = null;
+};
 
 Toe.Model.Page.prototype.constructor = Toe.Model.Page;
+
+/**
+ * Sets ID of page.
+ *
+ * @methodOf Toe.Model.Page
+ * @param {String} page ID
+ */
+Toe.Model.Page.prototype.setID = function(pid) {
+    this.id = pid;
+};
+
+/**
+ * Returns page ID.
+ *
+ * @methodOf Toe.Model.Page
+ * @returns {String} page ID
+ */
+Toe.Model.Page.prototype.getID = function() {
+    return this.id;
+};
 
 /**
  * Set canvas width and height directly
@@ -86,7 +116,7 @@ Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
  */
 Toe.Model.Page.prototype.setPageScale = function(scale) {
     this.scale = scale;
-}
+};
 
 /**
  * Given coordinates, find the index of the closest staff
@@ -112,7 +142,7 @@ Toe.Model.Page.prototype.getClosestStaff = function(coords) {
     sInd = $.inArray(Math.min.apply(Math, distances), distances);
 
     return this.staves[sInd];
-}
+};
 
 /**
  * Given a staff, get the next staff on the page
@@ -129,7 +159,7 @@ Toe.Model.Page.prototype.getNextStaff = function(staff) {
     else {
         return null;
     }
-}
+};
 
 Toe.Model.Page.prototype.getPreviousStaff = function(staff) {
     // for each staff, except the first
@@ -140,7 +170,7 @@ Toe.Model.Page.prototype.getPreviousStaff = function(staff) {
     else {
         return null;
     }
-}
+};
 
 /**
  * Adds a given number of staves to the page
@@ -150,13 +180,84 @@ Toe.Model.Page.prototype.getPreviousStaff = function(staff) {
  * @returns {Toe.Model.Page} pointer to the current page for chaining
  */
 Toe.Model.Page.prototype.addStaff = function(staff) {
-    this.staves.push(staff);
+
+    // We may have to adjust the staff numbers.
+    if (staff.orderNumber > this.staves.length) {
+        this.staves.push(staff);
+    }
+    else {
+        for (var i = staff.orderNumber - 1; i < this.staves.length; i++) {
+            this.staves[i].setOrderNumber(parseInt(this.staves[i].orderNumber) + 1);
+        }
+        this.staves.splice(staff.orderNumber - 1, 0, staff);
+    }
+
+    // Update index of staff with largest width.
+    if (this.staffIndexLargestWidth < 0) {
+        this.staffIndexLargestWidth = 0;
+    }
+    else if (staff.getWidth() > this.staves[this.staffIndexLargestWidth].getWidth()) {
+        this.staffIndexLargestWidth = this.staves.length;
+    }
+
+    // Update index of staff with largest height.
+    if (this.staffIndexLargestHeight < 0) {
+        this.staffIndexLargestHeight = 0;
+    }
+    else if (staff.getHeight() > this.staves[this.staffIndexLargestHeight].getHeight()) {
+        this.staffIndexLargestHeight = this.staves.length;
+    }
+
+    // Update staff height average.
+    this.staffAverageHeight *= (this.staves.length - 1);
+    this.staffAverageHeight += staff.getHeight();
+    this.staffAverageHeight /= this.staves.length;
 
 	// update view
 	$(staff).trigger("vRenderStaff", [staff]);
 
     return this;
-}
+};
+
+/**
+ * Returns reference to the widest staff.
+ *
+ * @methodOf Toe.Model.Page
+ * @returns {Staff} nextStaff the next staff
+ */
+Toe.Model.Page.prototype.getWidestStaff = function() {
+    var largestWidthIndex = -1;
+    for (var i = 0; i < this.staves.length; i++) {
+        if (largestWidthIndex == -1 || this.staves[i].getWidth() > this.staves[largestWidthIndex].getWidth()) {
+            largestWidthIndex = i;
+        }
+    }
+
+    if (largestWidthIndex == -1) {
+        return null;
+    }
+    return this.staves[largestWidthIndex];
+};
+
+/**
+ * Calculates the minimum distance between consecutive systems.
+ *
+ * @returns {int} smallest Y distance between consecutive systems
+ */
+Toe.Model.Page.prototype.getSmallestYDistanceBetweenStaves = function() {
+    var minimumYDistance = 0;
+    if (this.staves.length == 1) {
+        minimumYDistance = this.staffAverageHeight / 2;
+    }
+    else if (this.staves.length > 1) {
+        minimumYDistance = this.staves[1].getDistanceFromStaff(this.staves[0]);
+        for (var i = 2; i < this.staves.length ; i++) {
+            var distanceY = this.staves[i].getDistanceFromStaff(this.staves[i - 1]);
+            minimumYDistance = distanceY < minimumYDistance ? distanceY : minimumYDistance;
+        }
+    }
+    return minimumYDistance < 0 ? 0 : minimumYDistance;
+};
 
 // helper function to parse bounding box information
 // "static" function

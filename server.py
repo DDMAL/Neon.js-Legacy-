@@ -48,7 +48,11 @@ rules = [
     (abs_path(r"/edit/(.*?)/delete/clef"), neonsrv.tornadoapi.DeleteClefHandler),
     (abs_path(r"/edit/(.*?)/insert/custos"), neonsrv.tornadoapi.InsertCustosHandler),
     (abs_path(r"/edit/(.*?)/move/custos"), neonsrv.tornadoapi.MoveCustosHandler),
-    (abs_path(r"/edit/(.*?)/delete/custos"), neonsrv.tornadoapi.DeleteCustosHandler)
+    (abs_path(r"/edit/(.*?)/delete/custos"), neonsrv.tornadoapi.DeleteCustosHandler),
+    (abs_path(r"/edit/(.*?)/insert/system"), neonsrv.tornadoapi.InsertSystemHandler),
+    (abs_path(r"/edit/(.*?)/insert/system"), neonsrv.tornadoapi.InsertSystemHandler),
+    (abs_path(r"/edit/(.*?)/insert/systembreak"), neonsrv.tornadoapi.InsertSystemBreakHandler),
+    (abs_path(r"/edit/(.*?)/modify/systembreak"), neonsrv.tornadoapi.ModifySystemBreakHandler)
 ]
 
 # Set up tests if we're in debug mode

@@ -665,6 +665,61 @@ class ModifyDocument:
         result = {"id": custos.getId()}
         return result
 
+    def insert_system(self, page_id, ulx, uly, lrx, lry):
+        '''
+        Insert a system and its bounding box.
+        '''
+
+        # create system
+        system = MeiElement("system")
+
+        # add system to page
+        page = self.mei.getElementById(page_id)
+        page.addChild(system)
+
+        # update system bounding box
+        self.update_or_add_zone(system, ulx, uly, lrx, lry)
+
+        result = {"id": system.getId()}
+        return result
+
+    def insert_system_break(self, system_id, order_number, next_sb_id):
+        '''
+        Insert a system break before the associated system break,
+        associate it with a system ID, and give it an order number.
+        '''
+
+        # create system
+        sb = MeiElement("sb")
+        sb.addAttribute("n", str(order_number))
+        sb.addAttribute("systemref", str(system_id))
+
+        # Perform insertion.  If we have no next reference, just add to last layer.
+        if next_sb_id is None:
+            layers = self.mei.getElementsByName("layer")
+            if len(layers):
+                layers[-1].addChild(sb)
+        else:
+            next_sb = self.mei.getElementById(str(next_sb_id))
+            parent = next_sb.getParent()
+            if parent and next_sb:
+                parent.addChildBefore(next_sb, sb)
+
+        result = {"id": sb.getId()}
+        return result
+
+    def modify_system_break(self, sb_id, order_number):
+        '''
+        Modify a system break.
+        '''
+
+        # modify system
+        sb = self.mei.getElementById(sb_id)
+        sb.addAttribute("n", order_number)
+
+        result = {"id": sb_id}
+        return result
+
     def move_custos(self, id, pname, oct, ulx, uly, lrx, lry):
         '''
         Move the given custos element.

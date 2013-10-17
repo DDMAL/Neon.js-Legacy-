@@ -36,6 +36,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
     this.punctDwg = null;
     this.divisionDwg = null;
     this.clefDwg = null;
+    this.staffDwg = null;
 
     // cache height and width of punctum glyph for use in
     // bounding box estimation in neumify and ungroup
@@ -58,7 +59,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
 
     // bind hotkeys
     this.bindHotKeys();
-}
+};
 
 Toe.View.SquareNoteInteraction.prototype.constructor = Toe.View.SquareNoteInteraction;
 
@@ -69,32 +70,13 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
 
-    // activate all objects on the canvas 
-    // so they can be modified in edit mode
-    gui.rendEng.canvas.selection = true;
-    gui.rendEng.canvas.HOVER_CURSOR = "pointer";
-
-    // first remove insert options
-    $("#sidebar-insert").remove();
-
-    // unbind insert event handlers
-    gui.rendEng.unObserve("mouse:move");
-    gui.rendEng.unObserve("mouse:up");
-
-    // remove drawings following the pointer from insert mode
-    if (gui.punctDwg) {
-        gui.rendEng.canvas.remove(gui.punctDwg);
-    }
-    if (gui.divisionDwg) {
-        gui.rendEng.canvas.remove(gui.divisionDwg);
-    }
-    if (gui.clefDwg) {
-        gui.rendEng.canvas.remove(gui.clefDwg);
-    }
-    gui.rendEng.repaint();
+    gui.activateCanvasObjects();
+    gui.removeInsertControls();
+    gui.removeInsertSubControls();
+    gui.unbindMouseEventHandlers();
            
     // add buttons for edit commands
-    if ($("#sidebar-edit").length == 0) {
+    if ($("#sidebar-edit").length === 0) {
         $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
                               '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                               '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
@@ -1154,19 +1136,19 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
 Toe.View.SquareNoteInteraction.prototype.handleInsert = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
-    gui.deactivateCanvasObjects(gui);
-    gui.removeInsertControls(gui);
+    gui.deactivateCanvasObjects();
+    gui.removeInsertControls();
     gui.unbindInsertControls();
-    gui.removeEditControls(gui);
+    gui.removeEditControls();
     gui.unbindEditControls();
-    gui.unbindMouseEventHandlers(gui);
-    gui.insertInsertControls(gui, parentDivId);
+    gui.unbindMouseEventHandlers();
+    gui.insertInsertControls(parentDivId);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers(gui);
-    gui.removeInsertControls(gui);
+    gui.unbindMouseEventHandlers();
+    gui.removeInsertSubControls();
 
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
@@ -1355,8 +1337,8 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers(gui);
-    gui.removeInsertControls(gui);
+    gui.unbindMouseEventHandlers();
+    gui.removeInsertSubControls();
 
     // add division type toggles
     if ($("#menu_insertdivision").length == 0) {
@@ -1543,14 +1525,106 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers(gui);
-    gui.removeInsertControls(gui);
+    gui.unbindMouseEventHandlers();
+    gui.removeInsertSubControls();
+    gui.createInsertStaffSubControls();
+    gui.updateInsertStaffSubControls();
+
+    // Get the widest staff and use its dimensions.  If there is no widest staff, forget it!
+    var widestStaff = gui.page.getWidestStaff();
+    if (widestStaff == null) {
+        return;
+    }
+
+    // Create the drawing.
+    gui.staffDwg = null;
+    var numberOfLines = widestStaff.props.numLines;
+    var width = widestStaff.getWidth();
+    var deltaY = widestStaff.delta_y;
+    var elements = {fixed: new Array(), modify: new Array()};
+    for (var li = 0; li < numberOfLines; li++) {
+        elements.fixed.push(gui.rendEng.createLine([0, deltaY * li, width, deltaY * li]));
+    }
+    gui.staffDwg = gui.rendEng.draw(elements, {group: true, selectable: false, opacity: 0.6})[0];
+
+    // Move the drawing with the pointer.
+    gui.rendEng.canvas.observe("mouse:move", function(e) {
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
+        gui.staffDwg.left = pnt.x;
+        gui.staffDwg.top = pnt.y;
+        gui.rendEng.repaint();
+    });
+
+    // Do the insert.
+    gui.rendEng.canvas.observe('mouse:up', function(e) {
+
+        // Create bounding box and staffm then add MVC components.
+        var ulx = gui.staffDwg.left - Math.round(gui.staffDwg.currentWidth / 2);
+        var uly = gui.staffDwg.top - Math.round(gui.staffDwg.currentHeight / 2);
+        var boundingBox = [ulx, uly, ulx + gui.staffDwg.currentWidth, uly + gui.staffDwg.currentHeight];
+        var staff = new Toe.Model.SquareNoteStaff(boundingBox);
+        var staffView = new Toe.View.StaffView(gui.rendEng);
+        var staffController = new Toe.Ctrl.StaffController(staff, staffView);
+
+        // We also have to adjust the associated system break order number.  Then, we can add it to the page.
+        // This MIGHT have an impact on staves after it.
+        staff.setOrderNumber($('#staff_number_slider').val());
+        gui.page.addStaff(staff);
+        gui.updateInsertStaffSubControls();
+        var nextStaff = gui.page.getNextStaff(staff);
+
+        // Create arguments for our first POST.
+        var outbb = gui.getOutputBoundingBox([staff.zone.ulx, staff.zone.uly, staff.zone.lrx, staff.zone.lry]);
+        var createSystemArguments = {pageid: gui.page.getID(), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+        // POST system, then cascade into other POSTs.
+        $.post(gui.apiprefix + "/insert/system", createSystemArguments, function(data) {
+            staff.setSystemID(JSON.parse(data).id);
+            postSystemBreak();
+        })
+        .error(function() {
+            $("#alert > p").text("Server failed to insert system.  Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+
+        // POST system break.
+        function postSystemBreak() {
+
+            // Create arguments.
+            var createSystemBreakArguments = {ordernumber: staff.orderNumber, systemid: staff.systemId};
+            if (nextStaff != null) {
+                createSystemBreakArguments.nextsbid = nextStaff.id;
+            }
+
+            // Do POST.  If we had to reorder system breaks, POST those, too.
+            $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
+                staff.setID(JSON.parse(data).id);
+                while (nextStaff != null) {
+                    postSystemBreakEdit(nextStaff.id, nextStaff.orderNumber);
+                    nextStaff = gui.page.getNextStaff(nextStaff);
+                }
+            })
+            .error(function() {
+                $("#alert > p").text("Server failed to insert system break.  Client and server are not synchronized.");
+                $("#alert").animate({opacity: 1.0}, 100);
+            });
+        }
+
+        // POST system break editing.
+        function postSystemBreakEdit(aStaffId, aOrderNumber) {
+            $.post(gui.apiprefix + "/modify/systembreak", {sbid: aStaffId, ordernumber: aOrderNumber})
+            .error(function() {
+                $("#alert > p").text("Server failed to modify system break.  Client and server are not synchronized.");
+                $("#alert").animate({opacity: 1.0}, 100);
+            });
+        }
+    });
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers(gui);
-    gui.removeInsertControls(gui);
+    gui.unbindMouseEventHandlers();
+    gui.removeInsertSubControls();
 
     // add clef type toggles
     if ($("#menu_insertclef").length == 0) {
@@ -1785,6 +1859,9 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GUI Management Methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.SquareNoteInteraction.prototype.getOutputBoundingBox = function(bb) {
     gui = this;
     return $.map(bb, function(b) {
@@ -1812,69 +1889,94 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
     });
 }
 
-Toe.View.SquareNoteInteraction.prototype.deactivateCanvasObjects = function(aGui) {
-    aGui.rendEng.canvas.selection = false;
-    aGui.rendEng.canvas.deactivateAll();
-    aGui.rendEng.canvas.HOVER_CURSOR = null;
+Toe.View.SquareNoteInteraction.prototype.deactivateCanvasObjects = function() {
+    this.rendEng.canvas.selection = false;
+    this.rendEng.canvas.deactivateAll();
+    this.rendEng.canvas.HOVER_CURSOR = null;
 }
 
-Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aGui, aParentDivId) {
+Toe.View.SquareNoteInteraction.prototype.activateCanvasObjects = function() {
+    this.rendEng.canvas.selection = true;
+    this.rendEng.canvas.HOVER_CURSOR = "pointer";
+}
+
+Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParentDivId) {
     if ($("#sidebar-insert").length == 0) {
         $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
                               '<li><div class="btn-group" data-toggle="buttons-radio">' +
                               '<button id="rad_punctum" class="btn"><b>■</b> Punctum</button>\n' +
                               '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
-                       //       '<button id="rad_staff" class="btn"><b><i class="icon-align-justify icon-black"></i></b>Staff</button>\n' + 
+                              '<button id="rad_staff" class="btn"><b><i class="icon-align-justify icon-black"></i></b>Staff</button>\n' + 
                               '<button id="rad_clef" class="btn"><b>C/F</b> Clef</button>\n</div>\n</li>\n</span>');
     }
-    $("#rad_punctum").bind("click.insert", {gui: aGui}, aGui.handleInsertPunctum);
-    $("#rad_division").bind("click.insert", {gui: aGui}, aGui.handleInsertDivision);
-  //  $("#rad_staff").bind("click.insert", {gui: aGui}, aGui.handleInsertStaff);
-    $("#rad_clef").bind("click.insert", {gui: aGui}, aGui.handleInsertClef);
+    $("#rad_punctum").bind("click.insert", {gui: this}, this.handleInsertPunctum);
+    $("#rad_division").bind("click.insert", {gui: this}, this.handleInsertDivision);
+    $("#rad_staff").bind("click.insert", {gui: this}, this.handleInsertStaff);
+    $("#rad_clef").bind("click.insert", {gui: this}, this.handleInsertClef);
     $("#rad_punctum").trigger('click');
 }
 
-Toe.View.SquareNoteInteraction.prototype.removeInsertControls = function(aGui) {
+Toe.View.SquareNoteInteraction.prototype.removeInsertControls = function() {
+    $("#sidebar-insert").remove();
+}
+
+Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
     $("#menu_insertdivision").remove();
     $("#menu_insertclef").remove();
     $("#menu_insertpunctum").remove();
     $("#menu_insertstaff").remove();
-    if (aGui.divisionDwg) {
-        aGui.rendEng.canvas.remove(aGui.divisionDwg);
+    if (this.divisionDwg) {
+        this.rendEng.canvas.remove(this.divisionDwg);
     }
-    if (aGui.clefDwg) {
-        aGui.rendEng.canvas.remove(aGui.clefDwg);
+    if (this.clefDwg) {
+        this.rendEng.canvas.remove(this.clefDwg);
     }
-    if (aGui.punctDwg) {
-        aGui.rendEng.canvas.remove(aGui.punctDwg);
+    if (this.punctDwg) {
+        this.rendEng.canvas.remove(this.punctDwg);
     }
-  /*  if (aGui.staffDwg) {
-        aGui.rendEng.canvas.remove(aGui.staffDwg);
-    }*/
+    if (this.staffDwg) {
+        this.rendEng.canvas.remove(this.staffDwg);
+    }
     $("#info").animate({opacity: 0.0}, 100);
 }
 
 Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
     $("#rad_punctum").unbind("click");
     $("#rad_division").unbind("click");
-  //  $("#rad_staff").unbind("click");
+    $("#rad_staff").unbind("click");
     $("#rad_clef").unbind("click");
 }
 
-Toe.View.SquareNoteInteraction.prototype.removeEditControls = function(aGui) {
+Toe.View.SquareNoteInteraction.prototype.removeEditControls = function() {
     $("#sidebar-edit").remove();
 }
 
-Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function(aGui) {
+Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function() {
     $("#btn_delete").unbind("click.edit");
     $("#btn_neumify").unbind("click.edit");
 }
 
-Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function(aGui) {
-    aGui.rendEng.unObserve("mouse:down");
-    aGui.rendEng.unObserve("mouse:up");
-    aGui.rendEng.unObserve("object:moving");
-    aGui.rendEng.unObserve("object:selected");
-    aGui.rendEng.unObserve("selection:cleared");
-    aGui.rendEng.unObserve("selection:created");
+Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
+    this.rendEng.unObserve("mouse:down");
+    this.rendEng.unObserve("mouse:up");
+    this.rendEng.unObserve("mouse:move");
+    this.rendEng.unObserve("object:moving");
+    this.rendEng.unObserve("object:selected");
+    this.rendEng.unObserve("selection:cleared");
+    this.rendEng.unObserve("selection:created");
+}
+
+Toe.View.SquareNoteInteraction.prototype.createInsertStaffSubControls = function() {
+    if ($("#menu_insertstaff").length == 0) {
+        $("#sidebar-insert").append('<span id="menu_insertstaff"><br/>\n<li class="nav-header">Staff Number</li>\n' +
+                                    '<li><div><input id="staff_number_slider" type="range" min="1" max="1" step="1" value="1">' +
+                                    ' <output id="staff_number"></output></div></li></span>');
+        $("#staff_number_slider").change(function() {$('#staff_number').html(this.value);}).change();
+    }
+}
+
+Toe.View.SquareNoteInteraction.prototype.updateInsertStaffSubControls = function() {
+    $("#staff_number_slider").attr("max", this.page.staves.length + 1);
+    $("#staff_number_slider").val(this.page.staves.length + 1);
+    $("#staff_number_slider").change();
 }

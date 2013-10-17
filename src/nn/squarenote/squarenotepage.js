@@ -28,7 +28,7 @@ THE SOFTWARE.
  */
 Toe.Model.SquareNotePage = function(documentType) {
     this.documentType = documentType;
-}
+};
 
 // inherit prototype from page object
 Toe.Model.SquareNotePage.prototype = new Toe.Model.Page();
@@ -45,6 +45,10 @@ Toe.Model.SquareNotePage.prototype.constructor = Toe.SquareNotePage;
 Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
     // cache page reference
     var page = this;
+
+    // Get the actual "page" element.
+    var pageId = $($(mei).find("page")[0]).attr("xml:id");
+    this.setID(pageId);
 
     var surface = $(mei).find("surface")[0];
     var clefList = $("clef, sb", mei);
@@ -94,9 +98,11 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         // create staff
         var s_bb = page.parseBoundingBox(sysFacs);
 
-        // get id of parent layer
+        // Set some parameters.
         var sModel = new Toe.Model.SquareNoteStaff(s_bb);
         sModel.setID($(sel).attr("xml:id"));
+        sModel.setOrderNumber(parseInt($(sel).attr("n")));
+        sModel.setSystemID(sbref);
 
         // set global scale using staff from first system
         if (sit == 0) {

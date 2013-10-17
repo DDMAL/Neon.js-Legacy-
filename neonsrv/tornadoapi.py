@@ -371,3 +371,58 @@ class DeleteCustosHandler(tornado.web.RequestHandler):
         md.write_doc()
 
         self.set_status(200)
+
+#####################################################
+#           STAFF/SYSTEM HANDLER CLASSES            #
+#####################################################
+class InsertSystemHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        page_id = str(self.get_argument("pageid", None))
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        result = md.insert_system(page_id, ulx, uly, lrx, lry)
+        md.write_doc()
+
+        self.write(json.dumps(result))
+
+        self.set_status(200)
+
+class InsertSystemBreakHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        system_id = self.get_argument("systemid", None)
+        order_number = self.get_argument("ordernumber", None)
+        next_sb_id = self.get_argument("nextsbid", None)
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        result = md.insert_system_break(system_id, order_number, next_sb_id)
+        md.write_doc()
+
+        self.write(json.dumps(result))
+
+        self.set_status(200)
+
+class ModifySystemBreakHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        sb_id = str(self.get_argument("sbid"))
+        order_number = str(self.get_argument("ordernumber"))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        result = md.modify_system_break(sb_id, order_number)
+        md.write_doc()
+
+        self.write(json.dumps(result))
+
+        self.set_status(200)
