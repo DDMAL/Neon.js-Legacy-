@@ -74,22 +74,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     gui.removeInsertControls();
     gui.removeInsertSubControls();
     gui.unbindMouseEventHandlers();
-           
-    // add buttons for edit commands
-    if ($("#sidebar-edit").length === 0) {
-        $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
-                              '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
-                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
-                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
-                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
-                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
-    }
-    
-    // grey out edit buttons by default
-    $('#btn_delete').toggleClass('disabled', true);
-    $('#btn_neumify').toggleClass('disabled', true);
-    $('#btn_neumify_liquescence').toggleClass('disabled', true);
-    $('#btn_ungroup').toggleClass('disabled', true);
+    gui.insertEditControls(parentDivId);
 
     gui.rendEng.canvas.observe('mouse:down', function(e) {
         // cache pointer coordinates for mouse up
@@ -111,7 +96,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         var sModel = null;
         $.each(selection.getObjects(), function (oInd, o) {
             // don't draw a selection border around each object in the selection
-            o.borderColor = 'rgba(0,0,0,0)'; 
+            o.borderColor = 'rgba(0,0,0,0)';
 
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
@@ -146,6 +131,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     });
 
     gui.rendEng.canvas.observe('object:selected', function(e) {
+
+        // Unbind previous stuff.
+        gui.unbindEditNeumeSubControls();
+
         $('#btn_delete').toggleClass('disabled', false);
 
         var selection = gui.rendEng.canvas.getActiveObject();
@@ -160,23 +149,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
             $("#menu_editclef").remove();
 
             if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
-                if ($("#menu_editpunctum").length == 0) {
-                    $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
-                                              '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
-                                              '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
-                                              '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
-                                              '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' + 
-                                              '<br/><li class="nav-header">Attributes</li>\n' +
-                                              '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
-                                              'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
-                                              '<li><a id="head_punctum">punctum</a></li>\n' +
-                                              '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
-                                              '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
-                                              '<li><a id="head_cavum">cavum</a></li>\n' +
-                                              '<li><a id="head_virga">virga</a></li>\n' +
-                                              '<li><a id="head_quilisma">quilisma</a></li>\n' +
-                                              '</ul></div></span>');
-                }
+
+                // Insert and rebind sub-controls.
+                gui.insertEditNeumeSubControls();
+                gui.bindEditNeumeSubControls(ele);
 
                 // toggle ornamentation
                 var nc = ele.components[0];
@@ -188,24 +164,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     $("#edit_chk_dot").toggleClass("active", false);
                 }
 
-                // Handle dot toggles
-                // remove onclick listener for previous selection
-                $("#edit_chk_dot").unbind("click");
-                $("#edit_chk_dot").bind("click.edit", {gui: gui, punctum: ele}, gui.handleDotToggle);
-
-                // Handle head shape change
-                $("#head_punctum").unbind("click");
-                $("#head_cavum").unbind("click");
-                $("#head_virga").unbind("click");
-                $("#head_quilisma").unbind("click");
-                $("#head_punctum_inclinatum").unbind("click");
-                $("#head_punctum_inclinatum_parvum").unbind("click");
-                $("#head_punctum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum"}, gui.handleHeadShapeChange);
-                $("#head_cavum").bind("click.edit", {gui: gui, punctum: ele, shape: "cavum"}, gui.handleHeadShapeChange);
-                $("#head_virga").bind("click.edit", {gui: gui, punctum: ele, shape: "virga"}, gui.handleHeadShapeChange);
-                $("#head_quilisma").bind("click.edit", {gui: gui, punctum: ele, shape: "quilisma"}, gui.handleHeadShapeChange);
-                $("#head_punctum_inclinatum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum"}, gui.handleHeadShapeChange);
-                $("#head_punctum_inclinatum_parvum").bind("click.edit", {gui: gui, punctum: ele, shape: "punctum_inclinatum_parvum"}, gui.handleHeadShapeChange);
+                // Rebind sub-controls.
             }
             else {
                 $("#menu_editpunctum").remove();
@@ -1900,6 +1859,44 @@ Toe.View.SquareNoteInteraction.prototype.activateCanvasObjects = function() {
     this.rendEng.canvas.HOVER_CURSOR = "pointer";
 }
 
+Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDivId) {
+    // add buttons for edit commands
+    if ($("#sidebar-edit").length === 0) {
+        $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
+                              '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
+                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
+                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
+                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
+    }
+    
+    // grey out edit buttons by default
+    $('#btn_delete').toggleClass('disabled', true);
+    $('#btn_neumify').toggleClass('disabled', true);
+    $('#btn_neumify_liquescence').toggleClass('disabled', true);
+    $('#btn_ungroup').toggleClass('disabled', true);
+}
+
+Toe.View.SquareNoteInteraction.prototype.insertEditNeumeSubControls = function() {
+    if ($("#menu_editpunctum").length == 0) {
+        $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
+                                  '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
+                                  '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
+                                  '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
+                                  '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' + 
+                                  '<br/><li class="nav-header">Attributes</li>\n' +
+                                  '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
+                                  'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
+                                  '<li><a id="head_punctum">punctum</a></li>\n' +
+                                  '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
+                                  '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
+                                  '<li><a id="head_cavum">cavum</a></li>\n' +
+                                  '<li><a id="head_virga">virga</a></li>\n' +
+                                  '<li><a id="head_quilisma">quilisma</a></li>\n' +
+                                  '</ul></div></span>');
+    }
+}
+
 Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParentDivId) {
     if ($("#sidebar-insert").length == 0) {
         $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
@@ -1914,6 +1911,26 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParent
     $("#rad_staff").bind("click.insert", {gui: this}, this.handleInsertStaff);
     $("#rad_clef").bind("click.insert", {gui: this}, this.handleInsertClef);
     $("#rad_punctum").trigger('click');
+}
+
+Toe.View.SquareNoteInteraction.prototype.unbindEditNeumeSubControls = function() {
+    $("#edit_chk_dot").unbind("click");
+    $("#head_punctum").unbind("click");
+    $("#head_cavum").unbind("click");
+    $("#head_virga").unbind("click");
+    $("#head_quilisma").unbind("click");
+    $("#head_punctum_inclinatum").unbind("click");
+    $("#head_punctum_inclinatum_parvum").unbind("click");
+}
+
+Toe.View.SquareNoteInteraction.prototype.bindEditNeumeSubControls = function(aElement) {
+    $("#head_punctum").bind("click.edit", {gui: this, punctum: aElement, shape: "punctum"}, this.handleHeadShapeChange);
+    $("#head_cavum").bind("click.edit", {gui: this, punctum: aElement, shape: "cavum"}, this.handleHeadShapeChange);
+    $("#head_virga").bind("click.edit", {gui: this, punctum: aElement, shape: "virga"}, this.handleHeadShapeChange);
+    $("#head_quilisma").bind("click.edit", {gui: this, punctum: aElement, shape: "quilisma"}, this.handleHeadShapeChange);
+    $("#head_punctum_inclinatum").bind("click.edit", {gui: this, punctum: aElement, shape: "punctum_inclinatum"}, this.handleHeadShapeChange);
+    $("#head_punctum_inclinatum_parvum").bind("click.edit", {gui: this, punctum: aElement, shape: "punctum_inclinatum_parvum"}, this.handleHeadShapeChange);
+    $("#edit_chk_dot").bind("click.edit", {gui: this, punctum: aElement}, this.handleDotToggle);
 }
 
 Toe.View.SquareNoteInteraction.prototype.removeInsertControls = function() {
