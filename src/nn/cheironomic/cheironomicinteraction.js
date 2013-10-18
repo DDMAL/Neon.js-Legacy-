@@ -304,7 +304,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                     // snap to staff
                     var finalCoords = {x: element.left, y: element.top};
                     var sModel = gui.page.getClosestStaff(finalCoords);
-                    var snapCoords = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele, y: false});
+                    var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele, y: false});
 
                     // set the bounding box hint for the neume
                     var ulx = snapCoords.x-(element.currentWidth/2);
@@ -911,7 +911,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
         var nModel = new Toe.Model.CheironomicNeume();
 
         // calculate snapped coords
-        var snapCoords = sModel.ohSnap(coords, gui.punctDwg.currentWidth, {y: false});
+        var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth, {y: false});
 
         // update bounding box with physical position on the page
         var ulx = snapCoords.x - gui.punctDwg.currentWidth/2;

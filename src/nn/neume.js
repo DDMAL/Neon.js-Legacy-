@@ -89,7 +89,7 @@ Toe.Model.Neume.prototype.setID = function(nid) {
 }
 
 Toe.Model.Neume.prototype.setStaff = function(staff) {
-    if (!(staff instanceof Toe.Model.Staff)) {
+    if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Neume: invalid staff reference");
     }
 

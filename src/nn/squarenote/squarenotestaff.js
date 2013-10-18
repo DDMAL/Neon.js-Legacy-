@@ -36,11 +36,11 @@ THE SOFTWARE.
  */
 Toe.Model.SquareNoteStaff = function(bb, options) {
     // call super constructor
-    Toe.Model.Staff.call(this, bb, options);
+    Toe.Model.System.call(this, bb, options);
 }
 
 // inherit prototype from generic staff model
-Toe.Model.SquareNoteStaff.prototype = new Toe.Model.Staff();
+Toe.Model.SquareNoteStaff.prototype = new Toe.Model.System();
 Toe.Model.SquareNoteStaff.prototype.constructor = Toe.Model.SquareNoteStaff;
 
 // if clef is given, return pitched elements under the given acting clef
@@ -140,7 +140,7 @@ Toe.Model.SquareNoteStaff.prototype.calcStaffPosFromPitch = function(pname, oct,
 
 /**
  * Calculates note pitch name and octave from coordinates of note
- * Coords should be snapped to line/space already! @see ohSnap
+ * Coords should be snapped to line/space already! @see Toe.Model.System.getSystemSnapCoordinates
  */
 Toe.Model.SquareNoteStaff.prototype.calcPitchFromCoords = function(coords) {
     var staffPos = Math.round((this.zone.uly - coords.y) / (this.delta_y/2));

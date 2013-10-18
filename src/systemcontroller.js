@@ -21,28 +21,25 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a new staff controller and listens to the model and the view
+ * Creates a new system controller and listens to the model and the view
  *
- * @class Controller for the staff
- * @param {Toe.Model.Staff} pModel The staff model
- * @param {Toe.View.Staff} pView The staff view
+ * @class Controller for the system
+ * @param {Toe.Model.SystemView} pModel system model
+ * @param {Toe.View.System} pView system view
  */
-Toe.Ctrl.StaffController = function(sModel, sView) {
-    // LISTEN TO THE VIEW
-
-    // LISTEN TO THE MODEL
+Toe.Ctrl.SystemController = function(sModel, sView) {
     /** 
      * @event
-     * event type: vRenderStaff
-     * @param {Toe.Model.Staff} staff Staff to render
+     * event type: vRenderSystem
+     * @param {Toe.Model.System} aSystem system to render
      */
-    $(sModel).bind("vRenderStaff", function(event, staff) {
+    $(sModel).bind("vRenderSystem", function(event, aSystem) {
         if (Toe.debug) {
-            sView.renderStaffBoundingBox(staff);
+            sView.renderSystemBoundingBox(aSystem);
         }
 
-        sView.renderStaff(staff);
+        sView.renderSystem(aSystem);
     });
 }
 
-Toe.Ctrl.StaffController.prototype.constructor = Toe.Ctrl.StaffController;
+Toe.Ctrl.SystemController.prototype.constructor = Toe.Ctrl.SystemController;

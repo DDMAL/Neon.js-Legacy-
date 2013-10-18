@@ -84,7 +84,7 @@ Toe.Model.Clef.prototype.setID = function(cid) {
 }
 
 Toe.Model.Clef.prototype.setStaff = function(staff) {
-    if (!(staff instanceof Toe.Model.Staff)) {
+    if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Clef: invalid staff reference");
     }
 

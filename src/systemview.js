@@ -21,19 +21,19 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a new staff view
+ * Creates a new system view
  *
- * @class View for the staff
+ * @class View for the system
  * @param {Toe.View.RenderEngine} renderEngine The rendering engine
  */
-Toe.View.StaffView = function(renderEngine) {
+Toe.View.SystemView = function(renderEngine) {
     this.rendEng = renderEngine;
-}
+};
 
-Toe.View.StaffView.prototype.constructor = Toe.View.StaffView;
+Toe.View.SystemView.prototype.constructor = Toe.View.SystemView;
 
 /**
- * Renders the staff according to the following scheme:
+ * Renders the system according to the following scheme:
  *  <ulx,uly> =======
  *            ------- (line numLines)
  *            ------- (line numLines-1)
@@ -41,36 +41,36 @@ Toe.View.StaffView.prototype.constructor = Toe.View.StaffView;
  *            ------- (line 1)
  *            ======= <lrx,lry>
  * 
- * @methodOf Toe.View.StaffView
- * @param {Toe.Model.Staff} staff Staff to render
+ * @methodOf Toe.View.SystemView
+ * @param {Toe.Model.System} aSystem system to render
  */
-Toe.View.StaffView.prototype.renderStaff = function(staff) {
+Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
     if (!this.rendEng) {
         throw new Error("Staff: Invalid render context");
     }
 
     var elements = {fixed: new Array(), modify: new Array()};
 
-    // render staff lines
-    for (var li = 0; li < staff.props.numLines; li++) {
-        var yval = staff.zone.uly+(li*staff.delta_y);
-        elements.fixed.push(this.rendEng.createLine([staff.zone.ulx, yval, staff.zone.lrx, yval]));
+    // render lines
+    for (var li = 0; li < aSystem.props.numLines; li++) {
+        var yval = aSystem.zone.uly+(li*aSystem.delta_y);
+        elements.fixed.push(this.rendEng.createLine([aSystem.zone.ulx, yval, aSystem.zone.lrx, yval]));
     }
     
-	this.rendEng.draw(elements, {selectable: staff.props.interact, 
-                                 group: staff.props.group, 
-                                 eleRef: staff,
+	this.rendEng.draw(elements, {selectable: aSystem.props.interact, 
+                                 group: aSystem.props.group,
+                                 eleRef: aSystem,
                                  lockMovementX: true, 
                                  lockMovementY: true});
 }
 
 /**
- * Renders the bounding box of the staff
+ * Renders the bounding box of the system
  *
- * @methodOf Toe.View.StaffView
- * @param {Toe.Model.Staff} staff Staff to render the bounding box
+ * @methodOf Toe.View.SystemView
+ * @param {Toe.Model.System} aSystem Staff to render the bounding box
  */
-Toe.View.StaffView.prototype.renderStaffBoundingBox = function(staff) {
-    var s_bb = [staff.zone.ulx, staff.zone.uly, staff.zone.lrx, staff.zone.lry];
+Toe.View.SystemView.prototype.renderSystemBoundingBox = function(aSystem) {
+    var s_bb = [aSystem.zone.ulx, aSystem.zone.uly, aSystem.zone.lrx, aSystem.zone.lry];
     this.rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
 }

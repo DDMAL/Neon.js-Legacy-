@@ -88,10 +88,10 @@ Toe.Model.Custos.prototype.setID = function(cid) {
  * Sets the staff that this custos element is attached to.
  *
  * @methodOf Toe.Model.Custos
- * @param {Toe.Model.Staff} staff The staff model to attach the custos to.
+ * @param {Toe.Model.System} staff The staff model to attach the custos to.
  */
 Toe.Model.Custos.prototype.setStaff = function(staff) {
-    if (!(staff instanceof Toe.Model.Staff)) {
+    if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Custos: invalid staff reference");
     }
 

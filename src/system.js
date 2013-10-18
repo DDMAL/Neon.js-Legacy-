@@ -21,10 +21,10 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a staff
- * @class Represents a Staff
+ * Creates a system
+ * @class Represents a system
  * 
- * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
+ * @param {Array} bb [ulx, uly, lrx, lry] system bounding box
  * (.) <ulx,uly>        (.)
  *
  *
@@ -32,10 +32,10 @@ THE SOFTWARE.
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
  *
- * The staff has list of elements on the staff, sorted by horizontal position.
- * The staff model is a generic container to accomodate staffless glyphs without pitch.
+ * The system has list of elements on the staff, sorted by horizontal position.
+ * The system model is a generic container to accomodate staffless glyphs without pitch.
  */
-Toe.Model.Staff = function(bb, options) {
+Toe.Model.System = function(bb, options) {
     // prevent construction of prototype object without parameters
     if (!arguments.length) return;
 
@@ -50,7 +50,7 @@ Toe.Model.Staff = function(bb, options) {
 
     // set position
     if(!Toe.validBoundingBox(bb)) {
-        throw new Error("Staff: invalid bounding box");
+        throw new Error("System: invalid bounding box");
     }
 
     this.zone = new Object();
@@ -76,47 +76,47 @@ Toe.Model.Staff = function(bb, options) {
     this.elements = new Array();
 };
 
-Toe.Model.Staff.prototype.constructor = Toe.Model.Staff;
+Toe.Model.System.prototype.constructor = Toe.Model.System;
 
 /**
- * Sets ID of staff (system break).
+ * Sets ID of system (system break).
  *
- * @methodOf Toe.Model.Staff
+ * @methodOf Toe.Model.System
  * @param {String} id
  */
-Toe.Model.Staff.prototype.setID = function(sid) {
+Toe.Model.System.prototype.setID = function(sid) {
     this.id = sid;
 };
 
 /**
  * Sets ID of associated system element.
  *
- * @methodOf Toe.Model.Staff
+ * @methodOf Toe.Model.System
  * @param {String} system id
  */
-Toe.Model.Staff.prototype.setSystemID = function(aSystemId) {
+Toe.Model.System.prototype.setSystemID = function(aSystemId) {
     this.systemId = aSystemId;
 };
 
 /**
- * Sets order number of staff (system break).
+ * Sets order number of system (system break).
  *
- * @methodOf Toe.Model.Staff
+ * @methodOf Toe.Model.System
  * @param {int} aOrderNumber
  */
-Toe.Model.Staff.prototype.setOrderNumber = function(aOrderNumber) {
+Toe.Model.System.prototype.setOrderNumber = function(aOrderNumber) {
     this.orderNumber = aOrderNumber;
 };
 
 /**
- * Sets the bounding box of the staff
+ * Sets the bounding box of the system
  *
- * @methodOf Toe.Model.Staff
+ * @methodOf Toe.Model.System
  * @param {Array} bb [ulx,uly,lrx,lry]
  */
-Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
+Toe.Model.System.prototype.setBoundingBox = function(bb) {
     if(!Toe.validBoundingBox(bb)) {
-        throw new Error("Staff: invalid bounding box");
+        throw new Error("System: invalid bounding box");
     }
     
     bb = $.map(bb, Math.round);
@@ -133,7 +133,7 @@ Toe.Model.Staff.prototype.setBoundingBox = function(bb) {
 }
 
 // sort based on ulx bounding box position
-Toe.Model.Staff.prototype.sortElements = function() {
+Toe.Model.System.prototype.sortElements = function() {
     this.elements.sort(function(el1, el2) {
         return el1.zone.ulx - el2.zone.ulx;
     });
@@ -141,7 +141,7 @@ Toe.Model.Staff.prototype.sortElements = function() {
 
 // insert element in the element list (sorted in ascending order
 // by x position).
-Toe.Model.Staff.prototype.insertElement = function(ele) {
+Toe.Model.System.prototype.insertElement = function(ele) {
     // by default, we should push to the end of the array
     var iInsert = this.elements.length;
     for (var i = 0; i < this.elements.length; i++) {
@@ -157,7 +157,7 @@ Toe.Model.Staff.prototype.insertElement = function(ele) {
 }
 
 // Remove element by ID
-Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
+Toe.Model.System.prototype.removeElementByID = function(eleID) {
     for (var i = this.elements.length-1; i >= 0; i--) {
         if (this.elements[i].id == eleID) {
             // remove drawing
@@ -168,7 +168,7 @@ Toe.Model.Staff.prototype.removeElementByID = function(eleID) {
 }
 
 // remove element by reference
-Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
+Toe.Model.System.prototype.removeElementByRef = function(ele) {
     var eleInd = $.inArray(ele, this.elements);
 
     if (eleInd >= 0) {
@@ -181,9 +181,9 @@ Toe.Model.Staff.prototype.removeElementByRef = function(ele) {
 /**
  * Get clef acting on an element
  *
- * @methodOf Toe.Model.staff
+ * @methodOf Toe.Model.System
  */
-Toe.Model.Staff.prototype.getActingClefByEle = function(element) {
+Toe.Model.System.prototype.getActingClefByEle = function(element) {
     var eleInd = $.inArray(element, this.elements);
     // look backwards for first clef
     for (var i = eleInd; i >= 0; i--) {
@@ -193,11 +193,11 @@ Toe.Model.Staff.prototype.getActingClefByEle = function(element) {
         }
     }
 
-    // if no clef is on the staff
+    // if no clef is on the system
     return null;
 }
 
-Toe.Model.Staff.prototype.getActingClefByCoords = function(coords) {
+Toe.Model.System.prototype.getActingClefByCoords = function(coords) {
     // look backwards from end of element list for first clef
     for (var i = this.elements.length; i >= 0; i--) {
         var e = this.elements[i];
@@ -210,10 +210,10 @@ Toe.Model.Staff.prototype.getActingClefByCoords = function(coords) {
     return null;
 }
 
-// Given a clef mounted on this staff, get the previous acting clef
-Toe.Model.Staff.prototype.getPreviousClef = function(clef) {
+// Given a clef mounted on this system, get the previous acting clef
+Toe.Model.System.prototype.getPreviousClef = function(clef) {
     var oldClefInd = $.inArray(clef, this.elements);
-    // only search if the clef is not the first clef, and is mounted on this staff
+    // only search if the clef is not the first clef, and is mounted on this system
     if (oldClefInd > 0) {
         for (var i = oldClefInd-1; i >= 0; i--) {
             if (this.elements[i] instanceof Toe.Model.Clef) {
@@ -227,48 +227,48 @@ Toe.Model.Staff.prototype.getPreviousClef = function(clef) {
 }
 
 /**
- * Returns width of staff.
+ * Returns width of system.
  *
- * @methodOf Toe.Model.Staff
- * @returns {int} width of staff
+ * @methodOf Toe.Model.System
+ * @returns {int} width of system
  */
-Toe.Model.Staff.prototype.getWidth = function() {
+Toe.Model.System.prototype.getWidth = function() {
     return this.zone.lrx - this.zone.ulx;
-}
+};
 
 /**
- * Returns height of staff.
+ * Returns height of system.
  *
- * @methodOf Toe.Model.Staff
- * @returns {int} height of staff
+ * @methodOf Toe.Model.System
+ * @returns {int} height of system
  */
-Toe.Model.Staff.prototype.getHeight = function() {
+Toe.Model.System.prototype.getHeight = function() {
     return this.zone.lry - this.zone.uly;
 };
 
 /**
- * Given a staff, computes the vertical distance between the two.
+ * Given a system, computes the vertical distance between the two.
  *
- * @methodOf Toe.Model.Staff
- * @param {Toe.Model.Staff} aStaff
- * @returns {int} vertical distance between staff (top of one to bottom of other); it CAN return negative if overlap
+ * @methodOf Toe.Model.System
+ * @param {Toe.Model.System} aSystem
+ * @returns {int} vertical distance between system (top of one to bottom of other); it CAN return negative if overlap
  */
-Toe.Model.Staff.prototype.getDistanceFromStaff = function(aStaff) {
-    if (aStaff.zone.uly > this.zone.uly) {
-        return aStaff.zone.uly - this.zone.lry;
+Toe.Model.System.prototype.getDistanceFromSystem = function(aSystem) {
+    if (aSystem.zone.uly > this.zone.uly) {
+        return aSystem.zone.uly - this.zone.lry;
     }
-    return this.zone.uly - aStaff.zone.lry;
+    return this.zone.uly - aSystem.zone.lry;
 };
 
 /**
  * Given a set of coordinates, returns snapped coordinates
- * to lines or spaces within the staff.
+ * to lines or spaces within the system.
  *
- * @methodOf Toe.Model.Staff
+ * @methodOf Toe.Model.System
  * @param {Object} coords {x: ,y: }
  * @returns {Object} snappedCoords {x: xprime, y: yprime}
  */
-Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
+Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, options) {
     var opts = {
         ignoreEle: null,
         x: true,
@@ -305,7 +305,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
 
     if (opts.x) {
         // CALCULATE NEW HORIZONTAL POSITION
-        // go through each element in staff element list to see if the inserted element 
+        // go through each element in system element list to see if the inserted element 
         // intersects with others. If so, offset it.
         var left = coords.x-(width/2);
         var right = coords.x+(width/2);
@@ -334,7 +334,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
                         // move right
                         // TODO: check that other elements aren't drawn here
                         coordsPrime.x = lrx + width/2;
-                    }    
+                    }
                 }
                 else {
                     coordsPrime.x = coords.x;
@@ -343,7 +343,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
             }
         }
 
-        // check left staff boundary
+        // check left system boundary
         if (this.elements.length && this.elements[0] instanceof Toe.Model.Clef && left <= this.elements[0].zone.lrx) {
             coordsPrime.x = this.elements[0].zone.lrx + width/2 + 1;
         }
@@ -351,7 +351,7 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
             coordsPrime.x = this.zone.ulx + width/2 + 1;
         }
 
-        // check right staff boundary
+        // check right system boundary
         if (this.custos && opts.ignoreEle != this.custos && right >= this.custos.zone.ulx) {
             coordsPrime.x = this.custos.zone.ulx - width/2 - 3; 
         }
@@ -361,4 +361,4 @@ Toe.Model.Staff.prototype.ohSnap = function(coords, width, options) {
     }
 
     return coordsPrime;
-}
+};

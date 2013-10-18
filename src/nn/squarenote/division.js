@@ -83,7 +83,7 @@ Toe.Model.Division.prototype.setID = function(did) {
 }
 
 Toe.Model.Division.prototype.setStaff = function(staff) {
-    if (!(staff instanceof Toe.Model.Staff)) {
+    if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Division: invalid staff reference");
     }
 

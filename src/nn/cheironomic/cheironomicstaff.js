@@ -23,7 +23,7 @@ THE SOFTWARE.
 /**
  * Creates a cheironomic notation staff without stafflines
  * @class Represents a staff container with no stafflines
- * @extends Toe.Model.Staff
+ * @extends Toe.Model.System
  * 
  * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box, which encompasses a line
  * of music on the page.
@@ -38,11 +38,11 @@ THE SOFTWARE.
  */
 Toe.Model.CheironomicStaff = function(bb, options) {
     // call super constructor
-    Toe.Model.Staff.call(this, bb, options);
+    Toe.Model.System.call(this, bb, options);
 }
 
 // inherit prototype from generic staff model
-Toe.Model.CheironomicStaff.prototype = new Toe.Model.Staff();
+Toe.Model.CheironomicStaff.prototype = new Toe.Model.System();
 Toe.Model.CheironomicStaff.prototype.constructor = Toe.Model.CheironomicStaff;
 
 /**

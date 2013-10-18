@@ -75,8 +75,8 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
         sModel.setID(sbID);
 
         // instantiate staff view and controller
-        var sView = new Toe.View.StaffView(rendEng);
-        var sCtrl = new Toe.Ctrl.StaffController(sModel, sView);
+        var sView = new Toe.View.SystemView(rendEng);
+        var sCtrl = new Toe.Ctrl.SystemController(sModel, sView);
         page.addStaff(sModel);
 
         var uly_lb = Number.MAX_VALUE;
@@ -115,7 +115,7 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
             var lrx = sModel.elements[sModel.elements.length-1].zone.lrx;
             sModel.setBoundingBox([ulx, uly_lb, lrx, lry_ub]);
 
-            $(sModel).trigger("vRenderStaff", [sModel]);
+            $(sModel).trigger("vRenderSystem", [sModel]);
         }
 
         prevInd = sel+1;

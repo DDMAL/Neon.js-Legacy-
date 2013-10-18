@@ -67,14 +67,15 @@ Toe.View.SquareNoteInteraction.prototype.constructor = Toe.View.SquareNoteIntera
  *                  EDIT                          *
  **************************************************/
 Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
+    
     var gui = e.data.gui;
-    var parentDivId = e.data.parentDivId;
-
+    gui.hideInfo();
     gui.activateCanvasObjects();
     gui.removeInsertControls();
     gui.removeInsertSubControls();
     gui.unbindMouseEventHandlers();
-    gui.insertEditControls(parentDivId);
+    gui.insertEditControls(e.data.parentDivId);
+    gui.removeEditSubControls();
 
     gui.rendEng.canvas.observe('mouse:down', function(e) {
         // cache pointer coordinates for mouse up
@@ -132,47 +133,30 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
     gui.rendEng.canvas.observe('object:selected', function(e) {
 
-        // Unbind previous stuff.
+        // Unbind and remove previous stuff.
         gui.unbindEditNeumeSubControls();
+        gui.removeEditSubControls();
 
         $('#btn_delete').toggleClass('disabled', false);
 
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            $("#info > p").html("Selected: " + ele.name + "<br/> Pitche(s): " + 
-                                $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
-            $("#info").animate({opacity: 1.0}, 100);
+            gui.showInfo("Selected: " + ele.name +
+                         "<br/> Pitche(s): " +
+                         $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
 
             $('#btn_ungroup').toggleClass('disabled', false);
 
-            $("#menu_editclef").remove();
-
+            // Setup the neume sub-controls if we selected an editable neume.
             if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
-
-                // Insert and rebind sub-controls.
                 gui.insertEditNeumeSubControls();
                 gui.bindEditNeumeSubControls(ele);
-
-                // toggle ornamentation
-                var nc = ele.components[0];
-                var hasDot = nc.hasOrnament("dot");
-                if (hasDot) {
-                    $("#edit_chk_dot").toggleClass("active", true);
-                }
-                else {
-                    $("#edit_chk_dot").toggleClass("active", false);
-                }
-
-                // Rebind sub-controls.
-            }
-            else {
-                $("#menu_editpunctum").remove();
+                gui.initializeEditNeumeSubControls(ele);
             }
         }
         else if (ele instanceof Toe.Model.Clef) {
-            $("#info > p").text("Selected: " + ele.name);
-            $("#info").animate({opacity: 1.0}, 100);
+            gui.showInfo("Selected: " + ele.name);
 
             if ($("#menu_editclef").length == 0) {
                     $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n' +
@@ -197,15 +181,13 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
             $("#edit_rad_f").bind("click.edit", {gui: gui, clef: ele, shape: "f"}, gui.handleClefShapeChange);
         }
         else if (ele instanceof Toe.Model.Division) {
-            $("#info > p").text("Selected: " + ele.type);
-            $("#info").animate({opacity: 1.0}, 100);
+            gui.showInfo("Selected: " + ele.type);
 
             $("#menu_editpunctum").remove();
             $("#menu_editclef").remove();
         }
         else if (ele instanceof Toe.Model.Custos) {
-            $("#info > p").html("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
-            $("#info").animate({opacity: 1.0}, 100);
+            gui.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
 
             $("#menu_editpunctum").remove();
             $("#menu_editclef").remove();
@@ -217,8 +199,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     });
 
     gui.rendEng.canvas.observe('selection:cleared', function(e) {
-        // close info alert
-        $("#info").animate({opacity: 0.0}, 100);
+        gui.hideInfo();
 
         // remove selection specific editing options
         $("#menu_editpunctum").remove();
@@ -274,7 +255,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     }
 
                     // snap release position to line/space
-                    var snappedCoords = ele.staff.ohSnap({x: left, y: top}, null, {ignoreEle: ele});
+                    var snappedCoords = ele.staff.getSystemSnapCoordinates({x: left, y: top}, null, {ignoreEle: ele});
 
                     // TODO clefs moving to different staves?
 
@@ -350,7 +331,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     var sModel = gui.page.getClosestStaff(finalCoords);
                     
                     // snap to staff
-                    var snapCoords = sModel.ohSnap(finalCoords, element.currentWidth, {ignoreEle: ele});
+                    var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
 
                     var newRootStaffPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
 
@@ -434,7 +415,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // get closest staff
                     var staff = gui.page.getClosestStaff(finalCoords);
 
-                    var snapCoords = staff.ohSnap(finalCoords, element.currentWidth, {x: true, y: false});
+                    var snapCoords = staff.getSystemSnapCoordinates(finalCoords, element.currentWidth, {x: true, y: false});
 
                     // get vertical snap coordinates for the appropriate staff
                     switch (ele.type) {
@@ -502,8 +483,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         element.left = left + delta_x;
                         element.top = top + delta_y;
                     }
-                }
-                else if (ele instanceof Toe.Model.Staff) {
                 }
             });
             if (elements.length > 1) {
@@ -1095,6 +1074,7 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
 Toe.View.SquareNoteInteraction.prototype.handleInsert = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
+    gui.hideInfo();
     gui.deactivateCanvasObjects();
     gui.removeInsertControls();
     gui.unbindInsertControls();
@@ -1187,7 +1167,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         var nModel = new Toe.Model.SquareNoteNeume();
 
         // calculate snapped coords
-        var snapCoords = sModel.ohSnap(coords, gui.punctDwg.currentWidth);
+        var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
 
         // update bounding box with physical position on the page
         var ulx = snapCoords.x - gui.punctDwg.currentWidth/2;
@@ -1404,7 +1384,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
         var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
 
         // calculate snapped coords
-        var snapCoords = staff.ohSnap(coords, gui.divisionDwg.currentWidth);
+        var snapCoords = staff.getSystemSnapCoordinates(coords, gui.divisionDwg.currentWidth);
 
         var division = new Toe.Model.Division(divisionForm);
 
@@ -1522,8 +1502,8 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
         var uly = gui.staffDwg.top - Math.round(gui.staffDwg.currentHeight / 2);
         var boundingBox = [ulx, uly, ulx + gui.staffDwg.currentWidth, uly + gui.staffDwg.currentHeight];
         var staff = new Toe.Model.SquareNoteStaff(boundingBox);
-        var staffView = new Toe.View.StaffView(gui.rendEng);
-        var staffController = new Toe.Ctrl.StaffController(staff, staffView);
+        var staffView = new Toe.View.SystemView(gui.rendEng);
+        var staffController = new Toe.Ctrl.SystemController(staff, staffView);
 
         // We also have to adjust the associated system break order number.  Then, we can add it to the page.
         // This MIGHT have an impact on staves after it.
@@ -1634,7 +1614,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         var staff = gui.page.getClosestStaff(coords);
 
         // calculate snapped coordinates on the staff
-        var snapCoords = staff.ohSnap(coords, gui.clefDwg.currentWidth);
+        var snapCoords = staff.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
 
         var staffPos = Math.round((staff.zone.uly - snapCoords.y) / (staff.delta_y/2));
 
@@ -1933,6 +1913,17 @@ Toe.View.SquareNoteInteraction.prototype.bindEditNeumeSubControls = function(aEl
     $("#edit_chk_dot").bind("click.edit", {gui: this, punctum: aElement}, this.handleDotToggle);
 }
 
+Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = function(aElement) {
+    var nc = aElement.components[0];
+    var hasDot = nc.hasOrnament("dot");
+    if (hasDot) {
+        $("#edit_chk_dot").toggleClass("active", true);
+    }
+    else {
+        $("#edit_chk_dot").toggleClass("active", false);
+    }
+}
+
 Toe.View.SquareNoteInteraction.prototype.removeInsertControls = function() {
     $("#sidebar-insert").remove();
 }
@@ -1954,7 +1945,6 @@ Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
     if (this.staffDwg) {
         this.rendEng.canvas.remove(this.staffDwg);
     }
-    $("#info").animate({opacity: 0.0}, 100);
 }
 
 Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
@@ -1966,6 +1956,11 @@ Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
 
 Toe.View.SquareNoteInteraction.prototype.removeEditControls = function() {
     $("#sidebar-edit").remove();
+}
+
+Toe.View.SquareNoteInteraction.prototype.removeEditSubControls = function () {
+    $("#menu_editclef").remove();
+    $("#menu_editpunctum").remove();
 }
 
 Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function() {
@@ -1996,4 +1991,13 @@ Toe.View.SquareNoteInteraction.prototype.updateInsertStaffSubControls = function
     $("#staff_number_slider").attr("max", this.page.staves.length + 1);
     $("#staff_number_slider").val(this.page.staves.length + 1);
     $("#staff_number_slider").change();
+}
+
+Toe.View.SquareNoteInteraction.prototype.showInfo = function(aText) {
+    $("#info > p").html(aText);
+    $("#info").animate({opacity: 1.0}, 100);
+}
+
+Toe.View.SquareNoteInteraction.prototype.hideInfo = function() {
+    $("#info").animate({opacity: 0.0}, 100);
 }

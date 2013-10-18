@@ -148,7 +148,7 @@ Toe.Model.Page.prototype.getClosestStaff = function(coords) {
  * Given a staff, get the next staff on the page
  *
  * @methodOf Toe.Model.Page
- * @param {Toe.Model.Staff} staff 
+ * @param {Toe.Model.System} staff 
  * @returns {Staff} nextStaff the next staff
  */
 Toe.Model.Page.prototype.getNextStaff = function(staff) {
@@ -176,7 +176,7 @@ Toe.Model.Page.prototype.getPreviousStaff = function(staff) {
  * Adds a given number of staves to the page
  *
  * @methodOf Toe.Model.Page
- * @param {Toe.Model.Staff} staff the staff to add to the model
+ * @param {Toe.Model.System} staff the staff to add to the model
  * @returns {Toe.Model.Page} pointer to the current page for chaining
  */
 Toe.Model.Page.prototype.addStaff = function(staff) {
@@ -214,7 +214,7 @@ Toe.Model.Page.prototype.addStaff = function(staff) {
     this.staffAverageHeight /= this.staves.length;
 
 	// update view
-	$(staff).trigger("vRenderStaff", [staff]);
+	$(staff).trigger("vRenderSystem", [staff]);
 
     return this;
 };
