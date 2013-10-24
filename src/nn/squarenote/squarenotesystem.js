@@ -21,10 +21,10 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a square-note notation staff with stafflines
- * @class Represents a Staff
+ * Creates a square-note notation system with stafflines
+ * @class Represents a System
  * 
- * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box
+ * @param {Array} bb [ulx, uly, lrx, lry] system bounding box
  * (.) <ulx,uly>        (.)
  *
  *
@@ -32,20 +32,20 @@ THE SOFTWARE.
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
  *
- * The staff has list of elements on the staff, sorted by horizontal position.
+ * The system has list of elements on the staff, sorted by horizontal position.
  */
-Toe.Model.SquareNoteStaff = function(bb, options) {
+Toe.Model.SquareNoteSystem = function(bb, options) {
     // call super constructor
     Toe.Model.System.call(this, bb, options);
 }
 
 // inherit prototype from generic staff model
-Toe.Model.SquareNoteStaff.prototype = new Toe.Model.System();
-Toe.Model.SquareNoteStaff.prototype.constructor = Toe.Model.SquareNoteStaff;
+Toe.Model.SquareNoteSystem.prototype = new Toe.Model.System();
+Toe.Model.SquareNoteSystem.prototype.constructor = Toe.Model.SquareNoteSystem;
 
 // if clef is given, return pitched elements under the given acting clef
 // otherwise, return all pitched elements
-Toe.Model.SquareNoteStaff.prototype.getPitchedElements = function(options) {
+Toe.Model.SquareNoteSystem.prototype.getPitchedElements = function(options) {
     var opts = {
         clef: null,
         neumes: true,
@@ -78,7 +78,7 @@ Toe.Model.SquareNoteStaff.prototype.getPitchedElements = function(options) {
 
 // calculate pitch info of pitched element on this Staff
 // from its staff position.
-Toe.Model.SquareNoteStaff.prototype.calcPitchFromStaffPos = function(staffPos, actingClef) {
+Toe.Model.SquareNoteSystem.prototype.calcPitchFromStaffPos = function(staffPos, actingClef) {
     // calculate difference from clef position
     var yStep = staffPos - actingClef.props.staffPos;
 
@@ -115,7 +115,7 @@ Toe.Model.SquareNoteStaff.prototype.calcPitchFromStaffPos = function(staffPos, a
 
 // Calculate staff position of note on the staff from pitch information.
 // This is the inverse function of @see calcPitchFromStaffPos
-Toe.Model.SquareNoteStaff.prototype.calcStaffPosFromPitch = function(pname, oct, actingClef) {
+Toe.Model.SquareNoteSystem.prototype.calcStaffPosFromPitch = function(pname, oct, actingClef) {
     var clefOct = 4;
     if (actingClef.shape == "f") {
         clefOct = 3;
@@ -142,7 +142,7 @@ Toe.Model.SquareNoteStaff.prototype.calcStaffPosFromPitch = function(pname, oct,
  * Calculates note pitch name and octave from coordinates of note
  * Coords should be snapped to line/space already! @see Toe.Model.System.getSystemSnapCoordinates
  */
-Toe.Model.SquareNoteStaff.prototype.calcPitchFromCoords = function(coords) {
+Toe.Model.SquareNoteSystem.prototype.calcPitchFromCoords = function(coords) {
     var staffPos = Math.round((this.zone.uly - coords.y) / (this.delta_y/2));
 
     // get acting clef
@@ -153,7 +153,7 @@ Toe.Model.SquareNoteStaff.prototype.calcPitchFromCoords = function(coords) {
 
 // if clef given, update from this clef to the next clef
 // otherwise update everything
-Toe.Model.SquareNoteStaff.prototype.updatePitchedElements = function(options) {
+Toe.Model.SquareNoteSystem.prototype.updatePitchedElements = function(options) {
     var opts = {
         clef: null,
         neumes: true,
@@ -199,7 +199,7 @@ Toe.Model.SquareNoteStaff.prototype.updatePitchedElements = function(options) {
 }
 
 // update pitch name/octave of each component of the pitched element.
-Toe.Model.SquareNoteStaff.prototype.updateElePitchInfo = function(pitchedEle, options) {
+Toe.Model.SquareNoteSystem.prototype.updateElePitchInfo = function(pitchedEle, options) {
     var opts = {
         clef: null
     };
@@ -232,11 +232,11 @@ Toe.Model.SquareNoteStaff.prototype.updateElePitchInfo = function(pitchedEle, op
 /**
  * Mounts the clef on the staff
  *
- * @methodOf Toe.Model.SquareNoteStaff
+ * @methodOf Toe.Model.SquareNoteSystem
  * @param {Toe.Model.Clef} clef The clef to mount
- * @returns {Toe.Model.SquareNoteStaff} pointer to this staff for chaining
+ * @returns {Toe.Model.SquareNoteSystem} pointer to this staff for chaining
  */
-Toe.Model.SquareNoteStaff.prototype.addClef = function(clef, options) {
+Toe.Model.SquareNoteSystem.prototype.addClef = function(clef, options) {
     if (!(clef instanceof Toe.Model.Clef)) {
         throw new Error("Staff: Invalid clef");
     }
@@ -268,7 +268,7 @@ Toe.Model.SquareNoteStaff.prototype.addClef = function(clef, options) {
     return nInd;
 }
 
-Toe.Model.SquareNoteStaff.prototype.setCustos = function(custos) {
+Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
     if (!(custos instanceof Toe.Model.Custos)) {
         throw new Error("Staff: Invalid Custos");
     }
@@ -303,14 +303,14 @@ Toe.Model.SquareNoteStaff.prototype.setCustos = function(custos) {
 /**
  * Mounts a neume on the staff
  *
- * @methodOf Toe.Model.SquareNoteStaff
+ * @methodOf Toe.Model.SquareNoteSystem
  * @param {Toe.Model.Neume} neume The neume to mount
  * @params {Options} options {justPush: just push to the elements array (don't bother with sorted insert.
                               This option is for inserting from MEI, since elements are in order in MEI 
                               document already. Faster load times.)}
  * @return {Number} ind index of element on the staff
  */
-Toe.Model.SquareNoteStaff.prototype.addNeume = function(neume, options) {
+Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
     // check argument is a neume
     if (!(neume instanceof Toe.Model.Neume)) {
         throw new Error("Staff: Invalid neume");
@@ -362,7 +362,7 @@ Toe.Model.SquareNoteStaff.prototype.addNeume = function(neume, options) {
  *                              This option is for inserting from MEI, since elements are in order in MEI 
  *                              document already. Faster load times.)}
  */
-Toe.Model.SquareNoteStaff.prototype.addDivision = function(division, options) {
+Toe.Model.SquareNoteSystem.prototype.addDivision = function(division, options) {
 	// check argument is a division
 	if (!(division instanceof Toe.Model.Division)) {
 		throw new Error("Staff: invalid division");

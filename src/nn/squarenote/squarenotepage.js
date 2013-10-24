@@ -99,7 +99,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         var s_bb = page.parseBoundingBox(sysFacs);
 
         // Set some parameters.
-        var sModel = new Toe.Model.SquareNoteStaff(s_bb);
+        var sModel = new Toe.Model.SquareNoteSystem(s_bb);
         sModel.setID($(sel).attr("xml:id"));
         sModel.setOrderNumber(parseInt($(sel).attr("n")));
         sModel.setSystemID(sbref);

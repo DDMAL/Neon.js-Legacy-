@@ -1466,8 +1466,8 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
     var gui = e.data.gui;
     gui.unbindMouseEventHandlers();
     gui.removeInsertSubControls();
-    gui.createInsertStaffSubControls();
-    gui.updateInsertStaffSubControls();
+    gui.createInsertSystemSubControls();
+    gui.updateInsertSystemSubControls();
 
     // Get the widest staff and use its dimensions.  If there is no widest staff, forget it!
     var widestStaff = gui.page.getWidestSystem();
@@ -1501,7 +1501,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
         var ulx = gui.staffDwg.left - Math.round(gui.staffDwg.currentWidth / 2);
         var uly = gui.staffDwg.top - Math.round(gui.staffDwg.currentHeight / 2);
         var boundingBox = [ulx, uly, ulx + gui.staffDwg.currentWidth, uly + gui.staffDwg.currentHeight];
-        var staff = new Toe.Model.SquareNoteStaff(boundingBox);
+        var staff = new Toe.Model.SquareNoteSystem(boundingBox);
         var staffView = new Toe.View.SystemView(gui.rendEng);
         var staffController = new Toe.Ctrl.SystemController(staff, staffView);
 
@@ -1509,7 +1509,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
         // This MIGHT have an impact on systems after it.
         staff.setOrderNumber($('#system_number_slider').val());
         gui.page.addSystem(staff);
-        gui.updateInsertStaffSubControls();
+        gui.updateInsertSystemSubControls();
         var nextStaff = gui.page.getNextSystem(staff);
 
         // Create arguments for our first POST.
@@ -1883,7 +1883,7 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParent
                               '<li><div class="btn-group" data-toggle="buttons-radio">' +
                               '<button id="rad_punctum" class="btn"><b>■</b> Punctum</button>\n' +
                               '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
-                              '<button id="rad_staff" class="btn"><b><i class="icon-align-justify icon-black"></i></b>Staff</button>\n' + 
+                              '<button id="rad_staff" class="btn"><b><i class="icon-align-justify icon-black"></i></b>System</button>\n' + 
                               '<button id="rad_clef" class="btn"><b>C/F</b> Clef</button>\n</div>\n</li>\n</span>');
     }
     $("#rad_punctum").bind("click.insert", {gui: this}, this.handleInsertPunctum);
@@ -1978,18 +1978,18 @@ Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
     this.rendEng.unObserve("selection:created");
 }
 
-Toe.View.SquareNoteInteraction.prototype.createInsertStaffSubControls = function() {
+Toe.View.SquareNoteInteraction.prototype.createInsertSystemSubControls = function() {
     if ($("#menu_insertstaff").length == 0) {
-        $("#sidebar-insert").append('<span id="menu_insertstaff"><br/>\n<li class="nav-header">Staff Number</li>\n' +
+        $("#sidebar-insert").append('<span id="menu_insertstaff"><br/>\n<li class="nav-header">System Number</li>\n' +
                                     '<li><div><input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +
                                     ' <output id="staff_number"></output></div></li></span>');
         $("#system_number_slider").change(function() {$('#staff_number').html(this.value);}).change();
     }
 }
 
-Toe.View.SquareNoteInteraction.prototype.updateInsertStaffSubControls = function() {
-    $("#system_number_slider").attr("max", this.page.staves.length + 1);
-    $("#system_number_slider").val(this.page.staves.length + 1);
+Toe.View.SquareNoteInteraction.prototype.updateInsertSystemSubControls = function() {
+    $("#system_number_slider").attr("max", this.page.systems.length + 1);
+    $("#system_number_slider").val(this.page.systems.length + 1);
     $("#system_number_slider").change();
 }
 
