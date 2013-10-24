@@ -39,7 +39,7 @@ Toe.Model.SquareNoteSystem = function(bb, options) {
     Toe.Model.System.call(this, bb, options);
 }
 
-// inherit prototype from generic staff model
+// inherit prototype from generic system model
 Toe.Model.SquareNoteSystem.prototype = new Toe.Model.System();
 Toe.Model.SquareNoteSystem.prototype.constructor = Toe.Model.SquareNoteSystem;
 
@@ -67,7 +67,7 @@ Toe.Model.SquareNoteSystem.prototype.getPitchedElements = function(options) {
         return pitchedEles;
     }
     else {
-        // return all pitched elements on the staff
+        // return all pitched elements on the system
         return $.grep(this.elements, function(e) {
             if ((e instanceof Toe.Model.Neume && opts.neumes) || (e instanceof Toe.Model.Custos && opts.custos)) {
                 return e;
@@ -76,7 +76,7 @@ Toe.Model.SquareNoteSystem.prototype.getPitchedElements = function(options) {
     }
 }
 
-// calculate pitch info of pitched element on this Staff
+// calculate pitch info of pitched element on this system
 // from its staff position.
 Toe.Model.SquareNoteSystem.prototype.calcPitchFromStaffPos = function(staffPos, actingClef) {
     // calculate difference from clef position
@@ -234,11 +234,11 @@ Toe.Model.SquareNoteSystem.prototype.updateElePitchInfo = function(pitchedEle, o
  *
  * @methodOf Toe.Model.SquareNoteSystem
  * @param {Toe.Model.Clef} clef The clef to mount
- * @returns {Toe.Model.SquareNoteSystem} pointer to this staff for chaining
+ * @returns {Toe.Model.SquareNoteSystem} pointer to this system for chaining
  */
 Toe.Model.SquareNoteSystem.prototype.addClef = function(clef, options) {
     if (!(clef instanceof Toe.Model.Clef)) {
-        throw new Error("Staff: Invalid clef");
+        throw new Error("Toe.Model.SquareNoteSystem: Invalid clef");
     }
 
     var opts = {
@@ -257,9 +257,9 @@ Toe.Model.SquareNoteSystem.prototype.addClef = function(clef, options) {
         nInd = this.insertElement(clef);
     }
 
-    clef.setStaff(this);
+    clef.setSystem(this);
     
-    // update affected pitched elements on this staff
+    // update affected pitched elements on this system
     this.updatePitchedElements({clef: clef, custos: false});
     
     // update view
@@ -270,7 +270,7 @@ Toe.Model.SquareNoteSystem.prototype.addClef = function(clef, options) {
 
 Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
     if (!(custos instanceof Toe.Model.Custos)) {
-        throw new Error("Staff: Invalid Custos");
+        throw new Error("Toe.Model.SquareNoteSystem: Invalid Custos");
     }
 
     var clef = this.getActingClefByCoords({x: custos.zone.ulx});
@@ -287,7 +287,7 @@ Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
             this.elements.push(custos);
         }
 
-        custos.setStaff(this);
+        custos.setSystem(this);
         this.custos = custos;
         
         // update view
@@ -313,7 +313,7 @@ Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
 Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
     // check argument is a neume
     if (!(neume instanceof Toe.Model.Neume)) {
-        throw new Error("Staff: Invalid neume");
+        throw new Error("Toe.Model.SquareNoteSystem: Invalid neume");
     }
     
     var opts = {
@@ -345,7 +345,7 @@ Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
             nInd = this.insertElement(neume);
         }
 
-        neume.setStaff(this);
+        neume.setSystem(this);
 
         // update view
         $(neume).trigger("vRenderNeume", [neume]);
@@ -365,7 +365,7 @@ Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
 Toe.Model.SquareNoteSystem.prototype.addDivision = function(division, options) {
 	// check argument is a division
 	if (!(division instanceof Toe.Model.Division)) {
-		throw new Error("Staff: invalid division");
+		throw new Error("Toe.Model.SquareNoteSystem: invalid division");
 	}
 
     var opts = {
@@ -384,7 +384,7 @@ Toe.Model.SquareNoteSystem.prototype.addDivision = function(division, options) {
         nInd = this.insertElement(division);
     }
 
-    division.setStaff(this);
+    division.setSystem(this);
 
     // update view
 	$(division).trigger("vRenderDivision", [division]);

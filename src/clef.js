@@ -83,7 +83,7 @@ Toe.Model.Clef.prototype.setID = function(cid) {
     this.id = cid;
 }
 
-Toe.Model.Clef.prototype.setStaff = function(staff) {
+Toe.Model.Clef.prototype.setSystem = function(staff) {
     if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Clef: invalid staff reference");
     }
@@ -125,7 +125,7 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
  * @methodOf Toe.Model.Clef
  * @param {Number} staffPos new staff position
  */
-Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
+Toe.Model.Clef.prototype.setSystemPosition = function(staffPos) {
     // only redraw the glyph if it needs to be redrawn
     if (this.props.staffPos == staffPos) {
         return;
@@ -138,7 +138,7 @@ Toe.Model.Clef.prototype.setStaffPosition = function(staffPos) {
     // do not update custos
     this.staff.updatePitchedElements({clef: this, custos: false});
 
-    $(this).trigger("vUpdateStaffPosition", [this]);
+    $(this).trigger("vUpdateSystemPosition", [this]);
 }
 
 /**

@@ -77,7 +77,7 @@ Toe.Model.CheironomicStaff.prototype.addNeume = function(neume, options) {
         nInd = this.insertElement(neume);
     }
 
-    neume.setStaff(this);
+    neume.setSystem(this);
 
     // update view
     $(neume).trigger("vRenderNeume", [neume]);

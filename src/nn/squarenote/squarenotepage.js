@@ -37,7 +37,7 @@ Toe.Model.SquareNotePage.prototype.constructor = Toe.SquareNotePage;
 /**
  * Loads the page of music from an MEI file. The render engine is required
  * as a parameter because the glyph scaling factor is derived from the
- * size of the first staff that is loaded in this function.
+ * size of the first system that is loaded in this function.
  *
  * @methodOf Toe.Model.SquareNotePage
  * @param {Toe.View.RenderEngine} rendEng the rendering engine
@@ -95,7 +95,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
         var sysFacs = $(surface).find("zone[xml\\:id=" + sysfacsid + "]")[0];
 
-        // create staff
+        // create system
         var s_bb = page.parseBoundingBox(sysFacs);
 
         // Set some parameters.
@@ -109,7 +109,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
             rendEng.calcScaleFromStaff(sModel, {overwrite: true});
         }
 
-        // instantiate staff view and controller
+        // instantiate system view and controller
         var sView = new Toe.View.SystemView(rendEng);
         var sCtrl = new Toe.Ctrl.SystemController(sModel, sView);
         page.addSystem(sModel);

@@ -36,7 +36,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
     this.punctDwg = null;
     this.divisionDwg = null;
     this.clefDwg = null;
-    this.staffDwg = null;
+    this.systemDwg = null;
 
     // cache height and width of punctum glyph for use in
     // bounding box estimation in neumify and ungroup
@@ -262,12 +262,12 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // get staff position of snapped coordinates
                     var staffPos = -Math.round((snappedCoords.y - ele.staff.zone.uly) / (ele.staff.delta_y/2));
 
-                    ele.setStaffPosition(staffPos);
+                    ele.setSystemPosition(staffPos);
 
                     var neumesOnStaff = ele.staff.getPitchedElements({neumes: true, custos: false});
                     if (neumesOnStaff.length > 0 && ele.staff.getActingClefByEle(neumesOnStaff[0]) == ele) {
-                        // if the shift of the clef has affected the first neume on this staff
-                        // update the custos on the previous staff
+                        // if the shift of the clef has affected the first neume on this system
+                        // update the custos on the previous system
                         var prevStaff = gui.page.getPreviousSystem(ele.staff);
                         if (prevStaff) {
                             var newPname = neumesOnStaff[0].components[0].pname;
@@ -342,7 +342,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     ele.setBoundingBox(bb);
 
                     var oldRootStaffPos = ele.rootStaffPos;
-                    // derive pitch name and octave of notes in the neume on the appropriate staff
+                    // derive pitch name and octave of notes in the neume on the appropriate system
                     $.each(ele.components, function(ncInd, nc) {
                         var noteInfo = sModel.calcPitchFromCoords({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
                         nc.setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
@@ -352,7 +352,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     $(ele).trigger("vEraseDrawing");
                     ele.staff.removeElementByRef(ele);
      
-                    // mount the new neume on the most appropriate staff
+                    // mount the new neume on the most appropriate system
                     var nInd = sModel.addNeume(ele);
                     if (elements.length == 1) {
                         $(ele).trigger("vSelectDrawing");
@@ -386,7 +386,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         args["beforeid"] = sModel.elements[nInd+1].id;
                     }
                     else {
-                        // insert before the next system break (staff)
+                        // insert before the next system break (system)
                         var sNextModel = gui.page.getNextSystem(sModel);
                         args["beforeid"] = sNextModel.id;
                     }
@@ -412,24 +412,24 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
                     var finalCoords = {x: left, y: top};
                     
-                    // get closest staff
-                    var staff = gui.page.getClosestSystem(finalCoords);
+                    // get closest system
+                    var system = gui.page.getClosestSystem(finalCoords);
 
-                    var snapCoords = staff.getSystemSnapCoordinates(finalCoords, element.currentWidth, {x: true, y: false});
+                    var snapCoords = system.getSystemSnapCoordinates(finalCoords, element.currentWidth, {x: true, y: false});
 
-                    // get vertical snap coordinates for the appropriate staff
+                    // get vertical snap coordinates for the appropriate system
                     switch (ele.type) {
                         case Toe.Model.Division.Type.div_small:
-                            snapCoords.y = staff.zone.uly;
+                            snapCoords.y = system.zone.uly;
                             break;
                         case Toe.Model.Division.Type.div_minor:
-                            snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                            snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
                             break;
                         case Toe.Model.Division.Type.div_major:
-                            snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                            snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
                             break;
                         case Toe.Model.Division.Type.div_final:
-                            snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                            snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
                             break;
                     }
 
@@ -445,18 +445,18 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     ele.setBoundingBox(bb);
 
                     // get id of note to move before
-                    var dInd = staff.addDivision(ele);
+                    var dInd = system.addDivision(ele);
                     if (elements.length == 1) {
                         ele.selectDrawing();
                     }
 
                     var beforeid = null;
-                    if (dInd + 1 < staff.elements.length) {
-                        beforeid = staff.elements[dInd+1].id;
+                    if (dInd + 1 < system.elements.length) {
+                        beforeid = system.elements[dInd+1].id;
                     }
                     else {
-                        // insert before the next system break staff
-                        var sNextModel = gui.page.getNextSystem(staff);
+                        // insert before the next system break
+                        var sNextModel = gui.page.getNextSystem(system);
                         beforeid = sNextModel.id;
                     }
 
@@ -1204,10 +1204,10 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
         var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
         
-        // mount neume on the staff
+        // mount neume on the system
         var nInd = sModel.addNeume(nModel);
 
-        // if this is the first neume on a staff, update the custos of the next staff
+        // if this is the first neume on a system, update the custos of the next system
         if (nInd == 1) {
             var prevStaff = gui.page.getPreviousSystem(sModel);
             if (prevStaff) {
@@ -1228,7 +1228,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             args["beforeid"] = sModel.elements[nInd+1].id;
         }
         else {
-            // insert before the next system break (staff)
+            // insert before the next system break (system)
             var sNextModel = gui.page.getNextSystem(sModel);
             if (sNextModel) {
                 args["beforeid"] = sNextModel.id;
@@ -1290,23 +1290,23 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     }
 
     var divisionForm = null;
-    var staff = null;
+    var system = null;
 
     gui.rendEng.canvas.observe('mouse:move', function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
 
-        // get closest staff
-        staff = gui.page.getClosestSystem(pnt);
+        // get closest system
+        system = gui.page.getClosestSystem(pnt);
 
         var snapCoords = pnt;
         var divProps = {strokeWidth: 4, opacity: 0.6};
         switch (divisionForm) {
             case "div_small":
-                snapCoords.y = staff.zone.uly;
+                snapCoords.y = system.zone.uly;
 
                 if (!gui.divisionDwg) {
-                    var y1 = staff.zone.uly - staff.delta_y/2;
-                    var y2 = staff.zone.uly + staff.delta_y/2;
+                    var y1 = system.zone.uly - system.delta_y/2;
+                    var y2 = system.zone.uly + system.delta_y/2;
                     var x1 = snapCoords.x;
 
                     gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
@@ -1314,11 +1314,11 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
                 }
                 break;
             case "div_minor":
-                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
 
                 if (!gui.divisionDwg) {
-                    var y1 = staff.zone.uly + staff.delta_y/2;
-                    var y2 = y1 + 2*staff.delta_y;
+                    var y1 = system.zone.uly + system.delta_y/2;
+                    var y2 = y1 + 2*system.delta_y;
                     var x1 = snapCoords.x;
 
                     gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
@@ -1326,11 +1326,11 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
                 }
                 break;
             case "div_major":
-                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
 
                 if (!gui.divisionDwg) {
-                    var y1 = staff.zone.uly;
-                    var y2 = staff.zone.lry;
+                    var y1 = system.zone.uly;
+                    var y2 = system.zone.lry;
                     var x1 = snapCoords.x;
 
                     gui.divisionDwg = gui.rendEng.createLine([x1, y1, x1, y2], divProps);
@@ -1338,11 +1338,11 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
                 }
                 break;
             case "div_final":
-                snapCoords.y = staff.zone.uly + (staff.zone.lry - staff.zone.uly)/2;
+                snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
 
                 if (!gui.divisionDwg) {
-                    var y1 = staff.zone.uly;
-                    var y2 = staff.zone.lry;
+                    var y1 = system.zone.uly;
+                    var y2 = system.zone.lry;
                     var x1 = snapCoords.x;
                     // make width equal to width of punctum glyph
                     var x2 = snapCoords.x + gui.punctWidth;
@@ -1354,22 +1354,22 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
                 break;
         }                    
 
-        // snap the drawing to the staff on the x-plane
+        // snap the drawing to the system on the x-plane
         var dwgLeft = pnt.x - gui.divisionDwg.currentWidth/2;
         var dwgRight = pnt.x + gui.divisionDwg.currentWidth/2;
-        if (staff.elements[0] instanceof Toe.Model.Clef && dwgLeft <= staff.elements[0].zone.lrx) {
-            snapCoords.x = staff.elements[0].zone.lrx + gui.divisionDwg.currentWidth/2 + 1;
+        if (system.elements[0] instanceof Toe.Model.Clef && dwgLeft <= system.elements[0].zone.lrx) {
+            snapCoords.x = system.elements[0].zone.lrx + gui.divisionDwg.currentWidth/2 + 1;
         }
-        else if (dwgLeft <= staff.zone.ulx) {
-            snapCoords.x = staff.zone.ulx + gui.divisionDwg.currentWidth/2 + 1;
+        else if (dwgLeft <= system.zone.ulx) {
+            snapCoords.x = system.zone.ulx + gui.divisionDwg.currentWidth/2 + 1;
         }
 
-        if (staff.custos && dwgRight >= staff.custos.zone.ulx) {
+        if (system.custos && dwgRight >= system.custos.zone.ulx) {
             // 3 is a magic number just to give it some padding
-            snapCoords.x = staff.custos.zone.ulx - gui.divisionDwg.currentWidth/2 - 3;
+            snapCoords.x = system.custos.zone.ulx - gui.divisionDwg.currentWidth/2 - 3;
         }
-        else if (dwgRight >= staff.zone.lrx) {
-            snapCoords.x = staff.zone.lrx - gui.divisionDwg.currentWidth/2 - 3;
+        else if (dwgRight >= system.zone.lrx) {
+            snapCoords.x = system.zone.lrx - gui.divisionDwg.currentWidth/2 - 3;
         }
 
         // move around the drawing
@@ -1384,7 +1384,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
         var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
 
         // calculate snapped coords
-        var snapCoords = staff.getSystemSnapCoordinates(coords, gui.divisionDwg.currentWidth);
+        var snapCoords = system.getSystemSnapCoordinates(coords, gui.divisionDwg.currentWidth);
 
         var division = new Toe.Model.Division(divisionForm);
 
@@ -1398,18 +1398,18 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
         var dView = new Toe.View.DivisionView(gui.rendEng);
         var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
 
-        // mount division on the staff
-        var nInd = staff.addDivision(division);
+        // mount division on the system
+        var nInd = system.addDivision(division);
 
         var outbb = gui.getOutputBoundingBox(bb);
         var args = {type: division.key.slice(4), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
-        if (nInd + 1 < staff.elements.length) {
-            args["beforeid"] = staff.elements[nInd+1].id;   
+        if (nInd + 1 < system.elements.length) {
+            args["beforeid"] = system.elements[nInd+1].id;   
         }
         else {
-            // insert before the next system break (staff)
-            var sNextModel = gui.page.getNextSystem(staff);
+            // insert before the next system break (system)
+            var sNextModel = gui.page.getNextSystem(system);
             args["beforeid"] = sNextModel.id;
         }
 
@@ -1462,63 +1462,63 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     $("#rad_small").trigger('click');
 }
 
-Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
+Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
     var gui = e.data.gui;
     gui.unbindMouseEventHandlers();
     gui.removeInsertSubControls();
     gui.createInsertSystemSubControls();
     gui.updateInsertSystemSubControls();
 
-    // Get the widest staff and use its dimensions.  If there is no widest staff, forget it!
-    var widestStaff = gui.page.getWidestSystem();
-    if (widestStaff == null) {
+    // Get the widest system and use its dimensions.  If there is no widest system, forget it!
+    var widestSystem = gui.page.getWidestSystem();
+    if (widestSystem == null) {
         return;
     }
 
     // Create the drawing.
-    gui.staffDwg = null;
-    var numberOfLines = widestStaff.props.numLines;
-    var width = widestStaff.getWidth();
-    var deltaY = widestStaff.delta_y;
+    gui.systemDrawing = null;
+    var numberOfLines = widestSystem.props.numLines;
+    var width = widestSystem.getWidth();
+    var deltaY = widestSystem.delta_y;
     var elements = {fixed: new Array(), modify: new Array()};
     for (var li = 0; li < numberOfLines; li++) {
         elements.fixed.push(gui.rendEng.createLine([0, deltaY * li, width, deltaY * li]));
     }
-    gui.staffDwg = gui.rendEng.draw(elements, {group: true, selectable: false, opacity: 0.6})[0];
+    gui.systemDrawing = gui.rendEng.draw(elements, {group: true, selectable: false, opacity: 0.6})[0];
 
     // Move the drawing with the pointer.
     gui.rendEng.canvas.observe("mouse:move", function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
-        gui.staffDwg.left = pnt.x;
-        gui.staffDwg.top = pnt.y;
+        gui.systemDrawing.left = pnt.x;
+        gui.systemDrawing.top = pnt.y;
         gui.rendEng.repaint();
     });
 
     // Do the insert.
     gui.rendEng.canvas.observe('mouse:up', function(e) {
 
-        // Create bounding box and staffm then add MVC components.
-        var ulx = gui.staffDwg.left - Math.round(gui.staffDwg.currentWidth / 2);
-        var uly = gui.staffDwg.top - Math.round(gui.staffDwg.currentHeight / 2);
-        var boundingBox = [ulx, uly, ulx + gui.staffDwg.currentWidth, uly + gui.staffDwg.currentHeight];
-        var staff = new Toe.Model.SquareNoteSystem(boundingBox);
-        var staffView = new Toe.View.SystemView(gui.rendEng);
-        var staffController = new Toe.Ctrl.SystemController(staff, staffView);
+        // Create bounding box and system then add MVC components.
+        var ulx = gui.systemDrawing.left - Math.round(gui.systemDrawing.currentWidth / 2);
+        var uly = gui.systemDrawing.top - Math.round(gui.systemDrawing.currentHeight / 2);
+        var boundingBox = [ulx, uly, ulx + gui.systemDrawing.currentWidth, uly + gui.systemDrawing.currentHeight];
+        var system = new Toe.Model.SquareNoteSystem(boundingBox);
+        var systemView = new Toe.View.SystemView(gui.rendEng);
+        var systemController = new Toe.Ctrl.SystemController(system, systemView);
 
         // We also have to adjust the associated system break order number.  Then, we can add it to the page.
         // This MIGHT have an impact on systems after it.
-        staff.setOrderNumber($('#system_number_slider').val());
-        gui.page.addSystem(staff);
+        system.setOrderNumber($('#system_number_slider').val());
+        gui.page.addSystem(system);
         gui.updateInsertSystemSubControls();
-        var nextStaff = gui.page.getNextSystem(staff);
+        var nextSystem = gui.page.getNextSystem(system);
 
         // Create arguments for our first POST.
-        var outbb = gui.getOutputBoundingBox([staff.zone.ulx, staff.zone.uly, staff.zone.lrx, staff.zone.lry]);
+        var outbb = gui.getOutputBoundingBox([system.zone.ulx, system.zone.uly, system.zone.lrx, system.zone.lry]);
         var createSystemArguments = {pageid: gui.page.getID(), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
         // POST system, then cascade into other POSTs.
         $.post(gui.apiprefix + "/insert/system", createSystemArguments, function(data) {
-            staff.setSystemID(JSON.parse(data).id);
+            system.setSystemID(JSON.parse(data).id);
             postSystemBreak();
         })
         .error(function() {
@@ -1530,17 +1530,17 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
         function postSystemBreak() {
 
             // Create arguments.
-            var createSystemBreakArguments = {ordernumber: staff.orderNumber, systemid: staff.systemId};
-            if (nextStaff != null) {
-                createSystemBreakArguments.nextsbid = nextStaff.id;
+            var createSystemBreakArguments = {ordernumber: system.orderNumber, systemid: system.systemId};
+            if (nextSystem != null) {
+                createSystemBreakArguments.nextsbid = nextSystem.id;
             }
 
             // Do POST.  If we had to reorder system breaks, POST those, too.
             $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
-                staff.setID(JSON.parse(data).id);
-                while (nextStaff != null) {
-                    postSystemBreakEdit(nextStaff.id, nextStaff.orderNumber);
-                    nextStaff = gui.page.getNextSystem(nextStaff);
+                system.setID(JSON.parse(data).id);
+                while (nextSystem != null) {
+                    postSystemBreakEdit(nextSystem.id, nextSystem.orderNumber);
+                    nextSystem = gui.page.getNextSystem(nextSystem);
                 }
             })
             .error(function() {
@@ -1550,8 +1550,8 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
         }
 
         // POST system break editing.
-        function postSystemBreakEdit(aStaffId, aOrderNumber) {
-            $.post(gui.apiprefix + "/modify/systembreak", {sbid: aStaffId, ordernumber: aOrderNumber})
+        function postSystemBreakEdit(aSystemId, aOrderNumber) {
+            $.post(gui.apiprefix + "/modify/systembreak", {sbid: aSystemId, ordernumber: aOrderNumber})
             .error(function() {
                 $("#alert > p").text("Server failed to modify system break.  Client and server are not synchronized.");
                 $("#alert").animate({opacity: 1.0}, 100);
@@ -1610,13 +1610,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             coords.y -= gui.clefDwg.currentHeight/8;
         }
 
-        // get closest staff to insert onto
-        var staff = gui.page.getClosestSystem(coords);
+        // get closest system to insert onto
+        var system = gui.page.getClosestSystem(coords);
 
-        // calculate snapped coordinates on the staff
-        var snapCoords = staff.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
+        // calculate snapped coordinates on the system
+        var snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
 
-        var staffPos = Math.round((staff.zone.uly - snapCoords.y) / (staff.delta_y/2));
+        var staffPos = Math.round((system.zone.uly - snapCoords.y) / (system.delta_y/2));
 
         var clef = new Toe.Model.Clef(cShape, {"staffPos": staffPos});
 
@@ -1630,27 +1630,27 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         var cView = new Toe.View.ClefView(gui.rendEng);
         var cCtrl = new Toe.Ctrl.ClefController(clef, cView);
 
-        // mount clef on the staff
-        var nInd = staff.addClef(clef);
+        // mount clef on the system
+        var nInd = system.addClef(clef);
 
-        var staffLine = staff.props.numLines + staffPos/2;
+        var staffLine = system.props.numLines + staffPos/2;
         var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
         var args = {shape: cShape, line: staffLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
-        if (nInd + 1 < staff.elements.length) {
-            args["beforeid"] = staff.elements[nInd+1].id;
+        if (nInd + 1 < system.elements.length) {
+            args["beforeid"] = system.elements[nInd+1].id;
         }
         else {
             // insert before the next system break
-            var sNextModel = gui.page.getNextSystem(staff);
+            var sNextModel = gui.page.getNextSystem(system);
             args["beforeid"] = sNextModel.id;
         }
 
-        var neumesOnStaff = staff.getPitchedElements({neumes: true, custos: false});
-        if (neumesOnStaff.length > 0 && staff.getActingClefByEle(neumesOnStaff[0]) == clef) {
-            // if the shift of the clef has affected the first neume on this staff
-            // update the custos on the previous staff
-            var prevStaff = gui.page.getPreviousSystem(staff);
+        var neumesOnStaff = system.getPitchedElements({neumes: true, custos: false});
+        if (neumesOnStaff.length > 0 && system.getActingClefByEle(neumesOnStaff[0]) == clef) {
+            // if the shift of the clef has affected the first neume on this system
+            // update the custos on the previous system
+            var prevStaff = gui.page.getPreviousSystem(system);
             if (prevStaff) {
                 var newPname = neumesOnStaff[0].components[0].pname;
                 var newOct = neumesOnStaff[0].components[0].oct;
@@ -1659,7 +1659,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         }
 
         // gather new pitch information of affected pitched elements
-        args["pitchInfo"] = $.map(staff.getPitchedElements({clef: clef}), function(e) {
+        args["pitchInfo"] = $.map(system.getPitchedElements({clef: clef}), function(e) {
             if (e instanceof Toe.Model.Neume) {
                 var pitchInfo = new Array();
                 $.each(e.components, function(nInd, n) {
@@ -1883,12 +1883,12 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParent
                               '<li><div class="btn-group" data-toggle="buttons-radio">' +
                               '<button id="rad_punctum" class="btn"><b>■</b> Punctum</button>\n' +
                               '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
-                              '<button id="rad_staff" class="btn"><b><i class="icon-align-justify icon-black"></i></b>System</button>\n' + 
+                              '<button id="rad_system" class="btn"><b><i class="icon-align-justify icon-black"></i></b>System</button>\n' + 
                               '<button id="rad_clef" class="btn"><b>C/F</b> Clef</button>\n</div>\n</li>\n</span>');
     }
     $("#rad_punctum").bind("click.insert", {gui: this}, this.handleInsertPunctum);
     $("#rad_division").bind("click.insert", {gui: this}, this.handleInsertDivision);
-    $("#rad_staff").bind("click.insert", {gui: this}, this.handleInsertStaff);
+    $("#rad_system").bind("click.insert", {gui: this}, this.handleInsertSystem);
     $("#rad_clef").bind("click.insert", {gui: this}, this.handleInsertClef);
     $("#rad_punctum").trigger('click');
 }
@@ -1932,7 +1932,7 @@ Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
     $("#menu_insertdivision").remove();
     $("#menu_insertclef").remove();
     $("#menu_insertpunctum").remove();
-    $("#menu_insertstaff").remove();
+    $("#menu_insertsystem").remove();
     if (this.divisionDwg) {
         this.rendEng.canvas.remove(this.divisionDwg);
     }
@@ -1942,15 +1942,15 @@ Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
     if (this.punctDwg) {
         this.rendEng.canvas.remove(this.punctDwg);
     }
-    if (this.staffDwg) {
-        this.rendEng.canvas.remove(this.staffDwg);
+    if (this.systemDrawing) {
+        this.rendEng.canvas.remove(this.systemDrawing);
     }
 }
 
 Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
     $("#rad_punctum").unbind("click");
     $("#rad_division").unbind("click");
-    $("#rad_staff").unbind("click");
+    $("#rad_system").unbind("click");
     $("#rad_clef").unbind("click");
 }
 
@@ -1979,11 +1979,11 @@ Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
 }
 
 Toe.View.SquareNoteInteraction.prototype.createInsertSystemSubControls = function() {
-    if ($("#menu_insertstaff").length == 0) {
-        $("#sidebar-insert").append('<span id="menu_insertstaff"><br/>\n<li class="nav-header">System Number</li>\n' +
+    if ($("#menu_insertsystem").length == 0) {
+        $("#sidebar-insert").append('<span id="menu_insertsystem"><br/>\n<li class="nav-header">System Number</li>\n' +
                                     '<li><div><input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +
-                                    ' <output id="staff_number"></output></div></li></span>');
-        $("#system_number_slider").change(function() {$('#staff_number').html(this.value);}).change();
+                                    ' <output id="system_number"></output></div></li></span>');
+        $("#system_number_slider").change(function() {$('#system_number').html(this.value);}).change();
     }
 }
 

@@ -59,8 +59,8 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
         cView.updateShape(clef);
     });
 
-    $(cModel).bind("vUpdateStaffPosition", function(event, clef) {
-        cView.updateStaffPosition(clef);
+    $(cModel).bind("vUpdateSystemPosition", function(event, clef) {
+        cView.updateSystemPosition(clef);
     });
 
     $(cModel).bind("vSelectDrawing", function(event) {

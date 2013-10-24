@@ -37,7 +37,7 @@ Toe.Model.SquareNoteNeumeComponent = function(pname, oct, options) {
 
     this.setPitchInfo(pname, oct);
 
-    // the integer pitch difference is set when the neume is mounted onto a staff
+    // the integer pitch difference is set when the neume is mounted onto a system
     // since calculating this difference with respect to the root note of the neume
     // requires clef information.
     this.pitchDiff = null;

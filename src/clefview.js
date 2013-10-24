@@ -126,7 +126,7 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
  * @methodOf Toe.View.ClefView
  * @param {Toe.Model.Clef} clef The clef whose staff position is to be modified.
  */
-Toe.View.ClefView.prototype.updateStaffPosition = function(clef) {
+Toe.View.ClefView.prototype.updateSystemPosition = function(clef) {
     if (!this.drawing) {
         throw new Error("Clef: update method called, but there exists no drawing to update.");
     }

@@ -55,8 +55,8 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
         cView.renderCustos(custos);
     });
 
-    $(cModel).bind("vUpdateStaffPosition", function(event, custos) {
-        cView.updateStaffPosition(custos);
+    $(cModel).bind("vUpdateSystemPosition", function(event, custos) {
+        cView.updateSystemPosition(custos);
     });
 
     $(cModel).bind("vEraseDrawing", function(event) {

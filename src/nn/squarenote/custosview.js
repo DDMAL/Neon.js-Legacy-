@@ -93,7 +93,7 @@ Toe.View.CustosView.prototype.renderBoundingBox = function(custos) {
     this.rendEng.outlineBoundingBox(c_bb, {fill: "purple"});
 }
 
-Toe.View.CustosView.prototype.updateStaffPosition = function(custos) {
+Toe.View.CustosView.prototype.updateSystemPosition = function(custos) {
     if (!this.drawing) {
         throw new Error("Custos: update method called, but there exists no drawing to update.");
     }

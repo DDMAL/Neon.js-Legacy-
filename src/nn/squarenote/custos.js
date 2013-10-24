@@ -90,7 +90,7 @@ Toe.Model.Custos.prototype.setID = function(cid) {
  * @methodOf Toe.Model.Custos
  * @param {Toe.Model.System} staff The staff model to attach the custos to.
  */
-Toe.Model.Custos.prototype.setStaff = function(staff) {
+Toe.Model.Custos.prototype.setSystem = function(staff) {
     if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Custos: invalid staff reference");
     }
@@ -127,7 +127,7 @@ Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
     var pitchInfo = this.staff.calcPitchFromStaffPos(this.rootStaffPos, actingClef);
     this.setRootNote(pitchInfo["pname"], pitchInfo["oct"]);
 
-    $(this).trigger("vUpdateStaffPosition", [this]);
+    $(this).trigger("vUpdateSystemPosition", [this]);
 }
 
 /**

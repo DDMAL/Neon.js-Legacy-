@@ -88,7 +88,7 @@ Toe.Model.Neume.prototype.setID = function(nid) {
     this.id = nid;
 }
 
-Toe.Model.Neume.prototype.setStaff = function(staff) {
+Toe.Model.Neume.prototype.setSystem = function(staff) {
     if (!(staff instanceof Toe.Model.System)) {
         throw new Error("Neume: invalid staff reference");
     }
