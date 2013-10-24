@@ -33,7 +33,7 @@ Toe.View.DivisionView = function(renderEngine) {
 Toe.View.DivisionView.prototype.constructor = Toe.View.DivisionView;
 
 /**
- * Renders the division on the staffs
+ * Renders the division on the systems
  *
  * @methodOf Toe.View.DivisionView
  * @param {Toe.Model.Division} division Division to render
@@ -43,7 +43,7 @@ Toe.View.DivisionView.prototype.renderDivision = function(division) {
         throw new Error("Division: Invalid render context");
     }
 
-    var staff = division.staff;
+    var system = division.system;
 
     var elements = {fixed: new Array(), modify: new Array()};
     
@@ -52,26 +52,26 @@ Toe.View.DivisionView.prototype.renderDivision = function(division) {
     var divProps = {strokeWidth: 4};
     switch (division.type) {
         case Toe.Model.Division.Type.div_small:
-            var y1 = staff.zone.uly - staff.delta_y/2;
-            var y2 = staff.zone.uly + staff.delta_y/2;
+            var y1 = system.zone.uly - system.delta_y/2;
+            var y2 = system.zone.uly + system.delta_y/2;
             elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.div_minor:
-            var y1 = staff.zone.uly + staff.delta_y/2;
-            var y2 = y1 + 2*staff.delta_y;
+            var y1 = system.zone.uly + system.delta_y/2;
+            var y2 = y1 + 2*system.delta_y;
             elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.div_major:
-            var y1 = staff.zone.uly;
-            var y2 = staff.zone.lry;
+            var y1 = system.zone.uly;
+            var y2 = system.zone.lry;
             elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
             break;
 
         case Toe.Model.Division.Type.div_final:
-            var y1 = staff.zone.uly;
-            var y2 = staff.zone.lry;
+            var y1 = system.zone.uly;
+            var y2 = system.zone.lry;
             elements.fixed.push(this.rendEng.createLine([x1, y1, x1, y2], divProps));
 
             var x2 = division.zone.lrx;

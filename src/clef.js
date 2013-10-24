@@ -25,7 +25,7 @@ THE SOFTWARE.
  *
  * @class Represents a clef
  * @param {String} clefShape clef shape: c or f
- * @param {Object} options staffline {Number}, interact {Boolean}
+ * @param {Object} options systemline {Number}, interact {Boolean}
  */
 Toe.Model.Clef = function(clefShape, options) {
     this.shape = clefShape.toLowerCase();
@@ -37,16 +37,16 @@ Toe.Model.Clef = function(clefShape, options) {
 
     var clefPos = null;
     if (clefShape == "c") {
-        // default staffline from pp. 17 Liber Usualis
+        // default systemline from pp. 17 Liber Usualis
         clefPos = 0;
     }
     else if (clefShape == "f") {
-        // default staffline from pp. 17 Liber Usualis
+        // default systemline from pp. 17 Liber Usualis
         clefPos = 2;
     }
 
     this.props = {
-        staffPos: clefPos,
+        systemPos: clefPos,
         interact: true
     };
 
@@ -55,8 +55,8 @@ Toe.Model.Clef = function(clefShape, options) {
     // initialize bounding box
     this.zone = new Object();
 
-    // reference to the staff this clef is mounted on
-    this.staff = null;
+    // reference to the system this clef is mounted on
+    this.system = null;
 }
 
 /**
@@ -83,12 +83,12 @@ Toe.Model.Clef.prototype.setID = function(cid) {
     this.id = cid;
 }
 
-Toe.Model.Clef.prototype.setSystem = function(staff) {
-    if (!(staff instanceof Toe.Model.System)) {
-        throw new Error("Clef: invalid staff reference");
+Toe.Model.Clef.prototype.setSystem = function(aSystem) {
+    if (!(aSystem instanceof Toe.Model.System)) {
+        throw new Error("Toe.Model.Clef: invalid system reference");
     }
 
-    this.staff = staff;
+    this.system = aSystem;
 }
 
 /**
@@ -105,15 +105,15 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
         throw new Error("Clef: unknown clef shape");
     }
 
-    // update affected pitched elements on the staff
+    // update affected pitched elements on the system
     // do not update custos
-    this.staff.updatePitchedElements({clef: this, custos: false});
+    this.system.updatePitchedElements({clef: this, custos: false});
 
     $(this).trigger("vUpdateShape", [this]);
 }
 
 /**
- * Sets the position on the staff according to the following scheme:
+ * Sets the position on the system according to the following scheme:
  *
  *  <ulx,uly> =======
  *            ------- 0
@@ -123,20 +123,20 @@ Toe.Model.Clef.prototype.setShape = function(shape) {
  *            ======= <lrx,lry>
  * 
  * @methodOf Toe.Model.Clef
- * @param {Number} staffPos new staff position
+ * @param {Number} systemPos new system position
  */
-Toe.Model.Clef.prototype.setSystemPosition = function(staffPos) {
+Toe.Model.Clef.prototype.setSystemPosition = function(aSystemPosition) {
     // only redraw the glyph if it needs to be redrawn
-    if (this.props.staffPos == staffPos) {
+    if (this.props.systemPos == aSystemPosition) {
         return;
     }
    
     // reset clef position in model
-    this.props.staffPos = staffPos;
+    this.props.systemPos = aSystemPosition;
 
-    // update affected pitched elements on the staff
+    // update affected pitched elements on the system
     // do not update custos
-    this.staff.updatePitchedElements({clef: this, custos: false});
+    this.system.updatePitchedElements({clef: this, custos: false});
 
     $(this).trigger("vUpdateSystemPosition", [this]);
 }

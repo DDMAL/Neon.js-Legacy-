@@ -32,7 +32,7 @@ THE SOFTWARE.
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
  *
- * The system has list of elements on the staff, sorted by horizontal position.
+ * The system has list of elements on the system, sorted by horizontal position.
  * The system model is a generic container to accomodate staffless glyphs without pitch.
  */
 Toe.Model.System = function(bb, options) {

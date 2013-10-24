@@ -35,21 +35,21 @@ Toe.View.CustosView = function(renderEngine) {
 
 Toe.View.CustosView.prototype.constructor = Toe.View.CustosView;
 
-Toe.View.CustosView.prototype.drawLedgerLines = function(staffPos, centre, width, staff) {
+Toe.View.CustosView.prototype.drawLedgerLines = function(aSystemPos, centre, width, aSystem) {
     width *= 0.75;
 
     var cv = this;
     var ledgers = new Array();
-    var bottomStaffPos = 2*(1-staff.props.numLines);
-    if (staffPos > 0) {
-        for (var i = 0; i <= staffPos; i += 2) {
-            var line_y = staff.zone.uly - (i*staff.delta_y/2);
+    var bottomSystemPos = 2*(1-aSystem.props.numLines);
+    if (aSystemPos > 0) {
+        for (var i = 0; i <= aSystemPos; i += 2) {
+            var line_y = aSystem.zone.uly - (i*aSystem.delta_y/2);
             ledgers.push(cv.rendEng.createLine([centre-width, line_y, centre+width, line_y]));
         }
     }
-    else if (staffPos < bottomStaffPos) {
-        for (var i = bottomStaffPos; i >= staffPos; i -= 2) {
-            var line_y = staff.zone.uly - (i*staff.delta_y/2);
+    else if (aSystemPos < bottomSystemPos) {
+        for (var i = bottomSystemPos; i >= aSystemPos; i -= 2) {
+            var line_y = aSystem.zone.uly - (i*aSystem.delta_y/2);
             ledgers.push(cv.rendEng.createLine([centre-width, line_y, centre+width, line_y]));
         }
     }
@@ -58,7 +58,7 @@ Toe.View.CustosView.prototype.drawLedgerLines = function(staffPos, centre, width
 }
 
 /**
- * Renders the custos on the staffs
+ * Renders the custos on the systems
  *
  * @methodOf Toe.View.CustosView
  * @param {Toe.Model.Custos} custos Custos to render
@@ -68,17 +68,17 @@ Toe.View.CustosView.prototype.renderCustos = function(custos) {
         throw new Error("Custos: Invalid render context");
     }
 
-    // get the staff this custos is mounted on
-    var staff = custos.staff;
+    // get the system this custos is mounted on
+    var system = custos.system;
 
     var glyphCustos = this.rendEng.getGlyph("custos");
 
     // calculate the y position of the custos
-    var custos_y = staff.zone.uly - custos.rootStaffPos*staff.delta_y/2;
+    var custos_y = system.zone.uly - custos.rootSystemPos*system.delta_y/2;
     var nc_x = custos.zone.ulx + glyphCustos.centre[0];
     var custosDwg = glyphCustos.clone().set({left: nc_x, top: custos_y - glyphCustos.centre[1]/2});
 
-    this.drawLedgerLines(custos.rootStaffPos, nc_x, 4*glyphCustos.centre[0], staff);
+    this.drawLedgerLines(custos.rootSystemPos, nc_x, 4*glyphCustos.centre[0], system);
 	this.drawing = this.rendEng.draw({fixed: [], modify: [custosDwg]}, {selectable: custos.props.interact, group: true, lockMovementX: true, lockMovementY: true, eleRef: custos})[0];
 }
 
@@ -102,12 +102,12 @@ Toe.View.CustosView.prototype.updateSystemPosition = function(custos) {
         this.ledgerLines = null;
     }
 
-    var staff = custos.staff;
+    var system = custos.system;
 
-    var glyphTop = staff.zone.uly - custos.rootStaffPos*staff.delta_y/2 - this.drawing.currentHeight/4;
+    var glyphTop = system.zone.uly - custos.rootSystemPos*system.delta_y/2 - this.drawing.currentHeight/4;
     this.drawing.top = glyphTop;
 
-    this.drawLedgerLines(custos.rootStaffPos, this.drawing.left, (3/2)*this.drawing.currentWidth, staff);
+    this.drawLedgerLines(custos.rootSystemPos, this.drawing.left, (3/2)*this.drawing.currentWidth, system);
 
     this.rendEng.repaint();
 

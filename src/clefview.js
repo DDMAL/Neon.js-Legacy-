@@ -47,7 +47,7 @@ Toe.View.ClefView.prototype.drawClef = function(clef) {
         throw new Error("Clef: Invalid render context");
     }
     
-    var staff = clef.staff;
+    var system = clef.system;
 
     var svgKey = null;
     switch(clef.shape) {
@@ -61,7 +61,7 @@ Toe.View.ClefView.prototype.drawClef = function(clef) {
 
     var cGlyph = this.rendEng.getGlyph(svgKey);
     var glyphLeft = clef.zone.ulx + cGlyph.centre[0];
-    var glyphTop = staff.zone.uly - clef.props.staffPos*staff.delta_y/2;
+    var glyphTop = system.zone.uly - clef.props.systemPos*system.delta_y/2;
      if (clef.shape == "f") {
         // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*cGlyph.centre[1];
@@ -124,14 +124,14 @@ Toe.View.ClefView.prototype.updateShape = function(clef) {
  * Updates the vertical position of a clef on the drawing surface.
  *
  * @methodOf Toe.View.ClefView
- * @param {Toe.Model.Clef} clef The clef whose staff position is to be modified.
+ * @param {Toe.Model.Clef} clef The clef whose system position is to be modified.
  */
 Toe.View.ClefView.prototype.updateSystemPosition = function(clef) {
     if (!this.drawing) {
         throw new Error("Clef: update method called, but there exists no drawing to update.");
     }
 
-    var glyphTop = clef.staff.zone.uly - clef.props.staffPos*clef.staff.delta_y/2;
+    var glyphTop = clef.system.zone.uly - clef.props.systemPos*clef.system.delta_y/2;
     if (clef.shape == "f") {
         // 0.34 is the relative position of the f clef glyph placement
         glyphTop += 0.34*this.drawing.currentHeight/2;

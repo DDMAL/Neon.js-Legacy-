@@ -21,11 +21,11 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a cheironomic notation staff without stafflines
- * @class Represents a staff container with no stafflines
+ * Creates a cheironomic notation system without lines
+ * @class Represents a system container with no lines
  * @extends Toe.Model.System
  * 
- * @param {Array} bb [ulx, uly, lrx, lry] staff bounding box, which encompasses a line
+ * @param {Array} bb [ulx, uly, lrx, lry] system bounding box, which encompasses a line
  * of music on the page.
  * (.) <ulx,uly>        (.)
  *
@@ -34,31 +34,31 @@ THE SOFTWARE.
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
  *
- * The staff has a list of elements (neumes) on the staff, sorted by horizontal position.
+ * The system has a list of elements (neumes) on the system, sorted by horizontal position.
  */
-Toe.Model.CheironomicStaff = function(bb, options) {
+Toe.Model.CheironomicSystem = function(bb, options) {
     // call super constructor
     Toe.Model.System.call(this, bb, options);
-}
+};
 
-// inherit prototype from generic staff model
-Toe.Model.CheironomicStaff.prototype = new Toe.Model.System();
-Toe.Model.CheironomicStaff.prototype.constructor = Toe.Model.CheironomicStaff;
+// inherit prototype from generic system model
+Toe.Model.CheironomicSystem.prototype = new Toe.Model.System();
+Toe.Model.CheironomicSystem.prototype.constructor = Toe.Model.CheironomicSystem;
 
 /**
- * Mounts a neume on the staff
+ * Mounts a neume on the system
  *
- * @methodOf Toe.Model.CheironomicStaff
+ * @methodOf Toe.Model.CheironomicSystem
  * @param {Toe.Model.Neume} neume The neume to mount
  * @params {Options} options {justPush: just push to the elements array (don't bother with sorted insert.
                               This option is for inserting from MEI, since elements are in order in MEI 
                               document already. Faster load times.)}
- * @return {Number} ind index of element on the staff
+ * @return {Number} ind index of element on the system
  */
-Toe.Model.CheironomicStaff.prototype.addNeume = function(neume, options) {
+Toe.Model.CheironomicSystem.prototype.addNeume = function(neume, options) {
     // check argument is a neume
     if (!(neume instanceof Toe.Model.Neume)) {
-        throw new Error("Staff: Invalid neume");
+        throw new Error("Toe.Model.CheironomicSystem: Invalid neume");
     }
     
     var opts = {
@@ -67,7 +67,7 @@ Toe.Model.CheironomicStaff.prototype.addNeume = function(neume, options) {
 
     $.extend(opts, options);
 
-    // insert neume into list of sorted staff elements
+    // insert neume into list of sorted system elements
     var nInd = null;
     if (opts.justPush) {
         this.elements.push(neume);

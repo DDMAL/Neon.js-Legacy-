@@ -47,8 +47,8 @@ Toe.Model.Division = function(key, options) {
     // set by server or MEI so null by default
     this.id = null;
 
-    // reference to the staff this clef is mounted on
-    this.staff = null;
+    // reference to the system this clef is mounted on
+    this.system = null;
 }
 
 Toe.Model.Division.prototype.constructor = Toe.Model.Division;
@@ -82,12 +82,12 @@ Toe.Model.Division.prototype.setID = function(did) {
     this.id = did;
 }
 
-Toe.Model.Division.prototype.setSystem = function(staff) {
-    if (!(staff instanceof Toe.Model.System)) {
-        throw new Error("Division: invalid staff reference");
+Toe.Model.Division.prototype.setSystem = function(aSystem) {
+    if (!(aSystem instanceof Toe.Model.System)) {
+        throw new Error("Toe.Model.Division: invalid system reference");
     }
 
-    this.staff = staff;
+    this.system = aSystem;
 }
 
 /**

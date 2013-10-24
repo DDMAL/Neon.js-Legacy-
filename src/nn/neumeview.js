@@ -54,45 +54,45 @@ Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
  *      HELPER FUNCTIONS         *
  *********************************/
 Toe.View.NeumeView.prototype.calcNoteYPos = function(neume) {
-    var staff = neume.staff;
+    var system = neume.system;
 
     // derive positions of neume components
     var nc_y = new Array();
 
     // set root note y pos
-    nc_y.push(staff.zone.uly - neume.rootStaffPos*staff.delta_y/2);
+    nc_y.push(system.zone.uly - neume.rootSystemPos*system.delta_y/2);
     for (var i = 1; i < neume.components.length; i++) {
-        nc_y.push(nc_y[0] + (-neume.components[i].pitchDiff * staff.delta_y/2));
+        nc_y.push(nc_y[0] + (-neume.components[i].pitchDiff * system.delta_y/2));
     }
 
     return nc_y;
 }
 
-Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) {
+Toe.View.NeumeView.prototype.bestDotPlacements = function(aSystem, nc_y, yposInd) {
     // corresponding to whether or not it is good to put a dot
     // at the middle, top, or bottom of the neume component
     var bestDots = [false, false, false];
     var dotsy = new Array();
 
-    var firstSpace = staff.zone.uly + staff.delta_y/2;
+    var firstSpace = aSystem.zone.uly + aSystem.delta_y/2;
 
     ypos = nc_y[yposInd];
 
     // try middle first
     var midPos = ypos;
-    k = Math.round(2*(midPos - firstSpace) / staff.delta_y);
+    k = Math.round(2*(midPos - firstSpace) / aSystem.delta_y);
     if (k % 2 == 0) {
         dotsy.push(midPos);
     } 
 
     // try top next
-    var topPos = ypos - staff.delta_y/2;
-    var k = Math.round(2*(topPos - firstSpace) / staff.delta_y);
+    var topPos = ypos - aSystem.delta_y/2;
+    var k = Math.round(2*(topPos - firstSpace) / aSystem.delta_y);
 
     // check there isn't a note here
     // must also check note after (eg., podatus)
     var isOccNote = false;
-    if ((yposInd-1 >= 0 && ypos - staff.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - staff.delta_y/2 == nc_y[yposInd+1])) {
+    if ((yposInd-1 >= 0 && ypos - aSystem.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - aSystem.delta_y/2 == nc_y[yposInd+1])) {
         isOccNote = true;
     }
 
@@ -101,12 +101,12 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) 
     }
     
     // try bottom
-    var botPos = ypos + staff.delta_y/2;
-    k = Math.round(2*(botPos - firstSpace) / staff.delta_y);
+    var botPos = ypos + aSystem.delta_y/2;
+    k = Math.round(2*(botPos - firstSpace) / aSystem.delta_y);
 
     // check there isn't a note here
     isOccNote = false;
-    if ((yposInd+1 < nc_y.length && ypos + staff.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + staff.delta_y/2 == nc_y[yposInd-1])) {
+    if ((yposInd+1 < nc_y.length && ypos + aSystem.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + aSystem.delta_y/2 == nc_y[yposInd-1])) {
         isOccNote = true;
     }
 
@@ -117,22 +117,22 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(staff, nc_y, yposInd) 
     return dotsy;
 }
 
-Toe.View.NeumeView.prototype.drawLedgerLines = function(ncStaffPos, centre, width, staff) {
+Toe.View.NeumeView.prototype.drawLedgerLines = function(ncSystemPos, centre, width, aSystem) {
     width *= 0.75;
 
     var nv = this;
     var ledgers = new Array();
-    var bottomStaffPos = 2*(1-staff.props.numLines);
-    $.each(ncStaffPos, function(ncInd, staffPos) {
-        if (staffPos > 0) {
-            for (var i = 0; i <= staffPos; i += 2) {
-                var line_y = staff.zone.uly - (i*staff.delta_y/2);
+    var bottomSystemPos = 2*(1-aSystem.props.numLines);
+    $.each(ncSystemPos, function(ncInd, systemPos) {
+        if (systemPos > 0) {
+            for (var i = 0; i <= systemPos; i += 2) {
+                var line_y = aSystem.zone.uly - (i*aSystem.delta_y/2);
                 ledgers.push(nv.rendEng.createLine([centre[ncInd]-width, line_y, centre[ncInd]+width, line_y]));
             }
         }
-        else if (staffPos < bottomStaffPos) {
-            for (var i = bottomStaffPos; i >= staffPos; i -= 2) {
-                var line_y = staff.zone.uly - (i*staff.delta_y/2);
+        else if (systemPos < bottomSystemPos) {
+            for (var i = bottomSystemPos; i >= systemPos; i -= 2) {
+                var line_y = aSystem.zone.uly - (i*aSystem.delta_y/2);
                 ledgers.push(nv.rendEng.createLine([centre[ncInd]-width, line_y, centre[ncInd]+width, line_y]));
             }
         }

@@ -23,8 +23,8 @@ THE SOFTWARE.
 /**
  * Creates a new custos 
  *
- * @class Models a custos, a neume at the end of a staff that represents the pitch 
- * of the first note in the next staff.
+ * @class Models a custos, a neume at the end of a system that represents the pitch 
+ * of the first note in the next system.
  * @param {String} pname pitch name of the next note
  * @param {Integer} oct octave of the next note
  * @param {Object} options key: {Boolean} interact Whether the glyph can be interacted with.
@@ -40,8 +40,8 @@ Toe.Model.Custos = function(pname, oct, options) {
     this.oct = oct;
 
     // the integer pitch difference relative to the clef
-    // this is set when the custos is mounted on a staff
-    this.rootStaffPos = null;
+    // this is set when the custos is mounted on a system
+    this.rootSystemPos = null;
 
     // initialize bounding box
     this.zone = new Object();
@@ -49,8 +49,8 @@ Toe.Model.Custos = function(pname, oct, options) {
     // set by server or MEI so null by default
     this.id = null;
 
-    // reference to the staff this custos is mounted on
-    this.staff = null;
+    // reference to the system this custos is mounted on
+    this.system = null;
 }
 
 Toe.Model.Custos.prototype.constructor = Toe.Model.Custos;
@@ -85,17 +85,17 @@ Toe.Model.Custos.prototype.setID = function(cid) {
 }
 
 /**
- * Sets the staff that this custos element is attached to.
+ * Sets the system that this custos element is attached to.
  *
  * @methodOf Toe.Model.Custos
- * @param {Toe.Model.System} staff The staff model to attach the custos to.
+ * @param {Toe.Model.System} aSystem The system model to attach the custos to.
  */
-Toe.Model.Custos.prototype.setSystem = function(staff) {
-    if (!(staff instanceof Toe.Model.System)) {
-        throw new Error("Custos: invalid staff reference");
+Toe.Model.Custos.prototype.setSystem = function(aSystem) {
+    if (!(aSystem instanceof Toe.Model.System)) {
+        throw new Error("Toe.Model.Custos: invalid aSystem reference");
     }
 
-    this.staff = staff;
+    this.system = aSystem;
 }
 
 /**
@@ -111,20 +111,20 @@ Toe.Model.Custos.prototype.setRootNote = function(pname, oct) {
 }
 
 /**
- * Sets the pitch difference of the custos in relation to the clef of the staff the
+ * Sets the pitch difference of the custos in relation to the clef of the system the
  * custos is mounted on.
  */
-Toe.Model.Custos.prototype.setRootStaffPos = function(staffPos) {
+Toe.Model.Custos.prototype.setRootSystemPos = function(aSystemPos) {
     // only redraw the glyph if it needs to be redrawn
-    if (this.rootStaffPos == staffPos) {
+    if (this.rootSystemPos == aSystemPos) {
         return;
     }
 
-    // reset staff position of custos
-    this.rootStaffPos = staffPos;
+    // reset system position of custos
+    this.rootSystemPos = aSystemPos;
 
-    var actingClef = this.staff.getActingClefByEle(this);
-    var pitchInfo = this.staff.calcPitchFromStaffPos(this.rootStaffPos, actingClef);
+    var actingClef = this.system.getActingClefByEle(this);
+    var pitchInfo = this.system.calcPitchFromSystemPos(this.rootSystemPos, actingClef);
     this.setRootNote(pitchInfo["pname"], pitchInfo["oct"]);
 
     $(this).trigger("vUpdateSystemPosition", [this]);

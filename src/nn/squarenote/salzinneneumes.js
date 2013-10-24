@@ -31,7 +31,7 @@ var drawSalzinnesNeume = function(neume) {
 
     var nc_y = this.calcNoteYPos(neume);
 
-    var staff = neume.staff;
+    var system = neume.system;
     var nv = this;
 
     var ncOverlap_x = 1; // (pixels)
@@ -79,11 +79,11 @@ var drawSalzinnesNeume = function(neume) {
             // render dots
             if (neume.components[0].hasOrnament('dot')) {
                 // get best spot for one dot
-                var bestDots = this.bestDotPlacements(staff, nc_y, 0);
+                var bestDots = this.bestDotPlacements(system, nc_y, 0);
                 elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
-            this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
+            this.drawLedgerLines([neume.rootSystemPos], [left], ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -105,7 +105,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[nc_x.length-1], top: bestDots[0]}));
                     }
@@ -113,8 +113,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
             break;
 
         // VIRGA
@@ -126,16 +126,16 @@ var drawSalzinnesNeume = function(neume) {
             // render dots
             if (neume.components[0].hasOrnament('dot')) {
                 // get best spot for one dot
-                var bestDots = this.bestDotPlacements(staff, nc_y, 0);
+                var bestDots = this.bestDotPlacements(system, nc_y, 0);
                 elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
             // draw right line coming off punctum
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
-            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0] + (3/2)*staff.delta_y], {strokeWidth: 2, interact: true});
+            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0] + (3/2)*system.delta_y], {strokeWidth: 2, interact: true});
             elements.fixed.push(line);
 
-            this.drawLedgerLines([neume.rootStaffPos], [left], ncGlyphs[0].centre[0]*2, staff);
+            this.drawLedgerLines([neume.rootSystemPos], [left], ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -150,7 +150,7 @@ var drawSalzinnesNeume = function(neume) {
 
                 // draw right line coming off punctum
                 var rx = glyphPunct.left+ncGlyphs[it].centre[0]-1;
-                var line = this.rendEng.createLine([rx, nc_y[it], rx, nc_y[it] + (3/2)*staff.delta_y], {strokeWidth: 2, interact: true});
+                var line = this.rendEng.createLine([rx, nc_y[it], rx, nc_y[it] + (3/2)*system.delta_y], {strokeWidth: 2, interact: true});
                 elements.fixed.push(line);
 
                 // calculate nc_x for following virga
@@ -161,7 +161,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[nc_x.length-1], top: bestDots[0]}));
                     }
@@ -169,8 +169,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -204,7 +204,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -212,8 +212,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -248,7 +248,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -256,8 +256,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -276,7 +276,7 @@ var drawSalzinnesNeume = function(neume) {
 
              // draw right line coming off punctum
             var rx = glyphPunct.left+ncGlyphs[0].centre[0]-1;
-            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0]+ (3/2)*staff.delta_y], {strokeWidth: 2, interact: true});
+            var line = this.rendEng.createLine([rx, nc_y[0], rx, nc_y[0]+ (3/2)*system.delta_y], {strokeWidth: 2, interact: true});
             elements.fixed.push(line);
 
             // now draw following punctum Inclinatum
@@ -295,7 +295,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -304,8 +304,8 @@ var drawSalzinnesNeume = function(neume) {
 
             // draw ledger lines
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
             
@@ -346,7 +346,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -354,8 +354,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -417,7 +417,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -426,8 +426,8 @@ var drawSalzinnesNeume = function(neume) {
 
             // draw ledger lines
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -454,7 +454,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -462,8 +462,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -493,7 +493,7 @@ var drawSalzinnesNeume = function(neume) {
             $.each(neume.components, function(it,el) {
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -501,8 +501,8 @@ var drawSalzinnesNeume = function(neume) {
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
 
@@ -555,14 +555,14 @@ var drawSalzinnesNeume = function(neume) {
             // only check last note has a dot
             if (neume.components[2].hasOrnament('dot')) {
                 // get best spot for the dot
-                var bestDots = this.bestDotPlacements(staff, nc_y, 2);
+                var bestDots = this.bestDotPlacements(system, nc_y, 2);
                 if (bestDots.length > 0) {
                     elements.modify.push(glyphDot.clone().set({left: glyphPunct.left + (2*ncGlyphs[2].centre[0]), top: bestDots[0]}));
                 }
             }
 
             // only draw ledger lines for 1st and 3rd neume components
-            this.drawLedgerLines([neume.rootStaffPos + neume.components[2].pitchDiff], [nc_x], ncGlyphs[2].centre[0]*2, staff);
+            this.drawLedgerLines([neume.rootSystemPos + neume.components[2].pitchDiff], [nc_x], ncGlyphs[2].centre[0]*2, system);
 
             break;
 
@@ -607,7 +607,7 @@ var drawSalzinnesNeume = function(neume) {
                 var el = neume.components[i];
                 if (el.hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -655,7 +655,7 @@ var drawSalzinnesNeume = function(neume) {
                 for (var ncInd = i; ncInd < i+2; ncInd++) {
                     if (neume.components[ncInd].hasOrnament('dot')) {
                         //get best spot for the dot
-                        var bestDots = this.bestDotPlacements(staff, nc_y, ncInd);
+                        var bestDots = this.bestDotPlacements(system, nc_y, ncInd);
                         if (bestDots.length > 0) {
                             elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[ncInd].centre[0]), top: bestDots[0]}));
                         }
@@ -673,7 +673,7 @@ var drawSalzinnesNeume = function(neume) {
                 // draw dots on stray virga if they exist
                 if(neume.components[numNC-1].hasOrnament('dot')) {
                     // get best spot for the dot
-                    var bestDots = this.bestDotPlacements(staff, nc_y, numNC-1);
+                    var bestDots = this.bestDotPlacements(system, nc_y, numNC-1);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct3.left + (2*ncGlyphs[numNC-1].centre[0]), top: bestDots[0]}));
                     }
@@ -687,8 +687,8 @@ var drawSalzinnesNeume = function(neume) {
             }
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
         
@@ -715,7 +715,7 @@ var drawSalzinnesNeume = function(neume) {
             for (var ncInd = 0; ncInd < 2; ncInd++) {
                 if (neume.components[ncInd].hasOrnament('dot')) {
                     //get best spot for the dot
-                    var bestDots = this.bestDotPlacements(staff, nc_y, ncInd);
+                    var bestDots = this.bestDotPlacements(system, nc_y, ncInd);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[ncInd]+(2*ncGlyphs[ncInd].centre[0]), top: bestDots[0]}));
                     }
@@ -743,7 +743,7 @@ var drawSalzinnesNeume = function(neume) {
             for (var ncInd = 2; ncInd < neume.components.length; ncInd++) {
                 if (neume.components[ncInd].hasOrnament('dot')) {
                     // get best spot for one dot
-                    var bestDots = nv.bestDotPlacements(staff, nc_y, it);
+                    var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
                     }
@@ -751,8 +751,8 @@ var drawSalzinnesNeume = function(neume) {
             };
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
-                return neume.rootStaffPos + nc.pitchDiff;
-            }), nc_x, ncGlyphs[0].centre[0]*2, staff);
+                return neume.rootSystemPos + nc.pitchDiff;
+            }), nc_x, ncGlyphs[0].centre[0]*2, system);
 
             break;
         case "scandicus.flexus.2":

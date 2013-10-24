@@ -101,12 +101,12 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
-                    sModel = o.eleRef.staff;
+                    sModel = o.eleRef.system;
                 }
                 
                 toUngroup++;
 
-                if (o.eleRef.staff == sModel) {
+                if (o.eleRef.system == sModel) {
                     toNeumify++;
                 }
             }
@@ -142,9 +142,15 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            gui.showInfo("Selected: " + ele.name +
+     /*       gui.showInfo("Selected: " + ele.name +
                          "<br/> Pitche(s): " +
-                         $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
+                         $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));*/
+            $("#info > p").html("Selected: " + ele.name + "<br/> Pitche(s): " + 
+                                $.map(ele.components, function(nc) { 
+                                    return nc.pname.toUpperCase() + nc.oct; 
+                                }).join(", "));
+            $("#info").animate({opacity: 1.0}, 100);
+
 
             $('#btn_ungroup').toggleClass('disabled', false);
 
@@ -255,29 +261,29 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     }
 
                     // snap release position to line/space
-                    var snappedCoords = ele.staff.getSystemSnapCoordinates({x: left, y: top}, null, {ignoreEle: ele});
+                    var snappedCoords = ele.system.getSystemSnapCoordinates({x: left, y: top}, null, {ignoreEle: ele});
 
                     // TODO clefs moving to different systems?
 
-                    // get staff position of snapped coordinates
-                    var staffPos = -Math.round((snappedCoords.y - ele.staff.zone.uly) / (ele.staff.delta_y/2));
+                    // get system position of snapped coordinates
+                    var systemPos = -Math.round((snappedCoords.y - ele.system.zone.uly) / (ele.system.delta_y/2));
 
-                    ele.setSystemPosition(staffPos);
+                    ele.setSystemPosition(systemPos);
 
-                    var neumesOnStaff = ele.staff.getPitchedElements({neumes: true, custos: false});
-                    if (neumesOnStaff.length > 0 && ele.staff.getActingClefByEle(neumesOnStaff[0]) == ele) {
+                    var neumesOnSystem = ele.system.getPitchedElements({neumes: true, custos: false});
+                    if (neumesOnSystem.length > 0 && ele.system.getActingClefByEle(neumesOnSystem[0]) == ele) {
                         // if the shift of the clef has affected the first neume on this system
                         // update the custos on the previous system
-                        var prevStaff = gui.page.getPreviousSystem(ele.staff);
-                        if (prevStaff) {
-                            var newPname = neumesOnStaff[0].components[0].pname;
-                            var newOct = neumesOnStaff[0].components[0].oct;
-                            gui.handleUpdatePrevCustos(newPname, newOct, prevStaff);
+                        var prevSystem = gui.page.getPreviousSystem(ele.system);
+                        if (prevSystem) {
+                            var newPname = neumesOnSystem[0].components[0].pname;
+                            var newOct = neumesOnSystem[0].components[0].oct;
+                            gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
                         }
                     }
 
                     // gather new pitch information of affected pitched elements
-                    var pitchInfo = $.map(ele.staff.getPitchedElements({clef: ele}), function(e) {
+                    var pitchInfo = $.map(ele.system.getPitchedElements({clef: ele}), function(e) {
                         if (e instanceof Toe.Model.Neume) {
                             var pitchInfo = new Array();
                             $.each(e.components, function(nInd, n) {
@@ -300,10 +306,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         }
                     });
 
-                    // convert staffPos to staffLine format used in MEI attribute
-                    var staffLine = ele.staff.props.numLines + (ele.props.staffPos/2);
+                    // convert systemPos to staffLine format used in MEI attribute
+                    var systemLine = ele.system.props.numLines + (ele.props.systemPos/2);
                     var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
-                    var args = {id: ele.id, line: staffLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
+                    var args = {id: ele.id, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
                     // send pitch shift command to server to change underlying MEI
                     $.post(gui.apiprefix + "/move/clef", {data: JSON.stringify(args)})
@@ -325,15 +331,15 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     }
 
                     // get y position of first neume component
-                    var nc_y = ele.staff.zone.uly - ele.rootStaffPos*ele.staff.delta_y/2;
+                    var nc_y = ele.system.zone.uly - ele.rootSystemPos*ele.system.delta_y/2;
                     var finalCoords = {x: left, y: nc_y - delta_y};
 
                     var sModel = gui.page.getClosestSystem(finalCoords);
                     
-                    // snap to staff
+                    // snap to system
                     var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
 
-                    var newRootStaffPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
+                    var newRootSystemPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
 
                     // construct bounding box hint for the new drawing: bounding box changes when dot is repositioned
                     var ulx = snapCoords.x-(element.currentWidth/2);
@@ -341,7 +347,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
                     ele.setBoundingBox(bb);
 
-                    var oldRootStaffPos = ele.rootStaffPos;
+                    var oldRootSystemPos = ele.rootSystemPos;
                     // derive pitch name and octave of notes in the neume on the appropriate system
                     $.each(ele.components, function(ncInd, nc) {
                         var noteInfo = sModel.calcPitchFromCoords({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
@@ -350,7 +356,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
                     // remove the old neume
                     $(ele).trigger("vEraseDrawing");
-                    ele.staff.removeElementByRef(ele);
+                    ele.system.removeElementByRef(ele);
      
                     // mount the new neume on the most appropriate system
                     var nInd = sModel.addNeume(ele);
@@ -360,20 +366,20 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
                     var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
                     var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
-                    if (oldRootStaffPos != newRootStaffPos) {
+                    if (oldRootSystemPos != newRootSystemPos) {
                         // this is a pitch shift
                         args.pitchInfo = new Array();
                         $.each(ele.components, function(ncInd, nc) {
                             args.pitchInfo.push({"pname": nc.pname, "oct": nc.oct});
                         });
 
-                        // if this element is the first neume on the staff
+                        // if this element is the first neume on the system
                         if (ele == sModel.elements[1]) {
-                            var prevStaff = gui.page.getPreviousSystem(sModel);
-                            if (prevStaff) {
+                            var prevSystem = gui.page.getPreviousSystem(sModel);
+                            if (prevSystem) {
                                 var cPname = ele.components[0].pname;
                                 var cOct = ele.components[0].oct;
-                                gui.handleUpdatePrevCustos(cPname, cOct, prevStaff);
+                                gui.handleUpdatePrevCustos(cPname, cOct, prevSystem);
                             }
                         }
                     }
@@ -433,8 +439,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                             break;
                     }
 
-                    // remove division from the previous staff representation
-                    ele.staff.removeElementByRef(ele);
+                    // remove division from the previous system representation
+                    ele.system.removeElementByRef(ele);
                     gui.rendEng.canvas.remove(element);
                     gui.rendEng.repaint();
 
@@ -592,19 +598,19 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
     if (clef.shape != cShape) {
         clef.setShape(cShape);
 
-        var neumesOnStaff = clef.staff.getPitchedElements({neumes: true, custos: false});
-        if (neumesOnStaff.length > 0 && clef.staff.getActingClefByEle(neumesOnStaff[0]) == clef) {
-            // if the shift of the clef has affected the first neume on this staff
-            // update the custos on the previous staff
-            var prevStaff = gui.page.getPreviousSystem(clef.staff);
-            if (prevStaff) {
-                var newPname = neumesOnStaff[0].components[0].pname;
-                var newOct = neumesOnStaff[0].components[0].oct;
-                gui.handleUpdatePrevCustos(newPname, newOct, prevStaff);
+        var neumesOnSystem = clef.system.getPitchedElements({neumes: true, custos: false});
+        if (neumesOnSystem.length > 0 && clef.system.getActingClefByEle(neumesOnSystem[0]) == clef) {
+            // if the shift of the clef has affected the first neume on this system
+            // update the custos on the previous system
+            var prevSystem = gui.page.getPreviousSystem(clef.system);
+            if (prevSystem) {
+                var newPname = neumesOnSystem[0].components[0].pname;
+                var newOct = neumesOnSystem[0].components[0].oct;
+                gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
             }
         }
 
-        var pitchInfo = $.map(clef.staff.getPitchedElements({clef: clef}), function(e) {
+        var pitchInfo = $.map(clef.system.getPitchedElements({clef: clef}), function(e) {
             if (e instanceof Toe.Model.Neume) {
                 var pitchInfo = new Array();
                 $.each(e.components, function(nInd, n) {
@@ -652,20 +658,20 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
 
     var deleteClef = function(drawing) {
         var clef = drawing.eleRef;
-        var staff = clef.staff;
+        var system = clef.system;
 
         // get previous acting clef
         //  (NOTE: this should always be defined
         // since the first clef on a system is not allowed to be deleted)
-        var pClef = staff.getPreviousClef(clef);
+        var pClef = system.getPreviousClef(clef);
 
         // get references to pitched elements that will be changed after
         // the clef is deleted.
-        var pitchedEles = staff.getPitchedElements(clef);
+        var pitchedEles = system.getPitchedElements(clef);
 
         // now delete the clef, and update the pitch information of these elements
-        staff.removeElementByRef(clef);
-        staff.updatePitchedElements(pClef);
+        system.removeElementByRef(clef);
+        system.updatePitchedElements(pClef);
 
         // gather the pitch information of the pitched notes
         var pitchInfo = $.map(pitchedEles, function(e) {
@@ -700,23 +706,23 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     var deleteNeume = function(drawing) {
         var neume = drawing.eleRef;
 
-        var neumesOnStaff = neume.staff.getPitchedElements({neumes: true, custos: false});
+        var neumesOnSystem = neume.system.getPitchedElements({neumes: true, custos: false});
 
-        neume.staff.removeElementByRef(neume);
+        neume.system.removeElementByRef(neume);
         toDelete.nids.push(neume.id);
 
         gui.rendEng.canvas.discardActiveObject();
 
-        if (neumesOnStaff.length == 1) {
-            // there are no neumes left on the staff
-            // remove the custos from the previous staff
-            var prevStaff = gui.page.getPreviousSystem(neume.staff);
-            if (prevStaff && prevStaff.custos) {
-                prevStaff.custos.eraseDrawing();
-                prevStaff.removeElementByRef(prevStaff.custos);
+        if (neumesOnSystem.length == 1) {
+            // there are no neumes left on the system
+            // remove the custos from the previous system
+            var prevSystem = gui.page.getPreviousSystem(neume.system);
+            if (prevSystem && prevSystem.custos) {
+                prevSystem.custos.eraseDrawing();
+                prevSystem.removeElementByRef(prevSystem.custos);
 
                 // send the custos delete command to the server to update the underlying MEI
-                $.post(gui.apiprefix + "/delete/custos", {ids: prevStaff.custos.id})
+                $.post(gui.apiprefix + "/delete/custos", {ids: prevSystem.custos.id})
                 .error(function() {
                     // show alert to user
                     // replace text with error message
@@ -724,25 +730,25 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
                     $("#alert").animate({opacity: 1.0}, 100);
                 });
 
-                prevStaff.custos = null;
+                prevSystem.custos = null;
             }
         }
-        else if (neume == neumesOnStaff[0]) {
-            // if this neume is the first neume on the staff
-            // update the custos of the previous staff
-            var prevStaff = gui.page.getPreviousSystem(neume.staff);
-            if (prevStaff && prevStaff.custos) {
-                var custos = prevStaff.custos;
-                var nextNeume = neumesOnStaff[1];
+        else if (neume == neumesOnSystem[0]) {
+            // if this neume is the first neume on the system
+            // update the custos of the previous system
+            var prevSystem = gui.page.getPreviousSystem(neume.system);
+            if (prevSystem && prevSystem.custos) {
+                var custos = prevSystem.custos;
+                var nextNeume = neumesOnSystem[1];
                 var newPname = nextNeume.components[0].pname;
                 var newOct = nextNeume.components[0].oct;
                 
-                var actingClef = prevStaff.getActingClefByEle(custos);
-                var newStaffPos = prevStaff.calcStaffPosFromPitch(newPname, newOct, actingClef);
+                var actingClef = prevSystem.getActingClefByEle(custos);
+                var newSystemPos = prevSystem.calcSystemPosFromPitch(newPname, newOct, actingClef);
 
                 custos.pname = newPname;
                 custos.oct = newOct;
-                custos.setRootStaffPos(newStaffPos);
+                custos.setRootSystemPos(newSystemPos);
 
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
@@ -763,7 +769,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     var deleteDivision = function(drawing) {
         var division = drawing.eleRef;
 
-        division.staff.removeElementByRef(division);
+        division.system.removeElementByRef(division);
         toDelete.dids.push(division.id);
 
         gui.rendEng.canvas.remove(drawing);
@@ -773,8 +779,8 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     var deleteCustos = function(drawing) {
         var custos = drawing.eleRef;
 
-        custos.staff.removeElementByRef(custos);
-        custos.staff.custos = null;
+        custos.system.removeElementByRef(custos);
+        custos.system.custos = null;
         toDelete.cids.push(custos.id);
 
         gui.rendEng.canvas.remove(drawing);
@@ -784,7 +790,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     var selection = gui.rendEng.canvas.getActiveObject();
     if (selection) {
         // ignore the first clef, since this should never be deleted
-        if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.staff.elements[0] != selection.eleRef) {
+        if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements[0] != selection.eleRef) {
             deleteClef(selection);
         }
         else if (selection.eleRef instanceof Toe.Model.Neume) {
@@ -805,7 +811,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
             // group of elements selected
             $.each(selection.getObjects(), function(oInd, o) {
                 // ignore the first clef, since this should never be deleted
-                if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.staff.elements[0] != o.eleRef) {
+                if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.system.elements[0] != o.eleRef) {
                     deleteClef(o);
                 }
                 else if (o.eleRef instanceof Toe.Model.Neume) {
@@ -875,16 +881,16 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var selection = gui.rendEng.canvas.getActiveGroup();
     if (selection) {
         // there is something selected
-        // make sure there are at least 2 neumes on the same staff to work with
+        // make sure there are at least 2 neumes on the same system to work with
         var neumes = new Array();
         var sModel = null;
         $.each(selection.getObjects(), function (oInd, o) {
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
-                    sModel = o.eleRef.staff;
+                    sModel = o.eleRef.system;
                 }
 
-                if (o.eleRef.staff == sModel) {
+                if (o.eleRef.system == sModel) {
                     neumes.push(o);
                 }
             }
@@ -1011,14 +1017,14 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
         var ulx = o.eleRef.zone.ulx;
 
         // remove the old neume
-        o.eleRef.staff.removeElementByRef(o.eleRef);
+        o.eleRef.system.removeElementByRef(o.eleRef);
         gui.rendEng.canvas.remove(o);
 
         $.each(o.eleRef.components, function(ncInd, nc) {
             var newPunct = new Toe.Model.SquareNoteNeume();
             newPunct.components.push(nc);
 
-            var uly = o.eleRef.staff.zone.uly - (o.eleRef.rootStaffPos + nc.pitchDiff)*o.eleRef.staff.delta_y/2 - gui.punctHeight/2;
+            var uly = o.eleRef.system.zone.uly - (o.eleRef.rootSystemPos + nc.pitchDiff)*o.eleRef.system.delta_y/2 - gui.punctHeight/2;
             // set the bounding box hint of the new neume for drawing
             var bb = [ulx+(ncInd*gui.punctWidth), uly, ulx+((ncInd+1)*gui.punctWidth), uly+gui.punctHeight];
             newPunct.setBoundingBox(bb);
@@ -1027,8 +1033,8 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
             var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
             var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
 
-            // add the punctum to the staff and draw it
-            o.eleRef.staff.addNeume(newPunct);
+            // add the punctum to the system and draw it
+            o.eleRef.system.addNeume(newPunct);
 
             // get final bounding box information
             var outbb = gui.getOutputBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
@@ -1209,9 +1215,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
         // if this is the first neume on a system, update the custos of the next system
         if (nInd == 1) {
-            var prevStaff = gui.page.getPreviousSystem(sModel);
-            if (prevStaff) {
-                gui.handleUpdatePrevCustos(pname, oct, prevStaff);
+            var prevSystem = gui.page.getPreviousSystem(sModel);
+            if (prevSystem) {
+                gui.handleUpdatePrevCustos(pname, oct, prevSystem);
             }
         }
 
@@ -1616,9 +1622,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         // calculate snapped coordinates on the system
         var snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
 
-        var staffPos = Math.round((system.zone.uly - snapCoords.y) / (system.delta_y/2));
+        var systemPos = Math.round((system.zone.uly - snapCoords.y) / (system.delta_y/2));
 
-        var clef = new Toe.Model.Clef(cShape, {"staffPos": staffPos});
+        var clef = new Toe.Model.Clef(cShape, {"systemPos": systemPos});
 
         // update bounding box with physical position on page
         var ulx = snapCoords.x - gui.clefDwg.currentWidth/2;
@@ -1633,9 +1639,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         // mount clef on the system
         var nInd = system.addClef(clef);
 
-        var staffLine = system.props.numLines + staffPos/2;
+        var systemLine = system.props.numLines + systemPos/2;
         var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
-        var args = {shape: cShape, line: staffLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+        var args = {shape: cShape, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
         if (nInd + 1 < system.elements.length) {
             args["beforeid"] = system.elements[nInd+1].id;
@@ -1646,15 +1652,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             args["beforeid"] = sNextModel.id;
         }
 
-        var neumesOnStaff = system.getPitchedElements({neumes: true, custos: false});
-        if (neumesOnStaff.length > 0 && system.getActingClefByEle(neumesOnStaff[0]) == clef) {
+        var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});
+        if (neumesOnSystem.length > 0 && system.getActingClefByEle(neumesOnSystem[0]) == clef) {
             // if the shift of the clef has affected the first neume on this system
             // update the custos on the previous system
-            var prevStaff = gui.page.getPreviousSystem(system);
-            if (prevStaff) {
-                var newPname = neumesOnStaff[0].components[0].pname;
-                var newOct = neumesOnStaff[0].components[0].oct;
-                gui.handleUpdatePrevCustos(newPname, newOct, prevStaff);
+            var prevSystem = gui.page.getPreviousSystem(system);
+            if (prevSystem) {
+                var newPname = neumesOnSystem[0].components[0].pname;
+                var newOct = neumesOnSystem[0].components[0].oct;
+                gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
             }
         }
 
@@ -1742,15 +1748,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     $("#rad_doh").trigger("click");
 }
 
-Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname, oct, prevStaff) {
-    var custos = prevStaff.custos;
+Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname, oct, prevSystem) {
+    var custos = prevSystem.custos;
     if (custos) {
         // update the custos
         custos.setRootNote(pname, oct);
         
         // get acting clef for the custos 
-        var actingClef = prevStaff.getActingClefByEle(custos);
-        custos.setRootStaffPos(prevStaff.calcStaffPosFromPitch(pname, oct, actingClef));
+        var actingClef = prevSystem.getActingClefByEle(custos);
+        custos.setRootSystemPos(prevSystem.calcSystemPosFromPitch(pname, oct, actingClef));
         var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
         $.post(this.apiprefix + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
         .error(function() {
@@ -1765,8 +1771,8 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         var cModel = new Toe.Model.Custos(pname, oct);
 
         // create bounding box hint
-        var ulx = prevStaff.zone.lrx - gui.punctWidth/2;
-        var uly = prevStaff.zone.uly; // probably not correct, but sufficient for the hint
+        var ulx = prevSystem.zone.lrx - gui.punctWidth/2;
+        var uly = prevSystem.zone.uly; // probably not correct, but sufficient for the hint
         var bb = [ulx, uly, ulx + gui.punctWidth, uly + gui.punctHeight];
         cModel.setBoundingBox(bb);
 
@@ -1774,16 +1780,16 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         var cView = new Toe.View.CustosView(gui.rendEng);
         var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
 
-        // mount the custos on the staff
-        prevStaff.setCustos(cModel);
+        // mount the custos on the system
+        prevSystem.setCustos(cModel);
 
         var outbb = this.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
         var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
-        // get id of the next staff element
-        var nextStaff = gui.page.getNextSystem(prevStaff);
-        if (nextStaff) {
-            args["beforeid"] = nextStaff.id;
+        // get id of the next system element
+        var nextSystem = gui.page.getNextSystem(prevSystem);
+        if (nextSystem) {
+            args["beforeid"] = nextSystem.id;
         }
 
         // update underlying MEI file

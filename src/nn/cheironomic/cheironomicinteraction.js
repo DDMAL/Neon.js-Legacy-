@@ -146,12 +146,12 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
-                    sModel = o.eleRef.staff;
+                    sModel = o.eleRef.system;
                 }
                 
                 toUngroup++;
 
-                if (o.eleRef.staff == sModel) {
+                if (o.eleRef.system == sModel) {
                     toNeumify++;
                 }
             }
@@ -301,7 +301,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
                 // move neume
                 if (ele instanceof Toe.Model.Neume) {
-                    // snap to staff
+                    // snap to system
                     var finalCoords = {x: element.left, y: element.top};
                     var sModel = gui.page.getClosestSystem(finalCoords);
                     var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele, y: false});
@@ -315,9 +315,9 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
                     // remove the old neume
                     $(ele).trigger("vEraseDrawing");
-                    ele.staff.removeElementByRef(ele);
+                    ele.system.removeElementByRef(ele);
      
-                    // mount the new neume on the most appropriate staff
+                    // mount the new neume on the most appropriate system
                     var nInd = sModel.addNeume(ele);
                     if (elements.length == 1) {
                         $(ele).trigger("vSelectDrawing");
@@ -332,7 +332,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                         args["beforeid"] = sModel.elements[nInd+1].id;
                     }
                     else {
-                        // insert before the next system break (staff)
+                        // insert before the next system break (system)
                         var sNextModel = gui.page.getNextSystem(sModel);
                         args["beforeid"] = sNextModel.id;
                     }
@@ -492,7 +492,7 @@ Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {
     var deleteNeume = function(drawing) {
         var neume = drawing.eleRef;
 
-        neume.staff.removeElementByRef(neume);
+        neume.system.removeElementByRef(neume);
         nids.push(neume.id);
 
         gui.rendEng.canvas.discardActiveObject();
@@ -546,16 +546,16 @@ Toe.View.CheironomicInteraction.prototype.handleNeumify = function(e) {
     var selection = gui.rendEng.canvas.getActiveGroup();
     if (selection) {
         // there is something selected
-        // make sure there are at least 2 neumes on the same staff to work with
+        // make sure there are at least 2 neumes on the same system to work with
         var neumes = new Array();
         var sModel = null;
         $.each(selection.getObjects(), function (oInd, o) {
             if (o.eleRef instanceof Toe.Model.Neume) {
                 if (!sModel) {
-                    sModel = o.eleRef.staff;
+                    sModel = o.eleRef.system;
                 }
 
-                if (o.eleRef.staff == sModel) {
+                if (o.eleRef.system == sModel) {
                     neumes.push(o);
                 }
             }
@@ -707,7 +707,7 @@ Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
         var ulx = o.eleRef.zone.ulx;
 
         // remove the old neume
-        o.eleRef.staff.removeElementByRef(o.eleRef);
+        o.eleRef.system.removeElementByRef(o.eleRef);
         gui.rendEng.canvas.remove(o);
 
         $.each(o.eleRef.components, function(ncInd, nc) {
@@ -727,8 +727,8 @@ Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
             var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
             var nCtrl = new Toe.Ctrl.NeumeController(newPunct, nView);
 
-            // add the punctum to the staff and draw it
-            o.eleRef.staff.addNeume(newPunct);
+            // add the punctum to the system and draw it
+            o.eleRef.system.addNeume(newPunct);
 
             // get final bounding box information
             var outbb = gui.getOutputBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
@@ -946,7 +946,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
         var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
         var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
         
-        // mount neume on the staff
+        // mount neume on the system
         var nInd = sModel.addNeume(nModel);
 
         // now that final bounding box is calculated from the drawing
@@ -962,7 +962,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
             args["beforeid"] = sModel.elements[nInd+1].id;
         }
         else {
-            // insert before the next system break (staff)
+            // insert before the next system break (system)
             var sNextModel = gui.page.getNextSystem(sModel);
             if (sNextModel) {
                 args["beforeid"] = sNextModel.id;

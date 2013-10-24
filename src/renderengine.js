@@ -81,17 +81,17 @@ Toe.View.RenderEngine.prototype.getGlyph = function(svgKey) {
     return this.glyphs[svgKey];
 }
 
-Toe.View.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
+Toe.View.RenderEngine.prototype.calcScaleFromSystem = function(aSystem, options) {
 	opts = {
 		overwrite: false
 	};
 
 	$.extend(opts, options);
 
-	var delta_y = staff.zone.lry - staff.zone.uly;
-	var height = delta_y / (staff.props.numLines-1);
+	var delta_y = aSystem.zone.lry - aSystem.zone.uly;
+	var height = delta_y / (aSystem.props.numLines-1);
  
-	// clef spans 2 stafflines with 40% height (pixels) verticle buffer, 20% on each space
+	// clef spans 2 lines with 40% height (pixels) verticle buffer, 20% on each space
 	height = (height * 2) - (0.65*height);
 
 	var glyph = this.getGlyph("c_clef").clone();
@@ -111,7 +111,7 @@ Toe.View.RenderEngine.prototype.calcScaleFromStaff = function(staff, options) {
  * be an elementary neume such as a punctum, such that the scaling of the individual 
  * SVG glyph can be calculated from the bounding box of the neume from the MEI document.
  * This is the method of calculating the glyph scaling for staffless neume
- * notation, where the distance between stafflines is not available to calculate the 
+ * notation, where the distance between lines is not available to calculate the 
  * proper glyph scalings.
  */
 Toe.View.RenderEngine.prototype.calcScaleFromNeume = function(neume, options) {

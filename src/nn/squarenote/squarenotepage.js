@@ -104,9 +104,9 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         sModel.setOrderNumber(parseInt($(sel).attr("n")));
         sModel.setSystemID(sbref);
 
-        // set global scale using staff from first system
+        // set global scale using system from first system
         if (sit == 0) {
-            rendEng.calcScaleFromStaff(sModel, {overwrite: true});
+            rendEng.calcScaleFromSystem(sModel, {overwrite: true});
         }
 
         // instantiate system view and controller
@@ -117,16 +117,16 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         // load all clefs in the system
         $(clefList).slice(clef_sbInd[sit]+1, clef_sbInd[sit+1]).each(function(cit, cel) {
             var clefShape = $(cel).attr("shape");
-            var clefStaffLine = parseInt($(cel).attr("line"));
+            var clefSystemLine = parseInt($(cel).attr("line"));
 
-            // convert mei line attribute to staffPos attribute used in the internal clef Model
-            var staffPos = -(sModel.props.numLines - clefStaffLine) * 2;
+            // convert mei line attribute to systemPos attribute used in the internal clef Model
+            var systemPos = -(sModel.props.numLines - clefSystemLine) * 2;
 
             var clefFacsId = $(cel).attr("facs");
             var clefFacs = $(surface).find("zone[xml\\:id=" + clefFacsId + "]")[0];
             var c_bb = page.parseBoundingBox(clefFacs);
 
-            var cModel = new Toe.Model.Clef(clefShape, {"staffPos": staffPos});
+            var cModel = new Toe.Model.Clef(clefShape, {"systemPos": systemPos});
             cModel.setID($(cel).attr("xml:id"));
             cModel.setBoundingBox(c_bb);
 
@@ -134,7 +134,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
             var cView = new Toe.View.ClefView(rendEng);
             var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
 
-            // mount clef on the staff
+            // mount clef on the system
             sModel.addClef(cModel);
         });
 
@@ -149,7 +149,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
             var nView = new Toe.View.NeumeView(rendEng, page.documentType);
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
-            // mount neume on the staff
+            // mount neume on the system
             sModel.addNeume(nModel);
         });
 
@@ -167,7 +167,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
             var dView = new Toe.View.DivisionView(rendEng);
             var dCtrl = new Toe.Ctrl.DivisionController(dModel, dView);
 
-            // mount the division on the staff
+            // mount the division on the system
             sModel.addDivision(dModel);
         });
 
@@ -188,7 +188,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
             var cView = new Toe.View.CustosView(rendEng);
             var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
 
-            // mount the custos on the staff
+            // mount the custos on the system
             sModel.setCustos(cModel);
         });
     });

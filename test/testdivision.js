@@ -2,7 +2,7 @@
     module("Division");
   
     // <zone xml:id="m-0ac66c2a-bebd-493a-94bc-cfa2a0ba0489" lry="406" lrx="1450" uly="302" ulx="190"/>
-    var staff_bb = [190, 302, 406, 1450];
+    var system_bb = [190, 302, 406, 1450];
     // <zone xml:id="m-abdc88db-ac94-4153-8575-ac86b7afa75e" ulx="503" uly="320" lrx="505" lry="388"/>
     var division_bb = [503, 320, 505, 388];
 
@@ -18,7 +18,7 @@
         equal(dModel.type, Toe.Model.Division.Type.div_small);
         deepEqual(dModel.zone, new Object());
         equal(dModel.id, null);
-        equal(dModel.staff, null);
+        equal(dModel.system, null);
 
         var dModel = new Toe.Model.Division("div_minor");
         equal(dModel.key, "div_minor");
@@ -66,17 +66,17 @@
         equal(dModel.id, 42);
     });
 
-    test("Set Staff", function() {
+    test("Set System", function() {
         var dModel = new Toe.Model.Division("div_final");
-        var sModel = new Toe.Model.Staff(staff_bb);
+        var sModel = new Toe.Model.System(system_bb);
 
-        dModel.setStaff(sModel);
+        dModel.setSystem(sModel);
 
-        equal(dModel.staff, sModel);
+        equal(dModel.system, sModel);
 
-        // test object is not a staff
+        // test object is not a system
         raises(function() {
-            dModel.setStaff(new Object());
+            dModel.setSystem(new Object());
         });
     });
 

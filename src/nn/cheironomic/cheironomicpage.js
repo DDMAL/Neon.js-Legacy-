@@ -62,9 +62,9 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
     $(sbInds).each(function(sit, sel) {
         var neumes = $(eles).slice(prevInd, sel);
 
-        // create staff with no stafflines as a container for the neumes
+        // create system with no lines as a container for the neumes
         var s_bb = [0,0,0,0];
-        var sModel = new Toe.Model.CheironomicStaff(s_bb, {numLines: 0});
+        var sModel = new Toe.Model.CheironomicSystem(s_bb, {numLines: 0});
         var sbID = null;
         if (sit == 0) {
             sbID = $(section).attr("xml:id");
@@ -74,7 +74,7 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
         }
         sModel.setID(sbID);
 
-        // instantiate staff view and controller
+        // instantiate system view and controller
         var sView = new Toe.View.SystemView(rendEng);
         var sCtrl = new Toe.Ctrl.SystemController(sModel, sView);
         page.addSystem(sModel);
@@ -86,7 +86,7 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
             var neumeFacs = $(surface).find("zone[xml\\:id=" + $(nel).attr("facs") + "]")[0];
             var n_bb = page.parseBoundingBox(neumeFacs);
             
-            // track upper and lower y-position bounds of staff container
+            // track upper and lower y-position bounds of system container
             if (n_bb[1] < uly_lb) {
                 uly_lb = n_bb[1];
             }
@@ -100,16 +100,16 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
             // derive global scale from dimensions of the first neume
-            // since it can't be figured out from the intra-staffline distance
+            // since it can't be figured out from the intra-line distance
             if (sit == 0 && nit == 0) {
                 rendEng.calcScaleFromNeume(nModel, {overwrite: true});
             }
 
-            // mount neume on the staff
+            // mount neume on the system
             sModel.addNeume(nModel, {justPush: true});
         });
 
-        // update bounding box of staff container based on contents
+        // update bounding box of system container based on contents
         if (sModel.elements.length) {
             var ulx = sModel.elements[0].zone.ulx;
             var lrx = sModel.elements[sModel.elements.length-1].zone.lrx;

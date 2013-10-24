@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a square-note notation system with stafflines
+ * Creates a square-note notation system with lines
  * @class Represents a System
  * 
  * @param {Array} bb [ulx, uly, lrx, lry] system bounding box
@@ -32,7 +32,7 @@ THE SOFTWARE.
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
  *
- * The system has list of elements on the staff, sorted by horizontal position.
+ * The system has list of elements on the system, sorted by horizontal position.
  */
 Toe.Model.SquareNoteSystem = function(bb, options) {
     // call super constructor
@@ -77,10 +77,10 @@ Toe.Model.SquareNoteSystem.prototype.getPitchedElements = function(options) {
 }
 
 // calculate pitch info of pitched element on this system
-// from its staff position.
-Toe.Model.SquareNoteSystem.prototype.calcPitchFromStaffPos = function(staffPos, actingClef) {
+// from its system position.
+Toe.Model.SquareNoteSystem.prototype.calcPitchFromSystemPos = function(aSystemPos, actingClef) {
     // calculate difference from clef position
-    var yStep = staffPos - actingClef.props.staffPos;
+    var yStep = aSystemPos - actingClef.props.systemPos;
 
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
@@ -113,9 +113,9 @@ Toe.Model.SquareNoteSystem.prototype.calcPitchFromStaffPos = function(staffPos, 
     return {pname: pname, oct: oct};
 }
 
-// Calculate staff position of note on the staff from pitch information.
-// This is the inverse function of @see calcPitchFromStaffPos
-Toe.Model.SquareNoteSystem.prototype.calcStaffPosFromPitch = function(pname, oct, actingClef) {
+// Calculate system position of note on the system from pitch information.
+// This is the inverse function of @see calcPitchFromSystemPos
+Toe.Model.SquareNoteSystem.prototype.calcSystemPosFromPitch = function(pname, oct, actingClef) {
     var clefOct = 4;
     if (actingClef.shape == "f") {
         clefOct = 3;
@@ -134,8 +134,8 @@ Toe.Model.SquareNoteSystem.prototype.calcStaffPosFromPitch = function(pname, oct
         clefDiff += numChroma;
     }
 
-    var staffPos = actingClef.props.staffPos + clefDiff;
-    return staffPos;
+    var systemPos = actingClef.props.systemPos + clefDiff;
+    return systemPos;
 }
 
 /**
@@ -143,12 +143,12 @@ Toe.Model.SquareNoteSystem.prototype.calcStaffPosFromPitch = function(pname, oct
  * Coords should be snapped to line/space already! @see Toe.Model.System.getSystemSnapCoordinates
  */
 Toe.Model.SquareNoteSystem.prototype.calcPitchFromCoords = function(coords) {
-    var staffPos = Math.round((this.zone.uly - coords.y) / (this.delta_y/2));
+    var systemPos = Math.round((this.zone.uly - coords.y) / (this.delta_y/2));
 
     // get acting clef
     var actingClef = this.getActingClefByCoords(coords);
     
-    return this.calcPitchFromStaffPos(staffPos, actingClef);
+    return this.calcPitchFromSystemPos(systemPos, actingClef);
 }
 
 // if clef given, update from this clef to the next clef
@@ -162,7 +162,7 @@ Toe.Model.SquareNoteSystem.prototype.updatePitchedElements = function(options) {
 
     $.extend(opts, options);
 
-    var staff = this;
+    var system = this;
 
     // update pitched elements from the given clef to the next clef
     if (opts.clef) {
@@ -172,13 +172,13 @@ Toe.Model.SquareNoteSystem.prototype.updatePitchedElements = function(options) {
         // (meaning we are not to overwrite its pitch content), then we need to shift
         // the custos drawing accordingly
         if (this.custos && pitchedEles[pitchedEles.length-1] == this.custos && !opts.custos) {
-            var newStaffPos = this.calcStaffPosFromPitch(this.custos.pname, this.custos.oct, opts.clef);
-            this.custos.setRootStaffPos(newStaffPos);
+            var newSystemPos = this.calcSystemPosFromPitch(this.custos.pname, this.custos.oct, opts.clef);
+            this.custos.setRootSystemPos(newSystemPos);
             pitchedEles.pop();
         }
 
         $.each(pitchedEles, function(eInd, e) {
-            staff.updateElePitchInfo(e, {clef: opts.clef});
+            system.updateElePitchInfo(e, {clef: opts.clef});
         });
     }
     else {
@@ -188,11 +188,11 @@ Toe.Model.SquareNoteSystem.prototype.updatePitchedElements = function(options) {
                 curClef = e;
             }
             else if (curClef && ((e instanceof Toe.Model.Neume && opts.neumes) || (e == this.custos && opts.custos))) {
-                staff.updateElePitchInfo(e, {clef: curClef});
+                system.updateElePitchInfo(e, {clef: curClef});
             }
             else if (this.custos && e == this.custos && !opts.custos) {
-                var newStaffPos = this.calcStaffPosFromPitch(this.custos.pname, this.custos.oct, curClef);
-                this.custos.setRootStaffPos(newStaffPos);
+                var newSystemPos = this.calcSystemPosFromPitch(this.custos.pname, this.custos.oct, curClef);
+                this.custos.setRootSystemPos(newSystemPos);
             }
         });
     }
@@ -210,19 +210,19 @@ Toe.Model.SquareNoteSystem.prototype.updateElePitchInfo = function(pitchedEle, o
         opts.clef = this.getActingClefByEle(pitchedEle);
     }
 
-    var staff = this;
+    var system = this;
     if (pitchedEle instanceof Toe.Model.Neume) {
         $.each(pitchedEle.components, function(ncInd, nc) {
-            var staffPos = pitchedEle.rootStaffPos + nc.pitchDiff;
-            var pitchInfo = staff.calcPitchFromStaffPos(staffPos, opts.clef);
+            var systemPos = pitchedEle.rootSystemPos + nc.pitchDiff;
+            var pitchInfo = system.calcPitchFromSystemPos(systemPos, opts.clef);
 
             // update the pitch information
             nc.setPitchInfo(pitchInfo["pname"], pitchInfo["oct"]);
         });
     }
     else if (pitchedEle instanceof Toe.Model.Custos) {
-        var staffPos = pitchedEle.rootStaffPos;
-        var pitchInfo = this.calcPitchFromStaffPos(staffPos, opts.clef);
+        var systemPos = pitchedEle.rootSystemPos;
+        var pitchInfo = this.calcPitchFromSystemPos(systemPos, opts.clef);
 
         // update the pitch information
         pitchedEle.setRootNote(pitchInfo["pname"], pitchInfo["oct"]);
@@ -230,7 +230,7 @@ Toe.Model.SquareNoteSystem.prototype.updateElePitchInfo = function(pitchedEle, o
 }
 
 /**
- * Mounts the clef on the staff
+ * Mounts the clef on the system
  *
  * @methodOf Toe.Model.SquareNoteSystem
  * @param {Toe.Model.Clef} clef The clef to mount
@@ -247,7 +247,7 @@ Toe.Model.SquareNoteSystem.prototype.addClef = function(clef, options) {
 
     $.extend(opts, options);
 
-    // insert neume into list of sorted staff elements
+    // insert neume into list of sorted system elements
     var nInd = null;
     if (opts.justPush) {
         this.elements.push(clef);
@@ -276,7 +276,7 @@ Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
     var clef = this.getActingClefByCoords({x: custos.zone.ulx});
     if (clef) {
         // calculate pitch difference in relation to the clef
-        custos.rootStaffPos = this.calcStaffPosFromPitch(custos.pname, custos.oct, clef);
+        custos.rootSystemPos = this.calcSystemPosFromPitch(custos.pname, custos.oct, clef);
 
         // custos should always be at the end
         // if a custos exists already, replace it
@@ -301,14 +301,14 @@ Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
 }
 
 /**
- * Mounts a neume on the staff
+ * Mounts a neume on the system
  *
  * @methodOf Toe.Model.SquareNoteSystem
  * @param {Toe.Model.Neume} neume The neume to mount
  * @params {Options} options {justPush: just push to the elements array (don't bother with sorted insert.
                               This option is for inserting from MEI, since elements are in order in MEI 
                               document already. Faster load times.)}
- * @return {Number} ind index of element on the staff
+ * @return {Number} ind index of element on the system
  */
 Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
     // check argument is a neume
@@ -326,16 +326,16 @@ Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
     if (clef) {
         // update neume root note difference
         var rootPitchInfo = neume.getRootPitchInfo();
-        neume.rootStaffPos = this.calcStaffPosFromPitch(neume.components[0].pname, neume.components[0].oct, clef);
+        neume.rootSystemPos = this.calcSystemPosFromPitch(neume.components[0].pname, neume.components[0].oct, clef);
 
         // update pitch differences (wrt. root note) of each note within the neume
         neume.components[0].setPitchDifference(0);
         for (var i = 1; i < neume.components.length; i++) {
             var nc = neume.components[i];
-            nc.setPitchDifference(this.calcStaffPosFromPitch(nc.pname, nc.oct, clef) - neume.rootStaffPos);
+            nc.setPitchDifference(this.calcSystemPosFromPitch(nc.pname, nc.oct, clef) - neume.rootSystemPos);
         }
 
-        // insert neume into list of sorted staff elements
+        // insert neume into list of sorted system elements
         var nInd = null;
         if (opts.justPush) {
             this.elements.push(neume);
@@ -374,7 +374,7 @@ Toe.Model.SquareNoteSystem.prototype.addDivision = function(division, options) {
 
     $.extend(opts, options);
 
-    // insert division into list of sorted staff elements
+    // insert division into list of sorted system elements
     var nInd = null;
     if (opts.justPush) {
         this.elements.push(division);

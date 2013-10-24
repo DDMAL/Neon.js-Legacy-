@@ -32,9 +32,9 @@ Toe.Model.SquareNoteNeume = function(options) {
     // call super constructor
     Toe.Model.Neume.call(this, options);
 
-    // staff position of the root note of the neume
-    // this is set when the neume is mounted onto a staff
-    this.rootStaffPos = null;
+    // system position of the root note of the neume
+    // this is set when the neume is mounted onto a system
+    this.rootSystemPos = null;
 }
 
 // inherit prototype from generic neume model
@@ -71,21 +71,21 @@ Toe.Model.SquareNoteNeume.prototype.getPitchInfo = function() {
 }
 
 /**
- * Sets the staff position of the root note
+ * Sets the system position of the root note
  */
-Toe.Model.SquareNoteNeume.prototype.setRootStaffPos = function(staffPos) {
-    if (this.rootStaffPos == staffPos) {
+Toe.Model.SquareNoteNeume.prototype.setRootSystemPos = function(aSystemPos) {
+    if (this.rootSystemPos == aSystemPos) {
         return;
     }
 
-    this.rootStaffPos = staffPos;
+    this.rootSystemPos = aSystemPos;
 
-    var actingClef = this.staff.getActingClefByEle(this);
-    var pitchInfo = this.staff.calcPitchFromStaffPos(this.rootStaffPos, actingClef);
+    var actingClef = this.system.getActingClefByEle(this);
+    var pitchInfo = this.system.calcPitchFromSystemPos(this.rootSystemPos, actingClef);
     var neume = this;
     $.each(this.components, function(ncInd, nc) {
-        var staffPos = neume.rootStaffPos + nc.pitchDiff;
-        var pitchInfo = neume.staff.calcPitchFromStaffPos(staffPos, actingClef);
+        var aSystemPos = neume.rootSystemPos + nc.pitchDiff;
+        var pitchInfo = neume.system.calcPitchFromSystemPos(aSystemPos, actingClef);
 
         // update the pitch information
         nc.setPitchInfo(pitchInfo["pname"], pitchInfo["oct"]);
