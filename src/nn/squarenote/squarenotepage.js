@@ -112,7 +112,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         // instantiate staff view and controller
         var sView = new Toe.View.SystemView(rendEng);
         var sCtrl = new Toe.Ctrl.SystemController(sModel, sView);
-        page.addStaff(sModel);
+        page.addSystem(sModel);
 
         // load all clefs in the system
         $(clefList).slice(clef_sbInd[sit]+1, clef_sbInd[sit+1]).each(function(cit, cel) {

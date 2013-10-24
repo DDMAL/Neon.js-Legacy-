@@ -303,7 +303,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                 if (ele instanceof Toe.Model.Neume) {
                     // snap to staff
                     var finalCoords = {x: element.left, y: element.top};
-                    var sModel = gui.page.getClosestStaff(finalCoords);
+                    var sModel = gui.page.getClosestSystem(finalCoords);
                     var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele, y: false});
 
                     // set the bounding box hint for the neume
@@ -333,7 +333,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
                     }
                     else {
                         // insert before the next system break (staff)
-                        var sNextModel = gui.page.getNextStaff(sModel);
+                        var sNextModel = gui.page.getNextSystem(sModel);
                         args["beforeid"] = sNextModel.id;
                     }
 
@@ -905,7 +905,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
     // deal with punctum insert
     gui.rendEng.canvas.observe('mouse:up', function(e) {
         var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
-        var sModel = gui.page.getClosestStaff(coords);
+        var sModel = gui.page.getClosestSystem(coords);
 
         // instantiate a punctum
         var nModel = new Toe.Model.CheironomicNeume();
@@ -963,7 +963,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
         }
         else {
             // insert before the next system break (staff)
-            var sNextModel = gui.page.getNextStaff(sModel);
+            var sNextModel = gui.page.getNextSystem(sModel);
             if (sNextModel) {
                 args["beforeid"] = sNextModel.id;
             }

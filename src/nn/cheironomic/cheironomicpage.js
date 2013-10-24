@@ -77,7 +77,7 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
         // instantiate staff view and controller
         var sView = new Toe.View.SystemView(rendEng);
         var sCtrl = new Toe.Ctrl.SystemController(sModel, sView);
-        page.addStaff(sModel);
+        page.addSystem(sModel);
 
         var uly_lb = Number.MAX_VALUE;
         var lry_ub = 0;

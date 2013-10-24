@@ -257,7 +257,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // snap release position to line/space
                     var snappedCoords = ele.staff.getSystemSnapCoordinates({x: left, y: top}, null, {ignoreEle: ele});
 
-                    // TODO clefs moving to different staves?
+                    // TODO clefs moving to different systems?
 
                     // get staff position of snapped coordinates
                     var staffPos = -Math.round((snappedCoords.y - ele.staff.zone.uly) / (ele.staff.delta_y/2));
@@ -268,7 +268,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     if (neumesOnStaff.length > 0 && ele.staff.getActingClefByEle(neumesOnStaff[0]) == ele) {
                         // if the shift of the clef has affected the first neume on this staff
                         // update the custos on the previous staff
-                        var prevStaff = gui.page.getPreviousStaff(ele.staff);
+                        var prevStaff = gui.page.getPreviousSystem(ele.staff);
                         if (prevStaff) {
                             var newPname = neumesOnStaff[0].components[0].pname;
                             var newOct = neumesOnStaff[0].components[0].oct;
@@ -328,7 +328,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     var nc_y = ele.staff.zone.uly - ele.rootStaffPos*ele.staff.delta_y/2;
                     var finalCoords = {x: left, y: nc_y - delta_y};
 
-                    var sModel = gui.page.getClosestStaff(finalCoords);
+                    var sModel = gui.page.getClosestSystem(finalCoords);
                     
                     // snap to staff
                     var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
@@ -369,7 +369,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
                         // if this element is the first neume on the staff
                         if (ele == sModel.elements[1]) {
-                            var prevStaff = gui.page.getPreviousStaff(sModel);
+                            var prevStaff = gui.page.getPreviousSystem(sModel);
                             if (prevStaff) {
                                 var cPname = ele.components[0].pname;
                                 var cOct = ele.components[0].oct;
@@ -387,7 +387,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     }
                     else {
                         // insert before the next system break (staff)
-                        var sNextModel = gui.page.getNextStaff(sModel);
+                        var sNextModel = gui.page.getNextSystem(sModel);
                         args["beforeid"] = sNextModel.id;
                     }
 
@@ -413,7 +413,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     var finalCoords = {x: left, y: top};
                     
                     // get closest staff
-                    var staff = gui.page.getClosestStaff(finalCoords);
+                    var staff = gui.page.getClosestSystem(finalCoords);
 
                     var snapCoords = staff.getSystemSnapCoordinates(finalCoords, element.currentWidth, {x: true, y: false});
 
@@ -456,7 +456,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     }
                     else {
                         // insert before the next system break staff
-                        var sNextModel = gui.page.getNextStaff(staff);
+                        var sNextModel = gui.page.getNextSystem(staff);
                         beforeid = sNextModel.id;
                     }
 
@@ -596,7 +596,7 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
         if (neumesOnStaff.length > 0 && clef.staff.getActingClefByEle(neumesOnStaff[0]) == clef) {
             // if the shift of the clef has affected the first neume on this staff
             // update the custos on the previous staff
-            var prevStaff = gui.page.getPreviousStaff(clef.staff);
+            var prevStaff = gui.page.getPreviousSystem(clef.staff);
             if (prevStaff) {
                 var newPname = neumesOnStaff[0].components[0].pname;
                 var newOct = neumesOnStaff[0].components[0].oct;
@@ -710,7 +710,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         if (neumesOnStaff.length == 1) {
             // there are no neumes left on the staff
             // remove the custos from the previous staff
-            var prevStaff = gui.page.getPreviousStaff(neume.staff);
+            var prevStaff = gui.page.getPreviousSystem(neume.staff);
             if (prevStaff && prevStaff.custos) {
                 prevStaff.custos.eraseDrawing();
                 prevStaff.removeElementByRef(prevStaff.custos);
@@ -730,7 +730,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         else if (neume == neumesOnStaff[0]) {
             // if this neume is the first neume on the staff
             // update the custos of the previous staff
-            var prevStaff = gui.page.getPreviousStaff(neume.staff);
+            var prevStaff = gui.page.getPreviousSystem(neume.staff);
             if (prevStaff && prevStaff.custos) {
                 var custos = prevStaff.custos;
                 var nextNeume = neumesOnStaff[1];
@@ -1161,7 +1161,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     // deal with punctum insert
     gui.rendEng.canvas.observe('mouse:up', function(e) {
         var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
-        var sModel = gui.page.getClosestStaff(coords);
+        var sModel = gui.page.getClosestSystem(coords);
 
         // instantiate a punctum
         var nModel = new Toe.Model.SquareNoteNeume();
@@ -1209,7 +1209,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
         // if this is the first neume on a staff, update the custos of the next staff
         if (nInd == 1) {
-            var prevStaff = gui.page.getPreviousStaff(sModel);
+            var prevStaff = gui.page.getPreviousSystem(sModel);
             if (prevStaff) {
                 gui.handleUpdatePrevCustos(pname, oct, prevStaff);
             }
@@ -1229,7 +1229,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         }
         else {
             // insert before the next system break (staff)
-            var sNextModel = gui.page.getNextStaff(sModel);
+            var sNextModel = gui.page.getNextSystem(sModel);
             if (sNextModel) {
                 args["beforeid"] = sNextModel.id;
             }
@@ -1296,7 +1296,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
 
         // get closest staff
-        staff = gui.page.getClosestStaff(pnt);
+        staff = gui.page.getClosestSystem(pnt);
 
         var snapCoords = pnt;
         var divProps = {strokeWidth: 4, opacity: 0.6};
@@ -1409,7 +1409,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
         }
         else {
             // insert before the next system break (staff)
-            var sNextModel = gui.page.getNextStaff(staff);
+            var sNextModel = gui.page.getNextSystem(staff);
             args["beforeid"] = sNextModel.id;
         }
 
@@ -1470,7 +1470,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
     gui.updateInsertStaffSubControls();
 
     // Get the widest staff and use its dimensions.  If there is no widest staff, forget it!
-    var widestStaff = gui.page.getWidestStaff();
+    var widestStaff = gui.page.getWidestSystem();
     if (widestStaff == null) {
         return;
     }
@@ -1506,11 +1506,11 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
         var staffController = new Toe.Ctrl.SystemController(staff, staffView);
 
         // We also have to adjust the associated system break order number.  Then, we can add it to the page.
-        // This MIGHT have an impact on staves after it.
-        staff.setOrderNumber($('#staff_number_slider').val());
-        gui.page.addStaff(staff);
+        // This MIGHT have an impact on systems after it.
+        staff.setOrderNumber($('#system_number_slider').val());
+        gui.page.addSystem(staff);
         gui.updateInsertStaffSubControls();
-        var nextStaff = gui.page.getNextStaff(staff);
+        var nextStaff = gui.page.getNextSystem(staff);
 
         // Create arguments for our first POST.
         var outbb = gui.getOutputBoundingBox([staff.zone.ulx, staff.zone.uly, staff.zone.lrx, staff.zone.lry]);
@@ -1540,7 +1540,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertStaff = function(e) {
                 staff.setID(JSON.parse(data).id);
                 while (nextStaff != null) {
                     postSystemBreakEdit(nextStaff.id, nextStaff.orderNumber);
-                    nextStaff = gui.page.getNextStaff(nextStaff);
+                    nextStaff = gui.page.getNextSystem(nextStaff);
                 }
             })
             .error(function() {
@@ -1611,7 +1611,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         }
 
         // get closest staff to insert onto
-        var staff = gui.page.getClosestStaff(coords);
+        var staff = gui.page.getClosestSystem(coords);
 
         // calculate snapped coordinates on the staff
         var snapCoords = staff.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
@@ -1642,7 +1642,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         }
         else {
             // insert before the next system break
-            var sNextModel = gui.page.getNextStaff(staff);
+            var sNextModel = gui.page.getNextSystem(staff);
             args["beforeid"] = sNextModel.id;
         }
 
@@ -1650,7 +1650,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         if (neumesOnStaff.length > 0 && staff.getActingClefByEle(neumesOnStaff[0]) == clef) {
             // if the shift of the clef has affected the first neume on this staff
             // update the custos on the previous staff
-            var prevStaff = gui.page.getPreviousStaff(staff);
+            var prevStaff = gui.page.getPreviousSystem(staff);
             if (prevStaff) {
                 var newPname = neumesOnStaff[0].components[0].pname;
                 var newOct = neumesOnStaff[0].components[0].oct;
@@ -1781,7 +1781,7 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
         // get id of the next staff element
-        var nextStaff = gui.page.getNextStaff(prevStaff);
+        var nextStaff = gui.page.getNextSystem(prevStaff);
         if (nextStaff) {
             args["beforeid"] = nextStaff.id;
         }
@@ -1981,16 +1981,16 @@ Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
 Toe.View.SquareNoteInteraction.prototype.createInsertStaffSubControls = function() {
     if ($("#menu_insertstaff").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertstaff"><br/>\n<li class="nav-header">Staff Number</li>\n' +
-                                    '<li><div><input id="staff_number_slider" type="range" min="1" max="1" step="1" value="1">' +
+                                    '<li><div><input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +
                                     ' <output id="staff_number"></output></div></li></span>');
-        $("#staff_number_slider").change(function() {$('#staff_number').html(this.value);}).change();
+        $("#system_number_slider").change(function() {$('#staff_number').html(this.value);}).change();
     }
 }
 
 Toe.View.SquareNoteInteraction.prototype.updateInsertStaffSubControls = function() {
-    $("#staff_number_slider").attr("max", this.page.staves.length + 1);
-    $("#staff_number_slider").val(this.page.staves.length + 1);
-    $("#staff_number_slider").change();
+    $("#system_number_slider").attr("max", this.page.staves.length + 1);
+    $("#system_number_slider").val(this.page.staves.length + 1);
+    $("#system_number_slider").change();
 }
 
 Toe.View.SquareNoteInteraction.prototype.showInfo = function(aText) {

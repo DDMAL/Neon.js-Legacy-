@@ -46,7 +46,7 @@ Toe.View.SystemView.prototype.constructor = Toe.View.SystemView;
  */
 Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
     if (!this.rendEng) {
-        throw new Error("Staff: Invalid render context");
+        throw new Error("Toe.View.SystemView: Invalid render context");
     }
 
     var elements = {fixed: new Array(), modify: new Array()};
@@ -57,20 +57,20 @@ Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
         elements.fixed.push(this.rendEng.createLine([aSystem.zone.ulx, yval, aSystem.zone.lrx, yval]));
     }
     
-	this.rendEng.draw(elements, {selectable: aSystem.props.interact, 
+	this.rendEng.draw(elements, {selectable: aSystem.props.interact,
                                  group: aSystem.props.group,
                                  eleRef: aSystem,
-                                 lockMovementX: true, 
+                                 lockMovementX: true,
                                  lockMovementY: true});
-}
+};
 
 /**
  * Renders the bounding box of the system
  *
  * @methodOf Toe.View.SystemView
- * @param {Toe.Model.System} aSystem Staff to render the bounding box
+ * @param {Toe.Model.System} aSystem system to render the bounding box
  */
 Toe.View.SystemView.prototype.renderSystemBoundingBox = function(aSystem) {
     var s_bb = [aSystem.zone.ulx, aSystem.zone.uly, aSystem.zone.lrx, aSystem.zone.lry];
     this.rendEng.outlineBoundingBox(s_bb, {fill: "blue"});
-}
+};
