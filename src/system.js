@@ -76,6 +76,7 @@ Toe.Model.System = function(bb, options) {
     this.elements = new Array();
 };
 
+Toe.Model.System.prototype = new Toe.Model.Model();
 Toe.Model.System.prototype.constructor = Toe.Model.System;
 
 /**
@@ -130,14 +131,14 @@ Toe.Model.System.prototype.setBoundingBox = function(bb) {
     if (this.props.numLines > 1) {
         this.delta_y = Math.abs(this.zone.lry - this.zone.uly) / (this.props.numLines-1);
     }
-}
+};
 
 // sort based on ulx bounding box position
 Toe.Model.System.prototype.sortElements = function() {
     this.elements.sort(function(el1, el2) {
         return el1.zone.ulx - el2.zone.ulx;
     });
-}
+};
 
 // insert element in the element list (sorted in ascending order
 // by x position).
@@ -154,7 +155,7 @@ Toe.Model.System.prototype.insertElement = function(ele) {
     this.elements.splice(iInsert,0, ele);
 
     return iInsert;
-}
+};
 
 // Remove element by ID
 Toe.Model.System.prototype.removeElementByID = function(eleID) {
@@ -165,7 +166,7 @@ Toe.Model.System.prototype.removeElementByID = function(eleID) {
             this.elements.splice(i,1);
         }
     }
-}
+};
 
 // remove element by reference
 Toe.Model.System.prototype.removeElementByRef = function(ele) {
@@ -176,7 +177,7 @@ Toe.Model.System.prototype.removeElementByRef = function(ele) {
         $(this.elements[eleInd]).trigger("vEraseDrawing");
         this.elements.splice(eleInd, 1);
     }
-}
+};
 
 /**
  * Get clef acting on an element
@@ -195,7 +196,7 @@ Toe.Model.System.prototype.getActingClefByEle = function(element) {
 
     // if no clef is on the system
     return null;
-}
+};
 
 Toe.Model.System.prototype.getActingClefByCoords = function(coords) {
     // look backwards from end of element list for first clef
@@ -208,7 +209,7 @@ Toe.Model.System.prototype.getActingClefByCoords = function(coords) {
 
     // if no clef is found
     return null;
-}
+};
 
 // Given a clef mounted on this system, get the previous acting clef
 Toe.Model.System.prototype.getPreviousClef = function(clef) {
@@ -224,7 +225,7 @@ Toe.Model.System.prototype.getPreviousClef = function(clef) {
 
     // if no clef is found
     return null;
-}
+};
 
 /**
  * Returns width of system.

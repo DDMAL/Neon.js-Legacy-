@@ -134,7 +134,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     gui.rendEng.canvas.observe('object:selected', function(e) {
 
         // Unbind and remove previous stuff.
-        gui.unbindEditNeumeSubControls();
+        gui.unbindEditSubControls();
         gui.removeEditSubControls();
 
         $('#btn_delete').toggleClass('disabled', false);
@@ -142,15 +142,9 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-     /*       gui.showInfo("Selected: " + ele.name +
+            gui.showInfo("Selected: " + ele.name +
                          "<br/> Pitche(s): " +
-                         $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));*/
-            $("#info > p").html("Selected: " + ele.name + "<br/> Pitche(s): " + 
-                                $.map(ele.components, function(nc) { 
-                                    return nc.pname.toUpperCase() + nc.oct; 
-                                }).join(", "));
-            $("#info").animate({opacity: 1.0}, 100);
-
+                         $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
 
             $('#btn_ungroup').toggleClass('disabled', false);
 
@@ -163,54 +157,23 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         }
         else if (ele instanceof Toe.Model.Clef) {
             gui.showInfo("Selected: " + ele.name);
-
-            if ($("#menu_editclef").length == 0) {
-                    $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n' +
-                                              '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
-                                              '<button id="edit_rad_c" class="btn">C</button>\n' +
-                                              '<button id="edit_rad_f" class="btn">F</button>\n</div></li></span>');
-            }
-
-            // activate appropriate radio button
-            if (ele.shape == "c") {
-                $("#edit_rad_c").toggleClass("active", true);
-            }
-            else {
-                $("#edit_rad_f").toggleClass("active", true);
-            }
-
-            // Handle clef shape changes
-            // remove onclick listener for previous selection
-            $("#edit_rad_c").unbind("click");
-            $("#edit_rad_f").unbind("click");
-            $("#edit_rad_c").bind("click.edit", {gui: gui, clef: ele, shape: "c"}, gui.handleClefShapeChange);
-            $("#edit_rad_f").bind("click.edit", {gui: gui, clef: ele, shape: "f"}, gui.handleClefShapeChange);
+            gui.insertEditClefSubControls(ele);
+            gui.bindEditClefSubControls(ele);
         }
         else if (ele instanceof Toe.Model.Division) {
             gui.showInfo("Selected: " + ele.type);
-
-            $("#menu_editpunctum").remove();
-            $("#menu_editclef").remove();
         }
         else if (ele instanceof Toe.Model.Custos) {
             gui.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
-
-            $("#menu_editpunctum").remove();
-            $("#menu_editclef").remove();
         }
-        else {
-            $("#menu_editpunctum").remove();
-            $("#menu_editclef").remove();
+        else if (ele instanceof Toe.Model.System) {
+            gui.showInfo("Selected: system #" + ele.orderNumber);
         }
     });
 
     gui.rendEng.canvas.observe('selection:cleared', function(e) {
         gui.hideInfo();
-
-        // remove selection specific editing options
-        $("#menu_editpunctum").remove();
-        $("#menu_editclef").remove();
-
+        gui.removeEditSubControls();
         $('#btn_delete').toggleClass('disabled', true);
         $('#btn_neumify').toggleClass('disabled', true);
         $('#btn_neumify_liquescence').toggleClass('disabled', true);
@@ -490,6 +453,9 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         element.top = top + delta_y;
                     }
                 }
+                else if (ele instanceof Toe.Model.System) {
+                    console.log("here");
+                }
             });
             if (elements.length > 1) {
                 gui.rendEng.canvas.discardActiveGroup();
@@ -647,14 +613,14 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
 
         $(this).toggleClass("active");
     }
-}
+};
 
 Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     var gui = e.data.gui;
 
     // get current canvas selection
     // check individual selection and group selections
-    toDelete = {clefs: new Array(), nids: new Array(), dids: new Array(), cids: new Array()};
+    toDelete = {clefs: [], nids: [], dids: [], cids: [], systemIdArray: []};
 
     var deleteClef = function(drawing) {
         var clef = drawing.eleRef;
@@ -785,7 +751,33 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
 
         gui.rendEng.canvas.remove(drawing);
         gui.rendEng.canvas.discardActiveObject();
-    }
+    };
+
+    var deleteSystem = function(aDrawing) {
+        var systemElementReference = aDrawing.eleRef;
+        toDelete.systemIdArray.push(systemElementReference.id);
+
+        // Remove all associated elements of the system.
+        for (var i = 0; i < systemElementReference.elements.length; i++) {
+            var subElement = systemElementReference.elements[i];
+            if (subElement instanceof Toe.Model.Clef) {
+                deleteClef(subElement);
+            }
+            else if (subElement instanceof Toe.Model.Neume) {
+                deleteNeume(subElement);
+            }
+            else if (subElement instanceof Toe.Model.Division) {
+                deleteDivision(subElement);
+            }
+            else if (subElement instanceof Toe.Model.Custos) {
+                deleteCustos(subElement);
+            }
+        }
+
+        // Tell the controller to get rid of the system.
+        gui.rendEng.canvas.remove(aDrawing);
+        gui.rendEng.canvas.discardActiveObject();
+    };
 
     var selection = gui.rendEng.canvas.getActiveObject();
     if (selection) {
@@ -801,6 +793,9 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         }
         else if (selection.eleRef instanceof Toe.Model.Custos) {
             deleteCustos(selection);
+        }
+        else if (selection.eleRef instanceof Toe.Model.System) {
+            deleteSystem(selection);
         }
 
         gui.rendEng.repaint();
@@ -1086,6 +1081,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsert = function(e) {
     gui.unbindInsertControls();
     gui.removeEditControls();
     gui.unbindEditControls();
+    gui.unbindEditSubControls();
     gui.unbindMouseEventHandlers();
     gui.insertInsertControls(parentDivId);
 }
@@ -1472,7 +1468,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
     var gui = e.data.gui;
     gui.unbindMouseEventHandlers();
     gui.removeInsertSubControls();
-    gui.createInsertSystemSubControls();
+    gui.insertInsertSystemSubControls();
     gui.updateInsertSystemSubControls();
 
     // Get the widest system and use its dimensions.  If there is no widest system, forget it!
@@ -1883,6 +1879,23 @@ Toe.View.SquareNoteInteraction.prototype.insertEditNeumeSubControls = function()
     }
 }
 
+Toe.View.SquareNoteInteraction.prototype.insertEditClefSubControls = function(aElement) {
+    if ($("#menu_editclef").length == 0) {
+            $("#sidebar-edit").append('<span id="menu_editclef"><br/><li class="nav-header">Clef</li>\n' +
+                                      '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
+                                      '<button id="edit_rad_c" class="btn">C</button>\n' +
+                                      '<button id="edit_rad_f" class="btn">F</button>\n</div></li></span>');
+    }
+
+    // activate appropriate radio button
+    if (aElement.shape == "c") {
+        $("#edit_rad_c").toggleClass("active", true);
+    }
+    else {
+        $("#edit_rad_f").toggleClass("active", true);
+    }
+}
+
 Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParentDivId) {
     if ($("#sidebar-insert").length == 0) {
         $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
@@ -1899,6 +1912,16 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParent
     $("#rad_punctum").trigger('click');
 }
 
+Toe.View.SquareNoteInteraction.prototype.unbindEditClefSubControls = function() {
+    $("#edit_rad_c").unbind("click");
+    $("#edit_rad_f").unbind("click");
+}
+
+Toe.View.SquareNoteInteraction.prototype.bindEditClefSubControls = function(aElement) {
+    $("#edit_rad_c").bind("click.edit", {gui: this, clef: aElement, shape: "c"}, this.handleClefShapeChange);
+    $("#edit_rad_f").bind("click.edit", {gui: this, clef: aElement, shape: "f"}, this.handleClefShapeChange);
+}
+
 Toe.View.SquareNoteInteraction.prototype.unbindEditNeumeSubControls = function() {
     $("#edit_chk_dot").unbind("click");
     $("#head_punctum").unbind("click");
@@ -1907,6 +1930,22 @@ Toe.View.SquareNoteInteraction.prototype.unbindEditNeumeSubControls = function()
     $("#head_quilisma").unbind("click");
     $("#head_punctum_inclinatum").unbind("click");
     $("#head_punctum_inclinatum_parvum").unbind("click");
+}
+
+Toe.View.SquareNoteInteraction.prototype.unbindEditSubControls = function() {
+
+    // Neume sub-controls.
+    $("#edit_chk_dot").unbind("click");
+    $("#head_punctum").unbind("click");
+    $("#head_cavum").unbind("click");
+    $("#head_virga").unbind("click");
+    $("#head_quilisma").unbind("click");
+    $("#head_punctum_inclinatum").unbind("click");
+    $("#head_punctum_inclinatum_parvum").unbind("click");
+
+    // Clef sub-controls.
+    $("#edit_rad_c").unbind("click");
+    $("#edit_rad_f").unbind("click");
 }
 
 Toe.View.SquareNoteInteraction.prototype.bindEditNeumeSubControls = function(aElement) {
@@ -1984,7 +2023,7 @@ Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
     this.rendEng.unObserve("selection:created");
 }
 
-Toe.View.SquareNoteInteraction.prototype.createInsertSystemSubControls = function() {
+Toe.View.SquareNoteInteraction.prototype.insertInsertSystemSubControls = function() {
     if ($("#menu_insertsystem").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertsystem"><br/>\n<li class="nav-header">System Number</li>\n' +
                                     '<li><div><input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +

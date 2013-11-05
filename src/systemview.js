@@ -30,6 +30,7 @@ Toe.View.SystemView = function(renderEngine) {
     this.rendEng = renderEngine;
 };
 
+Toe.View.SystemView.prototype = new Toe.View.View();
 Toe.View.SystemView.prototype.constructor = Toe.View.SystemView;
 
 /**
@@ -60,8 +61,8 @@ Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
 	this.rendEng.draw(elements, {selectable: aSystem.props.interact,
                                  group: aSystem.props.group,
                                  eleRef: aSystem,
-                                 lockMovementX: true,
-                                 lockMovementY: true});
+                                 lockMovementX: false,
+                                 lockMovementY: false});
 };
 
 /**

@@ -21,27 +21,11 @@ THE SOFTWARE.
 */
 
 /**
- * Creates a new system controller and listens to the model and the view
- *
- * @class Controller for the system
- * @param {Toe.Model.SystemView} pModel system model
- * @param {Toe.View.System} pView system view
+ * Generic controller
  */
-Toe.Ctrl.SystemController = function(sModel, sView) {
-    /** 
-     * @event
-     * event type: vRenderSystem
-     * @param {Toe.Model.System} aSystem system to render
-     */
-    $(sModel).bind("vRenderSystem", function(event, aSystem) {
-        if (Toe.debug) {
-            sView.renderSystemBoundingBox(aSystem);
-        }
-
-        sView.renderSystem(aSystem);
-    });
-    Toe.Ctrl.Controller.call(this, sModel, sView);
+Toe.View.View = function() {
+    this.model = null;
+    this.controller = null;
 };
 
-Toe.Ctrl.SystemController.prototype = new Toe.Ctrl.Controller();
-Toe.Ctrl.SystemController.prototype.constructor = Toe.Ctrl.SystemController;
+Toe.View.View.prototype.constructor = Toe.View.View;
