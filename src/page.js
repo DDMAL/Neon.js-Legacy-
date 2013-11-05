@@ -44,6 +44,7 @@ Toe.Model.Page = function() {
     this.id = null;
 };
 
+Toe.Model.Page.prototype = new Toe.Model.Model();
 Toe.Model.Page.prototype.constructor = Toe.Model.Page;
 
 /**

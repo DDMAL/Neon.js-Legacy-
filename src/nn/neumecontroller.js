@@ -71,6 +71,8 @@ Toe.Ctrl.NeumeController = function(nModel, nView) {
     $(nModel).bind("vSelectDrawing", function(event) {
         nView.selectDrawing();
     });
-}
+    Toe.Ctrl.Controller.call(this, nModel, nView);
+};
 
+Toe.Ctrl.NeumeController.prototype = new Toe.Ctrl.Controller();
 Toe.Ctrl.NeumeController.prototype.constructor = Toe.Ctrl.NeumeController;

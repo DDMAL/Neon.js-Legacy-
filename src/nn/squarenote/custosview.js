@@ -31,8 +31,9 @@ Toe.View.CustosView = function(renderEngine) {
 
     this.drawing = null;
     this.ledgerLines = null;
-}
+};
 
+Toe.View.CustosView.prototype = new Toe.View.View();
 Toe.View.CustosView.prototype.constructor = Toe.View.CustosView;
 
 Toe.View.CustosView.prototype.drawLedgerLines = function(aSystemPos, centre, width, aSystem) {

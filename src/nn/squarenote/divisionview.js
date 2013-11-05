@@ -28,8 +28,9 @@ THE SOFTWARE.
  */
 Toe.View.DivisionView = function(renderEngine) {
     this.rendEng = renderEngine;
-}
+};
 
+Toe.View.DivisionView.prototype = new Toe.View.View();
 Toe.View.DivisionView.prototype.constructor = Toe.View.DivisionView;
 
 /**

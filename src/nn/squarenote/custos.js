@@ -51,8 +51,9 @@ Toe.Model.Custos = function(pname, oct, options) {
 
     // reference to the system this custos is mounted on
     this.system = null;
-}
+};
 
+Toe.Model.Custos.prototype = new Toe.Model.Model();
 Toe.Model.Custos.prototype.constructor = Toe.Model.Custos;
 
 /**

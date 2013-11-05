@@ -26,7 +26,14 @@ THE SOFTWARE.
 Toe.Ctrl.Controller = function(aModel, aView) {
     this.model = aModel;
     this.view = aView;
-    console.log("here");
+    if (this.model !== undefined) {
+        this.model.controller = this;
+        this.model.view = this.view;
+    }
+    if (this.view !== undefined) {
+        this.view.model = this.model;
+        this.view.controller = this;
+    }
 };
 
 Toe.Ctrl.Controller.prototype.constructor = Toe.Ctrl.Controller;

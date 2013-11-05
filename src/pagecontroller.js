@@ -49,6 +49,8 @@ THE SOFTWARE.
     $(pModel).bind("vSetDimensions", function(event, width, height) {
         pView.setDimensions(width, height);
     });
-}
+    Toe.Ctrl.Controller.call(this, pModel, pView);
+};
 
+Toe.Ctrl.PageController.prototype = new Toe.Ctrl.Controller();
 Toe.Ctrl.PageController.prototype.constructor = Toe.Ctrl.PageController;

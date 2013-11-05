@@ -58,8 +58,9 @@ Toe.Model.Neume = function(options) {
 
     // initialize neume component array
     this.components = new Array();
-}
+};
 
+Toe.Model.Neume.prototype = new Toe.Model.Model();
 Toe.Model.Neume.prototype.constructor = Toe.Model.Neume;
 
 /**

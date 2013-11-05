@@ -37,7 +37,6 @@ Toe.Ctrl.SystemController = function(sModel, sView) {
         if (Toe.debug) {
             sView.renderSystemBoundingBox(aSystem);
         }
-
         sView.renderSystem(aSystem);
     });
     Toe.Ctrl.Controller.call(this, sModel, sView);

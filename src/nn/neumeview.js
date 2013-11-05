@@ -46,8 +46,9 @@ Toe.View.NeumeView = function(renderEngine, documentType) {
 
     this.drawing = null;
     this.ledgerLines = null;
-}
+};
 
+Toe.View.NeumeView.prototype = new Toe.View.View();
 Toe.View.NeumeView.prototype.constructor = Toe.View.NeumeView;
 
 /*********************************

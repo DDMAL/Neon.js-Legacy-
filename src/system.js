@@ -53,7 +53,7 @@ Toe.Model.System = function(bb, options) {
         throw new Error("System: invalid bounding box");
     }
 
-    this.zone = new Object();
+    this.zone = {};
     this.zone.ulx = bb[0];
     this.zone.uly = bb[1];
     this.zone.lrx = bb[2];
@@ -73,7 +73,7 @@ Toe.Model.System = function(bb, options) {
     // Associated system ID.
     this.systemId = null;
 
-    this.elements = new Array();
+    this.elements = [];
 };
 
 Toe.Model.System.prototype = new Toe.Model.Model();

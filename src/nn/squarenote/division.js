@@ -49,8 +49,9 @@ Toe.Model.Division = function(key, options) {
 
     // reference to the system this clef is mounted on
     this.system = null;
-}
+};
 
+Toe.Model.Division.prototype = new Toe.Model.Model();
 Toe.Model.Division.prototype.constructor = Toe.Model.Division;
 
 /**

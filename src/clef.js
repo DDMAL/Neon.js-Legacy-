@@ -57,7 +57,7 @@ Toe.Model.Clef = function(clefShape, options) {
 
     // reference to the system this clef is mounted on
     this.system = null;
-}
+};
 
 /**
  * Known clef types
@@ -71,6 +71,7 @@ Toe.Model.Clef.Type = {
     f: "Fah Clef"
 };
 
+Toe.Model.Clef.prototype = new Toe.Model.Model();
 Toe.Model.Clef.prototype.constructor = Toe.Model.Clef;
 
 /**

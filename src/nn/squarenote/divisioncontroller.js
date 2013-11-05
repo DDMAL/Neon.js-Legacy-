@@ -47,6 +47,8 @@ Toe.Ctrl.DivisionController = function(dModel, dView) {
     $(dModel).bind("vSelectDrawing", function(event) {
         dView.selectDrawing();
     });
-}
+    Toe.Ctrl.Controller.call(this, dModel, dView);
+};
 
+Toe.Ctrl.DivisionController.prototype = new Toe.Ctrl.Controller();
 Toe.Ctrl.DivisionController.prototype.constructor = Toe.Ctrl.DivisionController;

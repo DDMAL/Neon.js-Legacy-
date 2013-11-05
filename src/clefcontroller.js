@@ -66,6 +66,8 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
     $(cModel).bind("vSelectDrawing", function(event) {
         cView.selectDrawing();
     });
-}
+    Toe.Ctrl.Controller.call(this, cModel, cView);
+};
 
+Toe.Ctrl.ClefController.prototype = new Toe.Ctrl.Controller();
 Toe.Ctrl.ClefController.prototype.constructor = Toe.Ctrl.ClefController;

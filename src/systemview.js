@@ -28,6 +28,7 @@ THE SOFTWARE.
  */
 Toe.View.SystemView = function(renderEngine) {
     this.rendEng = renderEngine;
+    this.drawing = null;
 };
 
 Toe.View.SystemView.prototype = new Toe.View.View();
@@ -50,7 +51,7 @@ Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
         throw new Error("Toe.View.SystemView: Invalid render context");
     }
 
-    var elements = {fixed: new Array(), modify: new Array()};
+    var elements = {fixed: [], modify: []};
 
     // render lines
     for (var li = 0; li < aSystem.props.numLines; li++) {
@@ -58,11 +59,11 @@ Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
         elements.fixed.push(this.rendEng.createLine([aSystem.zone.ulx, yval, aSystem.zone.lrx, yval]));
     }
     
-	this.rendEng.draw(elements, {selectable: aSystem.props.interact,
-                                 group: aSystem.props.group,
-                                 eleRef: aSystem,
-                                 lockMovementX: false,
-                                 lockMovementY: false});
+	this.drawing = this.rendEng.draw(elements, {selectable: aSystem.props.interact,
+                                     group: aSystem.props.group,
+                                     eleRef: aSystem,
+                                     lockMovementX: false,
+                                     lockMovementY: false});
 };
 
 /**

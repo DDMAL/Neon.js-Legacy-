@@ -28,10 +28,10 @@ THE SOFTWARE.
  */
 Toe.View.ClefView = function(renderEngine) {
     this.rendEng = renderEngine;
-
     this.drawing = null;
-}
+};
 
+Toe.View.ClefView.prototype = new Toe.View.View();
 Toe.View.ClefView.prototype.constructor = Toe.View.ClefView;
 
 /**

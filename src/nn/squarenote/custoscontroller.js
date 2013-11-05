@@ -66,6 +66,8 @@ Toe.Ctrl.CustosController = function(cModel, cView) {
     $(cModel).bind("vSelectDrawing", function(event) {
         cView.selectDrawing();
     });
-}
+    Toe.Ctrl.Controller.call(this, cModel, cView);
+};
 
+Toe.Ctrl.CustosController.prototype = new Toe.Ctrl.Controller();
 Toe.Ctrl.CustosController.prototype.constructor = Toe.Ctrl.CustosController;

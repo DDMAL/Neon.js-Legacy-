@@ -36,8 +36,9 @@ Toe.Model.NeumeComponent = function(options) {
     };
 
     $.extend(this.props, options);
-}
+};
 
+Toe.Model.NeumeComponent.prototype = new Toe.Model.Model();
 Toe.Model.NeumeComponent.prototype.constructor = Toe.Model.NeumeComponent;
 
 Toe.Model.NeumeComponent.Type = {
