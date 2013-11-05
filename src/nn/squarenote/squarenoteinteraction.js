@@ -642,7 +642,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         // gather the pitch information of the pitched notes
         var pitchInfo = $.map(pitchedEles, function(e) {
             if (e instanceof Toe.Model.Neume) {
-                var pitchInfo = new Array();
+                var pitchInfo = [];
                 $.each(e.components, function(nInd, n) {
                     pitchInfo.push({pname: n.pname, oct: n.oct});
                 });
@@ -666,7 +666,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         toDelete.clefs.push({id: clef.id, pitchInfo: pitchInfo});
 
         gui.rendEng.canvas.remove(drawing);
-        gui.rendEng.canvas.discardActiveObject();
     };
 
     var deleteNeume = function(drawing) {
@@ -677,7 +676,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         neume.system.removeElementByRef(neume);
         toDelete.nids.push(neume.id);
 
-        gui.rendEng.canvas.discardActiveObject();
+        gui.rendEng.canvas.remove(drawing);
 
         if (neumesOnSystem.length == 1) {
             // there are no neumes left on the system
@@ -739,7 +738,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         toDelete.dids.push(division.id);
 
         gui.rendEng.canvas.remove(drawing);
-        gui.rendEng.canvas.discardActiveObject();
     };
 
     var deleteCustos = function(drawing) {
@@ -750,7 +748,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         toDelete.cids.push(custos.id);
 
         gui.rendEng.canvas.remove(drawing);
-        gui.rendEng.canvas.discardActiveObject();
     };
 
     var deleteSystem = function(aDrawing) {
@@ -758,25 +755,34 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         toDelete.systemIdArray.push(systemElementReference.id);
 
         // Remove all associated elements of the system.
-        for (var i = 0; i < systemElementReference.elements.length; i++) {
-            var subElement = systemElementReference.elements[i];
-            if (subElement instanceof Toe.Model.Clef) {
-                deleteClef(subElement);
+        var elementIndex = 0;
+        doneRemovingElements = false;
+        while (!doneRemovingElements) {
+
+            if (systemElementReference.elements.length === 0 || elementIndex >= systemElementReference.elements.length) {
+                doneRemovingElements = true;
             }
-            else if (subElement instanceof Toe.Model.Neume) {
-                deleteNeume(subElement);
-            }
-            else if (subElement instanceof Toe.Model.Division) {
-                deleteDivision(subElement);
-            }
-            else if (subElement instanceof Toe.Model.Custos) {
-                deleteCustos(subElement);
+            else {
+                var subElement = systemElementReference.elements[elementIndex];
+                var elementDrawing = subElement.view.drawing;
+                if (subElement instanceof Toe.Model.Clef) {
+                    deleteClef(elementDrawing);
+                }
+                else if (subElement instanceof Toe.Model.Neume) {
+                    deleteNeume(elementDrawing);
+                }
+                else if (subElement instanceof Toe.Model.Division) {
+                    deleteDivision(elementDrawing);
+                }
+                else if (subElement instanceof Toe.Model.Custos) {
+                    deleteCustos(elementDrawing);
+                }
+                else {
+                    elementIndex++;
+                }
             }
         }
-
-        // Tell the controller to get rid of the system.
         gui.rendEng.canvas.remove(aDrawing);
-        gui.rendEng.canvas.discardActiveObject();
     };
 
     var selection = gui.rendEng.canvas.getActiveObject();
@@ -797,7 +803,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         else if (selection.eleRef instanceof Toe.Model.System) {
             deleteSystem(selection);
         }
-
         gui.rendEng.repaint();
     }
     else {
@@ -819,23 +824,12 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
                     deleteCustos(o);
                 }
             });
-
             gui.rendEng.canvas.discardActiveGroup();
             gui.rendEng.repaint();
         }
     }
 
-    if (toDelete.clefs.length > 0) {
-        // send delete command to the server to change underlying MEI
-        $.post(gui.apiprefix + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
-        });
-    }
-
+    // The order in which we call the server to delete stuff is important.  Clefs and custos should be last.
     if (toDelete.nids.length > 0) {
         // send delete command to server to change underlying MEI
         $.post(gui.apiprefix + "/delete/neume",  {ids: toDelete.nids.join(",")})
@@ -866,7 +860,18 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
             $("#alert").animate({opacity: 1.0}, 100);
         });
     }
-}
+
+    if (toDelete.clefs.length > 0) {
+        // send delete command to the server to change underlying MEI
+        $.post(gui.apiprefix + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+};
 
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
