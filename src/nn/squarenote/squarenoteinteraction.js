@@ -620,9 +620,17 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
 
     // get current canvas selection
     // check individual selection and group selections
-    toDelete = {clefs: [], nids: [], dids: [], cids: [], systemIdArray: []};
+    toDelete = {clefs: [],
+                nids: [],
+                dids: [],
+                cids: [],
+                systemIdArray: [],
+                systemBreakIdArray: []};
 
-    var deleteClef = function(drawing) {
+    // Some systems may have to be adjusted.
+    var adjustedSystemBreakArray = [];
+
+    var deleteClef = function(drawing, aIgnorePitchInfo) {
         var clef = drawing.eleRef;
         var system = clef.system;
 
@@ -631,37 +639,41 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         // since the first clef on a system is not allowed to be deleted)
         var pClef = system.getPreviousClef(clef);
 
-        // get references to pitched elements that will be changed after
-        // the clef is deleted.
-        var pitchedEles = system.getPitchedElements(clef);
-
         // now delete the clef, and update the pitch information of these elements
         system.removeElementByRef(clef);
-        system.updatePitchedElements(pClef);
 
-        // gather the pitch information of the pitched notes
-        var pitchInfo = $.map(pitchedEles, function(e) {
-            if (e instanceof Toe.Model.Neume) {
-                var pitchInfo = [];
-                $.each(e.components, function(nInd, n) {
-                    pitchInfo.push({pname: n.pname, oct: n.oct});
-                });
-                return {id: e.id, noteInfo: pitchInfo};
-            }
-            else if (e instanceof Toe.Model.Custos) {
-                // the custos has been vertically moved
-                // update the custos bounding box information in the model
-                // do not need to update pitch name & octave since this does not change
-                var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
-                .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
-                });
-            }
-        });
+        // get references to pitched elements that will be changed after
+        // the clef is deleted (but only if required).
+        var pitchInfo = null;
+        if (!aIgnorePitchInfo) {
+
+            system.updatePitchedElements(pClef);
+            var pitchedEles = system.getPitchedElements(clef);
+
+            // gather the pitch information of the pitched notes
+            pitchInfo = $.map(pitchedEles, function(e) {
+                if (e instanceof Toe.Model.Neume) {
+                    var pitchInfo = [];
+                    $.each(e.components, function(nInd, n) {
+                        pitchInfo.push({pname: n.pname, oct: n.oct});
+                    });
+                    return {id: e.id, noteInfo: pitchInfo};
+                }
+                else if (e instanceof Toe.Model.Custos) {
+                    // the custos has been vertically moved
+                    // update the custos bounding box information in the model
+                    // do not need to update pitch name & octave since this does not change
+                    var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                    .error(function() {
+                        // show alert to user
+                        // replace text with error message
+                        $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                        $("#alert").animate({opacity: 1.0}, 100);
+                    });
+                }
+            });
+        }
 
         toDelete.clefs.push({id: clef.id, pitchInfo: pitchInfo});
 
@@ -752,7 +764,8 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
 
     var deleteSystem = function(aDrawing) {
         var systemElementReference = aDrawing.eleRef;
-        toDelete.systemIdArray.push(systemElementReference.id);
+        toDelete.systemBreakIdArray.push(systemElementReference.id);
+        toDelete.systemIdArray.push(systemElementReference.systemId);
 
         // Remove all associated elements of the system.
         var elementIndex = 0;
@@ -766,7 +779,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
                 var subElement = systemElementReference.elements[elementIndex];
                 var elementDrawing = subElement.view.drawing;
                 if (subElement instanceof Toe.Model.Clef) {
-                    deleteClef(elementDrawing);
+                    deleteClef(elementDrawing, true);
                 }
                 else if (subElement instanceof Toe.Model.Neume) {
                     deleteNeume(elementDrawing);
@@ -782,6 +795,8 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
                 }
             }
         }
+        var returnedArray = gui.page.removeSystem(systemElementReference);
+        adjustedSystemBreakArray = adjustedSystemBreakArray.concat(returnedArray);
         gui.rendEng.canvas.remove(aDrawing);
     };
 
@@ -789,7 +804,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     if (selection) {
         // ignore the first clef, since this should never be deleted
         if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements[0] != selection.eleRef) {
-            deleteClef(selection);
+            deleteClef(selection, false);
         }
         else if (selection.eleRef instanceof Toe.Model.Neume) {
             deleteNeume(selection);
@@ -812,7 +827,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
             $.each(selection.getObjects(), function(oInd, o) {
                 // ignore the first clef, since this should never be deleted
                 if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.system.elements[0] != o.eleRef) {
-                    deleteClef(o);
+                    deleteClef(o, false);
                 }
                 else if (o.eleRef instanceof Toe.Model.Neume) {
                     deleteNeume(o);
@@ -829,7 +844,7 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
         }
     }
 
-    // The order in which we call the server to delete stuff is important.  Clefs and custos should be last.
+    // Call the server to delete stuff.
     if (toDelete.nids.length > 0) {
         // send delete command to server to change underlying MEI
         $.post(gui.apiprefix + "/delete/neume",  {ids: toDelete.nids.join(",")})
@@ -870,6 +885,29 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
             $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
             $("#alert").animate({opacity: 1.0}, 100);
         });
+    }
+
+    // Delete system and system breaks.
+    if (toDelete.systemIdArray.length > 0) {
+        gui.postSystemDelete(toDelete.systemIdArray);
+    }
+    if (toDelete.systemBreakIdArray.length > 0) {
+        gui.postSystemBreakDelete(toDelete.systemBreakIdArray);
+    }
+
+    // Finally, may have had to adjust some systems.
+    if (adjustedSystemBreakArray.length > 0) {
+
+        // Remove duplicates first.
+        var uniqueAdjustedSystemBreakArray = [];
+        $.each(adjustedSystemBreakArray, function(i, el){
+            if($.inArray(el, uniqueAdjustedSystemBreakArray) === -1) uniqueAdjustedSystemBreakArray.push(el);
+        });
+
+        // Remove each.
+        for (var i = 0; i < adjustedSystemBreakArray.length; i++) {
+            gui.postSystemBreakEditOrder(adjustedSystemBreakArray[i].id, adjustedSystemBreakArray[i].orderNumber);
+        }
     }
 };
 
@@ -1546,21 +1584,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
             $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
                 system.setID(JSON.parse(data).id);
                 while (nextSystem != null) {
-                    postSystemBreakEdit(nextSystem.id, nextSystem.orderNumber);
+                    gui.postSystemBreakEdit(nextSystem.id, nextSystem.orderNumber);
                     nextSystem = gui.page.getNextSystem(nextSystem);
                 }
             })
             .error(function() {
                 $("#alert > p").text("Server failed to insert system break.  Client and server are not synchronized.");
-                $("#alert").animate({opacity: 1.0}, 100);
-            });
-        }
-
-        // POST system break editing.
-        function postSystemBreakEdit(aSystemId, aOrderNumber) {
-            $.post(gui.apiprefix + "/modify/systembreak", {sbid: aSystemId, ordernumber: aOrderNumber})
-            .error(function() {
-                $("#alert > p").text("Server failed to modify system break.  Client and server are not synchronized.");
                 $("#alert").animate({opacity: 1.0}, 100);
             });
         }
@@ -1803,6 +1832,33 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
             $("#alert").animate({opacity: 1.0}, 100);
         });
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// POST Methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Toe.View.SquareNoteInteraction.prototype.postSystemBreakEditOrder = function(aSystemId, aOrderNumber) {
+    $.post(this.apiprefix + "/modify/systembreak", {sbid: aSystemId, ordernumber: aOrderNumber})
+    .error(function() {
+        $("#alert > p").text("Server failed to modify system break.  Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
+}
+
+Toe.View.SquareNoteInteraction.prototype.postSystemDelete = function(aSystemIdArray) {
+    $.post(this.apiprefix + "/delete/system", {sids: aSystemIdArray.join(",")})
+    .error(function() {
+        $("#alert > p").text("Server failed to delete system.  Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
+}
+
+Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSystemBreadIdArray) {
+    $.post(this.apiprefix + "/delete/systembreak", {sbids: aSystemBreadIdArray.join(",")})
+    .error(function() {
+        $("#alert > p").text("Server failed to delete system break.  Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

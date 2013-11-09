@@ -33,10 +33,6 @@ Toe.Model.Page = function() {
     // no scaling by default
     this.scale = 1.0;
 
-    // Index of systems with largest dimensions.
-    this.systemIndexLargestWidth = -1;
-    this.systemIndexLargestHeight = -1;
-
     // Average system height.
     this.systemAverageHeight = 0;
 
@@ -195,25 +191,9 @@ Toe.Model.Page.prototype.addSystem = function(aSystem) {
     }
     else {
         for (var i = aSystem.orderNumber - 1; i < this.systems.length; i++) {
-            this.systems[i].setOrderNumber(parseInt(this.systems[i].orderNumber) + 1);
+            this.systems[i].setOrderNumber(parseInt(this.systems[i].orderNumber, 10) + 1);
         }
         this.systems.splice(aSystem.orderNumber - 1, 0, aSystem);
-    }
-
-    // Update index of the system with largest width.
-    if (this.systemIndexLargestWidth < 0) {
-        this.systemIndexLargestWidth = 0;
-    }
-    else if (aSystem.getWidth() > this.systems[this.systemIndexLargestWidth].getWidth()) {
-        this.systemIndexLargestWidth = this.systems.length;
-    }
-
-    // Update index of system with largest height.
-    if (this.systemIndexLargestHeight < 0) {
-        this.systemIndexLargestHeight = 0;
-    }
-    else if (aSystem.getHeight() > this.systems[this.systemIndexLargestHeight].getHeight()) {
-        this.systemIndexLargestHeight = this.systems.length;
     }
 
     // Update system height average.
@@ -225,6 +205,40 @@ Toe.Model.Page.prototype.addSystem = function(aSystem) {
 	$(aSystem).trigger("vRenderSystem", [aSystem]);
 
     return this;
+};
+
+/**
+ * Removes a system from the page.
+ *
+ * @methodOf Toe.Model.Page
+ * @param {Toe.Model.System} aSystem system to remove from the page model
+ * @returns {Array} ids of system (breaks) that had to be adjusted
+ */
+Toe.Model.Page.prototype.removeSystem = function(aSystem) {
+
+    // We may have to adjust the system numbers.
+    var othersAdjusted = [];
+    if (aSystem.orderNumber == this.systems.length) {
+        this.systems.pop();
+    }
+    else {
+        for (var i = aSystem.orderNumber; i < this.systems.length; i++) {
+            this.systems[i].setOrderNumber(parseInt(this.systems[i].orderNumber, 10) - 1);
+            othersAdjusted.push(this.systems[i]);
+        }
+        this.systems.splice(aSystem.orderNumber - 1, 1);
+    }
+
+    // Update system height average.
+    if (this.systems.length > 0) {
+        this.systemAverageHeight *= (this.systems.length + 1);
+        this.systemAverageHeight -= aSystem.getHeight();
+        this.systemAverageHeight /= this.systems.length;
+    }
+    else {
+        this.systemAverageHeight = 0;
+    }
+    return othersAdjusted;
 };
 
 /**

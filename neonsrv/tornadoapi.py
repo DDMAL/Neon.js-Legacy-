@@ -426,3 +426,29 @@ class ModifySystemBreakHandler(tornado.web.RequestHandler):
         self.write(json.dumps(result))
 
         self.set_status(200)
+
+class DeleteSystemBreakHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        sb_ids = str(self.get_argument("sbids", "")).split(",")
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        md.delete_system(sb_ids)
+        md.write_doc()
+
+        self.set_status(200)
+
+class DeleteSystemHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        system_ids = str(self.get_argument("sids", "")).split(",")
+        
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        md.delete_system(system_ids)
+        md.write_doc()
+
+        self.set_status(200)

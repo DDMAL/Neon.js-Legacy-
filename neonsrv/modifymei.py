@@ -636,7 +636,8 @@ class ModifyDocument:
             # remove the clef
             clef.getParent().removeChild(clef)
 
-            self.update_pitched_elements(c["pitchInfo"])
+            if c["pitchInfo"] is not None:
+                self.update_pitched_elements(c["pitchInfo"])
 
     def insert_custos(self, pname, oct, before_id, ulx, uly, lrx, lry):
         '''
@@ -719,6 +720,29 @@ class ModifyDocument:
 
         result = {"id": sb_id}
         return result
+
+    def delete_system(self, ids):
+        '''
+        Delete given systems from the document.
+        Also remove the element's bounding box information.
+        '''
+
+        for id in ids:
+            system = self.mei.getElementById(id)
+            # remove the bounding box data
+            self.remove_zone(system)
+            # remove the system from the document
+            system.getParent().removeChild(system)
+
+    def delete_system_break(self, ids):
+        '''
+        Delete given system breaks from the document.
+        '''
+        
+        for id in ids:
+            sb = self.mei.getElementById(id)
+            # remove the system from the document
+            sb.getParent().removeChild(sb)
 
     def move_custos(self, id, pname, oct, ulx, uly, lrx, lry):
         '''
