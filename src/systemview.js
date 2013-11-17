@@ -62,8 +62,13 @@ Toe.View.SystemView.prototype.renderSystem = function(aSystem) {
 	this.drawing = this.rendEng.draw(elements, {selectable: aSystem.props.interact,
                                      group: aSystem.props.group,
                                      eleRef: aSystem,
-                                     lockMovementX: false,
-                                     lockMovementY: false});
+                                     lockMovementX: true,
+                                     lockMovementY: true,
+                                     hasControls: true,
+                                     lockScalingX: false,
+                                     lockScalingY: true,
+                                     lockRotation: true,
+                                     lockUniScaling: false});
 };
 
 /**

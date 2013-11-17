@@ -195,6 +195,10 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         hasBorders: false,
         lockMovementX: false,
         lockMovementY: false,
+        lockScalingX: true,
+        lockScalingY: true,
+        lockUniScaling: true,
+        lockScale: true,
         opacity: 1.0,
         eleRef: null
 	};
@@ -218,6 +222,9 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.hasControls = opts.hasControls;
         val.lockRotation = true;
         val.lockScale = true;
+        val.lockScalingX = opts.lockScalingX;
+        val.lockScalingY = opts.lockScalingY;
+        val.lockUniScaling = opts.lockUniScaling;
         val.lockMovementX = opts.lockMovementX;
         val.lockMovementY = opts.lockMovementY;
         val.borderColor = 'rgba(102,153,255,1.0)';

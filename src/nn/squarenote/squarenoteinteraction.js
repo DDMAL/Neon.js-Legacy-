@@ -475,7 +475,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
     $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
-}
+};
 
 Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
     var gui = e.data.gui;
