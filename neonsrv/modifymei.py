@@ -744,6 +744,16 @@ class ModifyDocument:
             # remove the system from the document
             sb.getParent().removeChild(sb)
 
+    def update_system_zone(self, system_id, ulx, uly, lrx, lry):
+        '''
+        Modify zone of system.
+        '''
+
+        # modify system
+        system = self.mei.getElementById(system_id)
+        if system:
+            self.update_or_add_zone(system, ulx, uly, lrx, lry)
+
     def move_custos(self, id, pname, oct, ulx, uly, lrx, lry):
         '''
         Move the given custos element.

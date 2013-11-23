@@ -49,11 +49,6 @@ Toe.Ctrl.SystemController.prototype.constructor = Toe.Ctrl.SystemController;
  * Handles dimension and position change.
  */
 Toe.Ctrl.SystemController.prototype.modifyDimensions = function(aWidth, aHeight, aXLeft, aYTop) {
-
-    // Create a new bounding box..
     var boundingBox = [aXLeft, aYTop, aXLeft + aWidth, aYTop + aHeight];
     this.model.setBoundingBox(boundingBox);
-
-    // Update the zone of the system at the server.
-    /// TODO 
 };

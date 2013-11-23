@@ -452,3 +452,20 @@ class DeleteSystemHandler(tornado.web.RequestHandler):
         md.write_doc()
 
         self.set_status(200)
+
+class UpdateSystemZoneHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        system_id = str(self.get_argument("sid"))
+        ulx = str(self.get_argument("ulx"))
+        uly = str(self.get_argument("uly"))
+        lrx = str(self.get_argument("lrx"))
+        lry = str(self.get_argument("lry"))
+        
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        md.update_system_zone(system_id, ulx, uly, lrx, lry)
+        md.write_doc()
+
+        self.set_status(200)

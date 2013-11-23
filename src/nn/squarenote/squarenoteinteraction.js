@@ -1766,6 +1766,18 @@ Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSyste
     });
 }
 
+Toe.View.SquareNoteInteraction.prototype.postModifySystemZone = function(aSystemId, aUlx, aUly, aLrx, aLry) {
+    $.post(this.apiprefix + "/update/system/zone", {sid: aSystemId,
+                                                    ulx: aUlx,
+                                                    uly: aUly,
+                                                    lrx: aLrx,
+                                                    lry: aLry})
+    .error(function() {
+        $("#alert > p").text("Server failed to update system zone.  Client and server are not synchronized.");
+        $("#alert").animate({opacity: 1.0}, 100);
+    });
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event Handler Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1781,6 +1793,13 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
                                                               aObject.target.currentHeight,
                                                               aObject.target.left - (aObject.target.currentWidth / 2),
                                                               aObject.target.top - (aObject.target.currentHeight / 2));
+
+            // Make call to server.
+            this.postModifySystemZone(aObject.target.eleRef.systemId,
+                                      aObject.target.eleRef.zone.ulx / this.page.scale,
+                                      aObject.target.eleRef.zone.uly / this.page.scale,
+                                      aObject.target.eleRef.zone.lrx / this.page.scale,
+                                      aObject.target.eleRef.zone.lry / this.page.scale);
             break;
         }
 

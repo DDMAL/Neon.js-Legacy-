@@ -53,7 +53,8 @@ rules = [
     (abs_path(r"/edit/(.*?)/insert/systembreak"), neonsrv.tornadoapi.InsertSystemBreakHandler),
     (abs_path(r"/edit/(.*?)/modify/systembreak"), neonsrv.tornadoapi.ModifySystemBreakHandler),
     (abs_path(r"/edit/(.*?)/delete/systembreak"), neonsrv.tornadoapi.DeleteSystemBreakHandler),
-    (abs_path(r"/edit/(.*?)/delete/system"), neonsrv.tornadoapi.DeleteSystemHandler)
+    (abs_path(r"/edit/(.*?)/delete/system"), neonsrv.tornadoapi.DeleteSystemHandler),
+    (abs_path(r"/edit/(.*?)/update/system/zone"), neonsrv.tornadoapi.UpdateSystemZoneHandler)
 ]
 
 # Set up tests if we're in debug mode
