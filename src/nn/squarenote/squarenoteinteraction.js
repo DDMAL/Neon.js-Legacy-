@@ -77,109 +77,17 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     gui.insertEditControls(e.data.parentDivId);
     gui.removeEditSubControls();
 
-    gui.rendEng.canvas.observe('mouse:down', function(e) {
-        // cache pointer coordinates for mouse up
-        gui.downCoords = gui.rendEng.canvas.getPointer(e.e);
-    });
+    // Listen for object events.
+    gui.rendEng.canvas.observe('object:modified', function(aObject) {gui.handleEventObjectModified(aObject);});
+    gui.rendEng.canvas.observe('object:moving', function(e) {gui.objMoving = true;});
+    gui.rendEng.canvas.observe('object:selected', function(aObject) {gui.handleEventObjectSelected(aObject);});
 
-    gui.rendEng.canvas.observe('object:moving', function(e) {
-        gui.objMoving = true;
-    });
+    // Listen for selection events.
+    gui.rendEng.canvas.observe('selection:cleared', function(aObject) { gui.handleEventSelectionCleared(aObject);});
+    gui.rendEng.canvas.observe('selection:created', function(aObject) { gui.handleEventSelectionCreated(aObject);});
 
-    gui.rendEng.canvas.observe('selection:created', function(e) {
-        var selection = e.target;
-        selection.hasControls = false;
-        selection.borderColor = 'rgba(102,153,255,1.0)';
-
-        // disable/enable buttons
-        var toNeumify = 0;
-        var toUngroup = 0;
-        var sModel = null;
-        $.each(selection.getObjects(), function (oInd, o) {
-            // don't draw a selection border around each object in the selection
-            o.borderColor = 'rgba(0,0,0,0)';
-
-            if (o.eleRef instanceof Toe.Model.Neume) {
-                if (!sModel) {
-                    sModel = o.eleRef.system;
-                }
-                
-                toUngroup++;
-
-                if (o.eleRef.system == sModel) {
-                    toNeumify++;
-                }
-            }
-        });
-
-        $('#btn_delete').toggleClass('disabled', false);
-
-        if (toNeumify < 2) {
-            $('#btn_neumify').toggleClass('disabled', true);
-            $('#btn_neumify_liquescence').toggleClass('disabled', true);
-        }
-        else {
-            $('#btn_neumify').toggleClass('disabled', false);
-            $('#btn_neumify_liquescence').toggleClass('disabled', false);
-        }
-
-        if (toUngroup > 0) {
-            $('#btn_ungroup').toggleClass('disabled', false);
-        }
-        else {
-            $('#btn_ungroup').toggleClass('disabled', true);
-        }
-    });
-
-    gui.rendEng.canvas.observe('object:selected', function(e) {
-
-        // Unbind and remove previous stuff.
-        gui.unbindEditSubControls();
-        gui.removeEditSubControls();
-
-        $('#btn_delete').toggleClass('disabled', false);
-
-        var selection = gui.rendEng.canvas.getActiveObject();
-        var ele = selection.eleRef;
-        if (ele instanceof Toe.Model.Neume) {
-            gui.showInfo("Selected: " + ele.name +
-                         "<br/> Pitche(s): " +
-                         $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
-
-            $('#btn_ungroup').toggleClass('disabled', false);
-
-            // Setup the neume sub-controls if we selected an editable neume.
-            if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
-                gui.insertEditNeumeSubControls();
-                gui.bindEditNeumeSubControls(ele);
-                gui.initializeEditNeumeSubControls(ele);
-            }
-        }
-        else if (ele instanceof Toe.Model.Clef) {
-            gui.showInfo("Selected: " + ele.name);
-            gui.insertEditClefSubControls(ele);
-            gui.bindEditClefSubControls(ele);
-        }
-        else if (ele instanceof Toe.Model.Division) {
-            gui.showInfo("Selected: " + ele.type);
-        }
-        else if (ele instanceof Toe.Model.Custos) {
-            gui.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
-        }
-        else if (ele instanceof Toe.Model.System) {
-            gui.showInfo("Selected: system #" + ele.orderNumber);
-        }
-    });
-
-    gui.rendEng.canvas.observe('selection:cleared', function(e) {
-        gui.hideInfo();
-        gui.removeEditSubControls();
-        $('#btn_delete').toggleClass('disabled', true);
-        $('#btn_neumify').toggleClass('disabled', true);
-        $('#btn_neumify_liquescence').toggleClass('disabled', true);
-        $('#btn_ungroup').toggleClass('disabled', true);
-    });
-
+    // Listen for mouse events.
+    gui.rendEng.canvas.observe('mouse:down', function(e) {gui.downCoords = gui.rendEng.canvas.getPointer(e.e);});
     gui.rendEng.canvas.observe('mouse:up', function(e) {
         var upCoords = gui.rendEng.canvas.getPointer(e.e);
 
@@ -452,9 +360,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         element.left = left + delta_x;
                         element.top = top + delta_y;
                     }
-                }
-                else if (ele instanceof Toe.Model.System) {
-                    console.log("here");
                 }
             });
             if (elements.length > 1) {
@@ -1862,6 +1767,127 @@ Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSyste
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Event Handler Methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
+
+    // Switch on element reference type.
+    switch(aObject.target.eleRef.constructor) {
+
+        case Toe.Model.SquareNoteSystem:
+        {
+            // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
+            aObject.target.eleRef.controller.modifyDimensions(aObject.target.currentWidth,
+                                                              aObject.target.currentHeight,
+                                                              aObject.target.left - (aObject.target.currentWidth / 2),
+                                                              aObject.target.top - (aObject.target.currentHeight / 2));
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aObject) {
+
+    // Unbind and remove previous stuff.
+    this.unbindEditSubControls();
+    this.removeEditSubControls();
+
+    $('#btn_delete').toggleClass('disabled', false);
+
+    var selection = this.rendEng.canvas.getActiveObject();
+    var ele = selection.eleRef;
+    if (ele instanceof Toe.Model.Neume) {
+        this.showInfo("Selected: " + ele.name +
+                     "<br/> Pitche(s): " +
+                     $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
+
+        $('#btn_ungroup').toggleClass('disabled', false);
+
+        // Setup the neume sub-controls if we selected an editable neume.
+        if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
+            this.insertEditNeumeSubControls();
+            this.bindEditNeumeSubControls(ele);
+            this.initializeEditNeumeSubControls(ele);
+        }
+    }
+    else if (ele instanceof Toe.Model.Clef) {
+        this.showInfo("Selected: " + ele.name);
+        this.insertEditClefSubControls(ele);
+        this.bindEditClefSubControls(ele);
+    }
+    else if (ele instanceof Toe.Model.Division) {
+        this.showInfo("Selected: " + ele.type);
+    }
+    else if (ele instanceof Toe.Model.Custos) {
+        this.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
+    }
+    else if (ele instanceof Toe.Model.System) {
+        this.showInfo("Selected: system #" + ele.orderNumber);
+    }
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(aObject) {
+    this.hideInfo();
+    this.removeEditSubControls();
+    $('#btn_delete').toggleClass('disabled', true);
+    $('#btn_neumify').toggleClass('disabled', true);
+    $('#btn_neumify_liquescence').toggleClass('disabled', true);
+    $('#btn_ungroup').toggleClass('disabled', true);
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(aObject) {
+
+    var selection = aObject.target;
+    selection.hasControls = false;
+    selection.borderColor = 'rgba(102,153,255,1.0)';
+
+    // disable/enable buttons
+    var toNeumify = 0;
+    var toUngroup = 0;
+    var sModel = null;
+    $.each(selection.getObjects(), function (oInd, o) {
+        // don't draw a selection border around each object in the selection
+        o.borderColor = 'rgba(0,0,0,0)';
+
+        if (o.eleRef instanceof Toe.Model.Neume) {
+            if (!sModel) {
+                sModel = o.eleRef.system;
+            }
+            
+            toUngroup++;
+
+            if (o.eleRef.system == sModel) {
+                toNeumify++;
+            }
+        }
+    });
+
+    $('#btn_delete').toggleClass('disabled', false);
+
+    if (toNeumify < 2) {
+        $('#btn_neumify').toggleClass('disabled', true);
+        $('#btn_neumify_liquescence').toggleClass('disabled', true);
+    }
+    else {
+        $('#btn_neumify').toggleClass('disabled', false);
+        $('#btn_neumify_liquescence').toggleClass('disabled', false);
+    }
+
+    if (toUngroup > 0) {
+        $('#btn_ungroup').toggleClass('disabled', false);
+    }
+    else {
+        $('#btn_ungroup').toggleClass('disabled', true);
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GUI Management Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.SquareNoteInteraction.prototype.getOutputBoundingBox = function(bb) {
@@ -2082,6 +2108,7 @@ Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
     this.rendEng.unObserve("object:selected");
     this.rendEng.unObserve("selection:cleared");
     this.rendEng.unObserve("selection:created");
+    this.rendEng.unObserve("object:modified");
 }
 
 Toe.View.SquareNoteInteraction.prototype.insertInsertSystemSubControls = function() {
