@@ -520,302 +520,6 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
     }
 };
 
-Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
-    var gui = e.data.gui;
-
-    // get current canvas selection
-    // check individual selection and group selections
-    toDelete = {clefs: [],
-                nids: [],
-                dids: [],
-                cids: [],
-                systemIdArray: [],
-                systemBreakIdArray: []};
-
-    // Some systems may have to be adjusted.
-    var adjustedSystemBreakArray = [];
-
-    var deleteClef = function(drawing, aIgnorePitchInfo) {
-        var clef = drawing.eleRef;
-        var system = clef.system;
-
-        // get previous acting clef
-        //  (NOTE: this should always be defined
-        // since the first clef on a system is not allowed to be deleted)
-        var pClef = system.getPreviousClef(clef);
-
-        // now delete the clef, and update the pitch information of these elements
-        system.removeElementByRef(clef);
-
-        // get references to pitched elements that will be changed after
-        // the clef is deleted (but only if required).
-        var pitchInfo = null;
-        if (!aIgnorePitchInfo) {
-
-            system.updatePitchedElements(pClef);
-            var pitchedEles = system.getPitchedElements(clef);
-
-            // gather the pitch information of the pitched notes
-            pitchInfo = $.map(pitchedEles, function(e) {
-                if (e instanceof Toe.Model.Neume) {
-                    var pitchInfo = [];
-                    $.each(e.components, function(nInd, n) {
-                        pitchInfo.push({pname: n.pname, oct: n.oct});
-                    });
-                    return {id: e.id, noteInfo: pitchInfo};
-                }
-                else if (e instanceof Toe.Model.Custos) {
-                    // the custos has been vertically moved
-                    // update the custos bounding box information in the model
-                    // do not need to update pitch name & octave since this does not change
-                    var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                    $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
-                    .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
-                    });
-                }
-            });
-        }
-
-        toDelete.clefs.push({id: clef.id, pitchInfo: pitchInfo});
-
-        gui.rendEng.canvas.remove(drawing);
-    };
-
-    var deleteNeume = function(drawing) {
-        var neume = drawing.eleRef;
-
-        var neumesOnSystem = neume.system.getPitchedElements({neumes: true, custos: false});
-
-        neume.system.removeElementByRef(neume);
-        toDelete.nids.push(neume.id);
-
-        gui.rendEng.canvas.remove(drawing);
-
-        if (neumesOnSystem.length == 1) {
-            // there are no neumes left on the system
-            // remove the custos from the previous system
-            var prevSystem = gui.page.getPreviousSystem(neume.system);
-            if (prevSystem && prevSystem.custos) {
-                prevSystem.custos.eraseDrawing();
-                prevSystem.removeElementByRef(prevSystem.custos);
-
-                // send the custos delete command to the server to update the underlying MEI
-                $.post(gui.apiprefix + "/delete/custos", {ids: prevSystem.custos.id})
-                .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
-                });
-
-                prevSystem.custos = null;
-            }
-        }
-        else if (neume == neumesOnSystem[0]) {
-            // if this neume is the first neume on the system
-            // update the custos of the previous system
-            var prevSystem = gui.page.getPreviousSystem(neume.system);
-            if (prevSystem && prevSystem.custos) {
-                var custos = prevSystem.custos;
-                var nextNeume = neumesOnSystem[1];
-                var newPname = nextNeume.components[0].pname;
-                var newOct = nextNeume.components[0].oct;
-                
-                var actingClef = prevSystem.getActingClefByEle(custos);
-                var newSystemPos = prevSystem.calcSystemPosFromPitch(newPname, newOct, actingClef);
-
-                custos.pname = newPname;
-                custos.oct = newOct;
-                custos.setRootSystemPos(newSystemPos);
-
-                // the custos has been vertically moved
-                // update the custos bounding box information in the model
-                // do not need to update pitch name & octave since this does not change
-                var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
-                $.post(gui.apiprefix + "/move/custos",
-                      {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
-                .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
-                });
-            }
-        }
-    };
-
-    var deleteDivision = function(drawing) {
-        var division = drawing.eleRef;
-
-        division.system.removeElementByRef(division);
-        toDelete.dids.push(division.id);
-
-        gui.rendEng.canvas.remove(drawing);
-    };
-
-    var deleteCustos = function(drawing) {
-        var custos = drawing.eleRef;
-
-        custos.system.removeElementByRef(custos);
-        custos.system.custos = null;
-        toDelete.cids.push(custos.id);
-
-        gui.rendEng.canvas.remove(drawing);
-    };
-
-    var deleteSystem = function(aDrawing) {
-        var systemElementReference = aDrawing.eleRef;
-        toDelete.systemBreakIdArray.push(systemElementReference.id);
-        toDelete.systemIdArray.push(systemElementReference.systemId);
-
-        // Remove all associated elements of the system.
-        var elementIndex = 0;
-        doneRemovingElements = false;
-        while (!doneRemovingElements) {
-
-            if (systemElementReference.elements.length === 0 || elementIndex >= systemElementReference.elements.length) {
-                doneRemovingElements = true;
-            }
-            else {
-                var subElement = systemElementReference.elements[elementIndex];
-                var elementDrawing = subElement.view.drawing;
-                if (subElement instanceof Toe.Model.Clef) {
-                    deleteClef(elementDrawing, true);
-                }
-                else if (subElement instanceof Toe.Model.Neume) {
-                    deleteNeume(elementDrawing);
-                }
-                else if (subElement instanceof Toe.Model.Division) {
-                    deleteDivision(elementDrawing);
-                }
-                else if (subElement instanceof Toe.Model.Custos) {
-                    deleteCustos(elementDrawing);
-                }
-                else {
-                    elementIndex++;
-                }
-            }
-        }
-        var returnedArray = gui.page.removeSystem(systemElementReference);
-        adjustedSystemBreakArray = adjustedSystemBreakArray.concat(returnedArray);
-        gui.rendEng.canvas.remove(aDrawing);
-    };
-
-    var selection = gui.rendEng.canvas.getActiveObject();
-    if (selection) {
-        // ignore the first clef, since this should never be deleted
-        if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements[0] != selection.eleRef) {
-            deleteClef(selection, false);
-        }
-        else if (selection.eleRef instanceof Toe.Model.Neume) {
-            deleteNeume(selection);
-        }
-        else if (selection.eleRef instanceof Toe.Model.Division) {
-            deleteDivision(selection);
-        }
-        else if (selection.eleRef instanceof Toe.Model.Custos) {
-            deleteCustos(selection);
-        }
-        else if (selection.eleRef instanceof Toe.Model.System) {
-            deleteSystem(selection);
-        }
-        gui.rendEng.repaint();
-    }
-    else {
-        selection = gui.rendEng.canvas.getActiveGroup();
-        if (selection) {
-            // group of elements selected
-            $.each(selection.getObjects(), function(oInd, o) {
-                // ignore the first clef, since this should never be deleted
-                if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.system.elements[0] != o.eleRef) {
-                    deleteClef(o, false);
-                }
-                else if (o.eleRef instanceof Toe.Model.Neume) {
-                    deleteNeume(o);
-                }
-                else if (o.eleRef instanceof Toe.Model.Division) {
-                    deleteDivision(o);
-                }
-                else if (o.eleRef instanceof Toe.Model.Custos) {
-                    deleteCustos(o);
-                }
-            });
-            gui.rendEng.canvas.discardActiveGroup();
-            gui.rendEng.repaint();
-        }
-    }
-
-    // Call the server to delete stuff.
-    if (toDelete.nids.length > 0) {
-        // send delete command to server to change underlying MEI
-        $.post(gui.apiprefix + "/delete/neume",  {ids: toDelete.nids.join(",")})
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
-        });
-    }
-    if (toDelete.dids.length > 0) {
-        // send delete command to server to change underlying MEI
-        $.post(gui.apiprefix + "/delete/division", {ids: toDelete.dids.join(",")})
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
-        });
-    }
-    if (toDelete.cids.length > 0) {
-        // send delete command to server to change underlying MEI
-        $.post(gui.apiprefix + "/delete/custos", {ids: toDelete.cids.join(",")})
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
-        });
-    }
-
-    if (toDelete.clefs.length > 0) {
-        // send delete command to the server to change underlying MEI
-        $.post(gui.apiprefix + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
-        });
-    }
-
-    // Delete system and system breaks.
-    if (toDelete.systemIdArray.length > 0) {
-        gui.postSystemDelete(toDelete.systemIdArray);
-    }
-    if (toDelete.systemBreakIdArray.length > 0) {
-        gui.postSystemBreakDelete(toDelete.systemBreakIdArray);
-    }
-
-    // Finally, may have had to adjust some systems.
-    if (adjustedSystemBreakArray.length > 0) {
-
-        // Remove duplicates first.
-        var uniqueAdjustedSystemBreakArray = [];
-        $.each(adjustedSystemBreakArray, function(i, el){
-            if($.inArray(el, uniqueAdjustedSystemBreakArray) === -1) uniqueAdjustedSystemBreakArray.push(el);
-        });
-
-        // Remove each.
-        for (var i = 0; i < adjustedSystemBreakArray.length; i++) {
-            gui.postSystemBreakEditOrder(adjustedSystemBreakArray[i].id, adjustedSystemBreakArray[i].orderNumber);
-        }
-    }
-};
-
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
@@ -1740,6 +1444,309 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Edit Methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Deletes the active selection.
+ *
+ * NOTE - moved out of handler to allow for deletion when no trigger is fired.
+ */
+Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) {
+    // get current canvas selection
+    // check individual selection and group selections
+    toDelete = {clefs: [],
+                nids: [],
+                dids: [],
+                cids: [],
+                systemIdArray: [],
+                systemBreakIdArray: []};
+
+    // Some systems may have to be adjusted.
+    var adjustedSystemBreakArray = [];
+
+    var deleteClef = function(drawing, aIgnorePitchInfo) {
+        var clef = drawing.eleRef;
+        var system = clef.system;
+
+        // get previous acting clef
+        //  (NOTE: this should always be defined
+        // since the first clef on a system is not allowed to be deleted)
+        var pClef = system.getPreviousClef(clef);
+
+        // now delete the clef, and update the pitch information of these elements
+        system.removeElementByRef(clef);
+
+        // get references to pitched elements that will be changed after
+        // the clef is deleted (but only if required).
+        var pitchInfo = null;
+        if (!aIgnorePitchInfo) {
+
+            system.updatePitchedElements(pClef);
+            var pitchedEles = system.getPitchedElements(clef);
+
+            // gather the pitch information of the pitched notes
+            pitchInfo = $.map(pitchedEles, function(e) {
+                if (e instanceof Toe.Model.Neume) {
+                    var pitchInfo = [];
+                    $.each(e.components, function(nInd, n) {
+                        pitchInfo.push({pname: n.pname, oct: n.oct});
+                    });
+                    return {id: e.id, noteInfo: pitchInfo};
+                }
+                else if (e instanceof Toe.Model.Custos) {
+                    // the custos has been vertically moved
+                    // update the custos bounding box information in the model
+                    // do not need to update pitch name & octave since this does not change
+                    var outbb = aGui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    $.post(aGui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                    .error(function() {
+                        // show alert to user
+                        // replace text with error message
+                        $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                        $("#alert").animate({opacity: 1.0}, 100);
+                    });
+                }
+            });
+        }
+
+        toDelete.clefs.push({id: clef.id, pitchInfo: pitchInfo});
+
+        aGui.rendEng.canvas.remove(drawing);
+    };
+
+    var deleteNeume = function(drawing) {
+        var neume = drawing.eleRef;
+
+        var neumesOnSystem = neume.system.getPitchedElements({neumes: true, custos: false});
+
+        neume.system.removeElementByRef(neume);
+        toDelete.nids.push(neume.id);
+
+        aGui.rendEng.canvas.remove(drawing);
+
+        if (neumesOnSystem.length == 1) {
+            // there are no neumes left on the system
+            // remove the custos from the previous system
+            var prevSystem = aGui.page.getPreviousSystem(neume.system);
+            if (prevSystem && prevSystem.custos) {
+                prevSystem.custos.eraseDrawing();
+                prevSystem.removeElementByRef(prevSystem.custos);
+
+                // send the custos delete command to the server to update the underlying MEI
+                $.post(aGui.apiprefix + "/delete/custos", {ids: prevSystem.custos.id})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
+
+                prevSystem.custos = null;
+            }
+        }
+        else if (neume == neumesOnSystem[0]) {
+            // if this neume is the first neume on the system
+            // update the custos of the previous system
+            var prevSystem = aGui.page.getPreviousSystem(neume.system);
+            if (prevSystem && prevSystem.custos) {
+                var custos = prevSystem.custos;
+                var nextNeume = neumesOnSystem[1];
+                var newPname = nextNeume.components[0].pname;
+                var newOct = nextNeume.components[0].oct;
+                
+                var actingClef = prevSystem.getActingClefByEle(custos);
+                var newSystemPos = prevSystem.calcSystemPosFromPitch(newPname, newOct, actingClef);
+
+                custos.pname = newPname;
+                custos.oct = newOct;
+                custos.setRootSystemPos(newSystemPos);
+
+                // the custos has been vertically moved
+                // update the custos bounding box information in the model
+                // do not need to update pitch name & octave since this does not change
+                var outbb = aGui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+                $.post(aGui.apiprefix + "/move/custos",
+                      {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
+            }
+        }
+    };
+
+    var deleteDivision = function(drawing) {
+        var division = drawing.eleRef;
+
+        division.system.removeElementByRef(division);
+        toDelete.dids.push(division.id);
+
+        aGui.rendEng.canvas.remove(drawing);
+    };
+
+    var deleteCustos = function(drawing) {
+        var custos = drawing.eleRef;
+
+        custos.system.removeElementByRef(custos);
+        custos.system.custos = null;
+        toDelete.cids.push(custos.id);
+
+        aGui.rendEng.canvas.remove(drawing);
+    };
+
+    var deleteSystem = function(aDrawing) {
+        var systemElementReference = aDrawing.eleRef;
+        toDelete.systemBreakIdArray.push(systemElementReference.id);
+        toDelete.systemIdArray.push(systemElementReference.systemId);
+
+        // Remove all associated elements of the system.
+        var elementIndex = 0;
+        doneRemovingElements = false;
+        while (!doneRemovingElements) {
+
+            if (systemElementReference.elements.length === 0 || elementIndex >= systemElementReference.elements.length) {
+                doneRemovingElements = true;
+            }
+            else {
+                var subElement = systemElementReference.elements[elementIndex];
+                var elementDrawing = subElement.view.drawing;
+                if (subElement instanceof Toe.Model.Clef) {
+                    deleteClef(elementDrawing, true);
+                }
+                else if (subElement instanceof Toe.Model.Neume) {
+                    deleteNeume(elementDrawing);
+                }
+                else if (subElement instanceof Toe.Model.Division) {
+                    deleteDivision(elementDrawing);
+                }
+                else if (subElement instanceof Toe.Model.Custos) {
+                    deleteCustos(elementDrawing);
+                }
+                else {
+                    elementIndex++;
+                }
+            }
+        }
+        var returnedArray = aGui.page.removeSystem(systemElementReference);
+        adjustedSystemBreakArray = adjustedSystemBreakArray.concat(returnedArray);
+        aGui.rendEng.canvas.remove(aDrawing);
+    };
+
+    var selection = aGui.rendEng.canvas.getActiveObject();
+    if (selection) {
+        // ignore the first clef, since this should never be deleted
+        if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements[0] != selection.eleRef) {
+            deleteClef(selection, false);
+        }
+        else if (selection.eleRef instanceof Toe.Model.Neume) {
+            deleteNeume(selection);
+        }
+        else if (selection.eleRef instanceof Toe.Model.Division) {
+            deleteDivision(selection);
+        }
+        else if (selection.eleRef instanceof Toe.Model.Custos) {
+            deleteCustos(selection);
+        }
+        else if (selection.eleRef instanceof Toe.Model.System) {
+            deleteSystem(selection);
+        }
+        aGui.rendEng.repaint();
+    }
+    else {
+        selection = aGui.rendEng.canvas.getActiveGroup();
+        if (selection) {
+            // group of elements selected
+            $.each(selection.getObjects(), function(oInd, o) {
+                // ignore the first clef, since this should never be deleted
+                if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.system.elements[0] != o.eleRef) {
+                    deleteClef(o, false);
+                }
+                else if (o.eleRef instanceof Toe.Model.Neume) {
+                    deleteNeume(o);
+                }
+                else if (o.eleRef instanceof Toe.Model.Division) {
+                    deleteDivision(o);
+                }
+                else if (o.eleRef instanceof Toe.Model.Custos) {
+                    deleteCustos(o);
+                }
+            });
+            aGui.rendEng.canvas.discardActiveGroup();
+            aGui.rendEng.repaint();
+        }
+    }
+
+    // Call the server to delete stuff.
+    if (toDelete.nids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(aGui.apiprefix + "/delete/neume",  {ids: toDelete.nids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+    if (toDelete.dids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(aGui.apiprefix + "/delete/division", {ids: toDelete.dids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+    if (toDelete.cids.length > 0) {
+        // send delete command to server to change underlying MEI
+        $.post(aGui.apiprefix + "/delete/custos", {ids: toDelete.cids.join(",")})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+
+    if (toDelete.clefs.length > 0) {
+        // send delete command to the server to change underlying MEI
+        $.post(aGui.apiprefix + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+    }
+
+    // Delete system and system breaks.
+    if (toDelete.systemIdArray.length > 0) {
+        aGui.postSystemDelete(toDelete.systemIdArray);
+    }
+    if (toDelete.systemBreakIdArray.length > 0) {
+        aGui.postSystemBreakDelete(toDelete.systemBreakIdArray);
+    }
+
+    // Finally, may have had to adjust some systems.
+    if (adjustedSystemBreakArray.length > 0) {
+
+        // Remove duplicates first.
+        var uniqueAdjustedSystemBreakArray = [];
+        $.each(adjustedSystemBreakArray, function(i, el){
+            if($.inArray(el, uniqueAdjustedSystemBreakArray) === -1) uniqueAdjustedSystemBreakArray.push(el);
+        });
+
+        // Remove each.
+        for (var i = 0; i < adjustedSystemBreakArray.length; i++) {
+            aGui.postSystemBreakEditOrder(adjustedSystemBreakArray[i].id, adjustedSystemBreakArray[i].orderNumber);
+        }
+    }
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // POST Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.SquareNoteInteraction.prototype.postSystemBreakEditOrder = function(aSystemId, aOrderNumber) {
@@ -1781,6 +1788,11 @@ Toe.View.SquareNoteInteraction.prototype.postModifySystemZone = function(aSystem
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event Handler Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
+    var gui = e.data.gui;
+    gui.deleteActiveSelection(e.data.gui);
+};
+
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
 
     // Switch on element reference type.
@@ -1789,17 +1801,14 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
         case Toe.Model.SquareNoteSystem:
         {
             // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
-            aObject.target.eleRef.controller.modifyDimensions(aObject.target.currentWidth,
-                                                              aObject.target.currentHeight,
-                                                              aObject.target.left - (aObject.target.currentWidth / 2),
-                                                              aObject.target.top - (aObject.target.currentHeight / 2));
+            aObject.target.eleRef.controller.modifyWidth(aObject.target.currentWidth);
 
             // Make call to server.
             this.postModifySystemZone(aObject.target.eleRef.systemId,
-                                      aObject.target.eleRef.zone.ulx / this.page.scale,
-                                      aObject.target.eleRef.zone.uly / this.page.scale,
-                                      aObject.target.eleRef.zone.lrx / this.page.scale,
-                                      aObject.target.eleRef.zone.lry / this.page.scale);
+                                      Math.floor(aObject.target.eleRef.zone.ulx / this.page.scale),
+                                      Math.floor(aObject.target.eleRef.zone.uly / this.page.scale),
+                                      Math.floor(aObject.target.eleRef.zone.lrx / this.page.scale),
+                                      Math.floor(aObject.target.eleRef.zone.lry / this.page.scale));
 
             // Get the elements that became loose from the system.  Group them and delete.
             var looseElements = aObject.target.eleRef.getLooseElements();
@@ -1807,9 +1816,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
             {
                 var looseElementDrawings = $.map(looseElements, function(aElement, aIndex) {return aElement.view.drawing;});
                 var looseElementGroup = new fabric.Group(looseElementDrawings);
-
+                this.rendEng.canvas.deactivateAll();
+                this.rendEng.canvas.setActiveGroup(looseElementGroup);
+                this.deleteActiveSelection(this);
             }
-
             break;
         }
 
@@ -1818,7 +1828,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
             break;
         }
     }
-}
+};
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aObject) {
 
