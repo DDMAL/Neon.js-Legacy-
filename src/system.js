@@ -354,7 +354,7 @@ Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, op
 
         // check right system boundary
         if (this.custos && opts.ignoreEle != this.custos && right >= this.custos.zone.ulx) {
-            coordsPrime.x = this.custos.zone.ulx - width/2 - 3; 
+            coordsPrime.x = this.custos.zone.ulx - width/2 - 3;
         }
         else if (right >= this.zone.lrx) {
             coordsPrime.x = this.zone.lrx - width/2 - 3;
@@ -362,4 +362,24 @@ Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, op
     }
 
     return coordsPrime;
+};
+
+/**
+ * Returns array of elements that are "loose" (i.e. not on the system).
+ * It only checks horizontally (naturally).
+ *
+ * @methodOf Toe.Model.System
+ * @returns {Array} array of elements
+ */
+Toe.Model.System.prototype.getLooseElements = function() {
+
+    var looseElementArray = [];
+    if (this.elements && this.elements.length > 0) {
+        for (var i = 0; i < this.elements.length; i++) {
+            if (this.elements[i].zone.lrx < this.zone.ulx || this.elements[i].zone.ulx > this.zone.lrx) {
+                looseElementArray.push(this.elements[i]);
+            }
+        }
+    }
+    return looseElementArray;
 };

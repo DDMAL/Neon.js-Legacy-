@@ -1800,6 +1800,16 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
                                       aObject.target.eleRef.zone.uly / this.page.scale,
                                       aObject.target.eleRef.zone.lrx / this.page.scale,
                                       aObject.target.eleRef.zone.lry / this.page.scale);
+
+            // Get the elements that became loose from the system.  Group them and delete.
+            var looseElements = aObject.target.eleRef.getLooseElements();
+            if (looseElements.length > 0)
+            {
+                var looseElementDrawings = $.map(looseElements, function(aElement, aIndex) {return aElement.view.drawing;});
+                var looseElementGroup = new fabric.Group(looseElementDrawings);
+
+            }
+
             break;
         }
 

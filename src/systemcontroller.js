@@ -47,8 +47,16 @@ Toe.Ctrl.SystemController.prototype.constructor = Toe.Ctrl.SystemController;
 
 /**
  * Handles dimension and position change.
+ *
+ * @param {float} aWidth new width
+ * @param {float} aHeight new height
+ * @param {float} aXLeft new x-left position
+ * @param {float} aYTop new y-top position
+ * @return {Array} array of loose elements
  */
 Toe.Ctrl.SystemController.prototype.modifyDimensions = function(aWidth, aHeight, aXLeft, aYTop) {
+
+    // Adjust dimensions.
     var boundingBox = [aXLeft, aYTop, aXLeft + aWidth, aYTop + aHeight];
     this.model.setBoundingBox(boundingBox);
 };
