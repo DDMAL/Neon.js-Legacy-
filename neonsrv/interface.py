@@ -102,7 +102,7 @@ class StafflessEditorHandler(tornado.web.RequestHandler):
             dstr = "true"
         else:
             dstr = "false"
-        self.render("neon_staffless.html", page=page, debug=dstr, prefix=conf.get_prefix())
+        self.render(conf.get_neonStafflessHtmlFileName(), page=page, debug=dstr, prefix=conf.get_prefix())
 
 class FileHandler(tornado.web.RequestHandler):
     mimetypes.add_type("text/xml", ".mei")
