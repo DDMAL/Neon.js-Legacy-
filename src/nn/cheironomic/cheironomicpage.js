@@ -65,6 +65,7 @@ Toe.Model.CheironomicPage.prototype.loadMei = function(mei, rendEng) {
         // create system with no lines as a container for the neumes
         var s_bb = [0,0,0,0];
         var sModel = new Toe.Model.CheironomicSystem(s_bb, {numLines: 0});
+        sModel.setOrderNumber(parseInt($(sel).attr("n")));
         var sbID = null;
         if (sit == 0) {
             sbID = $(section).attr("xml:id");
