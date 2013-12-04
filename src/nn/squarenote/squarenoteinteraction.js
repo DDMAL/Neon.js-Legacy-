@@ -21,15 +21,12 @@ THE SOFTWARE.
 */
 
 Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) {
+    Toe.View.Interaction.call(this, rendEng, page, apiprefix, guiToggles);
     var toggles = {
         initMode: "edit"
     };
 
     $.extend(toggles, guiToggles);
-
-    this.rendEng = rendEng;
-    this.page = page;
-    this.apiprefix = apiprefix;
 
     // these are variables holding pointers to the drawings
     // that follow around the pointer in insert mode.
@@ -74,7 +71,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     gui.activateCanvasObjects();
     gui.removeInsertControls();
     gui.removeInsertSubControls();
-    gui.unbindMouseEventHandlers();
+    gui.unbindEventHandlers();
     gui.insertEditControls(e.data.parentDivId);
     gui.removeEditSubControls();
 
@@ -702,13 +699,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsert = function(e) {
     gui.removeEditControls();
     gui.unbindEditControls();
     gui.unbindEditSubControls();
-    gui.unbindMouseEventHandlers();
+    gui.unbindEventHandlers();
     gui.insertInsertControls(parentDivId);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers();
+    gui.unbindEventHandlers();
     gui.removeInsertSubControls();
 
     // add ornamentation toggles
@@ -895,7 +892,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers();
+    gui.unbindEventHandlers();
     gui.removeInsertSubControls();
 
     // add division type toggles
@@ -1080,7 +1077,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers();
+    gui.unbindEventHandlers();
     gui.removeInsertSubControls();
     gui.insertInsertSystemSubControls();
     gui.updateInsertSystemSubControls();
@@ -1167,7 +1164,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     var gui = e.data.gui;
-    gui.unbindMouseEventHandlers();
+    gui.unbindEventHandlers();
     gui.removeInsertSubControls();
 
     // add clef type toggles
@@ -1879,17 +1876,6 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
     });
 }
 
-Toe.View.SquareNoteInteraction.prototype.deactivateCanvasObjects = function() {
-    this.rendEng.canvas.selection = false;
-    this.rendEng.canvas.deactivateAll();
-    this.rendEng.canvas.HOVER_CURSOR = null;
-}
-
-Toe.View.SquareNoteInteraction.prototype.activateCanvasObjects = function() {
-    this.rendEng.canvas.selection = true;
-    this.rendEng.canvas.HOVER_CURSOR = "pointer";
-}
-
 Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDivId) {
     // add buttons for edit commands
     if ($("#sidebar-edit").length === 0) {
@@ -2018,10 +2004,6 @@ Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = functi
     }
 }
 
-Toe.View.SquareNoteInteraction.prototype.removeInsertControls = function() {
-    $("#sidebar-insert").remove();
-}
-
 Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
     $("#menu_insertdivision").remove();
     $("#menu_insertclef").remove();
@@ -2048,10 +2030,6 @@ Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
     $("#rad_clef").unbind("click");
 }
 
-Toe.View.SquareNoteInteraction.prototype.removeEditControls = function() {
-    $("#sidebar-edit").remove();
-}
-
 Toe.View.SquareNoteInteraction.prototype.removeEditSubControls = function () {
     $("#menu_editclef").remove();
     $("#menu_editpunctum").remove();
@@ -2060,17 +2038,6 @@ Toe.View.SquareNoteInteraction.prototype.removeEditSubControls = function () {
 Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function() {
     $("#btn_delete").unbind("click.edit");
     $("#btn_neumify").unbind("click.edit");
-}
-
-Toe.View.SquareNoteInteraction.prototype.unbindMouseEventHandlers = function() {
-    this.rendEng.unObserve("mouse:down");
-    this.rendEng.unObserve("mouse:up");
-    this.rendEng.unObserve("mouse:move");
-    this.rendEng.unObserve("object:moving");
-    this.rendEng.unObserve("object:selected");
-    this.rendEng.unObserve("selection:cleared");
-    this.rendEng.unObserve("selection:created");
-    this.rendEng.unObserve("object:modified");
 }
 
 Toe.View.SquareNoteInteraction.prototype.insertInsertSystemSubControls = function() {

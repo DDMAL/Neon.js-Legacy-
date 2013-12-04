@@ -31,15 +31,12 @@ THE SOFTWARE.
  * @param {Object} guiToggles Various presets and options for the starting state of the GUI
  */
 Toe.View.CheironomicInteraction = function(rendEng, page, apiprefix, guiToggles) {
+    Toe.View.Interaction.call(this, rendEng, page, apiprefix, guiToggles);
     var toggles = {
         initMode: "edit"
     };
 
     $.extend(toggles, guiToggles);
-
-    this.rendEng = rendEng;
-    this.page = page;
-    this.apiprefix = apiprefix;
 
     // pointer to the the punctum drawing in insert mode
     this.punctDwg = null;
@@ -84,18 +81,10 @@ Toe.View.CheironomicInteraction.prototype.constructor = Toe.View.CheironomicInte
 Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
-
-    // activate all objects on the canvas 
-    // so they can be modified in edit mode
-    gui.rendEng.canvas.selection = true;
-    gui.rendEng.canvas.HOVER_CURSOR = "pointer";
-
-    // first remove insert options
-    $("#sidebar-insert").remove();
-
-    // unbind insert event handlers
-    gui.rendEng.unObserve("mouse:move");
-    gui.rendEng.unObserve("mouse:up");
+    gui.activateCanvasObjects();
+    gui.hideInfo();
+    gui.removeInsertControls();
+    gui.unbindEventHandlers();
 
     // remove drawings following the pointer from insert mode
     if (gui.punctDwg) {
@@ -185,7 +174,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            this.showInfo("Selected: " + ele.name);
+            gui.showInfo("Selected: " + ele.name);
 
             $('#btn_ungroup').toggleClass('disabled', false);
 
@@ -253,8 +242,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
     // when a set of objects are deselected, update the GUI widgets
     gui.rendEng.canvas.observe('selection:cleared', function(e) {
-        // close info alert
-        $("#info").animate({opacity: 0.0}, 100);
+        gui.hideInfo();
 
         // remove selection specific editing options
         $("#menu_editpunctum").remove();
@@ -339,10 +327,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
 
                     $.post(gui.apiprefix + "/move/neume", {data: JSON.stringify(args)})
                     .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to move neume. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
+                        gui.showAlert("Server failed to move neume. Client and server are not synchronized.");
                     });
                 }
             });
@@ -398,20 +383,14 @@ Toe.View.CheironomicInteraction.prototype.handleDotToggle = function(e) {
         // send add dot command to server to change underlying MEI
         $.post(gui.apiprefix + "/insert/dot", args)
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to add a dot to the punctum. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            gui.showAlert("Server failed to add a dot to the punctum. Client and server are not synchronized.");
         });
     }
     else {
         // send remove dot command to server to change underlying MEI
         $.post(gui.apiprefix + "/delete/dot", args)
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to remove dot from the punctum. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            gui.showAlert("Server failed to remove dot from the punctum. Client and server are not synchronized.");
         });
     }
 
@@ -469,10 +448,7 @@ Toe.View.CheironomicInteraction.prototype.handleHeadShapeChange = function(e) {
     // send change head command to server to change underlying MEI
     $.post(gui.apiprefix + "/update/neume/headshape", args)
     .error(function() {
-        // show alert to user
-        // replace text with error message
-        $("#alert > p").text("Server failed to change note head shape. Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        gui.showAlert("Server failed to change note head shape. Client and server are not synchronized.");
     });
 }
 
@@ -524,10 +500,7 @@ Toe.View.CheironomicInteraction.prototype.handleDelete = function(e) {
         // send delete command to server to change underlying MEI
         $.post(gui.apiprefix + "/delete/neume",  {ids: nids.join(",")})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            gui.showAlert("Server failed to delete neume. Client and server are not synchronized.");
         });
     }
 }
@@ -646,10 +619,7 @@ Toe.View.CheironomicInteraction.prototype.handleNeumify = function(e) {
             newNeume.id = JSON.parse(data).id;
         })
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
         });
 
         gui.rendEng.canvas.discardActiveGroup();
@@ -757,10 +727,7 @@ Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
         });
     })
     .error(function() {
-        // show alert to user
-        // replace text with error message
-        $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        gui.showAlert("Server failed to ungroup selected neumes. Client and server are not synchronized.");
     });
 
     gui.rendEng.canvas.discardActiveObject();
@@ -781,28 +748,16 @@ Toe.View.CheironomicInteraction.prototype.handleUngroup = function(e) {
 Toe.View.CheironomicInteraction.prototype.handleInsert = function(e) {
     var gui = e.data.gui;
     var parentDivId = e.data.parentDivId;
-
-    // deactivate all objects on the canvas 
-    // so they can't be modified in insert mode
-    gui.rendEng.canvas.selection = false;
-    gui.rendEng.canvas.deactivateAll();
-    gui.rendEng.canvas.HOVER_CURSOR = null;
-
-    // first remove edit options
-    $("#sidebar-edit").remove();
+    gui.deactivateCanvasObjects();
+    gui.hideInfo();
+    gui.removeInsertControls();
+    gui.removeEditControls();
+    gui.unbindEventHandlers();
 
     // unbind edit event handlers
     $("#btn_delete").unbind("click.edit");
     $("#btn_neumify").unbind("click.edit");
     $("#btn_ungroup").unbind("click.edit");
-
-    // unbind move event handlers
-    gui.rendEng.unObserve("mouse:down");
-    gui.rendEng.unObserve("mouse:up");
-    gui.rendEng.unObserve("object:moving");
-    gui.rendEng.unObserve("object:selected");
-    gui.rendEng.unObserve("selection:cleared");
-    gui.rendEng.unObserve("selection:created");
 
     // then add insert options
     if ($("#sidebar-insert").length == 0) {
@@ -828,10 +783,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsert = function(e) {
  */
 Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
     var gui = e.data.gui;
-
-    // unbind other event handlers
-    gui.rendEng.unObserve("mouse:move");
-    gui.rendEng.unObserve("mouse:up");
+    gui.unbindEventHandlers();
 
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
@@ -974,10 +926,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
             nModel.id = JSON.parse(data).id;
         })
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to insert neume. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
         });
     });
 
