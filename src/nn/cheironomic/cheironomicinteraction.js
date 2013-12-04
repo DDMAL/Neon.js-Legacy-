@@ -66,8 +66,9 @@ Toe.View.CheironomicInteraction = function(rendEng, page, apiprefix, guiToggles)
     $("#btn_" + toggles.initMode).trigger('click');
 
     this.bindHotKeys();
-}
+};
 
+Toe.View.CheironomicInteraction.prototype = new Toe.View.Interaction();
 Toe.View.CheironomicInteraction.prototype.constructor = Toe.View.CheironomicInteraction;
 
 /**************************************************
@@ -184,8 +185,7 @@ Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
         var selection = gui.rendEng.canvas.getActiveObject();
         var ele = selection.eleRef;
         if (ele instanceof Toe.Model.Neume) {
-            $("#info > p").html("Selected: " + ele.name);
-            $("#info").animate({opacity: 1.0}, 100);
+            this.showInfo("Selected: " + ele.name);
 
             $('#btn_ungroup').toggleClass('disabled', false);
 
@@ -1048,4 +1048,4 @@ Toe.View.CheironomicInteraction.prototype.bindHotKeys = function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
     });
-}
+};

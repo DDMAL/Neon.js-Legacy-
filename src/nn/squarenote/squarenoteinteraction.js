@@ -61,6 +61,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
     this.bindHotKeys();
 };
 
+Toe.View.SquareNoteInteraction.prototype = new Toe.View.Interaction();
 Toe.View.SquareNoteInteraction.prototype.constructor = Toe.View.SquareNoteInteraction;
 
 /**************************************************
@@ -169,10 +170,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                             var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
                             $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                             .error(function() {
-                                // show alert to user
-                                // replace text with error message
-                                $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                                $("#alert").animate({opacity: 1.0}, 100);
+                                this.showAlert("Server failed to move custos. Client and server are not synchronized.");
                             });
                         }
                     });
@@ -185,10 +183,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // send pitch shift command to server to change underlying MEI
                     $.post(gui.apiprefix + "/move/clef", {data: JSON.stringify(args)})
                     .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to move clef. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
+                        this.showAlert("Server failed to move clef. Client and server are not synchronized.");
                     });
                 }
                 else if (ele instanceof Toe.Model.Neume) {
@@ -271,10 +266,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // send pitch shift command to server to change underlying MEI
                     $.post(gui.apiprefix + "/move/neume", {data: JSON.stringify(args)})
                     .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to move neume. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
+                        this.showAlert("Server failed to move neume. Client and server are not synchronized.");
                     });
                 }
                 else if (ele instanceof Toe.Model.Division) {
@@ -343,10 +335,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // send move command to the server to change underlying MEI
                     $.post(gui.apiprefix + "/move/division", data)
                     .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to move division. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
+                        this.showAlert("Server failed to move division. Client and server are not synchronized.");
                     });
                 }
                 else if (ele instanceof Toe.Model.Custos) {
@@ -407,20 +396,14 @@ Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
         // send add dot command to server to change underlying MEI
         $.post(gui.apiprefix + "/insert/dot", args)
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to add a dot to the punctum. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to add a dot to the punctum. Client and server are not synchronized.");
         });
     }
     else {
         // send remove dot command to server to change underlying MEI
         $.post(gui.apiprefix + "/delete/dot", args)
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to remove dot from the punctum. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to remove dot from the punctum. Client and server are not synchronized.");
         });
     }
 
@@ -454,10 +437,7 @@ Toe.View.SquareNoteInteraction.prototype.handleHeadShapeChange = function(e) {
     // send change head command to server to change underlying MEI
     $.post(gui.apiprefix + "/update/neume/headshape", args)
     .error(function() {
-        // show alert to user
-        // replace text with error message
-        $("#alert > p").text("Server failed to change note head shape. Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        this.showAlert("Server failed to change note head shape. Client and server are not synchronized.");
     });
 }
 
@@ -496,10 +476,7 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
                 var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
                 $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
+                    this.showAlert("Server failed to move custos. Client and server are not synchronized.");
                 });
             }
         });
@@ -510,10 +487,7 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
         // send pitch shift command to server to change underlying MEI
         $.post(gui.apiprefix + "/update/clef/shape", {data: JSON.stringify(args)})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to update clef shape. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to update clef shape. Client and server are not synchronized.");
         });
 
         $(this).toggleClass("active");
@@ -612,10 +586,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
             newNeume.id = JSON.parse(data).id;
         })
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to neumify selected neumes. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
         });
 
         gui.rendEng.canvas.discardActiveGroup();
@@ -710,10 +681,7 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
         });
     })
     .error(function() {
-        // show alert to user
-        // replace text with error message
-        $("#alert > p").text("Server failed to ungroup selected neumes. Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        this.showAlert("Server failed to ungroup selected neumes. Client and server are not synchronized.");
     });
 
     gui.rendEng.canvas.discardActiveObject();
@@ -894,10 +862,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             nModel.id = JSON.parse(data).id;
         })
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to insert neume. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to insert neume. Client and server are not synchronized.");
         });
     });
 
@@ -1072,10 +1037,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
             division.id = JSON.parse(data).id;
         })
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to insert division. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to insert division. Client and server are not synchronized.");
         });
     });
 
@@ -1176,8 +1138,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
             postSystemBreak();
         })
         .error(function() {
-            $("#alert > p").text("Server failed to insert system.  Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to insert system.  Client and server are not synchronized.");
         });
 
         // POST system break.
@@ -1198,8 +1159,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
                 }
             })
             .error(function() {
-                $("#alert > p").text("Server failed to insert system break.  Client and server are not synchronized.");
-                $("#alert").animate({opacity: 1.0}, 100);
+                this.showAlert("Server failed to insert system break.  Client and server are not synchronized.");
             });
         }
     });
@@ -1319,10 +1279,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                 var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
                 $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
+                    this.showAlert("Server failed to move custos. Client and server are not synchronized.");
                 });
             }
         });
@@ -1332,10 +1289,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             clef.id = JSON.parse(data).id;
         })
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to insert clef. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to insert clef. Client and server are not synchronized.");
         });
     });
 
@@ -1399,10 +1353,7 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
         $.post(this.apiprefix + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to move custos. Client and server are not synchronized.");
         });
     }
     else {
@@ -1435,10 +1386,7 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         $.post(this.apiprefix + "/insert/custos", args, function(data) {
             cModel.id = JSON.parse(data).id;
         }).error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to insert custos. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to insert custos. Client and server are not synchronized.");
         });
     }
 }
@@ -1500,10 +1448,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                     var outbb = aGui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
                     $.post(aGui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                     .error(function() {
-                        // show alert to user
-                        // replace text with error message
-                        $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                        $("#alert").animate({opacity: 1.0}, 100);
+                        this.showAlert("Server failed to move custos. Client and server are not synchronized.");
                     });
                 }
             });
@@ -1535,10 +1480,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                 // send the custos delete command to the server to update the underlying MEI
                 $.post(aGui.apiprefix + "/delete/custos", {ids: prevSystem.custos.id})
                 .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
+                    this.showAlert("Server failed to delete custos. Client and server are not synchronized.");
                 });
 
                 prevSystem.custos = null;
@@ -1568,10 +1510,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                 $.post(aGui.apiprefix + "/move/custos",
                       {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
-                    // show alert to user
-                    // replace text with error message
-                    $("#alert > p").text("Server failed to move custos. Client and server are not synchronized.");
-                    $("#alert").animate({opacity: 1.0}, 100);
+                    this.showAlert("Server failed to move custos. Client and server are not synchronized.");
                 });
             }
         }
@@ -1683,30 +1622,21 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
         // send delete command to server to change underlying MEI
         $.post(aGui.apiprefix + "/delete/neume",  {ids: toDelete.nids.join(",")})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete neume. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to delete neume. Client and server are not synchronized.");
         });
     }
     if (toDelete.dids.length > 0) {
         // send delete command to server to change underlying MEI
         $.post(aGui.apiprefix + "/delete/division", {ids: toDelete.dids.join(",")})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete division. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to delete division. Client and server are not synchronized.");
         });
     }
     if (toDelete.cids.length > 0) {
         // send delete command to server to change underlying MEI
         $.post(aGui.apiprefix + "/delete/custos", {ids: toDelete.cids.join(",")})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete custos. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to delete custos. Client and server are not synchronized.");
         });
     }
 
@@ -1714,10 +1644,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
         // send delete command to the server to change underlying MEI
         $.post(aGui.apiprefix + "/delete/clef", {data: JSON.stringify(toDelete.clefs)})
         .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to delete clef. Client and server are not synchronized.");
-            $("#alert").animate({opacity: 1.0}, 100);
+            this.showAlert("Server failed to delete clef. Client and server are not synchronized.");
         });
     }
 
@@ -1752,24 +1679,21 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
 Toe.View.SquareNoteInteraction.prototype.postSystemBreakEditOrder = function(aSystemId, aOrderNumber) {
     $.post(this.apiprefix + "/modify/systembreak", {sbid: aSystemId, ordernumber: aOrderNumber})
     .error(function() {
-        $("#alert > p").text("Server failed to modify system break.  Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        this.showAlert("Server failed to modify system break.  Client and server are not synchronized.");
     });
 }
 
 Toe.View.SquareNoteInteraction.prototype.postSystemDelete = function(aSystemIdArray) {
     $.post(this.apiprefix + "/delete/system", {sids: aSystemIdArray.join(",")})
     .error(function() {
-        $("#alert > p").text("Server failed to delete system.  Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        this.showAlert("Server failed to delete system.  Client and server are not synchronized.");
     });
 }
 
 Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSystemBreadIdArray) {
     $.post(this.apiprefix + "/delete/systembreak", {sbids: aSystemBreadIdArray.join(",")})
     .error(function() {
-        $("#alert > p").text("Server failed to delete system break.  Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        this.showAlert("Server failed to delete system break.  Client and server are not synchronized.");
     });
 }
 
@@ -1780,8 +1704,7 @@ Toe.View.SquareNoteInteraction.prototype.postModifySystemZone = function(aSystem
                                                     lrx: aLrx,
                                                     lry: aLry})
     .error(function() {
-        $("#alert > p").text("Server failed to update system zone.  Client and server are not synchronized.");
-        $("#alert").animate({opacity: 1.0}, 100);
+        this.showAlert("Server failed to update system zone.  Client and server are not synchronized.");
     });
 }
 
@@ -2163,13 +2086,4 @@ Toe.View.SquareNoteInteraction.prototype.updateInsertSystemSubControls = functio
     $("#system_number_slider").attr("max", this.page.systems.length + 1);
     $("#system_number_slider").val(this.page.systems.length + 1);
     $("#system_number_slider").change();
-}
-
-Toe.View.SquareNoteInteraction.prototype.showInfo = function(aText) {
-    $("#info > p").html(aText);
-    $("#info").animate({opacity: 1.0}, 100);
-}
-
-Toe.View.SquareNoteInteraction.prototype.hideInfo = function() {
-    $("#info").animate({opacity: 0.0}, 100);
 }
