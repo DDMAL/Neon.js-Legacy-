@@ -80,34 +80,17 @@ Toe.View.CheironomicInteraction.prototype.constructor = Toe.View.CheironomicInte
  */
 Toe.View.CheironomicInteraction.prototype.handleEdit = function(e) {
     var gui = e.data.gui;
-    var parentDivId = e.data.parentDivId;
     gui.activateCanvasObjects();
     gui.hideInfo();
     gui.removeInsertControls();
     gui.unbindEventHandlers();
+    gui.insertEditControls(e.data.parentDivId);
 
     // remove drawings following the pointer from insert mode
     if (gui.punctDwg) {
         gui.rendEng.canvas.remove(gui.punctDwg);
     }
     gui.rendEng.repaint();
-           
-    // add buttons for edit commands
-    if ($("#sidebar-edit").length == 0) {
-        $(parentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
-                              '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
-                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
-                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
-                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence_aug">liquescence augmented</a></li>\n' +
-                              '<li><a id="btn_neumify_liquescence_dim">liquescence diminished</a></li></ul></li>\n' +
-                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
-    }
-    
-    // grey out edit buttons by default
-    $('#btn_delete').toggleClass('disabled', true);
-    $('#btn_neumify').toggleClass('disabled', true);
-    //$('#btn_neumify_liquescence').toggleClass('disabled', true);
-    $('#btn_ungroup').toggleClass('disabled', true);
 
     // on mouse down get pointer coordinates
     gui.rendEng.canvas.observe('mouse:down', function(e) {
@@ -997,4 +980,22 @@ Toe.View.CheironomicInteraction.prototype.bindHotKeys = function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
     });
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GUI Management Methods
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Toe.View.CheironomicInteraction.prototype.insertEditControls = function(aParentDivId) {
+    if ($("#sidebar-edit").length == 0) {
+        $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
+                              '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
+                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
+                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence_aug">liquescence augmented</a></li>\n' +
+                              '<li><a id="btn_neumify_liquescence_dim">liquescence diminished</a></li></ul></li>\n' +
+                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
+    }
+    $('#btn_delete').toggleClass('disabled', true);
+    $('#btn_neumify').toggleClass('disabled', true);
+    $('#btn_ungroup').toggleClass('disabled', true);
 };
