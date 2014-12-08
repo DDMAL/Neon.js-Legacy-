@@ -4,9 +4,9 @@
 if [ ! -f compiler.jar ]
 then
     echo "Retrieving google closure compiler ..."
-    wget http://closure-compiler.googlecode.com/files/compiler-latest.tar.gz
-    tar xvfz compiler-latest.tar.gz
-    rm {README,COPYING,compiler-latest.tar.gz}
+    wget http://dl.google.com/closure-compiler/compiler-latest.zip
+    unzip compiler-latest.zip
+    rm {README.md,COPYING,compiler-latest.zip}
 fi
 
 echo "Compiling Neon.js with google closure ..."
