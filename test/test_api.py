@@ -10,7 +10,7 @@ import tornado.httpserver
 from tornado.testing import AsyncHTTPTestCase
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from neonsrv import api
+from neonsrv import tornadoapi
 
 class FakeReq():
     """ A class that looks enough like an HTTPRequest to create a
