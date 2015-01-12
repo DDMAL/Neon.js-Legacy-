@@ -27,8 +27,24 @@ class RootHandler(tornado.web.RequestHandler):
         # list subdirectories in the mei root directory
         return os.walk(mei_dir).next()[1] 
 
-    def get(self):
-        self.render("index.html", 
+    def get(self, url):
+        #default and permissions are set in server.py
+        url = url or self.settings["default"]
+
+        #if page "doesn't exist", real 404
+        if url not in self.settings["visible_pages"]:
+            raise tornado.web.HTTPError(404)
+
+        #else, page handlers
+        elif url == "index.html":
+            self.render(url, 
+                    rootfiles=self.get_files(''),
+                    document_types=self.get_document_types(),
+                    errors="", 
+                    prefix=conf.get_prefix())
+
+        elif url == "demo.html":
+            self.render(url, 
                     squarenotefiles=self.get_files('squarenote'), 
                     stafflessfiles=self.get_files('cheironomic'),
                     document_types=self.get_document_types(),
@@ -93,7 +109,7 @@ class SquareNoteEditorHandler(tornado.web.RequestHandler):
             dstr = "true"
         else:
             dstr = "false"
-        self.render(conf.get_neonHtmlFileName(), page=page, debug=dstr, prefix=conf.get_prefix())
+        self.render(conf.get_neonHtmlFileName(square=True), page=page, debug=dstr, prefix=conf.get_prefix())
 
 class StafflessEditorHandler(tornado.web.RequestHandler):
     def get(self, page):
@@ -102,9 +118,23 @@ class StafflessEditorHandler(tornado.web.RequestHandler):
             dstr = "true"
         else:
             dstr = "false"
-        self.render(conf.get_neonStafflessHtmlFileName(), page=page, debug=dstr, prefix=conf.get_prefix())
+        self.render(conf.get_neonHtmlFileName(square=False), page=page, debug=dstr, prefix=conf.get_prefix())
 
 class FileHandler(tornado.web.RequestHandler):
+    mimetypes.add_type("text/xml", ".mei")
+
+    def get(self, filename):
+        fullpath = os.path.join(conf.MEI_DIRECTORY, filename)
+        if not os.path.exists(os.path.abspath(fullpath)):
+            self.send_error(403)
+        else:
+            fp = open(fullpath, "r")
+            response = fp.read()
+            # derive mime type from file for generic serving
+            self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0]);
+            self.write(response)
+
+class DemoFileHandler(tornado.web.RequestHandler):
     mimetypes.add_type("text/xml", ".mei")
 
     def get(self, documentType, filename):
