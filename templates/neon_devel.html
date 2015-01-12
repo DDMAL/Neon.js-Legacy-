@@ -77,7 +77,7 @@
         // derive background image name from mei
         $('#neon-wrapper').neon({
           debug: {{debug}},
-          glyphpath: "{{prefix}}{{static_url("img/neumes_concat.svg")}}",
+          glyphpath: "{{static_url("img/neumes_concat.svg")}}",
           meipath: "{{prefix}}/file/{{page}}",
           bgimgpath: "{{prefix}}/file/" + "{{page}}".replace(/\.[^/.]+$/, "") + ".jpg",
           bgimgopacity: 0.0,
