@@ -13,6 +13,9 @@ DEMO = True
 # Boolean: If true, working on either the demo or the production; if false, serving either
 DEBUG_NEON = True
 
+# String: Image path for Neon to look for images with the filename (with no extension) replaced by "PAGE"
+PROD_IMAGE_PATH = APP_ROOT + '/file/PAGE.jpg'
+
 def get_prefix():
     return APP_ROOT.rstrip("/")
 

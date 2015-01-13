@@ -109,7 +109,9 @@ class SquareNoteEditorHandler(tornado.web.RequestHandler):
             dstr = "true"
         else:
             dstr = "false"
-        self.render(conf.get_neonHtmlFileName(square=True), page=page, debug=dstr, prefix=conf.get_prefix())
+        page = page[:page.rfind(".")]
+        imagepath = conf.PROD_IMAGE_PATH.replace("PAGE", page)
+        self.render(conf.get_neonHtmlFileName(square=True), page=page, debug=dstr, prefix=conf.get_prefix(), imagepath=imagepath)
 
 class StafflessEditorHandler(tornado.web.RequestHandler):
     def get(self, page):
@@ -118,7 +120,9 @@ class StafflessEditorHandler(tornado.web.RequestHandler):
             dstr = "true"
         else:
             dstr = "false"
-        self.render(conf.get_neonHtmlFileName(square=False), page=page, debug=dstr, prefix=conf.get_prefix())
+        page = page[:page.rfind(".")]
+        imagepath = conf.PROD_IMAGE_PATH.replace("PAGE", page)
+        self.render(conf.get_neonHtmlFileName(square=False), page=page, debug=dstr, prefix=conf.get_prefix(), imagepath=imagepath)
 
 class FileHandler(tornado.web.RequestHandler):
     mimetypes.add_type("text/xml", ".mei")
