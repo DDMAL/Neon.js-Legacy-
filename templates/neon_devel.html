@@ -98,7 +98,10 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a class="brand" href="http://ddmal.music.mcgill.ca/neon">Neon.js</a>
+      <a class="brand" id="navbar-home" href="http://ddmal.music.mcgill.ca/neon">Neon.js</a>
+      <script>
+      $("#navbar-home").attr('href', window.location.href.split("editor")[0]);
+      </script>
       <div class="nav-collapse">
         <ul class="nav">
           <li class="dropdown">
