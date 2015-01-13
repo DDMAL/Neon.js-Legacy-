@@ -27,7 +27,7 @@
           debug: {{debug}},
           glyphpath: "{{static_url("img/neumes_concat.svg")}}",
           meipath: "{{prefix}}/file/{{page}}.mei",
-          bgimgpath: "{{imagepath}}",
+          bgimgpath: "{{imagepath}}".replace(/&amp;/g, "&"),
           bgimgopacity: 0.0,
           apiprefix: "{{prefix}}/edit/{{page}}",
           documentType: "liber",
