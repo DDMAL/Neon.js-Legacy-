@@ -1,11 +1,42 @@
-import os
+#############################
+# Begin addition -- Ling-Xiao Yang
+#
+# Mock several classes and functions to let the original code work with Rodan,
+# as I don't want to modify the code.
+#############################
+class conf:
+    MEI_DIRECTORY = None
+class os:
+    class path(object):
+        @staticmethod
+        def abspath(*a, **k):
+            return None
+        @staticmethod
+        def join(_, working_mei_file):
+            return working_mei_file
+class tornado:
+    class web:
+        class RequestHandler(object):
+            def __init__(self, user_input):
+                self.user_input = user_input
+                self.response_content = ''
+            def get_argument(self, name, default=None):
+                return self.user_input.get(name, default)
+            def write(self, content):
+                self.response_content = content
+            def set_status(self, status):
+                pass
+
+
+#############################
+# End addition -- Ling-Xiao Yang
+#############################
+
 
 from modifymei import ModifyDocument
 
-import tornado.web
 import json
 
-import conf
 
 #####################################################
 #              NEUME HANDLER CLASSES                #
@@ -40,7 +71,7 @@ class ChangeNeumePitchHandler(tornado.web.RequestHandler):
 
         id = str(data["id"])
         before_id = str(data["beforeid"])
-        
+
         # Bounding box
         ulx = str(data["ulx"])
         uly = str(data["uly"])
@@ -90,7 +121,7 @@ class UpdateNeumeHeadShapeHandler(tornado.web.RequestHandler):
 
 class NeumifyNeumeHandler(tornado.web.RequestHandler):
 
-    def post(self, file):        
+    def post(self, file):
         data = json.loads(self.get_argument("data", ""))
         nids = str(data["nids"]).split(",")
         type_id = str(data["typeid"])
@@ -104,7 +135,7 @@ class NeumifyNeumeHandler(tornado.web.RequestHandler):
             uly = str(data["uly"])
         except KeyError:
             ulx = uly = lrx = lry = None
-        
+
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
@@ -192,7 +223,7 @@ class DeleteDivisionHandler(tornado.web.RequestHandler):
 
 class AddDotHandler(tornado.web.RequestHandler):
 
-    def post(self, file):  
+    def post(self, file):
         id = str(self.get_argument("id", ""))
         dot_form = str(self.get_argument("dotform", ""))
 
@@ -237,7 +268,7 @@ class MoveClefHandler(tornado.web.RequestHandler):
     def post(self, file):
         data = json.loads(self.get_argument("data", ""))
         clef_id = str(data["id"])
-        
+
         # bounding box
         ulx = str(data["ulx"])
         uly = str(data["uly"])
@@ -256,7 +287,7 @@ class MoveClefHandler(tornado.web.RequestHandler):
 
 class UpdateClefShapeHandler(tornado.web.RequestHandler):
 
-    def post(self, file):        
+    def post(self, file):
         data = json.loads(self.get_argument("data", ""))
         clef_id = str(data["id"])
 
@@ -444,7 +475,7 @@ class DeleteSystemHandler(tornado.web.RequestHandler):
 
     def post(self, file):
         system_ids = str(self.get_argument("sids", "")).split(",")
-        
+
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
@@ -461,7 +492,7 @@ class UpdateSystemZoneHandler(tornado.web.RequestHandler):
         uly = str(self.get_argument("uly"))
         lrx = str(self.get_argument("lrx"))
         lry = str(self.get_argument("lry"))
-        
+
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
