@@ -48,7 +48,7 @@ class Neon(RodanTask):
         t = get_template('neon/templates/neon_square_prod.html')
         c = {
             'MEI': inputs['MEI'][0]['resource_url'] + '.working',     # HACK
-            'background_img': inputs['Background Image'][0]['large_thumb_url']
+            'background_img': inputs['Background Image'][0]['resource_url']
         }
         return (t, c)
 
