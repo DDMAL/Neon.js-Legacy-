@@ -79,7 +79,7 @@
           meipath: "{{ MEI }}",
           bgimgpath: "{{ background_img }}",
           bgimgopacity: 0.0,
-          apiprefix: document.URL,
+          apiprefix: document.URL.slice(0, -1),    // remove trailing '/'
           documentType: "liber",
           width: 1000 // enforce width
         });

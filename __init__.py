@@ -80,9 +80,10 @@ class Neon(RodanTask):
         ("update/system/zone", neonsrv.tornadoapi.UpdateSystemZoneHandler)
     )
     def validate_my_user_input(self, inputs, settings, user_input):
+        request_url = getattr(self, 'url', None)
         for url, handlerClass in self.handlers:
-            if getattr(self, 'url', None) == url:
+            if request_url == url:
                 handler = handlerClass(user_input)
                 handler.post(inputs['MEI'][0]['resource_url'] + '.working')  # HACK
                 return self.WAITING_FOR_INPUT(response=handler.response_content)
-        raise self.ManualPhaseException("No handler found for given URL {0}.".format(user_input.url))
+        raise self.ManualPhaseException("No handler found for given URL: {0}.".format(request_url))
