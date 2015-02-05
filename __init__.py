@@ -81,7 +81,7 @@ class Neon(RodanTask):
     )
     def validate_my_user_input(self, inputs, settings, user_input):
         for url, handlerClass in self.handlers:
-            if user_input['__url__'] == url:
+            if getattr(self, 'url', None) == url:
                 handler = handlerClass(user_input)
                 handler.post(inputs['MEI'][0]['resource_url'] + '.working')  # HACK
                 return self.WAITING_FOR_INPUT(response=handler.response_content)
