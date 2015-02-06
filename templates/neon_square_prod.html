@@ -83,6 +83,12 @@
           documentType: "liber",
           width: 1000 // enforce width
         });
+
+        $('#save-to-rodan').click(function (e) {
+          $.post(document.URL.split('#')[0] + 'save', {}, function (data) {
+            window.close();    // return to rodan
+          });
+        });
     });
   </script>
 </head>
@@ -104,6 +110,7 @@
             <ul id="nav_file_dropdown" class="dropdown-menu">
             </ul>
           </li>
+          <li><a href="#" id="save-to-rodan">Save</a></li>
         </ul>
         <p class="navbar-text pull-right"><a href="#developersModal" data-toggle="modal">Developers</a> | <a href="http://ddmal.music.mcgill.ca/">DDMAL</a></p>
       </div><!--/.nav-collapse -->

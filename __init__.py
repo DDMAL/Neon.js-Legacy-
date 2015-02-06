@@ -81,6 +81,8 @@ class Neon(RodanTask):
     )
     def validate_my_user_input(self, inputs, settings, user_input):
         request_url = getattr(self, 'url', None)
+        if request_url == 'save':
+            return {}   # let automatic phase copy the working file to output file
         for url, handlerClass in self.handlers:
             if request_url == url:
                 handler = handlerClass(user_input)
