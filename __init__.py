@@ -1,7 +1,6 @@
 import os, shutil
 from tempfile import mkstemp
 from rodan.jobs.base import RodanTask
-from django.template.loader import get_template
 
 import neonsrv.tornadoapi
 
@@ -45,7 +44,7 @@ class Neon(RodanTask):
             shutil.copyfile(working_f, outputs['Corrected MEI'][0]['resource_path'])
 
     def get_my_interface(self, inputs, settings):
-        t = get_template('neon/templates/neon_square_prod.html')
+        t = 'templates/neon_square_prod.html'
         c = {
             'MEI': inputs['MEI'][0]['resource_url'] + '.working',     # HACK
             'background_img': inputs['Background Image'][0]['resource_url']
