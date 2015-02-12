@@ -1720,8 +1720,9 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
 
         case Toe.Model.SquareNoteSystem:
         {
+            console.log(aObject);
             // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
-            aObject.target.eleRef.controller.modifyWidth(aObject.target.currentWidth);
+            aObject.target.eleRef.controller.modifyZone(aObject.target.getCenterPoint().x, aObject.target.currentWidth);
 
             // Make call to server.
             this.postModifySystemZone(aObject.target.eleRef.systemId,
