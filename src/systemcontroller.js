@@ -60,15 +60,16 @@ Toe.Ctrl.SystemController.prototype.modifyDimensions = function(aWidth, aHeight,
 };
 
 /**
- * Modifies width only (and keeps left position).
+ * Modifies zone according to the left and width.
  *
- * @param {float} aWidth new width
+ * @param {float} aCenterX  new horizontal center
+ * @param {float} aWidth    new width
  */
-Toe.Ctrl.SystemController.prototype.modifyWidth = function(aWidth) {
+Toe.Ctrl.SystemController.prototype.modifyZone = function(aCenterX, aWidth) {
 
-    var boundingBox = [this.model.zone.ulx,
+    var boundingBox = [aCenterX - aWidth / 2,
                        this.model.zone.uly,
-                       this.model.zone.ulx + aWidth,
+                       aCenterX + aWidth / 2,
                        this.model.zone.lry];
     this.model.setBoundingBox(boundingBox);
 };
