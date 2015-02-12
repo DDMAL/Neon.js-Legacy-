@@ -91,8 +91,8 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
     // for each system
     $("sb", mei).each(function(sit, sel) {
         // get facs data
-        var sbref = $(sel).attr("systemref");
-        var sysfacsid = $($(mei).find("system[xml\\:id=" + sbref + "]")[0]).attr("facs");
+        //var sbref = $(sel).attr("systemref");
+        var sysfacsid = $(sel).attr("facs");
         var sysFacs = $(surface).find("zone[xml\\:id=" + sysfacsid + "]")[0];
 
         // create system
@@ -102,7 +102,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         var sModel = new Toe.Model.SquareNoteSystem(s_bb);
         sModel.setID($(sel).attr("xml:id"));
         sModel.setOrderNumber(parseInt($(sel).attr("n")));
-        sModel.setSystemID(sbref);
+        sModel.setSystemID($(sel).attr("xml:id"));
 
         // set global scale using system from first system
         if (sit == 0) {
