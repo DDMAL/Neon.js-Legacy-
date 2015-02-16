@@ -1,0 +1,3 @@
+[submodule "meix"]
+	path = meix
+	url = https://github.com/DDMAL/meix.js.git
