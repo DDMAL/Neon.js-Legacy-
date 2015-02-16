@@ -5,9 +5,9 @@ from rodan.jobs.base import RodanTask
 import neonsrv.tornadoapi
 
 class Neon(RodanTask):
-    name = 'neon'
+    name = 'neon.square_note_editor_with_meix'
     author = 'Ling-Xiao Yang'
-    description = 'Neon.js Square Note Editor'
+    description = 'Neon.js Square Note Editor with MEIx.js'
     settings = {}
     enabled = True
     category = "Pitch Correction"
@@ -44,7 +44,12 @@ class Neon(RodanTask):
             shutil.copyfile(working_f, outputs['Corrected MEI'][0]['resource_path'])
 
     def get_my_interface(self, inputs, settings):
-        t = 'templates/neon_square_prod.html'
+        mode = self.params.get('mode')
+        if mode == 'meix':
+            t = 'templates/meix_diva.html'
+        else:
+            t = 'templates/neon_square_prod.html'
+
         c = {
             'MEI': inputs['MEI'][0]['resource_url'] + '.working',     # HACK
             'background_img': inputs['Background Image'][0]['resource_url']
