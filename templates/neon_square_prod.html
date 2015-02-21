@@ -61,28 +61,42 @@
             <ul id="nav_file_dropdown" class="dropdown-menu">
             </ul>
           </li>
-          <li><a href="?mode=meix">Go to MEIx.js</a></li>
-          <li><a href="#" id="save-to-rodan">Done correction</a></li>
         </ul>
-        <p class="navbar-text pull-right"><a href="#developersModal" data-toggle="modal">Developers</a> | <a href="http://ddmal.music.mcgill.ca/">DDMAL</a></p>
+        <p class="navbar-text pull-right"><a href="#rodanModal" data-toggle="modal" class="btn btn-default">Rodan Commands</a></p>
       </div><!--/.nav-collapse -->
     </div>
   </div>
 </div>
 
-<!-- Developers Information Modal -->
-<div class="modal fade" id="developersModal">
+<!-- Rodan Commands Modal -->
+<div class="modal fade" id="rodanModal">
   <div class="modal-header">
-    <button class="close" data-dismiss="modal"><i class="icon-remove"></i></button>
-    <h3>Developers</h3>
+    <button class="close" data-dismiss="modal">&times;</button>
+    <h3>Rodan Commands</h3>
   </div>
   <div class="modal-body">
-    <p>Gregory Burlet</p>
-    <p>Alastair Porter</p>
-    <hr/>
-    <p>View <a href="http://github.com/ddmal/neon.js">source code</a></p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Switch to Meix.js</th>
+          <td>Continue the correction with Meix.js editor.</td>
+        </tr>
+        <tr>
+          <th>Save</th>
+          <td>Save the working MEI file and go back to Rodan.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   <div class="modal-footer">
+    <a href="#" id="save-to-rodan" class="btn btn-primary">Save</a>
+    <a href="?mode=meix" class="btn">Switch to MEIx.js</a>
     <a href="#" class="btn" data-dismiss="modal">Close</a>
   </div>
 </div>

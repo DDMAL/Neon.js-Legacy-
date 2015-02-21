@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>MEIx.js Editor</title>
+        <title>MEIx.js | Editing</title>
 
         <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
@@ -62,9 +62,10 @@
            var plugins = ['meix/js/local/plugins/meiEditorZoneDisplay.js'];
 
            var meiEditor = new MeiEditor('#mei-editor', settings, plugins);
+           window.setTimeout(function() {
+             $("#topbarContent").append('<li><a href="?mode=neon">Go to Neon.js</a></li>')
+           }, 10);
            $(window).on('meiEditorLoaded', function(){
-             meiEditor = $("#mei-editor").data('AceMeiEditor');
-             //console.log(meiEditor);
 
            });
         });
@@ -74,5 +75,42 @@
     <body>
         <div id="mei-editor" style="width:50%;display:inline-block"></div>
         <div id="diva-wrapper" style="width:50%;position:absolute;left:50%;top:0;bottom:0;right:0;display:block;padding:0;margin:0"></div>
+        <button class="btn btn-default" data-toggle="modal" data-target="#rodanModal" style="position: absolute;right:10px;top:9px">Rodan Commands</button>
+
+        <!-- Rodan Commands Modal -->
+        <div class="modal fade" id="rodanModal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Rodan Commands</h4>
+              </div>
+              <div class="modal-body">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Command</th>
+                      <th>Description</th>
+                    </tr>
+                    <tbody>
+                      <tr>
+                        <th>Switch to Neon.js</th>
+                        <td>Continue the correction with Neon.js square note editor.</td>
+                      </tr>
+                      <tr>
+                        <th>Save</th>
+                        <td>Save the working MEI file and go back to Rodan.</td>
+                      </tr>
+                    </tbody>
+                </table>
+              </div>
+              <div class="modal-footer">
+                <a href="#" id="save-to-rodan" class="btn btn-primary">Save</a>
+                <a href="?mode=neon" class="btn btn-default">Switch to Neon.js</a>
+                <a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
+              </div>
+            </div>
+          </div>
+        </div>
     </body>
 </html>
