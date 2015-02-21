@@ -34,8 +34,8 @@ class Neon(RodanTask):
     def run_my_task(self, inputs, settings, outputs):
         if '@working_file' not in settings or not os.path.isfile(settings['@working_file']):
             f = inputs['MEI'][0]['resource_path']
-            working_f = "{0}.working".format(f)
-            shutil.copyfile(f, working_f)         # HACK
+            working_f = os.path.dirname(f) + "/image.mei"   # To let meix.js zone display link
+            shutil.copyfile(f, working_f)                   # HACK
             return self.WAITING_FOR_INPUT({
                 '@working_file': working_f
             })
@@ -51,8 +51,11 @@ class Neon(RodanTask):
             t = 'templates/neon_square_prod.html'
 
         c = {
-            'MEI': inputs['MEI'][0]['resource_url'] + '.working',     # HACK
-            'background_img': inputs['Background Image'][0]['resource_url']
+            'MEI': os.path.dirname(inputs['MEI'][0]['resource_url']) + '/image.mei',     # HACK
+            'background_img': inputs['Background Image'][0]['resource_url'],
+            'diva_object_data': inputs['Background Image'][0]['diva_object_data'],
+            'diva_iip_server': inputs['Background Image'][0]['diva_iip_server'],
+            'diva_image_dir': inputs['Background Image'][0]['diva_image_dir']
         }
         return (t, c)
 
@@ -90,6 +93,6 @@ class Neon(RodanTask):
         for url, handlerClass in self.handlers:
             if request_url == url:
                 handler = handlerClass(user_input)
-                handler.post(inputs['MEI'][0]['resource_path'] + '.working')  # HACK
+                handler.post(settings['@working_file'])
                 return self.WAITING_FOR_INPUT(response=handler.response_content)
         raise self.ManualPhaseException("No handler found for given URL: {0}.".format(request_url))

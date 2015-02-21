@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>MEIx.js Editor</title>
+
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="meix/css/meiEditor.css" />
+        <link rel="stylesheet" href="diva/css/diva.min.css" />
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+        <script src="meix/js/lib/require.js"></script>
+        <script src="meix/js/local/meiEditorPreloader.js"></script>
+        <script src="diva/js/diva.min.js"></script>
+
+        <style>
+         #newTabButton, #imagemei-listitem {visibility:hidden}   /* don't want to display the file name or close the file */
+         [id="1-diva-zoom-buttons-label"] {display:none!important}
+         [id="1-diva-tools"] {margin-top:0;padding-top:10px;border-radius:0;background-color:#222;height:52px}   /* like a navbar */
+         [id="1-diva-tools-right"] {display:none}               /* only one page */
+         [id="1-diva-outer"] {position:absolute;top:52px;bottom:0;left:0;right:0;height:initial} /* occupy half screen */
+         .navbar {border-radius:0}
+        </style>
+
+        <script>
+         $(document).ready(function() {
+           $('#diva-wrapper').diva({
+             adaptivePadding: 0,
+             enableAutoTitle: false,
+             enableAutoHeight: false,
+             enableAutoWidth: false,
+             enableCanvas: false,
+             enableDownload: false,
+             enableFullscreen: false,
+             enableGridIcon: false,
+             fixedHeightGrid: false,
+             iipServerURL: "{{diva_iip_server}}",
+             objectData: "{{diva_object_data}}",
+             imageDir: "{{diva_image_dir}}",
+             enableHighlight: true,
+             viewerWidthPadding: 0,
+             viewerHeightPadding: 0
+           });
+
+           var settings =
+           {
+             'skipFileUpload': true,
+             'skipXMLValidator': true,
+             'meiEditorLocation': 'meix/',
+             //'validatorLink': 'meix/validation/',
+             //'xmllintLocation': 'meix/js/lib/xmllint.js',
+             //'xmllintServer': 'http://132.206.14.122:8008',
+             'pageTitle': 'MEIx.js',
+             'initializeWithFile': '{{MEI}}',
+             'divaInstance': $('#diva-wrapper').data('diva'),
+             'jsonFileLocation': '{{diva_object_data}}',
+             'oneToOneMEI': true
+           };
+           var plugins = ['meix/js/local/plugins/meiEditorZoneDisplay.js'];
+
+           var meiEditor = new MeiEditor('#mei-editor', settings, plugins);
+           $(window).on('meiEditorLoaded', function(){
+             meiEditor = $("#mei-editor").data('AceMeiEditor');
+             //console.log(meiEditor);
+
+           });
+        });
+        </script>
+
+    </head>
+    <body>
+        <div id="mei-editor" style="width:50%;display:inline-block"></div>
+        <div id="diva-wrapper" style="width:50%;position:absolute;left:50%;top:0;bottom:0;right:0;display:block;padding:0;margin:0"></div>
+    </body>
+</html>
