@@ -37,16 +37,19 @@ class Neon(RodanTask):
             working_f = os.path.dirname(f) + "/image.mei"   # To let meix.js zone display link
             shutil.copyfile(f, working_f)                   # HACK
             return self.WAITING_FOR_INPUT({
-                '@working_file': working_f
+                '@working_file': working_f,
+                '@editor': 'neon'
             })
         else:
             working_f = settings['@working_file']
             shutil.copyfile(working_f, outputs['Corrected MEI'][0]['resource_path'])
 
     def get_my_interface(self, inputs, settings):
-        mode = self.params.get('mode')
+        mode = settings['@editor']
         if mode == 'meix':
             t = 'templates/meix_diva.html'
+        elif mode == 'neon':
+            t = 'templates/neon_square_prod.html'
         else:
             t = 'templates/neon_square_prod.html'
 
@@ -90,6 +93,10 @@ class Neon(RodanTask):
         request_url = getattr(self, 'url', None)
         if request_url == 'save':
             return {}   # let automatic phase copy the working file to output file
+        elif request_url == 'use_neon':
+            return self.WAITING_FOR_INPUT({"@editor": "neon"})
+        elif request_url == 'use_meix':
+            return self.WAITING_FOR_INPUT({"@editor": "meix"})
         for url, handlerClass in self.handlers:
             if request_url == url:
                 handler = handlerClass(user_input)

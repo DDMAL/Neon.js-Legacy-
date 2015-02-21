@@ -40,6 +40,11 @@
             window.close();    // return to rodan
           });
         });
+        $('#switch-to-meix').click(function (e) {
+          $.post(self_url + 'use_meix', {}, function (data) {
+            location.reload();
+          });
+        });
     });
   </script>
 </head>
@@ -96,7 +101,7 @@
   </div>
   <div class="modal-footer">
     <a href="#" id="save-to-rodan" class="btn btn-primary">Save</a>
-    <a href="?mode=meix" class="btn">Switch to MEIx.js</a>
+    <a href="#" id="switch-to-meix" class="btn">Switch to MEIx.js</a>
     <a href="#" class="btn" data-dismiss="modal">Close</a>
   </div>
 </div>
