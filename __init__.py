@@ -1,8 +1,16 @@
-import os, shutil
+import os, shutil, time, subprocess
 from tempfile import mkstemp
 from rodan.jobs.base import RodanTask
+from django.conf import settings
 
 import neonsrv.tornadoapi
+from distutils.spawn import find_executable
+
+# Find xmllint upon loading
+BIN_XMLLINT = getattr(settings, 'BIN_XMLLINT', None) or find_executable('xmllint')
+if not BIN_XMLLINT:
+    raise ImportError("cannot find xmllint")
+
 
 class Neon(RodanTask):
     name = 'neon.square_note_editor_with_meix'
@@ -54,7 +62,7 @@ class Neon(RodanTask):
             t = 'templates/neon_square_prod.html'
 
         c = {
-            'MEI': os.path.dirname(inputs['MEI'][0]['resource_url']) + '/image.mei',     # HACK
+            'MEI': os.path.dirname(inputs['MEI'][0]['resource_url']) + '/image.mei' + '?preventCache={0}'.format(int(time.time())),     # HACK
             'background_img': inputs['Background Image'][0]['resource_url'],
             'diva_object_data': inputs['Background Image'][0]['diva_object_data'],
             'diva_iip_server': inputs['Background Image'][0]['diva_iip_server'],
@@ -97,6 +105,22 @@ class Neon(RodanTask):
             return self.WAITING_FOR_INPUT({"@editor": "neon"})
         elif request_url == 'use_meix':
             return self.WAITING_FOR_INPUT({"@editor": "meix"})
+        elif request_url == 'update_content':
+            new_content = user_input['new_content']
+            # validate MEI [TODO]
+            with self.tempdir() as tdir:
+                tfile = os.path.join(tdir, 'temp.mei')
+                with open(tfile, 'w') as g:
+                    g.write(new_content)
+                try:
+                    subprocess.check_output([BIN_XMLLINT,
+                                             tfile], stderr=subprocess.STDOUT)
+                except subprocess.CalledProcessError as e:
+                    raise self.ManualPhaseException("MEI validation error:\n{0}".format(e.output))
+
+            with open(settings['@working_file'], 'w') as g:
+                g.write(new_content)
+            return self.WAITING_FOR_INPUT()
         for url, handlerClass in self.handlers:
             if request_url == url:
                 handler = handlerClass(user_input)

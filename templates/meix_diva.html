@@ -67,43 +67,56 @@
            var meiEditor = new MeiEditor('#mei-editor', settings, plugins);
 
            $(window).on('meiEditorLoaded', function(){
-              meiEditor = $("#mei-editor").data("AceMeiEditor");
-              console.log(meiEditor);
+             meiEditor = $("#mei-editor").data("AceMeiEditor");
+             console.log(meiEditor);
 
-              // add the save changes button
-              var $pagesList = $('#pagesList');
-              var $my_saveButton = $('<li class="ui-state-default ui-corner-top" role="tab" tabindex="-1" aria-selected="false" style="float:right"><a href="#" class="ui-tabs-anchor" role="presentation" tabindex="-1">Save Changes</a></li>');
-              $pagesList.append($my_saveButton);
-              $my_saveButton.on('mouseenter', function () {
-                $my_saveButton.addClass('ui-state-hover');
-              });
-              $my_saveButton.on('mouseleave', function () {
-                $my_saveButton.removeClass('ui-state-hover');
-              });
-              $my_saveButton.on('mousedown', function () {  //TODO
-                $my_saveButton.addClass('ui-state-active');
-              });
-              $my_saveButton.on('mouseup', function () {
-                $my_saveButton.removeClass('ui-state-active');
-              });
-              $my_saveButton.hide();
-              $rodanCommands = $("#rodan-commands");
+             // add the save changes button
+             var $pagesList = $('#pagesList');
+             var $my_saveButton = $('<li class="ui-state-default ui-corner-top" role="tab" tabindex="-1" aria-selected="false" style="float:right"><a href="#" class="ui-tabs-anchor" role="presentation" tabindex="-1">Save Changes</a></li>');
+             $pagesList.append($my_saveButton);
+             $my_saveButton.on('mouseenter', function () {
+               $my_saveButton.addClass('ui-state-hover');
+             });
+             $my_saveButton.on('mouseleave', function () {
+               $my_saveButton.removeClass('ui-state-hover');
+             });
+             $my_saveButton.on('mousedown', function () {
+               $my_saveButton.addClass('ui-state-active');
+             });
+             $my_saveButton.on('mouseup', function () {
+               $my_saveButton.removeClass('ui-state-active');
+             });
+             $my_saveButton.hide();
+             $rodanCommands = $("#rodan-commands");
 
-              var title = meiEditor.getActivePageTitle();
+             var title = meiEditor.getActivePageTitle();
 
-              var aceEditor = meiEditor.getPageData(title);   // the filename
-              aceEditor.on("change", function() {
-                $my_saveButton.show();
-                $rodanCommands.attr("disabled", true);
-              });
+             var aceEditor = meiEditor.getPageData(title);   // the filename
+             aceEditor.on("change", function() {
+               $my_saveButton.show();
+               $rodanCommands.attr("disabled", true);
+             });
 
-              $my_saveButton.on('click', function() {
-                var new_content = meiEditor.getAllTexts()[title].join('\n');
-                $.post('./update_content', {'new_content': new_content}, function () {
-                  $my_saveButton.hide();
-                  $rodanCommands.attr('disabled', false);
-                });
-              });
+             $my_saveButton.on('click', function() {
+               var new_content = meiEditor.getAllTexts()[title].join('\n');
+               $.ajax({
+                 type: "POST",
+                 url: './update_content',
+                 data: {'new_content': new_content},
+                 headers: {
+                   'Accept': 'application/json'
+                 }
+               }).done(function () {
+                 $my_saveButton.hide();
+                 $rodanCommands.attr('disabled', false);
+                 meiEditor.localLog("Saved.")
+               }).fail(function(msg) {
+                 var errmsg_lines = msg.responseJSON.detail.split('\n');
+                 $.each(errmsg_lines, function (index, line) {
+                   meiEditor.localError(line);
+                 });
+               });
+             });
            });
 
            $('#switch-to-neon').click(function (e) {
@@ -112,7 +125,7 @@
              });
            });
 
-        });
+         });
         </script>
 
     </head>
