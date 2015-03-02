@@ -73,7 +73,9 @@
              // add the save changes button
              var $pagesList = $('#pagesList');
              var $my_saveButton = $('<li class="ui-state-default ui-corner-top" role="tab" tabindex="-1" aria-selected="false" style="float:right"><a href="#" class="ui-tabs-anchor" role="presentation" tabindex="-1">Save Changes</a></li>');
+             var $my_discardButton = $('<li class="ui-state-default ui-corner-top" role="tab" tabindex="-1" aria-selected="false" style="float:right"><a href="#" class="ui-tabs-anchor" role="presentation" tabindex="-1">Discard Changes</a></li>');
              $pagesList.append($my_saveButton);
+             $pagesList.append($my_discardButton);
              $my_saveButton.on('mouseenter', function () {
                $my_saveButton.addClass('ui-state-hover');
              });
@@ -87,6 +89,19 @@
                $my_saveButton.removeClass('ui-state-active');
              });
              $my_saveButton.hide();
+             $my_discardButton.on('mouseenter', function () {
+               $my_discardButton.addClass('ui-state-hover');
+             });
+             $my_discardButton.on('mouseleave', function () {
+               $my_discardButton.removeClass('ui-state-hover');
+             });
+             $my_discardButton.on('mousedown', function () {
+               $my_discardButton.addClass('ui-state-active');
+             });
+             $my_discardButton.on('mouseup', function () {
+               $my_discardButton.removeClass('ui-state-active');
+             });
+             $my_discardButton.hide();
              $rodanCommands = $("#rodan-commands");
 
              var title = meiEditor.getActivePageTitle();
@@ -94,6 +109,7 @@
              var aceEditor = meiEditor.getPageData(title);   // the filename
              aceEditor.on("change", function() {
                $my_saveButton.show();
+               $my_discardButton.show();
                $rodanCommands.attr("disabled", true);
              });
 
@@ -116,6 +132,9 @@
                    meiEditor.localError(line);
                  });
                });
+             });
+             $my_discardButton.on('click', function() {
+               location.reload();
              });
            });
 
