@@ -407,7 +407,7 @@ class DeleteCustosHandler(tornado.web.RequestHandler):
 #           STAFF/SYSTEM HANDLER CLASSES            #
 #####################################################
 class InsertSystemHandler(tornado.web.RequestHandler):
-
+    # Deprecated as we drop <layout>
     def post(self, file):
         page_id = str(self.get_argument("pageid", None))
         ulx = str(self.get_argument("ulx", None))
@@ -426,16 +426,19 @@ class InsertSystemHandler(tornado.web.RequestHandler):
         self.set_status(200)
 
 class InsertSystemBreakHandler(tornado.web.RequestHandler):
-
+    # Changes: as we drop <layout>, we accept facs data here.
     def post(self, file):
-        system_id = self.get_argument("systemid", None)
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
         order_number = self.get_argument("ordernumber", None)
         next_sb_id = self.get_argument("nextsbid", None)
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_system_break(system_id, order_number, next_sb_id)
+        result = md.insert_system_break(order_number, next_sb_id, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))

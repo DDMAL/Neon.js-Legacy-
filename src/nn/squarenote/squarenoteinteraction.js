@@ -65,7 +65,7 @@ Toe.View.SquareNoteInteraction.prototype.constructor = Toe.View.SquareNoteIntera
  *                  EDIT                          *
  **************************************************/
 Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
-    
+
     var gui = e.data.gui;
     gui.hideInfo();
     gui.activateCanvasObjects();
@@ -96,7 +96,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         if (!gui.objMoving) {
             return;
         }
-        
+
         // if something is selected we need to do some housekeeping
         // check for single selection
         var selection = gui.rendEng.canvas.getActiveObject();
@@ -198,7 +198,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     var finalCoords = {x: left, y: nc_y - delta_y};
 
                     var sModel = gui.page.getClosestSystem(finalCoords);
-                    
+
                     // snap to system
                     var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
 
@@ -220,7 +220,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     // remove the old neume
                     $(ele).trigger("vEraseDrawing");
                     ele.system.removeElementByRef(ele);
-     
+
                     // mount the new neume on the most appropriate system
                     var nInd = sModel.addNeume(ele);
                     if (elements.length == 1) {
@@ -277,7 +277,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     }
 
                     var finalCoords = {x: left, y: top};
-                    
+
                     // get closest system
                     var system = gui.page.getClosestSystem(finalCoords);
 
@@ -304,7 +304,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                     gui.rendEng.canvas.remove(element);
                     gui.rendEng.repaint();
 
-                    // set bounding box hint 
+                    // set bounding box hint
                     var ulx = snapCoords.x - element.currentWidth/2;
                     var uly = snapCoords.y - element.currentHeight/2;
                     var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
@@ -525,7 +525,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
 
         // begin the NEUMIFICATION
         var newNeume = new Toe.Model.SquareNoteNeume({modifier: modifier});
-                        
+
         numPunct = 0;
         var nids = new Array();
         var ulx = Number.MAX_VALUE;
@@ -544,7 +544,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
             // calculate object's absolute positions from within selection group
             var left = selection.left + o.left;
             var top = selection.top + o.top;
-            
+
             ulx = Math.min(ulx, left - o.currentHeight/2);
             uly = Math.min(uly, top - o.currentHeight/2);
             lry = Math.max(lry, top + o.currentHeight/2);
@@ -762,7 +762,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         }
 
         // replace with new punctum drawing
-        gui.punctDwg = gui.rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0]; 
+        gui.punctDwg = gui.rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0];
     };
 
     // put the punctum off the screen for now
@@ -808,7 +808,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
             args["dotform"] = "aug";
         }
-        
+
         /* TODO: deal with episemata
         if (hasHorizEpisema) {
         }
@@ -822,7 +822,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         // instantiate neume view and controller
         var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
         var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
-        
+
         // mount neume on the system
         var nInd = sModel.addNeume(nModel);
 
@@ -968,7 +968,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
                     gui.divisionDwg = gui.rendEng.draw({fixed: [div1, div2], modify: []}, {group: true, selectable: false, opacity: 0.6})[0];
                 }
                 break;
-        }                    
+        }
 
         // snap the drawing to the system on the x-plane
         var dwgLeft = pnt.x - gui.divisionDwg.currentWidth/2;
@@ -1021,7 +1021,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
         var args = {type: division.key.slice(4), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         // get next element to insert before
         if (nInd + 1 < system.elements.length) {
-            args["beforeid"] = system.elements[nInd+1].id;   
+            args["beforeid"] = system.elements[nInd+1].id;
         }
         else {
             // insert before the next system break (system)
@@ -1127,38 +1127,27 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
 
         // Create arguments for our first POST.
         var outbb = gui.getOutputBoundingBox([system.zone.ulx, system.zone.uly, system.zone.lrx, system.zone.lry]);
-        var createSystemArguments = {pageid: gui.page.getID(), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
-        // POST system, then cascade into other POSTs.
-        $.post(gui.apiprefix + "/insert/system", createSystemArguments, function(data) {
-            system.setSystemID(JSON.parse(data).id);
-            postSystemBreak();
-        })
-        .error(function() {
-            this.showAlert("Server failed to insert system.  Client and server are not synchronized.");
-        });
+        /* Changes: as we drop <layout>, we only need to post SystemBreak with facs here */
+        var createSystemBreakArguments = {ordernumber: system.orderNumber, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
         // POST system break.
-        function postSystemBreak() {
-
-            // Create arguments.
-            var createSystemBreakArguments = {ordernumber: system.orderNumber, systemid: system.systemId};
-            if (nextSystem != null) {
-                createSystemBreakArguments.nextsbid = nextSystem.id;
-            }
-
-            // Do POST.  If we had to reorder system breaks, POST those, too.
-            $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
-                system.setID(JSON.parse(data).id);
-                while (nextSystem != null) {
-                    gui.postSystemBreakEdit(nextSystem.id, nextSystem.orderNumber);
-                    nextSystem = gui.page.getNextSystem(nextSystem);
-                }
-            })
-            .error(function() {
-                this.showAlert("Server failed to insert system break.  Client and server are not synchronized.");
-            });
+        if (nextSystem != null) {
+            createSystemBreakArguments.nextsbid = nextSystem.id;
         }
+
+        // Do POST.  If we had to reorder system breaks, POST those, too.
+        $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
+            system.setID(JSON.parse(data).id);
+            while (nextSystem != null) {
+                console.log(nextSystem, nextSystem.id, nextSystem.orderNumber);
+                gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
+                nextSystem = gui.page.getNextSystem(nextSystem);
+            }
+        })
+        .error(function() {
+            this.showAlert("Server failed to insert system break.  Client and server are not synchronized.");
+        });
     });
 }
 
@@ -1343,8 +1332,8 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
     if (custos) {
         // update the custos
         custos.setRootNote(pname, oct);
-        
-        // get acting clef for the custos 
+
+        // get acting clef for the custos
         var actingClef = prevSystem.getActingClefByEle(custos);
         custos.setRootSystemPos(prevSystem.calcSystemPosFromPitch(pname, oct, actingClef));
         var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
@@ -1492,7 +1481,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                 var nextNeume = neumesOnSystem[1];
                 var newPname = nextNeume.components[0].pname;
                 var newOct = nextNeume.components[0].oct;
-                
+
                 var actingClef = prevSystem.getActingClefByEle(custos);
                 var newSystemPos = prevSystem.calcSystemPosFromPitch(newPname, newOct, actingClef);
 
@@ -1818,7 +1807,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
             if (!sModel) {
                 sModel = o.eleRef.system;
             }
-            
+
             toUngroup++;
 
             if (o.eleRef.system == sModel) {
@@ -1886,7 +1875,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                               '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
                               '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
     }
-    
+
     // grey out edit buttons by default
     $('#btn_delete').toggleClass('disabled', true);
     $('#btn_neumify').toggleClass('disabled', true);
@@ -1900,10 +1889,10 @@ Toe.View.SquareNoteInteraction.prototype.insertEditNeumeSubControls = function()
                                   '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                   '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
                                   '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
-                                  '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' + 
+                                  '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' +
                                   '<br/><li class="nav-header">Attributes</li>\n' +
-                                  '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
-                                  'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
+                                  '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' +
+                                  'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' +
                                   '<li><a id="head_punctum">punctum</a></li>\n' +
                                   '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
                                   '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
@@ -1936,8 +1925,8 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParent
         $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
                               '<li><div class="btn-group" data-toggle="buttons-radio">' +
                               '<button id="rad_punctum" class="btn"><b>■</b> Punctum</button>\n' +
-                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
-                              '<button id="rad_system" class="btn"><b><i class="icon-align-justify icon-black"></i></b>System</button>\n' + 
+                              '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' +
+                              '<button id="rad_system" class="btn"><b><i class="icon-align-justify icon-black"></i></b>System</button>\n' +
                               '<button id="rad_clef" class="btn"><b>C/F</b> Clef</button>\n</div>\n</li>\n</span>');
     }
     $("#rad_punctum").bind("click.insert", {gui: this}, this.handleInsertPunctum);
