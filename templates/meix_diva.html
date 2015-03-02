@@ -23,6 +23,8 @@
          [id="1-diva-tools-right"] {display:none}               /* only one page */
          [id="1-diva-outer"] {position:absolute;top:52px;bottom:0;left:0;right:0;height:initial} /* occupy half screen */
          .navbar {border-radius:0}
+         #dropdown-zone-display {display:none}  /* hide zone display menus */
+         #zone-display-help {display:none}      /* hide zone display menus */
         </style>
 
         <script>
@@ -68,7 +70,6 @@
 
            $(window).on('meiEditorLoaded', function(){
              meiEditor = $("#mei-editor").data("AceMeiEditor");
-             console.log(meiEditor);
 
              // add the save changes button
              var $pagesList = $('#pagesList');
