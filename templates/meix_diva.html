@@ -40,9 +40,9 @@
              enableGridIcon: false,
              enableHighlight: true,
              fixedHeightGrid: false,
-             iipServerURL: "{{diva_iip_server}}",
-             objectData: "{{diva_object_data}}",
-             imageDir: "{{diva_image_dir}}",
+             iipServerURL: "{{ diva_iip_server | safe }}",
+             objectData: "{{ diva_object_data | safe }}",
+             imageDir: "{{ diva_image_dir | safe }}",
              enableHighlight: true,
              viewerWidthPadding: 0,
              viewerHeightPadding: 0
@@ -59,9 +59,9 @@
              //'xmllintLocation': 'meix/js/lib/xmllint.js',
              //'xmllintServer': 'http://132.206.14.122:8008',
              'pageTitle': 'MEIx.js',
-             'initializeWithFile': '{{MEI}}',
+             'initializeWithFile': '{{ MEI | safe }}',
              'divaInstance': $('#diva-wrapper').data('diva'),
-             'jsonFileLocation': '{{diva_object_data}}',
+             'jsonFileLocation': '{{ diva_object_data | safe }}',
              'oneToOneMEI': true
            };
            var plugins = ['meix/js/local/plugins/meiEditorZoneDisplay.js']//, 'js/meiEditor'];

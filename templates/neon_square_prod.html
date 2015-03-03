@@ -27,8 +27,8 @@
         $('#neon-wrapper').neon({
           debug: false,
           glyphpath: self_url + "img/neumes_concat.svg",
-          meipath: "{{ MEI }}",
-          bgimgpath: "{{ background_img }}",
+          meipath: "{{ MEI | safe }}",
+          bgimgpath: "{{ background_img | safe }}",
           bgimgopacity: 0.0,
           apiprefix: self_url.slice(0, -1),    // remove trailing '/'
           documentType: "liber",
