@@ -125,6 +125,7 @@
                  }
                }).done(function () {
                  $my_saveButton.hide();
+                 $my_discardButton.hide();
                  $rodanCommands.attr('disabled', false);
                  meiEditor.localLog("Saved.")
                }).fail(function(msg) {
