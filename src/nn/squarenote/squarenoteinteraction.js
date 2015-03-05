@@ -1139,6 +1139,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
         // Do POST.  If we had to reorder system breaks, POST those, too.
         $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
             system.setID(JSON.parse(data).id);
+            system.setSystemID(JSON.parse(data).id);
             while (nextSystem != null) {
                 console.log(nextSystem, nextSystem.id, nextSystem.orderNumber);
                 gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
