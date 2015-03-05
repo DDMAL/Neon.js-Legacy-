@@ -469,7 +469,7 @@ class DeleteSystemBreakHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        md.delete_system(sb_ids)
+        md.delete_system_break(sb_ids)
         md.write_doc()
 
         self.set_status(200)
