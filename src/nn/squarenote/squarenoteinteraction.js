@@ -1704,41 +1704,54 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
+    var self = this;
+    var targets = [];
+    if (aObject.target.hasOwnProperty('eleRef')) {
+        // handle single element
+        targets.push(aObject.target);
+    } else if (aObject.target.hasOwnProperty('objects')) {
+        // handle multiple elements
+        $.each(aObject.target.objects, function(idx, t) {
+            targets.push(t);
+        });
+    }
 
-    // Switch on element reference type.
-    switch(aObject.target.eleRef.constructor) {
+    $.each(targets, function(idx, target) {
+        var eleRef = target.eleRef;
+        // Switch on element reference type.
+        switch(eleRef.constructor) {
 
         case Toe.Model.SquareNoteSystem:
-        {
-            console.log(aObject);
-            // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
-            aObject.target.eleRef.controller.modifyZone(aObject.target.getCenterPoint().x, aObject.target.currentWidth);
-
-            // Make call to server.
-            this.postModifySystemZone(aObject.target.eleRef.systemId,
-                                      Math.floor(aObject.target.eleRef.zone.ulx / this.page.scale),
-                                      Math.floor(aObject.target.eleRef.zone.uly / this.page.scale),
-                                      Math.floor(aObject.target.eleRef.zone.lrx / this.page.scale),
-                                      Math.floor(aObject.target.eleRef.zone.lry / this.page.scale));
-
-            // Get the elements that became loose from the system.  Group them and delete.
-            var looseElements = aObject.target.eleRef.getLooseElements();
-            if (looseElements.length > 0)
             {
-                var looseElementDrawings = $.map(looseElements, function(aElement, aIndex) {return aElement.view.drawing;});
-                var looseElementGroup = new fabric.Group(looseElementDrawings);
-                this.rendEng.canvas.deactivateAll();
-                this.rendEng.canvas.setActiveGroup(looseElementGroup);
-                this.deleteActiveSelection(this);
+                // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
+                eleRef.controller.modifyZone(target.getCenterPoint().x, target.currentWidth);
+
+                // Make call to server.
+                self.postModifySystemZone(eleRef.systemId,
+                                          Math.floor(eleRef.zone.ulx / self.page.scale),
+                                          Math.floor(eleRef.zone.uly / self.page.scale),
+                                          Math.floor(eleRef.zone.lrx / self.page.scale),
+                                          Math.floor(eleRef.zone.lry / self.page.scale));
+
+                // Get the elements that became loose from the system.  Group them and delete.
+                var looseElements = eleRef.getLooseElements();
+                if (looseElements.length > 0)
+                {
+                    var looseElementDrawings = $.map(looseElements, function(aElement, aIndex) {return aElement.view.drawing;});
+                    var looseElementGroup = new fabric.Group(looseElementDrawings);
+                    this.rendEng.canvas.deactivateAll();
+                    this.rendEng.canvas.setActiveGroup(looseElementGroup);
+                    this.deleteActiveSelection(this);
+                }
+                break;
             }
-            break;
-        }
 
         default:
-        {
-            break;
+            {
+                break;
+            }
         }
-    }
+    });
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aObject) {
