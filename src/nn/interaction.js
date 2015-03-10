@@ -44,6 +44,15 @@ Toe.View.Interaction.prototype.hideInfo = function() {
     $("#info").animate({opacity: 0.0}, 100);
 };
 
+Toe.View.Interaction.prototype.showHeadsUp = function(aText) {
+    $("#headsUp > p").html(aText);
+    $("#headsUp").animate({opacity: 1.0}, 100);
+};
+
+Toe.View.Interaction.prototype.hideHeadsUp = function() {
+    $("#headsUp").animate({opacity: 0.0}, 100);
+};
+
 Toe.View.Interaction.prototype.showAlert = function(aText) {
     $("#alert > p").text(aText);
     $("#alert").animate({opacity: 1.0}, 100);

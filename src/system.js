@@ -23,7 +23,7 @@ THE SOFTWARE.
 /**
  * Creates a system
  * @class Represents a system
- * 
+ *
  * @param {Array} bb [ulx, uly, lrx, lry] system bounding box
  * (.) <ulx,uly>        (.)
  *
@@ -119,7 +119,7 @@ Toe.Model.System.prototype.setBoundingBox = function(bb) {
     if(!Toe.validBoundingBox(bb)) {
         throw new Error("System: invalid bounding box");
     }
-    
+
     bb = $.map(bb, Math.round);
 
     this.zone.ulx = bb[0];
@@ -269,7 +269,7 @@ Toe.Model.System.prototype.getDistanceFromSystem = function(aSystem) {
  * @param {Object} coords {x: ,y: }
  * @returns {Object} snappedCoords {x: xprime, y: yprime}
  */
-Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, options) {
+Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, options, gui) {
     var opts = {
         ignoreEle: null,
         x: true,
@@ -306,7 +306,7 @@ Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, op
 
     if (opts.x) {
         // CALCULATE NEW HORIZONTAL POSITION
-        // go through each element in system element list to see if the inserted element 
+        // go through each element in system element list to see if the inserted element
         // intersects with others. If so, offset it.
         var left = coords.x-(width/2);
         var right = coords.x+(width/2);
@@ -355,6 +355,12 @@ Toe.Model.System.prototype.getSystemSnapCoordinates = function(coords, width, op
         // check right system boundary
         if (this.custos && opts.ignoreEle != this.custos && right >= this.custos.zone.ulx) {
             coordsPrime.x = this.custos.zone.ulx - width/2 - 3;
+            if (gui) {
+                gui.showHeadsUp("The element is moved before the last custos in this system.");
+                window.setTimeout(function () {
+                    gui.hideHeadsUp();
+                }, 3000);
+            }
         }
         else if (right >= this.zone.lrx) {
             coordsPrime.x = this.zone.lrx - width/2 - 3;
