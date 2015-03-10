@@ -1328,6 +1328,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname, oct, prevSystem) {
+    var gui = this;
     var custos = prevSystem.custos;
     if (custos) {
         // update the custos
@@ -1386,6 +1387,7 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
  * NOTE - moved out of handler to allow for deletion when no trigger is fired.
  */
 Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) {
+    var gui = this;
     // get current canvas selection
     // check individual selection and group selections
     toDelete = {clefs: [],
@@ -1663,6 +1665,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
 // POST Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.SquareNoteInteraction.prototype.postSystemBreakEditOrder = function(aSystemId, aOrderNumber) {
+    var gui = this;
     $.post(this.apiprefix + "/modify/systembreak", {sbid: aSystemId, ordernumber: aOrderNumber})
     .error(function() {
         gui.showAlert("Server failed to modify system break.  Client and server are not synchronized.");
@@ -1670,6 +1673,7 @@ Toe.View.SquareNoteInteraction.prototype.postSystemBreakEditOrder = function(aSy
 }
 
 Toe.View.SquareNoteInteraction.prototype.postSystemDelete = function(aSystemIdArray) {
+    var gui = this;
     $.post(this.apiprefix + "/delete/system", {sids: aSystemIdArray.join(",")})
     .error(function() {
         gui.showAlert("Server failed to delete system.  Client and server are not synchronized.");
@@ -1677,6 +1681,7 @@ Toe.View.SquareNoteInteraction.prototype.postSystemDelete = function(aSystemIdAr
 }
 
 Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSystemBreadIdArray) {
+    var gui = this;
     $.post(this.apiprefix + "/delete/systembreak", {sbids: aSystemBreadIdArray.join(",")})
     .error(function() {
         gui.showAlert("Server failed to delete system break.  Client and server are not synchronized.");
@@ -1684,6 +1689,7 @@ Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSyste
 }
 
 Toe.View.SquareNoteInteraction.prototype.postModifySystemZone = function(aSystemId, aUlx, aUly, aLrx, aLry) {
+    var gui = this;
     $.post(this.apiprefix + "/update/system/zone", {sid: aSystemId,
                                                     ulx: aUlx,
                                                     uly: aUly,
