@@ -1388,6 +1388,34 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
  */
 Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) {
     var gui = this;
+
+    // Let user confirm when user wants to delete a system. It's too easy to select a system and delete.
+    var isDeletingSystem = false;
+    var selection = aGui.rendEng.canvas.getActiveObject();
+    if (selection) {
+        if (selection.eleRef instanceof Toe.Model.System) {
+            isDeletingSystem = true;
+        }
+    }
+    else {
+        selection = aGui.rendEng.canvas.getActiveGroup();
+        if (selection) {
+            // group of elements selected
+            $.each(selection.getObjects(), function(oInd, o) {
+                if (o.eleRef instanceof Toe.Model.System) {
+                    isDeletingSystem = true;
+                }
+            });
+        }
+    }
+
+    if (isDeletingSystem) {
+        if (!window.confirm("Deleting a system will remove all neumes on it. Are you sure to proceed?")) {
+            return;
+        }
+    }
+
+
     // get current canvas selection
     // check individual selection and group selections
     toDelete = {clefs: [],
