@@ -56,6 +56,9 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
 
     // bind hotkeys
     this.bindHotKeys();
+
+    // update all custodes button
+    $("#btn_update_all_custodes").bind("click", {gui: this}, this.handleUpdateAllCustodes);
 };
 
 Toe.View.SquareNoteInteraction.prototype = new Toe.View.Interaction();
@@ -1378,6 +1381,27 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
     }
 }
 
+/**************************************************
+ *                  Update                        *
+ **************************************************/
+Toe.View.SquareNoteInteraction.prototype.handleUpdateAllCustodes = function(e) {
+    var gui = e.data.gui;
+    var systems = gui.page.systems;
+    $.each(systems, function(idx, system) {
+        var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});
+        if (neumesOnSystem.length > 0) {
+            // if the shift of the clef has affected the first neume on this system
+            // update the custos on the previous system
+            var prevSystem = gui.page.getPreviousSystem(system);
+            if (prevSystem) {
+                var newPname = neumesOnSystem[0].components[0].pname;
+                var newOct = neumesOnSystem[0].components[0].oct;
+                gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
+            }
+        }
+    });
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Edit Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1886,7 +1910,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
 // GUI Management Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.SquareNoteInteraction.prototype.getOutputBoundingBox = function(bb) {
-    gui = this;
+    var gui = this;
     return $.map(bb, function(b) {
         return Math.round(b/gui.page.scale);
     });
