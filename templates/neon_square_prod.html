@@ -22,29 +22,41 @@
 
   <script type="text/javascript">
     $(document).ready(function () {
-        var self_url = location.href.split('#')[0];
-        // derive background image name from mei
-        $('#neon-wrapper').neon({
-          debug: false,
-          glyphpath: self_url + "img/neumes_concat.svg",
-          meipath: "{{ MEI | safe }}",
-          bgimgpath: "{{ background_img | safe }}",
-          bgimgopacity: 0.0,
-          apiprefix: self_url.slice(0, -1),    // remove trailing '/'
-          documentType: "liber",
-          width: 1000 // enforce width
-        });
+     var self_url = location.href.split('#')[0];
+     // derive background image name from mei
+     $('#neon-wrapper').neon({
+       debug: false,
+       glyphpath: self_url + "img/neumes_concat.svg",
+       meipath: "{{ MEI | safe }}",
+       bgimgpath: "{{ background_img | safe }}",
+       bgimgopacity: 0.0,
+       apiprefix: self_url.slice(0, -1),    // remove trailing '/'
+       documentType: "liber",
+       width: 1000 // enforce width
+     });
 
-        $('#save-to-rodan').click(function (e) {
-          $.post(self_url + 'save', {}, function (data) {
-            window.close();    // return to rodan
-          });
-        });
-        $('#switch-to-meix').click(function (e) {
-          $.post(self_url + 'use_meix', {}, function (data) {
-            location.reload();
-          });
-        });
+     $('#save-to-rodan').click(function (e) {
+       $.post(self_url + 'save', {}, function (data) {
+         window.close();    // return to rodan
+       });
+     });
+     $('#switch-to-meix').click(function (e) {
+       $.post(self_url + 'use_meix', {}, function (data) {
+         location.reload();
+       });
+     });
+
+     // During Ajax, tell user we are synchronizing
+     var $rodanCommands = $('#rodan_commands');
+     var $synchronizing = $('#synchronizing');
+     $(document).ajaxStart(function () {
+       $rodanCommands.attr('disabled', true);
+       $synchronizing.show();
+     });
+     $(document).ajaxStop(function () {
+       $rodanCommands.attr('disabled', false);
+       $synchronizing.hide();
+     });
     });
   </script>
 </head>
@@ -68,7 +80,7 @@
             </ul>
           </li>-->
         </ul>
-        <p class="navbar-text pull-right"><a href="#rodanModal" data-toggle="modal" class="btn btn-default">Rodan Commands</a></p>
+        <p class="navbar-text pull-right"><a href="#rodanModal" data-toggle="modal" class="btn btn-default" id="rodan_commands">Rodan Commands</a></p>
       </div><!--/.nav-collapse -->
     </div>
   </div>
@@ -114,18 +126,25 @@
                 <div class="span12">
                     <div class="sidebar-nav-fixed">
                         <div class="sidebar-inner">
-                            <h1>Editing</h1>
+                            <h1>Editing<img src="img/loading.gif" style="padding-left:20px;display:none" id="synchronizing" /></h1>
                         </div>
                         <div class="sidebar-inner">
                             <div id="neon-sidebar-nav" class="well">
                                 <ul id="gui-sidebar" class="nav nav-list">
-                                <li class="nav-header">Mode</li>
-                                <li>
+                                  <li class="nav-header">Mode</li>
+                                  <li>
                                     <div class="btn-group" data-toggle="buttons-radio">
-                                        <button id="btn_insert" class="btn btn-primary"><i class="icon-plus icon-white"></i> Insert</button>
-                                        <button id="btn_edit" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</button>
+                                      <button id="btn_insert" class="btn btn-primary"><i class="icon-plus icon-white"></i> Insert</button>
+                                      <button id="btn_edit" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</button>
                                     </div>
-                                </li>
+                                  </li>
+                                </ul>
+                                <ul class="nav nav-list">
+                                  <li class="divider"></li>
+                                  <li class="nav-header">Update</li>
+                                  <li>
+                                    <button class="btn" id="btn_update_all_custodes">All custodes</button>
+                                  </li>
                                 </ul>
                             </div>
                         </div>
