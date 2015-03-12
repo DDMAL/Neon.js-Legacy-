@@ -1332,6 +1332,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname, oct, prevSystem) {
     var gui = this;
+
+    // if previous system doesn't have a clef, let's do nothing
+    var clef = prevSystem.getActingClefByCoords({x: prevSystem.zone.lrx});
+    if (!clef) {
+        return;
+    }
+
     var custos = prevSystem.custos;
     if (custos) {
         // update the custos
