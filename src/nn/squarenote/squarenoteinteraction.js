@@ -240,7 +240,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
                         });
 
                         // if this element is the first neume on the system
-                        if (ele == sModel.elements[1]) {
+                        var neumesOnSystem = sModel.getPitchedElements({neumes: true, custos: false});
+                        if (ele == neumesOnSystem[0]) {
                             var prevSystem = gui.page.getPreviousSystem(sModel);
                             if (prevSystem) {
                                 var cPname = ele.components[0].pname;
@@ -1117,7 +1118,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
         var ulx = gui.systemDrawing.left - Math.round(gui.systemDrawing.currentWidth / 2);
         var uly = gui.systemDrawing.top - Math.round(gui.systemDrawing.currentHeight / 2);
         var boundingBox = [ulx, uly, ulx + gui.systemDrawing.currentWidth, uly + gui.systemDrawing.currentHeight];
-        var system = new Toe.Model.SquareNoteSystem(boundingBox);
+        var system = new Toe.Model.SquareNoteSystem(boundingBox, null, gui.page);
         var systemView = new Toe.View.SystemView(gui.rendEng);
         var systemController = new Toe.Ctrl.SystemController(system, systemView);
 
@@ -1338,6 +1339,15 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
     if (!clef) {
         return;
     }
+
+    // if next system doesn't have a clef as its first element (merely a split of curved staff lines), let's do nothing
+    var nextSystem = gui.page.getNextSystem(prevSystem);
+    if (nextSystem) {
+        if (!(nextSystem.elements[0] instanceof Toe.Model.Clef)) {
+            return;
+        }
+    }
+
 
     var custos = prevSystem.custos;
     if (custos) {
@@ -1576,7 +1586,9 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
         var custos = drawing.eleRef;
 
         custos.system.removeElementByRef(custos);
-        custos.system.custos = null;
+        if (custos.system.custos == custos) {  // may be an excessive custos caused by OMR error
+            custos.system.custos = null;
+        }
         toDelete.cids.push(custos.id);
 
         aGui.rendEng.canvas.remove(drawing);

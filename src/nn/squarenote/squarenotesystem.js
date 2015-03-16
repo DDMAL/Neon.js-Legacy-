@@ -23,7 +23,7 @@ THE SOFTWARE.
 /**
  * Creates a square-note notation system with lines
  * @class Represents a System
- * 
+ *
  * @param {Array} bb [ulx, uly, lrx, lry] system bounding box
  * (.) <ulx,uly>        (.)
  *
@@ -31,17 +31,57 @@ THE SOFTWARE.
  * (.)        <lrx,lry> (.)
  *
  * @param {Object} options [numlines {Number}, interact {Boolean}]
+ * @param {Object} page  reference to the page object
  *
  * The system has list of elements on the system, sorted by horizontal position.
  */
-Toe.Model.SquareNoteSystem = function(bb, options) {
+Toe.Model.SquareNoteSystem = function(bb, options, page) {
+    if (!page) {
+        throw new Error("Page object is required for square-note system.")
+    }
     // call super constructor
     Toe.Model.System.call(this, bb, options);
+    this.page = page;
 }
 
 // inherit prototype from generic system model
 Toe.Model.SquareNoteSystem.prototype = new Toe.Model.System();
 Toe.Model.SquareNoteSystem.prototype.constructor = Toe.Model.SquareNoteSystem;
+
+
+// overwrite the parent methods, let it scan previous systems for a clef
+Toe.Model.SquareNoteSystem.prototype.getActingClefByCoords = function(coords) {
+    var getActingClefByCoords = Toe.Model.System.prototype.getActingClefByCoords;
+    var clef = getActingClefByCoords.call(this, coords);
+    var prevSystem = this;
+    // find the clef in previous systems
+    while (!clef) {
+        prevSystem = prevSystem.page.getPreviousSystem(prevSystem);
+        if (!prevSystem) {
+            break;
+        } else {
+            clef = getActingClefByCoords.call(prevSystem, {x: prevSystem.zone.lrx});
+        }
+    }
+    return clef;
+}
+
+Toe.Model.SquareNoteSystem.prototype.getActingClefByEle = function(element) {
+    var getActingClefByCoords = Toe.Model.System.prototype.getActingClefByCoords;
+    var getActingClefByEle = Toe.Model.System.prototype.getActingClefByEle;
+    var clef = getActingClefByEle.call(this, element);
+    var prevSystem = this;
+    // find the clef in previous systems
+    while (!clef) {
+        prevSystem = prevSystem.page.getPreviousSystem(prevSystem);
+        if (!prevSystem) {
+            break;
+        } else {
+            clef = getActingClefByCoords.call(prevSystem, {x: prevSystem.zone.lrx});
+        }
+    }
+    return clef;
+}
 
 // if clef is given, return pitched elements under the given acting clef
 // otherwise, return all pitched elements
@@ -123,7 +163,7 @@ Toe.Model.SquareNoteSystem.prototype.calcSystemPosFromPitch = function(pname, oc
 
     // ["a", "b", "c", "d", "e", "f", "g"]
     var numChroma = Toe.neumaticChroma.length;
-    
+
     // make root note search in relation to the clef index
     var iClef = $.inArray(actingClef.shape, Toe.neumaticChroma);
     var iPitch = $.inArray(pname, Toe.neumaticChroma);
@@ -147,7 +187,7 @@ Toe.Model.SquareNoteSystem.prototype.calcPitchFromCoords = function(coords) {
 
     // get acting clef
     var actingClef = this.getActingClefByCoords(coords);
-    
+
     return this.calcPitchFromSystemPos(systemPos, actingClef);
 }
 
@@ -167,7 +207,7 @@ Toe.Model.SquareNoteSystem.prototype.updatePitchedElements = function(options) {
     // update pitched elements from the given clef to the next clef
     if (opts.clef) {
         var pitchedEles = this.getPitchedElements({clef: opts.clef});
-        
+
         // if the custos is under the given acting clef and opts.custos is false
         // (meaning we are not to overwrite its pitch content), then we need to shift
         // the custos drawing accordingly
@@ -258,10 +298,10 @@ Toe.Model.SquareNoteSystem.prototype.addClef = function(clef, options) {
     }
 
     clef.setSystem(this);
-    
+
     // update affected pitched elements on this system
     this.updatePitchedElements({clef: clef, custos: false});
-    
+
     // update view
     $(clef).trigger("vRenderClef", [clef]);
 
@@ -289,7 +329,7 @@ Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
 
         custos.setSystem(this);
         this.custos = custos;
-        
+
         // update view
         $(custos).trigger("vRenderCustos", [custos]);
 
@@ -306,7 +346,7 @@ Toe.Model.SquareNoteSystem.prototype.setCustos = function(custos) {
  * @methodOf Toe.Model.SquareNoteSystem
  * @param {Toe.Model.Neume} neume The neume to mount
  * @params {Options} options {justPush: just push to the elements array (don't bother with sorted insert.
-                              This option is for inserting from MEI, since elements are in order in MEI 
+                              This option is for inserting from MEI, since elements are in order in MEI
                               document already. Faster load times.)}
  * @return {Number} ind index of element on the system
  */
@@ -315,7 +355,7 @@ Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
     if (!(neume instanceof Toe.Model.Neume)) {
         throw new Error("Toe.Model.SquareNoteSystem: Invalid neume");
     }
-    
+
     var opts = {
         justPush: false
     };
@@ -323,6 +363,7 @@ Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
     $.extend(opts, options);
 
     var clef = this.getActingClefByCoords({x: neume.zone.ulx});
+
     if (clef) {
         // update neume root note difference
         var rootPitchInfo = neume.getRootPitchInfo();
@@ -359,14 +400,14 @@ Toe.Model.SquareNoteSystem.prototype.addNeume = function(neume, options) {
 
 /**
  * @params {Options} options {justPush: just push to the elements array (don't bother with sorted insert.
- *                              This option is for inserting from MEI, since elements are in order in MEI 
+ *                              This option is for inserting from MEI, since elements are in order in MEI
  *                              document already. Faster load times.)}
  */
 Toe.Model.SquareNoteSystem.prototype.addDivision = function(division, options) {
-	// check argument is a division
-	if (!(division instanceof Toe.Model.Division)) {
-		throw new Error("Toe.Model.SquareNoteSystem: invalid division");
-	}
+        // check argument is a division
+        if (!(division instanceof Toe.Model.Division)) {
+                throw new Error("Toe.Model.SquareNoteSystem: invalid division");
+        }
 
     var opts = {
         justPush: false
@@ -387,7 +428,7 @@ Toe.Model.SquareNoteSystem.prototype.addDivision = function(division, options) {
     division.setSystem(this);
 
     // update view
-	$(division).trigger("vRenderDivision", [division]);
+        $(division).trigger("vRenderDivision", [division]);
 
     return nInd;
 }

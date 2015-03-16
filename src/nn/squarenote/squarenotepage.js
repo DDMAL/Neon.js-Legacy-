@@ -21,9 +21,9 @@ THE SOFTWARE.
 */
 
 /**
- * A music score in square note notation. 
+ * A music score in square note notation.
  *
- * @class Represents a page of music in square note notation. 
+ * @class Represents a page of music in square note notation.
  * @extends Toe.Model.Page
  */
 Toe.Model.SquareNotePage = function(documentType) {
@@ -107,7 +107,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         var s_bb = page.parseBoundingBox(sysFacs);
 
         // Set some parameters.
-        var sModel = new Toe.Model.SquareNoteSystem(s_bb);
+        var sModel = new Toe.Model.SquareNoteSystem(s_bb, null, page);
         sModel.setID($(sel).attr("xml:id"));
         sModel.setOrderNumber(parseInt($(sel).attr("n")));
         sModel.setSystemID(systemid);
