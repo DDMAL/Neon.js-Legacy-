@@ -94,9 +94,10 @@ Toe.Model.SquareNoteSystem.prototype.getPitchedElements = function(options) {
 
     $.extend(opts, options);
 
+    var pitchedEles = [];
+
     // return pitched elements under the given acting clef
     if (opts.clef) {
-        var pitchedEles = new Array();
         var cInd = $.inArray(opts.clef, this.elements);
         for (var i = cInd+1; i < this.elements.length && !(this.elements[i] instanceof Toe.Model.Clef); i++) {
             var e = this.elements[i];
@@ -104,16 +105,36 @@ Toe.Model.SquareNoteSystem.prototype.getPitchedElements = function(options) {
                 pitchedEles.push(e);
             }
         }
-        return pitchedEles;
     }
     else {
         // return all pitched elements on the system
-        return $.grep(this.elements, function(e) {
+        pitchedEles = $.grep(this.elements, function(e) {
             if ((e instanceof Toe.Model.Neume && opts.neumes) || (e instanceof Toe.Model.Custos && opts.custos)) {
                 return e;
             }
         });
     }
+
+    // grab next system if it doesn't have a clef at the beginning
+    var foundClef = false;
+    var nextSystem = this;
+    while (nextSystem = this.page.getNextSystem(nextSystem)) {
+        var l = nextSystem.elements.length;
+        for (var i = 0; i < l; i++) {
+            var e = nextSystem.elements[i];
+            if ((e instanceof Toe.Model.Neume && opts.neumes) || (e instanceof Toe.Model.Custos && opts.custos)) {
+                pitchedEles.push(e);
+            } else if (e instanceof Toe.Model.Clef) {
+                foundClef = true;
+                break;
+            }
+        }
+        if (foundClef) {
+            break;
+        }
+    }
+
+    return pitchedEles;
 }
 
 // calculate pitch info of pitched element on this system
