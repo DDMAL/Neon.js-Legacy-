@@ -1815,9 +1815,9 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
                 {
                     var looseElementDrawings = $.map(looseElements, function(aElement, aIndex) {return aElement.view.drawing;});
                     var looseElementGroup = new fabric.Group(looseElementDrawings);
-                    this.rendEng.canvas.deactivateAll();
-                    this.rendEng.canvas.setActiveGroup(looseElementGroup);
-                    this.deleteActiveSelection(this);
+                    self.rendEng.canvas.deactivateAll();
+                    self.rendEng.canvas.setActiveGroup(looseElementGroup);
+                    self.deleteActiveSelection(self);
                 }
                 break;
             }
