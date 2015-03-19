@@ -77,7 +77,7 @@ Toe.Model.Page.prototype.setDimensions = function(width, height) {
 
 /**
  * Calculate dimensions of page from bounding boxes within facsimile data in MEI file
- * 
+ *
  * (.) <ulx,uly>        (.)
  *
  *
@@ -85,7 +85,7 @@ Toe.Model.Page.prototype.setDimensions = function(width, height) {
  *
  * @methodOf Toe.Model.Page
  * @param {jQuery Wrapped Element Set} meiZones bounding boxes from facsimile data from an MEI document
- * @returns {Array} dimensions [width, height] of the canvas 
+ * @returns {Array} dimensions [width, height] of the canvas
  */
 Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
     var max_x = 0;
@@ -101,8 +101,8 @@ Toe.Model.Page.prototype.calcDimensions = function(meiZones) {
             max_y = lry;
         }
     });
-    
-	// return page properties
+
+        // return page properties
     return [max_x, max_y];
 };
 
@@ -121,7 +121,7 @@ Toe.Model.Page.prototype.setPageScale = function(scale) {
  *
  * @methodOf Toe.Model.Page
  * @param {Object} coords {x: , y:}
- * @returns {Number} sInd
+ * @returns {Toe.Model.System} closest system element
  */
 Toe.Model.Page.prototype.getClosestSystem = function(coords) {
     var distances = $.map(this.systems, function(s) {
@@ -146,7 +146,7 @@ Toe.Model.Page.prototype.getClosestSystem = function(coords) {
  * Given a system, get the next system on the page
  *
  * @methodOf Toe.Model.Page
- * @param {Toe.Model.System} aSystem 
+ * @param {Toe.Model.System} aSystem
  * @returns {Toe.Model.System} next system (or null if DNE)
  */
 Toe.Model.Page.prototype.getNextSystem = function(aSystem) {
@@ -163,7 +163,7 @@ Toe.Model.Page.prototype.getNextSystem = function(aSystem) {
  * Given a system, get the previous system on the page
  *
  * @methodOf Toe.Model.Page
- * @param {Toe.Model.System} aSystem 
+ * @param {Toe.Model.System} aSystem
  * @returns {Toe.Model.System} previous system (or null if DNE)
  */
 Toe.Model.Page.prototype.getPreviousSystem = function(aSystem) {
@@ -201,8 +201,8 @@ Toe.Model.Page.prototype.addSystem = function(aSystem) {
     this.systemAverageHeight += aSystem.getHeight();
     this.systemAverageHeight /= this.systems.length;
 
-	// update view
-	$(aSystem).trigger("vRenderSystem", [aSystem]);
+        // update view
+        $(aSystem).trigger("vRenderSystem", [aSystem]);
 
     return this;
 };

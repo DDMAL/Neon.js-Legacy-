@@ -1209,6 +1209,16 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
 
         // get closest system to insert onto
         var system = gui.page.getClosestSystem(coords);
+        // and the position must be near the system, to prevent accidents.
+        var epsilon = 10; // suppose near = 10px
+        if ((coords.x < system.zone.ulx - epsilon) || (coords.x > system.zone.lrx + epsilon) || (coords.y < system.zone.uly - epsilon) || (coords.y > system.zone.lry + epsilon)) {
+            gui.showHeadsUp("Clef must be positioned on a system.");
+            window.setTimeout(function () {
+                gui.hideHeadsUp();
+            }, 3000);
+            return;
+        }
+
 
         // calculate snapped coordinates on the system
         var snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth, {}, gui);
@@ -1640,8 +1650,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
 
     var selection = aGui.rendEng.canvas.getActiveObject();
     if (selection) {
-        // ignore the first clef, since this should never be deleted
-        if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements[0] != selection.eleRef) {
+        if (selection.eleRef instanceof Toe.Model.Clef) {
             deleteClef(selection, false);
         }
         else if (selection.eleRef instanceof Toe.Model.Neume) {
@@ -1663,8 +1672,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
         if (selection) {
             // group of elements selected
             $.each(selection.getObjects(), function(oInd, o) {
-                // ignore the first clef, since this should never be deleted
-                if (o.eleRef instanceof Toe.Model.Clef && o.eleRef.system.elements[0] != o.eleRef) {
+                if (o.eleRef instanceof Toe.Model.Clef) {
                     deleteClef(o, false);
                 }
                 else if (o.eleRef instanceof Toe.Model.Neume) {
