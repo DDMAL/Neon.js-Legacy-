@@ -183,7 +183,7 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_division(before_id, page_id, div_type, ulx, uly, lrx, lry)
+        result = md.insert_division(before_id, div_type, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))
