@@ -44,7 +44,8 @@ import json
 class InsertNeumeHandler(tornado.web.RequestHandler):
 
     def post(self, file):
-        before_id = str(self.get_argument("beforeid", None))
+        before_id = str(self.get_argument("beforeid")) if self.get_argument("beforeid", None) else None
+        page_id = str(self.get_argument("pageid", None)) if self.get_argument("pageid", None) else None
         pname = str(self.get_argument("pname", ""))
         oct = str(self.get_argument("oct", ""))
         dot_form = self.get_argument("dotform", None)
@@ -58,7 +59,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_punctum(before_id, pname, oct, dot_form, ulx, uly, lrx, lry)
+        result = md.insert_punctum(before_id, page_id, pname, oct, dot_form, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))
@@ -182,7 +183,7 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_division(before_id, div_type, ulx, uly, lrx, lry)
+        result = md.insert_division(before_id, page_id, div_type, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))
@@ -313,7 +314,8 @@ class InsertClefHandler(tornado.web.RequestHandler):
         data = json.loads(self.get_argument("data", ""))
         shape = str(data["shape"]).upper()
         line = str(data["line"])
-        before_id = str(data["beforeid"])
+        before_id = str(data["beforeid"]) if data.get('beforeid') else None
+        page_id = str(data["pageid"]) if data.get('pageid') else None
 
         # bounding box
         ulx = str(data["ulx"])
@@ -324,7 +326,7 @@ class InsertClefHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_clef(line, shape, data["pitchInfo"], before_id, ulx, uly, lrx, lry)
+        result = md.insert_clef(line, shape, data["pitchInfo"], before_id, page_id, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))

@@ -853,8 +853,10 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         else {
             // insert before the next system break (system)
             var sNextModel = gui.page.getNextSystem(sModel);
-            if (sNextModel) {
+            if (sNextModel) { // we have next system
                 args["beforeid"] = sNextModel.id;
+            } else {
+                args["pageid"] = gui.page.id;
             }
         }
 
@@ -1238,7 +1240,11 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
         else {
             // insert before the next system break
             var sNextModel = gui.page.getNextSystem(system);
-            args["beforeid"] = sNextModel.id;
+            if (sNextModel) { // we have next system
+                args["beforeid"] = sNextModel.id;
+            } else {
+                args["pageid"] = gui.page.id;
+            }
         }
 
         var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});

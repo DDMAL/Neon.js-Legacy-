@@ -47,7 +47,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
     var page = this;
 
     // Get the actual "page" element.
-    var pageId = $($(mei).find("page")[0]).attr("xml:id");
+    var pageId = $($(mei).find("layer")[0]).attr("xml:id");
     this.setID(pageId);
 
     var surface = $(mei).find("surface")[0];

@@ -20,7 +20,7 @@ class ModifyDocument:
 
         XmlExport.write(self.mei, filename)
 
-    def insert_punctum(self, before_id, pname, oct, dot_form, ulx, uly, lrx, lry):
+    def insert_punctum(self, before_id, page_id, pname, oct, dot_form, ulx, uly, lrx, lry):
         '''
         Insert a punctum before the given element. There is one case where
         there is no element to insert before, when there is no subsequent staff.
@@ -50,12 +50,7 @@ class ModifyDocument:
         self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
         # perform the insertion
-        if before_id is None:
-            # get last layer
-            layers = self.mei.getElementsByName("layer")
-            if len(layers):
-                layers[-1].addChild(punctum)
-        else:
+        if before_id:
             before = self.mei.getElementById(before_id)
 
             # get layer element
@@ -63,6 +58,17 @@ class ModifyDocument:
 
             if parent and before:
                 parent.addChildBefore(before, punctum)
+            else:
+                raise ValueError("Invalid before_id - cannot find element")
+        elif page_id:
+            # get page
+            page = self.mei.getElementById(page_id)
+            if page:
+                page.addChild(punctum)
+            else:
+                raise ValueError("Invalid page_id - cannot find element")
+        else:
+            raise ValueError("Invalid argument - must provide before_id or page_id")
 
         # get the generated ID for the client
         result = {"id": punctum.getId()}
@@ -564,7 +570,7 @@ class ModifyDocument:
 
             self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
-    def insert_clef(self, line, shape, pitch_info, before_id, ulx, uly, lrx, lry):
+    def insert_clef(self, line, shape, pitch_info, before_id, page_id, ulx, uly, lrx, lry):
         '''
         Insert a doh or fah clef, with a given bounding box.
         Must also update pitched elements on the staff that
@@ -576,14 +582,26 @@ class ModifyDocument:
         clef.addAttribute("line", line)
 
         # perform clef insertion
-        before = self.mei.getElementById(before_id)
-        parent = before.getParent()
+        if before_id:
+            before = self.mei.getElementById(before_id)
+            parent = before.getParent()
 
-        if parent and before:
-            parent.addChildBefore(before, clef)
-
-        self.update_or_add_zone(clef, ulx, uly, lrx, lry)
-        self.update_pitched_elements(pitch_info)
+            if parent and before:
+                parent.addChildBefore(before, clef)
+                self.update_or_add_zone(clef, ulx, uly, lrx, lry)
+                self.update_pitched_elements(pitch_info)
+            else:
+                raise ValueError("Invalid before_id - cannot find element")
+        elif page_id:
+            page = self.mei.getElementById(page_id)
+            if page:
+                page.addChild(clef)
+                self.update_or_add_zone(clef, ulx, uly, lrx, lry)
+                self.update_pitched_elements(pitch_info)
+            else:
+                raise ValueError("Invalid page_id - cannot find element")
+        else:
+            raise ValueError("Invalid argument - must provide before_id or page_id")
 
         result = {"id": clef.getId()}
         return result
