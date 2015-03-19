@@ -837,11 +837,12 @@ class ModifyDocument:
     def update_pitched_elements(self, pitch_info):
         for ele in pitch_info:
             pitched_ele = self.mei.getElementById(str(ele["id"]))
-            if pitched_ele.getName() == "custos":
-                pitched_ele.addAttribute("pname", str(ele["noteInfo"]["pname"]))
-                pitched_ele.addAttribute("oct", str(ele["noteInfo"]["oct"]))
-            elif pitched_ele.getName() == "neume":
-                notes = pitched_ele.getDescendantsByName("note")
-                for n_info, n in zip(ele["noteInfo"], notes):
-                    n.addAttribute("pname", str(n_info["pname"]))
-                    n.addAttribute("oct", str(n_info["oct"]))
+            if pitched_ele:
+                if pitched_ele.getName() == "custos":
+                    pitched_ele.addAttribute("pname", str(ele["noteInfo"]["pname"]))
+                    pitched_ele.addAttribute("oct", str(ele["noteInfo"]["oct"]))
+                elif pitched_ele.getName() == "neume":
+                    notes = pitched_ele.getDescendantsByName("note")
+                    for n_info, n in zip(ele["noteInfo"], notes):
+                        n.addAttribute("pname", str(n_info["pname"]))
+                        n.addAttribute("oct", str(n_info["oct"]))
