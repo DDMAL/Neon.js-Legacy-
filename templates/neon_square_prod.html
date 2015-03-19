@@ -47,17 +47,27 @@
      });
 
      // During Ajax, tell user we are synchronizing
+     var isSynchronizing = false;
      var $rodanCommands = $('#rodan_commands');
      var $synchronizing = $('#synchronizing');
      $(document).ajaxStart(function () {
        $rodanCommands.attr('disabled', true);
        $synchronizing.show();
+       isSynchronizing = true;
      });
      $(document).ajaxStop(function () {
        $rodanCommands.attr('disabled', false);
        $synchronizing.hide();
+       isSynchronizing = false;
      });
-    });
+     $(window).on('beforeunload', function (e) {
+       if (isSynchronizing) {
+         return "Neon.js is synchronizing with the server."; // return prompt message
+       } else {
+         return null;
+       }
+     });
+   });
   </script>
 </head>
 <body>
