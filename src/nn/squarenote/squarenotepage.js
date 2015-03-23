@@ -125,7 +125,7 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
         // load all clefs in the system
         $(clefList).slice(clef_sbInd[sit]+1, clef_sbInd[sit+1]).each(function(cit, cel) {
             var clefShape = $(cel).attr("shape");
-            var clefSystemLine = parseInt($(cel).attr("line"));
+            var clefSystemLine = Math.round(parseFloat($(cel).attr("line")) * 2) / 2; // 1, 1.5, 2.5, ...
 
             // convert mei line attribute to systemPos attribute used in the internal clef Model
             var systemPos = -(sModel.props.numLines - clefSystemLine) * 2;
