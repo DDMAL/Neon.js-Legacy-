@@ -159,7 +159,7 @@ THE SOFTWARE.
         var loadSuccess = function() {
             // create page with specific document type
             var page;
-            
+
             switch (settings.documentType) {
                 case "liber":
                 case "salzinnes":
@@ -177,6 +177,9 @@ THE SOFTWARE.
             if (!settings.bgimgpath) {
                 // derive canvas dimensions from mei facs
                 canvasDims = page.calcDimensions($(mei).find("zone"));
+                // add some spaces
+                canvasDims[0] += 100;
+                canvasDims[1] += 100;
             }
 
             // calculate scale based on width, maintaining aspect ratio
@@ -224,7 +227,7 @@ THE SOFTWARE.
 
             // instantiate appropriate GUI elements
             var gui = new Toe.View.GUI(settings.apiprefix, settings.meipath, rendEng,
-                                      {sldr_bgImgOpacity: settings.bgimgpath, 
+                                      {sldr_bgImgOpacity: settings.bgimgpath,
                                        initBgImgOpacity: settings.bgimgopacity});
 
             // handle user interactions with glyphs on the digital music score
