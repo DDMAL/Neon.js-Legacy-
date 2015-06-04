@@ -1,9 +1,9 @@
-from pymei import MeiElement, MeiAttribute, XmlImport, XmlExport
+from pymei import MeiElement, MeiAttribute, documentFromFile, documentToFile
 
 class ModifyDocument:
 
     def __init__(self, filename):
-        self.mei = XmlImport.read(filename)
+        self.mei = documentFromFile(str(filename)).getMeiDocument()
         self.filename = filename
 
     def write_doc(self, **kwargs):
@@ -18,7 +18,9 @@ class ModifyDocument:
         else:
             filename = self.filename
 
-        XmlExport.write(self.mei, filename)
+        status = documentToFile(self.mei, str(filename))
+        if not status:
+            raise RuntimeError("Failed to save MEI file.")
 
     def insert_punctum(self, before_id, page_id, pname, oct, dot_form, ulx, uly, lrx, lry):
         '''
