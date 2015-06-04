@@ -138,6 +138,16 @@
              $my_discardButton.on('click', function() {
                location.reload();
              });
+
+             $("#control-hide-staves-div").show();
+             $('#control-hide-staves').change(function () {
+               if ($(this).is(":checked")) {
+                 meiEditor.addMEIIgnore('sb');
+               } else {
+                 meiEditor.removeMEIIgnore('sb');
+               }
+             });
+
            });
 
            $('#switch-to-neon').click(function (e) {
@@ -153,6 +163,11 @@
     <body>
         <div id="mei-editor" style="width:50%;display:inline-block"></div>
         <div id="diva-wrapper" style="width:50%;position:absolute;left:50%;top:0;bottom:0;right:0;display:block;padding:0;margin:0"></div>
+        <div style="position:absolute;left:60%;top:7px;color:#999;display:none" class="checkbox" id="control-hide-staves-div">
+          <label>
+            <input type="checkbox" id="control-hide-staves">Hide staves
+          </label>
+        </div>
         <button id="rodan-commands" class="btn btn-default" data-toggle="modal" data-target="#rodanModal" style="position: absolute;right:10px;top:9px">Rodan Commands</button>
 
         <!-- Rodan Commands Modal -->
