@@ -46,6 +46,8 @@ Toe.View.GUI = function(apiprefix, meipath, rendEng, guiToggles) {
     this.setupSideBar(parentDivId, toggles);
 
     this.bindHotkeys();
+
+    this.rendEng.repaint();
 }
 
 Toe.View.GUI.prototype.constructor = Toe.View.GUI;
@@ -65,11 +67,11 @@ Toe.View.GUI.prototype.setupNavBar = function() {
                                            '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
                                            '<li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
 
-        
+
         $("#nav_file_dropdown_revert").tooltip({animation: true,
-                                                placement: 'right', 
+                                                placement: 'right',
                                                 title: 'Revert the current MEI file to the original version. ' +
-                                                       'Warning: this will revert all changes made in the editor.', 
+                                                       'Warning: this will revert all changes made in the editor.',
                                                 delay: 100});
         $("#nav_file_dropdown_revert").click(function() {
             // move backup mei file to working directory
@@ -86,16 +88,16 @@ Toe.View.GUI.prototype.setupNavBar = function() {
         });
 
         // MEI download
-        $("#nav_file_dropdown_getmei").tooltip({animation: true, 
-                                                placement: 'right', 
+        $("#nav_file_dropdown_getmei").tooltip({animation: true,
+                                                placement: 'right',
                                                 title: 'View the MEI file of the document being edited.',
                                                 delay: 100});
         // set the download path of the file
         $("#nav_file_dropdown_getmei").attr("href", gui.meipath);
 
         // Document image rasterize
-        $("#nav_file_dropdown_getimg").tooltip({animation: true, 
-                                                placement: 'right', 
+        $("#nav_file_dropdown_getimg").tooltip({animation: true,
+                                                placement: 'right',
                                                 title: 'Download an image of the document being edited.',
                                                 delay: 100});
         $("#nav_file_dropdown_getimg").click(function() {
@@ -132,8 +134,8 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
 
         // create glyph opacity slider
         if (toggles.sldr_glyphOpacity) {
-            $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' + 
-                                   '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' + 
+            $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' +
+                                   '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' +
                                    'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
 
             $("#sldr_glyphOpacity").bind("change", function() {
