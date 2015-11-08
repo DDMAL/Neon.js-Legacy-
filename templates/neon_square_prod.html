@@ -37,7 +37,7 @@
 
      $('#save-to-rodan').click(function (e) {
        $.post(self_url + 'save', {}, function (data) {
-         window.close();    // return to rodan
+         window.location = "about:blank";    // return to rodan
        });
      });
      $('#switch-to-meix').click(function (e) {
