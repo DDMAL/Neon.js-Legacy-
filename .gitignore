@@ -5,3 +5,4 @@ static/js/*.js
 docs/*
 *.swp
 *.swo
+MEI_DIRECTORY/squarenote/*
