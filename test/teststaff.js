@@ -1,62 +1,63 @@
-(function() {
-    module("System");
+( function( QUnit ) {
+    QUnit.module( "System" );
 
     // <zone lry="406" lrx="1450" xml:id="m-0ac66c2a-bebd-493a-94bc-cfa2a0ba0489" uly="302" ulx="190"/>
-    var system_bb = [190, 302, 1450, 406];
+    var system_bb = [ 190, 302, 1450, 406 ];
 
-    test("Constructor", function() {
-        // test invalid bounding box argument
-        raises(function() { 
-            new Toe.Model.System([100,100,0,0]);
-        });
+    QUnit.test( "Constructor", function( assert ) {
 
-        var sModel = new Toe.Model.System(system_bb);
+        // Test invalid bounding box argument
+        assert.raises( function() {
+            new Toe.Model.System( [ 100, 100, 0, 0 ] );
+        } );
 
-        equal(sModel.zone.ulx, system_bb[0]);
-        equal(sModel.zone.uly, system_bb[1]);
-        equal(sModel.zone.lrx, system_bb[2]);
-        equal(sModel.zone.lry, system_bb[3]);
+        var sModel = new Toe.Model.System( system_bb );
 
-        // test default properties
-        equal(sModel.props.numLines, 4);
-        ok(!sModel.props.interact);
+        assert.equal( sModel.zone.ulx, system_bb[ 0 ] );
+        assert.equal( sModel.zone.uly, system_bb[ 1 ] );
+        assert.equal( sModel.zone.lrx, system_bb[ 2 ] );
+        assert.equal( sModel.zone.lry, system_bb[ 3 ] );
 
-        // test distance between system lines
-        var line_dist = Math.abs(system_bb[3] - system_bb[1]) / 3;
-        equal(sModel.delta_y, line_dist);
+        // Test default properties
+        assert.equal( sModel.props.numLines, 4 );
+        assert.ok( !sModel.props.interact );
 
-        equal(sModel.id, null);
-        equal(sModel.custos, null);
-        deepEqual(sModel.elements, new Array());
+        // Test distance between system lines
+        var line_dist = Math.abs( system_bb[ 3 ] - system_bb[ 1 ] ) / 3;
+        assert.equal( sModel.delta_y, line_dist );
 
-        // test optional parameters
-        sModel = new Toe.Model.System(system_bb, {numLines: 6, interact: true});
-        equal(sModel.props.numLines, 6);
-        line_dist = Math.abs(system_bb[3] - system_bb[1]) / 5;
-        equal(sModel.delta_y, line_dist);
-        ok(sModel.props.interact);
-    });
+        assert.equal( sModel.id, null );
+        assert.equal( sModel.custos, null );
+        assert.deepEqual( sModel.elements, new Array() );
 
-    test("Set ID", function() {
-        var sModel = new Toe.Model.System(system_bb);
-        sModel.setID(42);
+        // Test optional parameters
+        sModel = new Toe.Model.System( system_bb, { numLines: 6, interact: true } );
+        assert.equal( sModel.props.numLines, 6 );
+        line_dist = Math.abs( system_bb[ 3 ] - system_bb[ 1 ] ) / 5;
+        assert.equal( sModel.delta_y, line_dist );
+        assert.ok( sModel.props.interact );
+    } );
 
-        equal(sModel.id, 42);
-    });
+    QUnit.test( "Set ID", function( assert ) {
+        var sModel = new Toe.Model.System( system_bb );
+        sModel.setID( 42 );
 
-    test("Set Bounding Box", function() {
-        var sModel = new Toe.Model.System([2,2,200,200]);
+        assert.equal( sModel.id, 42 );
+    } );
 
-        // test invalid bounding box argument
-        raises(function() { 
-            sModel.setBoundingBox([234,23,0,0]);
-        });
+    QUnit.test( "Set Bounding Box", function( assert ) {
+        var sModel = new Toe.Model.System( [ 2, 2, 200, 200 ] );
 
-        sModel.setBoundingBox(system_bb);
-        equal(sModel.zone.ulx, system_bb[0]);
-        equal(sModel.zone.uly, system_bb[1]);
-        equal(sModel.zone.lrx, system_bb[2]);
-        equal(sModel.zone.lry, system_bb[3]);
-    });
+        // Test invalid bounding box argument
+        assert.raises( function() {
+            sModel.setBoundingBox( [ 234, 23, 0, 0 ] );
+        } );
 
-})();
+        sModel.setBoundingBox( system_bb );
+        assert.equal( sModel.zone.ulx, system_bb[ 0 ] );
+        assert.equal( sModel.zone.uly, system_bb[ 1 ] );
+        assert.equal( sModel.zone.lrx, system_bb[ 2 ] );
+        assert.equal( sModel.zone.lry, system_bb[ 3 ] );
+    } );
+
+} )( QUnit );

@@ -1,198 +1,201 @@
-(function() {
-    module("Clef");
-  
+( function( QUnit ) {
+    QUnit.module( "Clef" );
+
     // <zone lry="331" lrx="208" xml:id="m-5ff17ad0-6396-4f4b-9c99-de55e140ee97" uly="278" ulx="190"/>
-    var clef_bb = [190, 278, 208, 331];
+    var clef_bb = [ 190, 278, 208, 331 ];
+
     // <zone xml:id="m-0ac66c2a-bebd-493a-94bc-cfa2a0ba0489" lry="406" lrx="1450" uly="302" ulx="190"/>
-    var system_bb = [190, 302, 406, 1450];
+    var system_bb = [ 190, 302, 406, 1450 ];
+
     // <zone lry="349" lrx="258" xml:id="m-df35aa9a-9155-4c89-a8b2-a05688156807" uly="328" ulx="240"/>
-    var neume1_bb = [240, 328, 258, 349];
+    var neume1_bb = [ 240, 328, 258, 349 ];
+
     // <zone lry="376" lrx="315" xml:id="m-b06676a3-4aa1-430d-b1c8-3d3fcf606f0e" uly="326" ulx="265"/>
-    var neume2_bb = [265, 326, 315, 376];
+    var neume2_bb = [ 265, 326, 315, 376 ];
 
-    test("Constructor", function() {
-        var cClefModel = new Toe.Model.Clef("c");
-        var fClefModel = new Toe.Model.Clef("f");
+    QUnit.test( "Constructor", function( assert ) {
+        var cClefModel = new Toe.Model.Clef( "c" );
+        var fClefModel = new Toe.Model.Clef( "f" );
 
-        equal(cClefModel.shape, "c");
-        equal(cClefModel.name, "Doh Clef");
-        equal(fClefModel.shape, "f");
-        equal(fClefModel.name, "Fah Clef");
+        assert.equal( cClefModel.shape, "c" );
+        assert.equal( cClefModel.name, "Doh Clef" );
+        assert.equal( fClefModel.shape, "f" );
+        assert.equal( fClefModel.name, "Fah Clef" );
 
-        deepEqual(cClefModel.zone, {});
-        equal(cClefModel.system, null);
+        assert.deepEqual( cClefModel.zone, {} );
+        assert.equal( cClefModel.system, null );
 
-        // check default system line has been set correctly
-        equal(cClefModel.props.systemPos, 0);
-        equal(fClefModel.props.systemPos, 2);
+        // Check default system line has been set correctly
+        assert.equal( cClefModel.props.systemPos, 0 );
+        assert.equal( fClefModel.props.systemPos, 2 );
 
-        // test default properties
-        ok(cClefModel.props.interact);
+        // Test default properties
+        assert.ok( cClefModel.props.interact );
 
-        // test invalid clef shape
-        raises(function() {
-            new Toe.Model.Clef("z");
-        });
+        // Test invalid clef shape
+        assert.raises( function() {
+            new Toe.Model.Clef( "z" );
+        } );
 
-        // test manual settings
-        cClefModel = new Toe.Model.Clef("c", {systemPos: 3, interact: false});
-        equal(cClefModel.props.systemPos, 3);
-        ok(!cClefModel.props.interact);
-    });
-    
-    test("Set ID", function() {
-        var cClefModel = new Toe.Model.Clef("c");
-        cClefModel.setID(4);
+        // Test manual settings
+        cClefModel = new Toe.Model.Clef( "c", { systemPos: 3, interact: false } );
+        assert.equal( cClefModel.props.systemPos, 3 );
+        assert.ok( !cClefModel.props.interact );
+    } );
 
-        equal(cClefModel.id, 4);
-    });
+    QUnit.test( "Set ID", function( assert ) {
+        var cClefModel = new Toe.Model.Clef( "c" );
+        cClefModel.setID( 4 );
 
-    test("Set System", function() {
-        var cClefModel = new Toe.Model.Clef("c");
+        assert.equal( cClefModel.id, 4 );
+    } );
 
-        // get system data
-        var sModel = new Toe.Model.System(system_bb);
+    QUnit.test( "Set System", function( assert ) {
+        var cClefModel = new Toe.Model.Clef( "c" );
 
-        cClefModel.setSystem(sModel);
+        // Get system data
+        var sModel = new Toe.Model.System( system_bb );
 
-        equal(cClefModel.system, sModel);
+        cClefModel.setSystem( sModel );
 
-        // test object is not a system
-        raises(function() {
-            cClefModel.setSystem(new Object());
-        });
-    });
+        assert.equal( cClefModel.system, sModel );
 
-    test("Set Shape", function() {
-        var cClefModel = new Toe.Model.Clef("c");
-        cClefModel.setBoundingBox(clef_bb);
+        // Test object is not a system
+        assert.raises( function() {
+            cClefModel.setSystem( new Object() );
+        } );
+    } );
 
-        var sModel = new Toe.Model.System(system_bb);
-        sModel.addClef(cClefModel, {justPush: true});
+    QUnit.test( "Set Shape", function( assert ) {
+        var cClefModel = new Toe.Model.Clef( "c" );
+        cClefModel.setBoundingBox( clef_bb );
 
-        // add two test neumes to the system this clef is on
+        var sModel = new Toe.Model.System( system_bb );
+        sModel.addClef( cClefModel, { justPush: true } );
+
+        // Add two test neumes to the system this clef is on
         var n1 = new Toe.Model.Neume();
-        n1.setBoundingBox(neume1_bb);
-        n1.addComponent("punctum", "a", 3);
+        n1.setBoundingBox( neume1_bb );
+        n1.addComponent( "punctum", "a", 3 );
 
         var n2 = new Toe.Model.Neume();
-        n2.setBoundingBox(neume2_bb);
-        n2.addComponent("punctum", "a", 3);
-        n2.addComponent("punctum", "g", 3);
-        n2.addComponent("punctum", "a", 3);
+        n2.setBoundingBox( neume2_bb );
+        n2.addComponent( "punctum", "a", 3 );
+        n2.addComponent( "punctum", "g", 3 );
+        n2.addComponent( "punctum", "a", 3 );
 
-        sModel.addNeume(n1, {justPush: true});
-        sModel.addNeume(n2, {justPush: true});
+        sModel.addNeume( n1, { justPush: true } );
+        sModel.addNeume( n2, { justPush: true } );
 
-        equal(sModel.elements[1].rootSystemPos, -2);
-        equal(sModel.elements[1].components[0].pname, "a");
-        equal(sModel.elements[1].components[0].oct, 3);
-        
-        equal(sModel.elements[2].rootSystemPos, -2);
-        equal(sModel.elements[2].components[0].pname, "a");
-        equal(sModel.elements[2].components[0].oct, 3);
-        equal(sModel.elements[2].components[1].pname, "g");
-        equal(sModel.elements[2].components[0].oct, 3);
-        equal(sModel.elements[2].components[2].pname, "a");
-        equal(sModel.elements[2].components[0].oct, 3);
+        assert.equal( sModel.elements[ 1 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].pname, "a" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 3 );
 
-        cClefModel.setShape("f");
+        assert.equal( sModel.elements[ 2 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].pname, "a" );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].oct, 3 );
+        assert.equal( sModel.elements[ 2 ].components[ 1 ].pname, "g" );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].oct, 3 );
+        assert.equal( sModel.elements[ 2 ].components[ 2 ].pname, "a" );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].oct, 3 );
 
-        equal(cClefModel.shape, "f");
-        equal(cClefModel.name, "Fah Clef");
+        cClefModel.setShape( "f" );
 
-        // test pitch shift of elements
-        equal(sModel.elements[1].rootSystemPos, -2);
-        equal(sModel.elements[1].components[0].pname, "d");
-        equal(sModel.elements[1].components[0].oct, 3);
+        assert.equal( cClefModel.shape, "f" );
+        assert.equal( cClefModel.name, "Fah Clef" );
 
-        equal(sModel.elements[2].rootSystemPos, -2);
-        equal(sModel.elements[2].components[0].pname, "d");
-        equal(sModel.elements[1].components[0].oct, 3);
-        equal(sModel.elements[2].components[1].pname, "c");
-        equal(sModel.elements[1].components[0].oct, 3);
-        equal(sModel.elements[2].components[2].pname, "d");
-        equal(sModel.elements[1].components[0].oct, 3);
+        // Test pitch shift of elements
+        assert.equal( sModel.elements[ 1 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].pname, "d" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 3 );
 
-        // test invalid clef shape
-        raises(function() {
-            cClef.Model.setShape("z");
-        });
-    });
+        assert.equal( sModel.elements[ 2 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].pname, "d" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 3 );
+        assert.equal( sModel.elements[ 2 ].components[ 1 ].pname, "c" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 3 );
+        assert.equal( sModel.elements[ 2 ].components[ 2 ].pname, "d" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 3 );
 
-    test("Set Bounding Box", function() {
-        var cClefModel = new Toe.Model.Clef("c");
+        // Test invalid clef shape
+        assert.raises( function() {
+            cClef.Model.setShape( "z" );
+        } );
+    } );
 
-        // test invalid bounding box argument
-        raises(function() { 
-            cClefModel.setBoundingBox([-100,0,-200,0]);
-        });
+    QUnit.test( "Set Bounding Box", function( assert ) {
+        var cClefModel = new Toe.Model.Clef( "c" );
 
-        cClefModel.setBoundingBox(clef_bb);
+        // Test invalid bounding box argument
+        assert.raises( function() {
+            cClefModel.setBoundingBox( [ -100, 0, -200, 0 ] );
+        } );
 
-        equal(cClefModel.zone.ulx, clef_bb[0]);
-        equal(cClefModel.zone.uly, clef_bb[1]);
-        equal(cClefModel.zone.lrx, clef_bb[2]);
-        equal(cClefModel.zone.lry, clef_bb[3]);
+        cClefModel.setBoundingBox( clef_bb );
 
-        // test float truncation
-        float_bb = $.map(clef_bb, function(el) { return el + 0.243; });
-        cClefModel.setBoundingBox(float_bb);
+        assert.equal( cClefModel.zone.ulx, clef_bb[ 0 ] );
+        assert.equal( cClefModel.zone.uly, clef_bb[ 1 ] );
+        assert.equal( cClefModel.zone.lrx, clef_bb[ 2 ] );
+        assert.equal( cClefModel.zone.lry, clef_bb[ 3 ] );
 
-        equal(cClefModel.zone.ulx, clef_bb[0]);
-        equal(cClefModel.zone.uly, clef_bb[1]);
-        equal(cClefModel.zone.lrx, clef_bb[2]);
-        equal(cClefModel.zone.lry, clef_bb[3]);
-    });
-    
-    test("Set System Position", function() {
-        var cClefModel = new Toe.Model.Clef("c", {systemPos: 0});
-        cClefModel.setBoundingBox(clef_bb);
+        // Test float truncation
+        float_bb = $.map( clef_bb, function( el ) { return el + 0.243; } );
+        cClefModel.setBoundingBox( float_bb );
 
-        var sModel = new Toe.Model.System(system_bb);
-        sModel.addClef(cClefModel, {justPush: true});
+        assert.equal( cClefModel.zone.ulx, clef_bb[ 0 ] );
+        assert.equal( cClefModel.zone.uly, clef_bb[ 1 ] );
+        assert.equal( cClefModel.zone.lrx, clef_bb[ 2 ] );
+        assert.equal( cClefModel.zone.lry, clef_bb[ 3 ] );
+    } );
 
-        // add two test neumes to the system this clef is on
+    QUnit.test( "Set System Position", function( assert ) {
+        var cClefModel = new Toe.Model.Clef( "c", { systemPos: 0 } );
+        cClefModel.setBoundingBox( clef_bb );
+
+        var sModel = new Toe.Model.System( system_bb );
+        sModel.addClef( cClefModel, { justPush: true } );
+
+        // Add two test neumes to the system this clef is on
         var n1 = new Toe.Model.Neume();
-        n1.setBoundingBox(neume1_bb);
-        n1.addComponent("punctum", "a", 3);
+        n1.setBoundingBox( neume1_bb );
+        n1.addComponent( "punctum", "a", 3 );
 
         var n2 = new Toe.Model.Neume();
-        n2.setBoundingBox(neume2_bb);
-        n2.addComponent("punctum", "a", 3);
-        n2.addComponent("punctum", "g", 3);
-        n2.addComponent("punctum", "a", 3);
+        n2.setBoundingBox( neume2_bb );
+        n2.addComponent( "punctum", "a", 3 );
+        n2.addComponent( "punctum", "g", 3 );
+        n2.addComponent( "punctum", "a", 3 );
 
-        sModel.addNeume(n1, {justPush: true});
-        sModel.addNeume(n2, {justPush: true});
+        sModel.addNeume( n1, { justPush: true } );
+        sModel.addNeume( n2, { justPush: true } );
 
-        equal(sModel.elements[1].rootSystemPos, -2);
-        equal(sModel.elements[1].components[0].pname, "a");
-        equal(sModel.elements[1].components[0].oct, 3);
-        
-        equal(sModel.elements[2].rootSystemPos, -2);
-        equal(sModel.elements[2].components[0].pname, "a");
-        equal(sModel.elements[2].components[0].oct, 3);
-        equal(sModel.elements[2].components[1].pname, "g");
-        equal(sModel.elements[2].components[0].oct, 3);
-        equal(sModel.elements[2].components[2].pname, "a");
-        equal(sModel.elements[2].components[0].oct, 3);
+        assert.equal( sModel.elements[ 1 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].pname, "a" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 3 );
 
-        cClefModel.setSystemPosition(-4);
-        equal(cClefModel.props.systemPos, -4);
+        assert.equal( sModel.elements[ 2 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].pname, "a" );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].oct, 3 );
+        assert.equal( sModel.elements[ 2 ].components[ 1 ].pname, "g" );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].oct, 3 );
+        assert.equal( sModel.elements[ 2 ].components[ 2 ].pname, "a" );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].oct, 3 );
 
-        // test pitch shift of elements
-        equal(sModel.elements[1].rootSystemPos, -2);
-        equal(sModel.elements[1].components[0].pname, "e");
-        equal(sModel.elements[1].components[0].oct, 4);
+        cClefModel.setSystemPosition( -4 );
+        assert.equal( cClefModel.props.systemPos, -4 );
 
-        equal(sModel.elements[2].rootSystemPos, -2);
-        equal(sModel.elements[2].components[0].pname, "e");
-        equal(sModel.elements[1].components[0].oct, 4);
-        equal(sModel.elements[2].components[1].pname, "d");
-        equal(sModel.elements[1].components[0].oct, 4);
-        equal(sModel.elements[2].components[2].pname, "e");
-        equal(sModel.elements[1].components[0].oct, 4);
-    });
+        // Test pitch shift of elements
+        assert.equal( sModel.elements[ 1 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].pname, "e" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 4 );
 
-})();
+        assert.equal( sModel.elements[ 2 ].rootSystemPos, -2 );
+        assert.equal( sModel.elements[ 2 ].components[ 0 ].pname, "e" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 4 );
+        assert.equal( sModel.elements[ 2 ].components[ 1 ].pname, "d" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 4 );
+        assert.equal( sModel.elements[ 2 ].components[ 2 ].pname, "e" );
+        assert.equal( sModel.elements[ 1 ].components[ 0 ].oct, 4 );
+    } );
+
+} )( QUnit );
