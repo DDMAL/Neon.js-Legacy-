@@ -22,9 +22,9 @@ Setup
 cp conf.py{.dist,}
 ```
 
-2. Edit the configuration file conf.py and set MEI_DIRECTORY somewhere writable. Create a subdirectory in the MEI_DIRECTORY called `backup`. This subdirectory will store the original state of uploaded MEI files, which can be reverted to using the editor interface.
+2. Edit the configuration file conf.py and set MEI_DIRECTORY somewhere writable. Create 3 subdirectories in the MEI_DIRECTORY, `backup`, `squarenote`, and `cheironomic`. Backup will store the original state of uploaded MEI files, which can be reverted to using the editor interface. The other two are for storing the mei files of specific types.
 
-3. Now compile the Neon.js code. Yes, compiling JavaScript. Wierd, right?  
+3. Now compile the Neon.js code. Yes, compiling JavaScript. Weird, right?
 ```
 make dist
 ```
