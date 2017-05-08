@@ -107,7 +107,10 @@
                                     <td>Document type: 
                                         <select name="document_type">
                                             {% for d in document_types %}
-                                                <option value="{{d}}">{{ d }}</option>
+                                                {% if d == "backup" %}
+                                                {% else %}
+                                                    <option value="{{d}}">{{d}}</option>
+                                                {% end %}
                                             {% end %}
                                         </select>
                                     </td>
