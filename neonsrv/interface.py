@@ -51,7 +51,7 @@ class RootHandler(tornado.web.RequestHandler):
                     errors="", 
                     prefix=conf.get_prefix())
 
-    def post(self):
+    def post(self, request):
         mei = self.request.files.get("mei", [])
         mei_img = self.request.files.get("mei_img", [])
         document_type = self.get_argument("document_type")
@@ -95,7 +95,7 @@ class RootHandler(tornado.web.RequestHandler):
             except Exception, e:
                 errors += "invalid image file"
 
-        self.render("index.html", 
+        self.render("demo.html",
                     squarenotefiles=self.get_files('squarenote'), 
                     stafflessfiles=self.get_files('cheironomic'),
                     document_types=self.get_document_types(),
