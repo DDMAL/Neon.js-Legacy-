@@ -5,4 +5,5 @@ static/js/*.js
 docs/*
 *.swp
 *.swo
-MEI_DIRECTORY/squarenote/*
+app_env/*
+MEI_DIRECTORY/*
