@@ -2043,8 +2043,9 @@ Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function() {
 Toe.View.SquareNoteInteraction.prototype.insertInsertSystemSubControls = function() {
     if ($("#menu_insertsystem").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertsystem"><br/>\n<li class="nav-header">System Number</li>\n' +
+                                    '<p>Choose which system number to create. (Existing systems will be shifted upwards in number)</p>' +
                                     '<li><div><input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +
-                                    ' <output id="system_number"></output></div></li></span>');
+                                    '<output id="system_number"></output></div></li></span>');
         $("#system_number_slider").change(function() {$('#system_number').html(this.value);}).change();
     }
 }
