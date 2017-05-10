@@ -366,6 +366,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
     $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
+    $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
@@ -684,6 +685,27 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
     gui.rendEng.canvas.discardActiveObject();
     gui.rendEng.canvas.discardActiveGroup();
     gui.rendEng.repaint();
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleStaffLock = function(e) {
+    var gui = e.data.gui;
+    myArray = gui.rendEng.canvas.getObjects("system");
+    if ($("#btn_stafflock").is(":checked")){
+        myArray.map( function (eleSystem) {
+            eleSystem.selectable = false;
+            // TODO: System locations are not updating when moved so notes dont update properly
+            // eleSystem.lockMovementX = true;
+            // eleSystem.lockMovementY = true;
+        })
+    }
+    else{
+        myArray.map( function (eleSystem) {
+            eleSystem.selectable = true;
+            // TODO: System locations are not updating when moved so notes dont update properly
+            // eleSystem.lockMovementX = false;
+            // eleSystem.lockMovementY = false;
+        })
+    }
 }
 
 /**************************************************
@@ -1085,6 +1107,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
     // Get the widest system and use its dimensions.  If there is no widest system, forget it!
     var widestSystem = gui.page.getWidestSystem();
     if (widestSystem == null) {
+        // TODO: Maybe add some default values if there are no systems in the document yet
         return;
     }
 
@@ -1884,7 +1907,8 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                               '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
                               '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
                               '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
-                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>\n</span>');
+                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>' +
+                              '<p>Staff Lock<input id="btn_stafflock" type="checkbox"/></p></span>');
     }
     
     // grey out edit buttons by default
@@ -1892,6 +1916,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     $('#btn_neumify').toggleClass('disabled', true);
     $('#btn_neumify_liquescence').toggleClass('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
+
 }
 
 Toe.View.SquareNoteInteraction.prototype.insertEditNeumeSubControls = function() {
