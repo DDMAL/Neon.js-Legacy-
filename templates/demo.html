@@ -67,7 +67,7 @@
                             <ul>
                                 {% for f in squarenotefiles %}
                                     {% if f == "blank_test.mei" %}
-                                        <a href="{{prefix}}/editor/{{f}}">New File</a>
+                                        <a href="{{prefix}}/editor/{{f}}">{{ f }}</a>
                                     {% end %}
                                 {% end %}
                             </ul>
@@ -78,8 +78,7 @@
                             Choose a page of music in square-note notation to view or edit
                             <ul>
                             {% for f in squarenotefiles %}
-                                {% if f == "blank_test.mei" %}
-                                {% else %}
+                                {% if f != "blank_test.mei" %}
                                      <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a></li>
                                 {% end %}
                             {% end %}
@@ -122,8 +121,7 @@
                                     <td>Document type: 
                                         <select name="document_type">
                                             {% for d in document_types %}
-                                                {% if d == "backup" %}
-                                                {% else %}
+                                                {% if d != "backup" %}
                                                     <option value="{{d}}">{{d}}</option>
                                                 {% end %}
                                             {% end %}
