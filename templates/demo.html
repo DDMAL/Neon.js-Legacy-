@@ -62,11 +62,26 @@
                     </div>
                     <div class="row-fluid">
                         <div class="span12">
+                            <h2>Editor Test</h2>
+                            Test out the editor using a blank page!
+                            <ul>
+                                {% for f in squarenotefiles %}
+                                    {% if f == "blank_test.mei" %}
+                                        <a href="{{prefix}}/editor/{{f}}">New File</a>
+                                    {% end %}
+                                {% end %}
+                            </ul>
+
+                            <hr/>
+
                             <h2>Score Selection</h2>
                             Choose a page of music in square-note notation to view or edit
                             <ul>
                             {% for f in squarenotefiles %}
-                            <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a></li>
+                                {% if f == "blank_test.mei" %}
+                                {% else %}
+                                     <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a></li>
+                                {% end %}
                             {% end %}
                             </ul>
 
