@@ -732,15 +732,14 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
-        $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' +
-                                    'Select Head Shape <span class="caret"></span></a><ul class="dropdown-menu">\n' +
-                                    '<li><a id="head_punctum">punctum</a></li>\n' +
-                                    '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
-                                    '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
-                                    '<li><a id="head_cavum">cavum</a></li>\n' +
-                                    '<li><a id="head_virga">virga</a></li>\n' +
-                                    '<li><a id="head_quilisma">quilisma</a></li>\n' +
-                                    '</ul></div>' +
+        $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/>\n' +
+                                    '<p> Select Head Shape\n </p><select name="head_shape" id="head_shape">' +
+                                    '<option id="head_punctum" value="punctum">punctum</option>\n' +
+                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum">punctum inclinatum</option>\n' +
+                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum">punctum inclinatum parvum</option>\n' +
+                                    '<option id="head_cavum" value="cavum">cavum</option>\n' +
+                                    '<option id="head_virga" value="virga">virga</option>\n' +
+                                    '<option id="head_quilisma" value="quilisma">quilisma</option></select>\n' +
                                     '<li class="nav-header">Ornamentation</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                     '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
@@ -755,12 +754,10 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     var hasHorizEpisema = false;
     var hasVertEpisema = false;
 
-    //this function allows bindInsertNeumeSubControls to update noteType
-    setTypeId = function(newType){
-        noteType = newType;
-    }
-
-    gui.bindInsertNeumeSubControls(setTypeId);
+    //this allows users to select the value of neume from menu
+    $('#head_shape').change(function(){
+        noteType = $(this).find(':selected').attr('value');
+    })
 
     // keep the scope of the punctum drawing insert local
     // to not pollute the global namespace when inserting other
@@ -914,10 +911,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
         updateFollowPunct(false);
     });
-
-
-
-
 
     /* TODO: insert with episemata
     $("#chk_horizepisema").bind("click.insert", function() {
@@ -2049,27 +2042,6 @@ Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = functi
     else {
         $("#edit_chk_dot").toggleClass("active", false);
     }
-}
-
-Toe.View.SquareNoteInteraction.prototype.bindInsertNeumeSubControls = function(aFunc) {
-    $("#head_punctum").bind("click.insert", function() {
-        aFunc("punctum");
-    });
-    $("#head_punctum_inclinatum").bind("click.insert", function() {
-        aFunc("punctum_inclinatum");
-    });
-    $("#head_punctum_inclinatum_parvum").bind("click.insert", function() {
-        aFunc("punctum_inclinatum_parvum");
-    });
-    $("#head_cavum").bind("click.insert", function() {
-        aFunc("cavum");
-    });
-    $("#head_virga").bind("click.insert", function() {
-        aFunc("virga");
-    });
-    $("#head_quilisma").bind("click.insert", function() {
-        aFunc("quilisma");
-    });
 }
 
 Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
