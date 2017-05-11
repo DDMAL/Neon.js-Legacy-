@@ -710,17 +710,35 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
-        $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
+        $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/><li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' +
+                                    'Select Head Shape <span class="caret"></span></a><ul class="dropdown-menu">\n' +
+                                    '<li><a id="head_punctum">punctum</a></li>\n' +
+                                    '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
+                                    '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
+                                    '<li><a id="head_cavum">cavum</a></li>\n' +
+                                    '<li><a id="head_virga">virga</a></li>\n' +
+                                    '<li><a id="head_quilisma">quilisma</a></li>\n' +
+                                    '</ul></div>' +
+                                    '<li class="nav-header">Ornamentation</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                     '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
                                     '<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
                                     '<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
+
     }
 
     // ornamentation toggle flags
     var hasDot = false;
+    var noteType = "punctum";
     var hasHorizEpisema = false;
     var hasVertEpisema = false;
+
+    //this function allows bindInsertNeumeSubControls to update noteType
+    setTypeId = function(newType){
+        noteType = newType;
+    }
+
+    gui.bindInsertNeumeSubControls(setTypeId);
 
     // keep the scope of the punctum drawing insert local
     // to not pollute the global namespace when inserting other
@@ -729,7 +747,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         var elements = {modify: new Array(), fixed: new Array()};
 
         var punctPos = null;
-        var punctGlyph = gui.rendEng.getGlyph("punctum");
+        var punctGlyph = gui.rendEng.getGlyph("plus");
         if (initial) {
             // draw the punctum off the screen, initially
             var punctPos = {left: -50, top: -50};
@@ -816,7 +834,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         }
         */
 
-        var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: "punctum", ornaments: ornaments});
+        var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
         nModel.addComponent(nc);
 
         // instantiate neume view and controller
@@ -874,6 +892,10 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
         updateFollowPunct(false);
     });
+
+
+
+
 
     /* TODO: insert with episemata
     $("#chk_horizepisema").bind("click.insert", function() {
@@ -1935,7 +1957,7 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParent
     if ($("#sidebar-insert").length == 0) {
         $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
                               '<li><div class="btn-group" data-toggle="buttons-radio">' +
-                              '<button id="rad_punctum" class="btn"><b>■</b> Punctum</button>\n' +
+                              '<button id="rad_punctum" class="btn"><b>■</b> Neume</button>\n' +
                               '<button id="rad_division" class="btn"><b>||</b> Division</button>\n' + 
                               '<button id="rad_system" class="btn"><b><i class="icon-align-justify icon-black"></i></b>System</button>\n' + 
                               '<button id="rad_clef" class="btn"><b>C/F</b> Clef</button>\n</div>\n</li>\n</span>');
@@ -2002,6 +2024,27 @@ Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = functi
     else {
         $("#edit_chk_dot").toggleClass("active", false);
     }
+}
+
+Toe.View.SquareNoteInteraction.prototype.bindInsertNeumeSubControls = function(aFunc) {
+    $("#head_punctum").bind("click.insert", function() {
+        aFunc("punctum");
+    });
+    $("#head_punctum_inclinatum").bind("click.insert", function() {
+        aFunc("punctum_inclinatum");
+    });
+    $("#head_punctum_inclinatum_parvum").bind("click.insert", function() {
+        aFunc("punctum_inclinatum_parvum");
+    });
+    $("#head_cavum").bind("click.insert", function() {
+        aFunc("cavum");
+    });
+    $("#head_virga").bind("click.insert", function() {
+        aFunc("virga");
+    });
+    $("#head_quilisma").bind("click.insert", function() {
+        aFunc("quilisma");
+    });
 }
 
 Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
