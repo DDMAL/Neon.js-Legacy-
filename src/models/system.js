@@ -42,7 +42,7 @@ Toe.Model.System = function(bb, options) {
     // default 4 stafflines
     this.props = {
         numLines: 4,
-        interact: true,
+        interact: false,
         group: true
     };
 
