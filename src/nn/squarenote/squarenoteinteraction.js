@@ -837,73 +837,75 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             // get pitch name and octave of snapped coords of note
             var noteInfo = sModel.calcPitchFromCoords(snapCoords);
             if (noteInfo == null){
-                gui.showAlert("No clef placed on the staff.")
-            }
-            var pname = noteInfo["pname"];
-            var oct = noteInfo["oct"];
-
-            //  start forming arguments for the server function call
-            var args = {pname: pname, oct: oct};
-
-            // check ornamentation toggles to add to component
-            var ornaments = new Array();
-            if (hasDot) {
-                ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
-                args["dotform"] = "aug";
-            }
-
-            /* TODO: deal with episemata
-             if (hasHorizEpisema) {
-             }
-             if (hasVertEpisema) {
-             }
-             */
-
-            var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
-            nModel.addComponent(nc);
-
-            // instantiate neume view and controller
-            var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
-            var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
-
-            // mount neume on the system
-            var nInd = sModel.addNeume(nModel);
-
-            // if this is the first neume on a system, update the custos of the next system
-            if (nInd == 1) {
-                var prevSystem = gui.page.getPreviousSystem(sModel);
-                if (prevSystem) {
-                    gui.handleUpdatePrevCustos(pname, oct, prevSystem);
-                }
-            }
-
-            // now that final bounding box is calculated from the drawing
-            // add the bounding box information to the server function arguments
-            var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
-            args["ulx"] = outbb[0];
-            args["uly"] = outbb[1];
-            args["lrx"] = outbb[2];
-            args["lry"] = outbb[3];
-
-            // get next element to insert before
-            if (nInd + 1 < sModel.elements.length) {
-                args["beforeid"] = sModel.elements[nInd + 1].id;
-            }
+                gui.showAlert("No clef placed on the staff.");
+            } //Simple check here for if theres a clef placed on the staff.
             else {
-                // insert before the next system break (system)
-                var sNextModel = gui.page.getNextSystem(sModel);
-                if (sNextModel) {
-                    args["beforeid"] = sNextModel.id;
-                }
-            }
+                var pname = noteInfo["pname"];
+                var oct = noteInfo["oct"];
 
-            // send insert command to server to change underlying MEI
-            $.post(gui.apiprefix + "/insert/neume", args, function (data) {
-                    nModel.id = JSON.parse(data).id;
-                })
-                .error(function () {
-                    gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
-                });
+                //  start forming arguments for the server function call
+                var args = {pname: pname, oct: oct};
+
+                // check ornamentation toggles to add to component
+                var ornaments = new Array();
+                if (hasDot) {
+                    ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
+                    args["dotform"] = "aug";
+                }
+
+                /* TODO: deal with episemata
+                 if (hasHorizEpisema) {
+                 }
+                 if (hasVertEpisema) {
+                 }
+                 */
+
+                var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
+                nModel.addComponent(nc);
+
+                // instantiate neume view and controller
+                var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+                var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+                // mount neume on the system
+                var nInd = sModel.addNeume(nModel);
+
+                // if this is the first neume on a system, update the custos of the next system
+                if (nInd == 1) {
+                    var prevSystem = gui.page.getPreviousSystem(sModel);
+                    if (prevSystem) {
+                        gui.handleUpdatePrevCustos(pname, oct, prevSystem);
+                    }
+                }
+
+                // now that final bounding box is calculated from the drawing
+                // add the bounding box information to the server function arguments
+                var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+                args["ulx"] = outbb[0];
+                args["uly"] = outbb[1];
+                args["lrx"] = outbb[2];
+                args["lry"] = outbb[3];
+
+                // get next element to insert before
+                if (nInd + 1 < sModel.elements.length) {
+                    args["beforeid"] = sModel.elements[nInd + 1].id;
+                }
+                else {
+                    // insert before the next system break (system)
+                    var sNextModel = gui.page.getNextSystem(sModel);
+                    if (sNextModel) {
+                        args["beforeid"] = sNextModel.id;
+                    }
+                }
+
+                // send insert command to server to change underlying MEI
+                $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                        nModel.id = JSON.parse(data).id;
+                    })
+                    .error(function () {
+                        gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+                    });
+            }
         }
     });
 
@@ -1301,7 +1303,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             }
 
             var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});
-            if (neumesOnSystem.length > 0 && system.getActingClefByEle(neumesOnSystem[0]) == clef) {
+            if (neumesOnSystem.length > 0 && system.getActinglefByEle(neumesOnSystem[0]) == clef) {
                 // if the shift of the clef has affected the first neume on this system
                 // update the custos on the previous system
                 var prevSystem = gui.page.getPreviousSystem(system);
