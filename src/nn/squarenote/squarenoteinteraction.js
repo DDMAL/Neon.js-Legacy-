@@ -816,88 +816,92 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
     // deal with punctum insert
     gui.rendEng.canvas.observe('mouse:up', function(e) {
-        var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
-        var sModel = gui.page.getClosestSystem(coords);
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
+        // check for the pointer being in the canvas
+        if (pnt.x > 0 || pnt.x < canvas.getWidth() && pnt.y > 0 || pnt.y < canvas.getHeight()) {
+            var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
+            var sModel = gui.page.getClosestSystem(coords);
 
-        // instantiate a punctum
-        var nModel = new Toe.Model.SquareNoteNeume();
+            // instantiate a punctum
+            var nModel = new Toe.Model.SquareNoteNeume();
 
-        // calculate snapped coords
-        var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
+            // calculate snapped coords
+            var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
 
-        // update bounding box with physical position on the page
-        var ulx = snapCoords.x - gui.punctDwg.currentWidth/2;
-        var uly = snapCoords.y - gui.punctDwg.currentHeight/2;
-        var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
-        nModel.setBoundingBox(bb);
+            // update bounding box with physical position on the page
+            var ulx = snapCoords.x - gui.punctDwg.currentWidth / 2;
+            var uly = snapCoords.y - gui.punctDwg.currentHeight / 2;
+            var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
+            nModel.setBoundingBox(bb);
 
-        // get pitch name and octave of snapped coords of note
-        var noteInfo = sModel.calcPitchFromCoords(snapCoords);
-        var pname = noteInfo["pname"];
-        var oct = noteInfo["oct"];
+            // get pitch name and octave of snapped coords of note
+            var noteInfo = sModel.calcPitchFromCoords(snapCoords);
+            var pname = noteInfo["pname"];
+            var oct = noteInfo["oct"];
 
-        //  start forming arguments for the server function call
-        var args = {pname: pname, oct: oct};
+            //  start forming arguments for the server function call
+            var args = {pname: pname, oct: oct};
 
-        // check ornamentation toggles to add to component
-        var ornaments = new Array();
-        if (hasDot) {
-            ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
-            args["dotform"] = "aug";
-        }
-        
-        /* TODO: deal with episemata
-        if (hasHorizEpisema) {
-        }
-        if (hasVertEpisema) {
-        }
-        */
-
-        var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
-        nModel.addComponent(nc);
-
-        // instantiate neume view and controller
-        var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
-        var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
-        
-        // mount neume on the system
-        var nInd = sModel.addNeume(nModel);
-
-        // if this is the first neume on a system, update the custos of the next system
-        if (nInd == 1) {
-            var prevSystem = gui.page.getPreviousSystem(sModel);
-            if (prevSystem) {
-                gui.handleUpdatePrevCustos(pname, oct, prevSystem);
+            // check ornamentation toggles to add to component
+            var ornaments = new Array();
+            if (hasDot) {
+                ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
+                args["dotform"] = "aug";
             }
-        }
 
-        // now that final bounding box is calculated from the drawing
-        // add the bounding box information to the server function arguments
-        var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
-        args["ulx"] = outbb[0];
-        args["uly"] = outbb[1];
-        args["lrx"] = outbb[2];
-        args["lry"] = outbb[3];
+            /* TODO: deal with episemata
+             if (hasHorizEpisema) {
+             }
+             if (hasVertEpisema) {
+             }
+             */
 
-        // get next element to insert before
-        if (nInd + 1 < sModel.elements.length) {
-            args["beforeid"] = sModel.elements[nInd+1].id;
-        }
-        else {
-            // insert before the next system break (system)
-            var sNextModel = gui.page.getNextSystem(sModel);
-            if (sNextModel) {
-                args["beforeid"] = sNextModel.id;
+            var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
+            nModel.addComponent(nc);
+
+            // instantiate neume view and controller
+            var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+            var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+            // mount neume on the system
+            var nInd = sModel.addNeume(nModel);
+
+            // if this is the first neume on a system, update the custos of the next system
+            if (nInd == 1) {
+                var prevSystem = gui.page.getPreviousSystem(sModel);
+                if (prevSystem) {
+                    gui.handleUpdatePrevCustos(pname, oct, prevSystem);
+                }
             }
-        }
 
-        // send insert command to server to change underlying MEI
-        $.post(gui.apiprefix + "/insert/neume", args, function(data) {
-            nModel.id = JSON.parse(data).id;
-        })
-        .error(function() {
-            this.showAlert("Server failed to insert neume. Client and server are not synchronized.");
-        });
+            // now that final bounding box is calculated from the drawing
+            // add the bounding box information to the server function arguments
+            var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+            args["ulx"] = outbb[0];
+            args["uly"] = outbb[1];
+            args["lrx"] = outbb[2];
+            args["lry"] = outbb[3];
+
+            // get next element to insert before
+            if (nInd + 1 < sModel.elements.length) {
+                args["beforeid"] = sModel.elements[nInd + 1].id;
+            }
+            else {
+                // insert before the next system break (system)
+                var sNextModel = gui.page.getNextSystem(sModel);
+                if (sNextModel) {
+                    args["beforeid"] = sNextModel.id;
+                }
+            }
+
+            // send insert command to server to change underlying MEI
+            $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                    nModel.id = JSON.parse(data).id;
+                })
+                .error(function () {
+                    this.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+                });
+        }
     });
 
     $("#chk_dot").bind("click.insert", function() {
@@ -1033,46 +1037,50 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
 
     // handle the actual insertion
     gui.rendEng.canvas.observe('mouse:up', function(e) {
-        // get coords
-        var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
+        // check for the pointer being in the canvas
+        if (pnt.x > 0 || pnt.x < canvas.getWidth() && pnt.y > 0 || pnt.y < canvas.getHeight()) {
+            // get coords
+            var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
 
-        // calculate snapped coords
-        var snapCoords = system.getSystemSnapCoordinates(coords, gui.divisionDwg.currentWidth);
+            // calculate snapped coords
+            var snapCoords = system.getSystemSnapCoordinates(coords, gui.divisionDwg.currentWidth);
 
-        var division = new Toe.Model.Division(divisionForm);
+            var division = new Toe.Model.Division(divisionForm);
 
-        // update bounding box with physical position on the page
-        var ulx = snapCoords.x - gui.divisionDwg.currentWidth/2;
-        var uly = snapCoords.y - gui.divisionDwg.currentHeight/2;
-        var bb = [ulx, uly, ulx + gui.divisionDwg.currentWidth, uly + gui.divisionDwg.currentHeight];
-        division.setBoundingBox(bb);
+            // update bounding box with physical position on the page
+            var ulx = snapCoords.x - gui.divisionDwg.currentWidth / 2;
+            var uly = snapCoords.y - gui.divisionDwg.currentHeight / 2;
+            var bb = [ulx, uly, ulx + gui.divisionDwg.currentWidth, uly + gui.divisionDwg.currentHeight];
+            division.setBoundingBox(bb);
 
-        // instantiate division view and controller
-        var dView = new Toe.View.DivisionView(gui.rendEng);
-        var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
+            // instantiate division view and controller
+            var dView = new Toe.View.DivisionView(gui.rendEng);
+            var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
 
-        // mount division on the system
-        var nInd = system.addDivision(division);
+            // mount division on the system
+            var nInd = system.addDivision(division);
 
-        var outbb = gui.getOutputBoundingBox(bb);
-        var args = {type: division.key.slice(4), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
-        // get next element to insert before
-        if (nInd + 1 < system.elements.length) {
-            args["beforeid"] = system.elements[nInd+1].id;   
+            var outbb = gui.getOutputBoundingBox(bb);
+            var args = {type: division.key.slice(4), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+            // get next element to insert before
+            if (nInd + 1 < system.elements.length) {
+                args["beforeid"] = system.elements[nInd + 1].id;
+            }
+            else {
+                // insert before the next system break (system)
+                var sNextModel = gui.page.getNextSystem(system);
+                args["beforeid"] = sNextModel.id;
+            }
+
+            // send insert division command to server to change underlying MEI
+            $.post(gui.apiprefix + "/insert/division", args, function (data) {
+                    division.id = JSON.parse(data).id;
+                })
+                .error(function () {
+                    this.showAlert("Server failed to insert division. Client and server are not synchronized.");
+                });
         }
-        else {
-            // insert before the next system break (system)
-            var sNextModel = gui.page.getNextSystem(system);
-            args["beforeid"] = sNextModel.id;
-        }
-
-        // send insert division command to server to change underlying MEI
-        $.post(gui.apiprefix + "/insert/division", args, function(data) {
-            division.id = JSON.parse(data).id;
-        })
-        .error(function() {
-            this.showAlert("Server failed to insert division. Client and server are not synchronized.");
-        });
     });
 
     $("#rad_small").bind("click.insert", function() {
@@ -1242,90 +1250,100 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
 
     // handle the actual insertion
     gui.rendEng.canvas.observe("mouse:up", function(e) {
-        // get coords
-        var coords = {x: gui.clefDwg.left, y: gui.clefDwg.top};
+        var pnt = gui.rendEng.canvas.getPointer(e.e);
+        // check for the pointer being in the canvas
+        if (pnt.x > 0 || pnt.x < canvas.getWidth() && pnt.y > 0 || pnt.y < canvas.getHeight()) {
+            // get coords
+            var coords = {x: gui.clefDwg.left, y: gui.clefDwg.top};
 
-        if (cShape == "f") {
-            coords.x -= gui.clefDwg.currentWidth/8;
-            coords.y -= gui.clefDwg.currentHeight/8;
-        }
-
-        // get closest system to insert onto
-        var system = gui.page.getClosestSystem(coords);
-
-        // calculate snapped coordinates on the system
-        var snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
-
-        var systemPos = Math.round((system.zone.uly - snapCoords.y) / (system.delta_y/2));
-
-        var clef = new Toe.Model.Clef(cShape, {"systemPos": systemPos});
-
-        // update bounding box with physical position on page
-        var ulx = snapCoords.x - gui.clefDwg.currentWidth/2;
-        var uly = snapCoords.y - gui.clefDwg.currentHeight/2;
-        var bb = [ulx, uly, ulx + gui.clefDwg.currentWidth, uly + gui.clefDwg.currentHeight];
-        clef.setBoundingBox(bb);
-
-        // instantiate clef view and controller
-        var cView = new Toe.View.ClefView(gui.rendEng);
-        var cCtrl = new Toe.Ctrl.ClefController(clef, cView);
-
-        // mount clef on the system
-        var nInd = system.addClef(clef);
-
-        var systemLine = system.props.numLines + systemPos/2;
-        var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
-        var args = {shape: cShape, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
-        // get next element to insert before
-        if (nInd + 1 < system.elements.length) {
-            args["beforeid"] = system.elements[nInd+1].id;
-        }
-        else {
-            // insert before the next system break
-            var sNextModel = gui.page.getNextSystem(system);
-            args["beforeid"] = sNextModel.id;
-        }
-
-        var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});
-        if (neumesOnSystem.length > 0 && system.getActingClefByEle(neumesOnSystem[0]) == clef) {
-            // if the shift of the clef has affected the first neume on this system
-            // update the custos on the previous system
-            var prevSystem = gui.page.getPreviousSystem(system);
-            if (prevSystem) {
-                var newPname = neumesOnSystem[0].components[0].pname;
-                var newOct = neumesOnSystem[0].components[0].oct;
-                gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
+            if (cShape == "f") {
+                coords.x -= gui.clefDwg.currentWidth / 8;
+                coords.y -= gui.clefDwg.currentHeight / 8;
             }
-        }
 
-        // gather new pitch information of affected pitched elements
-        args["pitchInfo"] = $.map(system.getPitchedElements({clef: clef}), function(e) {
-            if (e instanceof Toe.Model.Neume) {
-                var pitchInfo = new Array();
-                $.each(e.components, function(nInd, n) {
-                    pitchInfo.push({pname: n.pname, oct: n.oct});
+            // get closest system to insert onto
+            var system = gui.page.getClosestSystem(coords);
+
+            // calculate snapped coordinates on the system
+            var snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
+
+            var systemPos = Math.round((system.zone.uly - snapCoords.y) / (system.delta_y / 2));
+
+            var clef = new Toe.Model.Clef(cShape, {"systemPos": systemPos});
+
+            // update bounding box with physical position on page
+            var ulx = snapCoords.x - gui.clefDwg.currentWidth / 2;
+            var uly = snapCoords.y - gui.clefDwg.currentHeight / 2;
+            var bb = [ulx, uly, ulx + gui.clefDwg.currentWidth, uly + gui.clefDwg.currentHeight];
+            clef.setBoundingBox(bb);
+
+            // instantiate clef view and controller
+            var cView = new Toe.View.ClefView(gui.rendEng);
+            var cCtrl = new Toe.Ctrl.ClefController(clef, cView);
+
+            // mount clef on the system
+            var nInd = system.addClef(clef);
+
+            var systemLine = system.props.numLines + systemPos / 2;
+            var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+            var args = {shape: cShape, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+            // get next element to insert before
+            if (nInd + 1 < system.elements.length) {
+                args["beforeid"] = system.elements[nInd + 1].id;
+            }
+            else {
+                // insert before the next system break
+                var sNextModel = gui.page.getNextSystem(system);
+                args["beforeid"] = sNextModel.id;
+            }
+
+            var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});
+            if (neumesOnSystem.length > 0 && system.getActingClefByEle(neumesOnSystem[0]) == clef) {
+                // if the shift of the clef has affected the first neume on this system
+                // update the custos on the previous system
+                var prevSystem = gui.page.getPreviousSystem(system);
+                if (prevSystem) {
+                    var newPname = neumesOnSystem[0].components[0].pname;
+                    var newOct = neumesOnSystem[0].components[0].oct;
+                    gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
+                }
+            }
+
+            // gather new pitch information of affected pitched elements
+            args["pitchInfo"] = $.map(system.getPitchedElements({clef: clef}), function (e) {
+                if (e instanceof Toe.Model.Neume) {
+                    var pitchInfo = new Array();
+                    $.each(e.components, function (nInd, n) {
+                        pitchInfo.push({pname: n.pname, oct: n.oct});
+                    });
+                    return {id: e.id, noteInfo: pitchInfo};
+                }
+                else if (e instanceof Toe.Model.Custos) {
+                    // the custos has been vertically moved
+                    // update the custos bounding box information in the model
+                    // do not need to update pitch name & octave since this does not change
+                    var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    $.post(gui.apiprefix + "/move/custos", {
+                            id: e.id,
+                            ulx: outbb[0],
+                            uly: outbb[1],
+                            lrx: outbb[2],
+                            lry: outbb[3]
+                        })
+                        .error(function () {
+                            this.showAlert("Server failed to move custos. Client and server are not synchronized.");
+                        });
+                }
+            });
+
+            // send insert clef command to the server to change underlying MEI
+            $.post(gui.apiprefix + "/insert/clef", {data: JSON.stringify(args)}, function (data) {
+                    clef.id = JSON.parse(data).id;
+                })
+                .error(function () {
+                    this.showAlert("Server failed to insert clef. Client and server are not synchronized.");
                 });
-                return {id: e.id, noteInfo: pitchInfo};
-            }
-            else if (e instanceof Toe.Model.Custos) {
-                // the custos has been vertically moved
-                // update the custos bounding box information in the model
-                // do not need to update pitch name & octave since this does not change
-                var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
-                .error(function() {
-                    this.showAlert("Server failed to move custos. Client and server are not synchronized.");
-                });
-            }
-        });
-
-        // send insert clef command to the server to change underlying MEI
-        $.post(gui.apiprefix + "/insert/clef", {data: JSON.stringify(args)}, function(data) {
-            clef.id = JSON.parse(data).id;
-        })
-        .error(function() {
-            this.showAlert("Server failed to insert clef. Client and server are not synchronized.");
-        });
+        }
     });
 
     // release old bindings
