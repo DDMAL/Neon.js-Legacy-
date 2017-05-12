@@ -1474,7 +1474,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
 
         // get previous acting clef
         //  (NOTE: this should always be defined
-        // since the first clef on a system is not allowed to be deleted)
+        // since the first clef on a system should not be deleted if it has any notes dependant on it)
         var pClef = system.getPreviousClef(clef);
 
         // now delete the clef, and update the pitch information of these elements
@@ -1489,10 +1489,10 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
             var pitchedEles = system.getPitchedElements(clef);
 
             // gather the pitch information of the pitched notes
-            pitchInfo = $.map(pitchedEles, function(e) {
+            pitchInfo = $.map(pitchedEles, function (e) {
                 if (e instanceof Toe.Model.Neume) {
                     var pitchInfo = [];
-                    $.each(e.components, function(nInd, n) {
+                    $.each(e.components, function (nInd, n) {
                         pitchInfo.push({pname: n.pname, oct: n.oct});
                     });
                     return {id: e.id, noteInfo: pitchInfo};
@@ -1502,10 +1502,16 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                     // update the custos bounding box information in the model
                     // do not need to update pitch name & octave since this does not change
                     var outbb = aGui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                    $.post(aGui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
-                    .error(function() {
-                        gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
-                    });
+                    $.post(aGui.apiprefix + "/move/custos", {
+                        id: e.id,
+                        ulx: outbb[0],
+                        uly: outbb[1],
+                        lrx: outbb[2],
+                        lry: outbb[3]
+                    })
+                        .error(function () {
+                            gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
+                        });
                 }
             });
         }
@@ -1631,9 +1637,13 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
 
     var selection = aGui.rendEng.canvas.getActiveObject();
     if (selection) {
-        // ignore the first clef, since this should never be deleted
+        //checks if selection is the first clef
         if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements[0] != selection.eleRef) {
             deleteClef(selection, false);
+        }
+        // check if it is first clef and only delete if it is the only element on the staff
+        else if (selection.eleRef instanceof Toe.Model.Clef && selection.eleRef.system.elements.length == 1) {
+            deleteClef(selection, true);
         }
         else if (selection.eleRef instanceof Toe.Model.Neume) {
             deleteNeume(selection);
