@@ -147,6 +147,9 @@ Toe.Model.SquareNoteSystem.prototype.calcPitchFromCoords = function(coords) {
 
     // get acting clef
     var actingClef = this.getActingClefByCoords(coords);
+
+    if (actingClef == null)
+        return null;
     
     return this.calcPitchFromSystemPos(systemPos, actingClef);
 }
