@@ -818,7 +818,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     gui.rendEng.canvas.observe('mouse:up', function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
         // check for the pointer being in the canvas
-        if (pnt.x > 0 || pnt.x < canvas.getWidth() && pnt.y > 0 || pnt.y < canvas.getHeight()) {
+        if (pnt.x > 0 && pnt.x < gui.rendEng.canvas.getWidth() && pnt.y > 0 && pnt.y < gui.rendEng.canvas.getHeight()) {
             var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
             var sModel = gui.page.getClosestSystem(coords);
 
@@ -1044,7 +1044,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
     gui.rendEng.canvas.observe('mouse:up', function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
         // check for the pointer being in the canvas
-        if (pnt.x > 0 || pnt.x < canvas.getWidth() && pnt.y > 0 || pnt.y < canvas.getHeight()) {
+        if (pnt.x > 0 && pnt.x < gui.rendEng.canvas.getWidth() && pnt.y > 0 && pnt.y < gui.rendEng.canvas.getHeight()) {
             // get coords
             var coords = {x: gui.divisionDwg.left, y: gui.divisionDwg.top};
 
@@ -1257,7 +1257,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     gui.rendEng.canvas.observe("mouse:up", function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
         // check for the pointer being in the canvas
-        if (pnt.x > 0 || pnt.x < canvas.getWidth() && pnt.y > 0 || pnt.y < canvas.getHeight()) {
+        if (pnt.x > 0 && pnt.x < gui.rendEng.canvas.getWidth() && pnt.y > 0 && pnt.y < gui.rendEng.canvas.getHeight()) {
             // get coords
             var coords = {x: gui.clefDwg.left, y: gui.clefDwg.top};
 
