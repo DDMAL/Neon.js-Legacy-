@@ -1075,7 +1075,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
             else {
                 // insert before the next system break (system)
                 var sNextModel = gui.page.getNextSystem(system);
-                args["beforeid"] = sNextModel.id;
+                if(sNextModel) {
+                    args["beforeid"] = sNextModel.id;
+                }
             }
 
             // send insert division command to server to change underlying MEI
@@ -1299,11 +1301,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             else {
                 // insert before the next system break
                 var sNextModel = gui.page.getNextSystem(system);
-                args["beforeid"] = sNextModel.id;
+                if (sNextModel) {
+                    args["beforeid"] = sNextModel.id;
+                }
             }
 
             var neumesOnSystem = system.getPitchedElements({neumes: true, custos: false});
-            if (neumesOnSystem.length > 0 && system.getActinglefByEle(neumesOnSystem[0]) == clef) {
+            if (neumesOnSystem.length > 0 && system.getActingClefByEle(neumesOnSystem[0]) == clef) {
                 // if the shift of the clef has affected the first neume on this system
                 // update the custos on the previous system
                 var prevSystem = gui.page.getPreviousSystem(system);
@@ -1342,7 +1346,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             });
 
             // send insert clef command to the server to change underlying MEI
-            $.post(gui.apiprefix + "/insert/clef", {data: JSON.stringify(args)}, function (data) {
+            $.post(gui.apiprefix + "/insert/clef", args, function (data) {
                     clef.id = JSON.parse(data).id;
                 })
                 .error(function () {

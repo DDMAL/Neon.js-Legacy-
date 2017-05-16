@@ -25,8 +25,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         uly = str(self.get_argument("uly", None))
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
-        fname_temp = os.path.join(mei_directory, file)
-        fname = fname_temp + ".mei"
+        fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
         result = md.insert_punctum(before_id, pname, oct, dot_form, ulx, uly, lrx, lry)
         md.write_doc()
@@ -280,21 +279,21 @@ class UpdateClefShapeHandler(tornado.web.RequestHandler):
 class InsertClefHandler(tornado.web.RequestHandler):
 
     def post(self, file):
-        data = json.loads(self.get_argument("data", ""))
-        shape = str(data["shape"]).upper()
-        line = str(data["line"])
-        before_id = str(data["beforeid"])
+        shape = str(self.get_argument("shape", "")).upper()
+        line = str(self.get_argument("line", ""))
+        before_id = str(self.get_argument("beforeid", None))
+        pitchInfo = str(self.get_argument("pitchInfo", ""))
 
         # bounding box
-        ulx = str(data["ulx"])
-        uly = str(data["uly"])
-        lrx = str(data["lrx"])
-        lry = str(data["lry"])
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_clef(line, shape, data["pitchInfo"], before_id, ulx, uly, lrx, lry)
+        result = md.insert_clef(line, shape, pitchInfo, before_id, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))

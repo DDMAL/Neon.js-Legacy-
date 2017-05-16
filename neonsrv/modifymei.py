@@ -3,8 +3,8 @@ from pymei import MeiElement, MeiAttribute, XmlImport, XmlExport
 class ModifyDocument:
     
     def __init__(self, filename):
-        self.mei = XmlImport.read(filename)
-        self.filename = filename
+        self.mei = XmlImport.read(filename + ".mei")
+        self.filename = filename + ".mei"
 
     def write_doc(self, **kwargs):
         '''
@@ -50,7 +50,7 @@ class ModifyDocument:
         self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
         # perform the insertion
-        if before_id is None:
+        if before_id == "None":
             # get last layer
             layers = self.mei.getElementsByName("layer")
             if len(layers):
