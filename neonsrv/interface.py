@@ -64,22 +64,22 @@ class RootHandler(tornado.web.RequestHandler):
             mei_fn = mei[0]["filename"]
             contents = mei[0]["body"]
             # TODO: Figure out how to validate MEI files properly using pymei
-            # try:
-            # mei = XmlImport.documentFromText(contents)
-            if not mei_fn.endswith('.mei'):
-                errors = "not in mei file format"
-            elif os.path.exists(os.path.join(mei_directory, mei_fn)):
-                errors = "mei file already exists"
-            else:
-                # write to working directory and backup
-                fp = open(os.path.join(mei_directory, mei_fn), "w")
-                fp.write(contents)
-                fp.close()
-                fp = open(os.path.join(mei_directory_backup, mei_fn), "w")
-                fp.write(contents)
-                fp.close()
-            # except Exception, e:
-            #     errors = "invalid mei file"
+            try:
+                mei = XmlImport.documentFromText(contents)
+            # if not mei_fn.endswith('.mei'):
+            #     errors = "not in mei file format"
+                if os.path.exists(os.path.join(mei_directory, mei_fn)):
+                    errors = "mei file already exists"
+                else:
+                    # write to working directory and backup
+                    fp = open(os.path.join(mei_directory, mei_fn), "w")
+                    fp.write(contents)
+                    fp.close()
+                    fp = open(os.path.join(mei_directory_backup, mei_fn), "w")
+                    fp.write(contents)
+                    fp.close()
+            except Exception, e:
+                errors = "invalid mei file"
 
         if len(mei_img):
             # derive image filename from mei filename

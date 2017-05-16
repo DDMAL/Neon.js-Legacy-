@@ -25,7 +25,8 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         uly = str(self.get_argument("uly", None))
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
-        fname = os.path.join(mei_directory, file)
+        fname_temp = os.path.join(mei_directory, file)
+        fname = fname_temp + ".mei"
         md = ModifyDocument(fname)
         result = md.insert_punctum(before_id, pname, oct, dot_form, ulx, uly, lrx, lry)
         md.write_doc()
