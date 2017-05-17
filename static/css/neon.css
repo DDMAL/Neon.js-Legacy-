@@ -20,8 +20,21 @@ body {
 
 form#delete-mei {
     display: inline-block;
+    margin: 0;
 }
 
-/*form#delete-mei:hover {*/
-    /*background-color: yellow;*/
-/*}*/
+input#delete{
+    /* change these properties to whatever you want */
+    background-color: transparent;
+    color: #000000;
+    border-color: transparent;
+    font-size: 10;
+    padding-top: 0px;
+    padding-right: 0px;
+    padding-bottom: 3px;
+    padding-left: 0px;
+}
+
+input#delete:hover{
+    color: #c8140e
+}
