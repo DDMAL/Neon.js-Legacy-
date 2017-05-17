@@ -141,6 +141,17 @@ class FileHandler(tornado.web.RequestHandler):
             self.set_header("Content-Type", mimetypes.guess_type(fullpath)[0]);
             self.write(response)
 
+class DeleteFileHandler(tornado.web.RequestHandler):
+    mimetypes.add_type("text/xml", ".mei")
+
+    def post(self, filename):
+        fullpath = os.path.join(conf.MEI_DIRECTORY + "/squarenote/", filename)
+        if not os.path.exists(os.path.abspath(fullpath)):
+            self.send_error(403)
+        else:
+            os.remove(fullpath)
+            self.redirect('/')
+
 class DemoFileHandler(tornado.web.RequestHandler):
     mimetypes.add_type("text/xml", ".mei")
 

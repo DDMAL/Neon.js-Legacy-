@@ -79,7 +79,12 @@
                             <ul>
                             {% for f in squarenotefiles %}
                                 {% if f != "blank_test.mei" %}
-                                     <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a></li>
+                                     <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a><form action="{{prefix}}/delete/{{f}}" method=post class=delete-mei id="delete-mei">
+                                         <input type=hidden value="{{ f }}" name="mei_to_delete"></input>
+                                         <input type=submit value="X"></input>
+                                     </form>
+
+                                     </li>
                                 {% end %}
                             {% end %}
                             </ul>

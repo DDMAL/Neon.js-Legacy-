@@ -17,3 +17,11 @@ body {
 .row-fluid > .span-fixed-sidebar {
     margin-left: 420px;
 }
+
+form#delete-mei {
+    display: inline-block;
+}
+
+/*form#delete-mei:hover {*/
+    /*background-color: yellow;*/
+/*}*/
