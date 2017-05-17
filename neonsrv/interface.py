@@ -162,10 +162,10 @@ class FileRevertHandler(tornado.web.RequestHandler):
         working directory. Overwrites changes made by the editor!
         '''
         mei_directory = os.path.join(os.path.abspath(conf.MEI_DIRECTORY), documentType)
-        meiworking = os.path.join(mei_directory, filename)
-        mei_directory_backup = os.path.join(mei_directory, "backup")
-        meibackup = os.path.join(mei_directory_backup, filename)
-        
+        meiworking = os.path.join(mei_directory, filename + ".mei")
+        mei_directory_backup = os.path.join(conf.MEI_DIRECTORY, "backup")
+        meibackup = os.path.join(mei_directory_backup, filename + ".mei")
+
         if meibackup:
             shutil.copy(meibackup, meiworking)
 
