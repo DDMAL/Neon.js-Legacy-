@@ -50,13 +50,13 @@ class ModifyDocument:
         self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
         # perform the insertion
-        if before_id == "None":
+        if before_id is None:
             # get last layer
             layers = self.mei.getElementsByName("layer")
             if len(layers):
                 layers[-1].addChild(punctum)
         else:
-            before = self.mei.getElementById(before_id)
+            before = self.mei.getElementById(str(before_id))
 
             # get layer element
             parent = before.getParent()
@@ -576,11 +576,17 @@ class ModifyDocument:
         clef.addAttribute("line", line)
 
         # perform clef insertion
-        before = self.mei.getElementById(before_id)
-        parent = before.getParent()
+        if before_id is None:
+            # get last layer
+            layers = self.mei.getElementsByName("layer")
+            if len(layers):
+                layers[-1].addChild(clef)
+        else:
+            before = self.mei.getElementById(before_id)
+            parent = before.getParent()
 
-        if parent and before:
-            parent.addChildBefore(before, clef)
+            if parent and before:
+                parent.addChildBefore(before, clef)
 
         self.update_or_add_zone(clef, ulx, uly, lrx, lry)
         self.update_pitched_elements(pitch_info)

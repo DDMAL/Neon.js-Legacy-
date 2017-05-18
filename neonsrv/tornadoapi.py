@@ -13,7 +13,7 @@ import conf
 class InsertNeumeHandler(tornado.web.RequestHandler):
 
     def post(self, file):
-        before_id = str(self.get_argument("beforeid", None))
+        before_id = self.get_argument("beforeid", None)
         pname = str(self.get_argument("pname", ""))
         oct = str(self.get_argument("oct", ""))
         dot_form = self.get_argument("dotform", None)
@@ -281,7 +281,7 @@ class InsertClefHandler(tornado.web.RequestHandler):
     def post(self, file):
         shape = str(self.get_argument("shape", "")).upper()
         line = str(self.get_argument("line", ""))
-        before_id = str(self.get_argument("beforeid", None))
+        before_id = self.get_argument("beforeid", None)
         pitchInfo = str(self.get_argument("pitchInfo", ""))
 
         # bounding box
