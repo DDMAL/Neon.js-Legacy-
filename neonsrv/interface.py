@@ -150,6 +150,8 @@ class DeleteFileHandler(tornado.web.RequestHandler):
             self.send_error(403)
         else:
             os.remove(fullpath)
+            jpgPath, mei_extension = os.path.splitext(fullpath)
+            os.remove(jpgPath + ".jpg")
             self.redirect('/')
 
 class DemoFileHandler(tornado.web.RequestHandler):

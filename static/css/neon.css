@@ -33,6 +33,7 @@ input#delete{
     padding-right: 0px;
     padding-bottom: 3px;
     padding-left: 0px;
+    margin-bottom: 0px;
 }
 
 input#delete:hover{
