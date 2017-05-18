@@ -783,10 +783,14 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             /* TODO: deal with episemata
             if (hasHorizEpisema) {
             }
+            */
 
             if (hasVertEpisema) {
+                var glyphVertEpisema = gui.rendEng.getGlyph("vertepisema");
+                var vertEpisema = glyphVertEpisema.clone().set({left: punctPos.left + gui.punctWidth, top: punctPos.top, opacity: 0.6});
+                elements.modify.push(vertEpisema);
             }
-            */
+
         }
 
         // create clean punctum glyph with no ornamentation
@@ -856,9 +860,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                 /* TODO: deal with episemata
                  if (hasHorizEpisema) {
                  }
-                 if (hasVertEpisema) {
-                 }
+
                  */
+
+                 if (hasVertEpisema) {
+                     ornaments.push(new Toe.Model.Ornament("episema", {form: "vertical"}));
+                     args["episemaform"] = "vertical";
+                 }
 
                 var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
                 nModel.addComponent(nc);
@@ -931,10 +939,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         updateFollowPunct(false);
     });
 
-    /* TODO: insert with episemata
     $("#chk_vertepisema").bind("click.insert", function() {
+        if (!hasVertEpisema) {
+            hasVertEpisema = true;
+        }
+        else {
+            hasVertEpisema = false;
+        }
+        updateFollowPunct(false);
     });
-    */
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {

@@ -20,7 +20,7 @@ class ModifyDocument:
 
         XmlExport.write(self.mei, filename)
 
-    def insert_punctum(self, before_id, pname, oct, dot_form, ulx, uly, lrx, lry):
+    def insert_punctum(self, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):
         '''
         Insert a punctum before the given element. There is one case where
         there is no element to insert before, when there is no subsequent staff.
@@ -42,6 +42,11 @@ class ModifyDocument:
             dot = MeiElement("dot")
             dot.addAttribute("form", str(dot_form))
             note.addChild(dot)
+
+        if episema_form is not None:
+            episema = MeiElement("episema")
+            episema.addAttribute("form", str(episema_form))
+            note.addChild(episema)
 
         punctum.addChild(nc)
         nc.addChild(note)

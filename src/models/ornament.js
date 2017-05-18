@@ -34,6 +34,8 @@ Toe.Model.Ornament = function(key, options) {
     if (this.type == undefined) {
         throw new Error("Ornament: undefined ornament type");
     }
+    // These else ifs are used to have back up cases in case the 'form' attribute was not sent from squarenoteneume.
+    // otherwise the form is set to whatever comes in as options. It defaults to horizontal for episemas
     else if (key == "episema") {
         oForm = "horizontal";
     }
@@ -48,9 +50,8 @@ Toe.Model.Ornament = function(key, options) {
         form: oForm,
         interact: false
     };
-
+    
     $.extend(this.props, options);
-
 }
 
 Toe.Model.Ornament.prototype.constructor = Toe.Model.Ornament;
