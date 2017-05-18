@@ -1867,6 +1867,12 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     else if (ele instanceof Toe.Model.System) {
         this.showInfo("Selected: system #" + ele.orderNumber);
     }
+
+    $('#closeinfo').click($.proxy(function (e) {
+        if($(e.target).is("closeinfo")){
+            this.hideInfo();
+        }
+    }, this))
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(aObject) {

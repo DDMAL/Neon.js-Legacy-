@@ -36,12 +36,13 @@ Toe.View.Interaction.prototype.constructor = Toe.View.Interaction;
 // GUI Management Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.Interaction.prototype.showInfo = function(aText) {
-    $("#info > p").html(aText);
     $("#info").animate({opacity: 1.0}, 100);
+    $("#info > p").html(aText);
+    $("#info").fadeIn(400);
 };
 
 Toe.View.Interaction.prototype.hideInfo = function() {
-    $("#info").animate({opacity: 0.0}, 100);
+    $("#info").fadeOut(400);
 };
 
 Toe.View.Interaction.prototype.showAlert = function(aText) {
