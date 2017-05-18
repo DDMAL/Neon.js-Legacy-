@@ -137,4 +137,10 @@
 	 width="256px" height="256px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve">
 <path d="M208,122h-74V48c0-3.534-2.466-6.4-6-6.4s-6,2.866-6,6.4v74H48c-3.534,0-6.4,2.466-6.4,6s2.866,6,6.4,6h74v74  c0,3.534,2.466,6.4,6,6.4s6-2.866,6-6.4v-74h74c3.534,0,6.4-2.466,6.4-6S211.534,122,208,122z"/>
 </svg>
+<svg version="1.1" id="episema-h" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="256px" height="256px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve">
+<path d="M0 0 L200 0 L200 35 L0 35 Z"/>
+</svg>
+<svg version="1.1" id="episema-v" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="256px" height="256px" viewBox="0 0 256 256" enable-background="new 0 0 256 256" xml:space="preserve">
+<path d="M140 200 L155 200 L155 0 L140 0 Z"/>
+</svg>
 </neumeroot>

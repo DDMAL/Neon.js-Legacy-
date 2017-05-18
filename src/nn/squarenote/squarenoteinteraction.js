@@ -921,16 +921,17 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         updateFollowPunct(false);
     });
 
-    /* TODO: insert with episemata
     $("#chk_horizepisema").bind("click.insert", function() {
-        if ($(this).hasClass("active")) {
+        if (!hasHorizEpisema) {
             hasHorizEpisema = true;
         }
         else {
             hasHorizEpisema = false;
         }
+        updateFollowPunct(false);
     });
 
+    /* TODO: insert with episemata
     $("#chk_vertepisema").bind("click.insert", function() {
     });
     */
