@@ -24,7 +24,7 @@ class ModifyDocument:
         '''
         Insert a punctum before the given element. There is one case where
         there is no element to insert before, when there is no subsequent staff.
-        In this case, the element is inserted at sthe end of the last system.
+        In this case, the element is inserted at the end of the last system.
         Also sets the bounding box information of the new punctum.
         '''
 
