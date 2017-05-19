@@ -68,6 +68,22 @@ Toe.Model.NeumeComponent.prototype.hasOrnament = function(oType) {
 }
 
 /**
+ * Return the form of the ornament given
+ *
+ * @methodOf Toe.Model.NeumeComponent
+ * @param {String} oType ornament type
+ * @return {String} form of the ornament
+ */
+Toe.Model.NeumeComponent.prototype.getOrnamentForm = function(oType) {
+    console.log($.grep(this.props.ornaments, function(o) {
+        return o.key == oType.toLowerCase();
+    }));
+    return $.grep(this.props.ornaments, function(o) {
+        return o.key == oType.toLowerCase();
+    })[0].props.form;
+}
+
+/**
  * Add an ornament to the neume component.
  *
  * @methodOf Toe.Model.NeumeComponent
