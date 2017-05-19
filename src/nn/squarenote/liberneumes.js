@@ -65,6 +65,7 @@ var drawLiberNeume = function(neume) {
 
     var glyphDot = this.rendEng.getGlyph("dot");
     var glyphVertEpisema = this.rendEng.getGlyph("vertepisema");
+    var glyphHorizEpisema = this.rendEng.getGlyph("horizepisema");
 
     // fixed holds elements that will not undergo global transformations
     // modify holds elements that will undergo global transformations
@@ -85,6 +86,12 @@ var drawLiberNeume = function(neume) {
             }
 
             // render episemas
+            if (neume.components[0].hasOrnament('episema')) {
+                // get best spot for one dot
+                var bestDots = this.bestDotPlacements(system, nc_y, 0);
+                elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
+            }
+
             if (neume.components[0].hasOrnament('episema')) {
                 // get best spot for one dot
                 var bestDots = this.bestDotPlacements(system, nc_y, 0);

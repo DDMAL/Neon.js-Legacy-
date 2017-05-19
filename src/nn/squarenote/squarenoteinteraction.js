@@ -780,10 +780,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                 elements.modify.push(dot);
             }
 
-            /* TODO: deal with episemata
             if (hasHorizEpisema) {
+                var glyphHorizEpisema = gui.rendEng.getGlyph("horizepisema");
+                var horizEpisema = glyphHorizEpisema.clone().set({left: punctPos.left + gui.punctWidth, top: punctPos.top, opacity: 0.6});
+                elements.modify.push(horizEpisema)
             }
-            */
+
 
             if (hasVertEpisema) {
                 var glyphVertEpisema = gui.rendEng.getGlyph("vertepisema");
@@ -857,16 +859,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                     args["dotform"] = "aug";
                 }
 
-                /* TODO: deal with episemata
-                 if (hasHorizEpisema) {
-                 }
+                if (hasHorizEpisema) {
+                    ornaments.push(new Toe.Model.Ornament("episema", {form: "horizontal"}));
+                    args["episemaform"] = "horizontal";
+                }
 
-                 */
-
-                 if (hasVertEpisema) {
+                if (hasVertEpisema) {
                      ornaments.push(new Toe.Model.Ornament("episema", {form: "vertical"}));
                      args["episemaform"] = "vertical";
-                 }
+                }
 
                 var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
                 nModel.addComponent(nc);
