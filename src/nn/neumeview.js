@@ -84,7 +84,7 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(aSystem, nc_y, yposInd
     k = Math.round(2*(midPos - firstSpace) / aSystem.delta_y);
     if (k % 2 == 0) {
         dotsy.push(midPos);
-    } 
+    }
 
     // try top next
     var topPos = ypos - aSystem.delta_y/2;
@@ -117,6 +117,57 @@ Toe.View.NeumeView.prototype.bestDotPlacements = function(aSystem, nc_y, yposInd
 
     return dotsy;
 }
+
+Toe.View.NeumeView.prototype.bestHorizEpisemaPlacements = function(aSystem, nc_y, yposInd) {
+    // calculate where to put the horizontal episema above the neume.
+    var bestHorizEpisemas = [false, false, false];
+    var hEpsy = new Array();
+
+    var firstSpace = aSystem.zone.uly + aSystem.delta_y/2;
+
+    ypos = nc_y[yposInd];
+
+    // try middle first
+    var midPos = ypos - 10;
+    k = Math.round(2*(midPos - firstSpace) / aSystem.delta_y);
+
+    if (k % 2 != 0) {
+        hEpsy.push(midPos);
+    }
+
+    // try top next
+    var topPos = ypos - aSystem.delta_y/2;
+    var k = Math.round(2*(topPos - firstSpace) / aSystem.delta_y);
+
+    // check there isn't a note here
+    // must also check note after (eg., podatus)
+    var isOccNote = false;
+    if ((yposInd-1 >= 0 && ypos - aSystem.delta_y/2 == nc_y[yposInd-1]) || (yposInd+1 < nc_y.length && ypos - aSystem.delta_y/2 == nc_y[yposInd+1])) {
+        isOccNote = true;
+    }
+
+    if (k % 2 != 0 && !isOccNote) {
+        console.log("mango");
+        hEpsy.push(topPos);
+    }
+
+    // try bottom
+    var botPos = ypos + aSystem.delta_y/2;
+    k = Math.round(2*(botPos - firstSpace) / aSystem.delta_y);
+
+    // check there isn't a note here
+    isOccNote = false;
+    if ((yposInd+1 < nc_y.length && ypos + aSystem.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + aSystem.delta_y/2 == nc_y[yposInd-1])) {
+        isOccNote = true;
+    }
+
+    if (k % 2 != 0 && !isOccNote) {
+        hEpsy.push(botPos);
+    }
+
+    return hEpsy;
+}
+
 
 Toe.View.NeumeView.prototype.drawLedgerLines = function(ncSystemPos, centre, width, aSystem) {
     width *= 0.75;

@@ -782,10 +782,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
             if (hasHorizEpisema) {
                 var glyphHorizEpisema = gui.rendEng.getGlyph("horizepisema");
-                var horizEpisema = glyphHorizEpisema.clone().set({left: punctPos.left + gui.punctWidth, top: punctPos.top, opacity: 0.6});
+                var horizEpisema = glyphHorizEpisema.clone().set({left: punctPos.left + gui.punctWidth * 0.1, top: punctPos.top * 1.1, opacity: 0.6});
                 elements.modify.push(horizEpisema)
             }
-
 
             if (hasVertEpisema) {
                 var glyphVertEpisema = gui.rendEng.getGlyph("vertepisema");
