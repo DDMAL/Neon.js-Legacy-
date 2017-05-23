@@ -89,6 +89,7 @@ var drawLiberNeume = function(neume) {
             if (neume.components[0].hasOrnament('episema')) {
                 // get best spot for episemas
                 if(neume.components[0].getOrnamentForm('episema') == "vertical"){
+<<<<<<< HEAD
                     var bestVertEpisema = this.bestDotPlacements(system, nc_y, 0);
                     elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestVertEpisema[0]}));
                 }
@@ -102,6 +103,12 @@ var drawLiberNeume = function(neume) {
                 }
             }
 
+=======
+                    elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                }
+            }
+
+>>>>>>> origin/develop
             this.drawLedgerLines([neume.rootSystemPos], [left], ncGlyphs[0].centre[0]*2, system);
 
             break;
@@ -140,6 +147,16 @@ var drawLiberNeume = function(neume) {
                 }
             });
 
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
+            });
+
+
             this.drawLedgerLines($.map(neume.components, function(nc) {
                 return neume.rootSystemPos + nc.pitchDiff;
             }), nc_x, ncGlyphs[0].centre[0]*2, system);
@@ -158,12 +175,20 @@ var drawLiberNeume = function(neume) {
                 elements.modify.push(glyphDot.clone().set({left: glyphPunct.left+(2*ncGlyphs[0].centre[0]), top: bestDots[0]}));
             }
 
+<<<<<<< HEAD
             // render horizontal episema
             if (neume.components[0].hasOrnament('episema')) {
                 // get best spot for one dot
                 if(neume.components[0].getOrnamentForm('episema') == "horizontal") {
                     var bestHorizEpisemas = this.bestHorizEpisemaPlacements(system, nc_y, 0);
                     elements.modify.push(glyphHorizEpisemas.clone().set({left: glyphPunct.left + (2 * ncGlyphs[0].centre[0]) * 0.1, top: bestHorizEpisemas[0]}));
+=======
+            // render episemas
+            if (neume.components[0].hasOrnament('episema')) {
+                // get best spot for episemas
+                if(neume.components[0].getOrnamentForm('episema') == "vertical"){
+                    elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left - 2, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+>>>>>>> origin/develop
                 }
             }
 
@@ -209,6 +234,15 @@ var drawLiberNeume = function(neume) {
                         if (bestHorizEpisemas.length > 0) {
                             elements.modify.push(glyphHorizEpisema.clone().set({left: nc_x[nc_x.length-1], top: bestHorizEpisemas[0]}));
                         }
+                    }
+                }
+            });
+
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
                     }
                 }
             });
@@ -263,6 +297,16 @@ var drawLiberNeume = function(neume) {
                     }
                 }
             });
+
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
+            });
+
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
                 return neume.rootSystemPos + nc.pitchDiff;
@@ -375,6 +419,15 @@ var drawLiberNeume = function(neume) {
                 }
             });
 
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
+            });
+
             // draw ledger lines
             this.drawLedgerLines($.map(neume.components, function(nc) {
                 return neume.rootSystemPos + nc.pitchDiff;
@@ -433,6 +486,15 @@ var drawLiberNeume = function(neume) {
                     }
                 }
 
+            });
+
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
             });
 
             this.drawLedgerLines($.map(neume.components, function(nc) {
@@ -514,6 +576,15 @@ var drawLiberNeume = function(neume) {
                 }
             });
 
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
+            });
+
             // draw ledger lines
             this.drawLedgerLines($.map(neume.components, function(nc) {
                 return neume.rootSystemPos + nc.pitchDiff;
@@ -563,6 +634,15 @@ var drawLiberNeume = function(neume) {
                         if (bestHorizEpisemas.length > 0) {
                             elements.modify.push(glyphHorizEpisema.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestHorizEpisemas[0]}));
                         }
+                    }
+                }
+            });
+
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
                     }
                 }
             });
@@ -638,6 +718,15 @@ var drawLiberNeume = function(neume) {
                 }
             });
 
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
+            });
+
             this.drawLedgerLines($.map(neume.components, function(nc) {
                 return neume.rootSystemPos + nc.pitchDiff;
             }), nc_x, ncGlyphs[0].centre[0]*2, system);
@@ -681,6 +770,15 @@ var drawLiberNeume = function(neume) {
                         if (bestHorizEpisemas.length > 0) {
                             elements.modify.push(glyphHorizEpisema.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestHorizEpisemas[0]}));
                         }
+                    }
+                }
+            });
+
+            // render episemas
+            $.each(neume.components, function(it,el) {
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
                     }
                 }
             });
@@ -754,6 +852,15 @@ var drawLiberNeume = function(neume) {
                 }
             }
 
+
+            // render episemas
+            if (el.hasOrnament('episema')) {
+                if(el.getOrnamentForm('episema') == "vertical"){
+                    elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                }
+            }
+
+
             // only draw ledger lines for 1st and 3rd neume components
             this.drawLedgerLines([neume.rootSystemPos + neume.components[2].pitchDiff], [nc_x], ncGlyphs[2].centre[0]*2, system);
 
@@ -821,6 +928,16 @@ var drawLiberNeume = function(neume) {
                     var bestDots = nv.bestDotPlacements(system, nc_y, it);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: glyphPunct1.left+(2*ncGlyphs[1].centre[0]), top: bestDots[0]}));
+                    }
+                }
+
+                // render episemas
+                if (el.hasOrnament('episema')) {
+                    if (el.getOrnamentForm('episema') == "vertical") {
+                        elements.modify.push(glyphVertEpisema.clone().set({
+                            left: glyphPunct.left,
+                            top: glyphPunct.top + (3 * ncGlyphs[0].centre[0])
+                        }));
                     }
                 }
             };
@@ -915,6 +1032,14 @@ var drawLiberNeume = function(neume) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[i-2]+(2*ncGlyphs[i].centre[0]), top: bestDots[0]}));
                     }
                 }
+
+
+                // render episemas
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
             }
             //render horizontal episemas for everything after swoosh
             for(var i = 2; i < neume.components.length; i++) {
@@ -998,6 +1123,11 @@ var drawLiberNeume = function(neume) {
                     var bestDots = nv.bestDotPlacements(system, nc_y, i);
                     if (bestDots.length > 0) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[i-2]+(2*ncGlyphs[i].centre[0]), top: bestDots[0]}));
+                    }
+                }
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
                     }
                 }
             }
@@ -1098,6 +1228,11 @@ var drawLiberNeume = function(neume) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[i-2]+(2*ncGlyphs[i].centre[0]), top: bestDots[0]}));
                     }
                 }
+                if (el.hasOrnament('episema')) {
+                    if(el.getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+                    }
+                }
             }
 
             // render horizontal episemas for everything after the swoosh
@@ -1164,6 +1299,11 @@ var drawLiberNeume = function(neume) {
                         var bestDots = this.bestDotPlacements(system, nc_y, ncInd);
                         if (bestDots.length > 0) {
                             elements.modify.push(glyphDot.clone().set({left: glyphPunct2.left+(2*ncGlyphs[ncInd].centre[0]), top: bestDots[0]}));
+                        }
+                    }
+                    if (neume.components[ncInd].hasOrnament('episema')) {
+                        if(el.getOrnamentForm('episema') == "vertical"){
+                            elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
                         }
                     }
                 }
@@ -1276,12 +1416,18 @@ var drawLiberNeume = function(neume) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[ncInd]+(2*ncGlyphs[ncInd].centre[0]), top: bestDots[0]}));
                     }
                 }
+<<<<<<< HEAD
                 if(neume.components[ncInd].hasOrnament('episema')) {
                     if(neume.components[0].getOrnamentForm('episema') == "horizontal") {
                         var bestHorizEpisemas = this.bestHorizEpisemaPlacements(system, nc_y, ncInd);
                         if (bestHorizEpisemas.length > 0) {
                             elements.modify.push(glyphDot.clone().set({left: nc_x[ncInd]+(2*ncGlyphs[ncInd].centre[0]), top: bestHorizEpisemas[0]}));
                         }
+=======
+                if (neume.components[ncInd].hasOrnament('episema')) {
+                    if(neume.components[ncInd].getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+>>>>>>> origin/develop
                     }
                 }
             };
@@ -1415,12 +1561,18 @@ var drawLiberNeume = function(neume) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[it].centre[0]), top: bestDots[0]}));
                     }
                 }
+<<<<<<< HEAD
                 if(neume.components[it].hasOrnament('episema')) {
                     if(neume.components[0].getOrnamentForm('episema') == "horizontal") {
                         var bestHorizEpisemas = this.bestHorizEpisemaPlacements(system, nc_y, it);
                         if (bestHorizEpisemas.length > 0) {
                             elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestHorizEpisemas[0]}));
                         }
+=======
+                if (neume.components[it].hasOrnament('episema')) {
+                    if(neume.componenets[it].getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+>>>>>>> origin/develop
                     }
                 }
             };
@@ -1492,12 +1644,18 @@ var drawLiberNeume = function(neume) {
                         elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[it].centre[0]), top: bestDots[0]}));
                     }
                 }
+<<<<<<< HEAD
                 if(neume.components[it].hasOrnament('episema')) {
                     if(neume.components[0].getOrnamentForm('episema') == "horizontal") {
                         var bestHorizEpisemas = this.bestHorizEpisemaPlacements(system, nc_y, it);
                         if (bestHorizEpisemas.length > 0) {
                             elements.modify.push(glyphDot.clone().set({left: nc_x[it]+(2*ncGlyphs[1].centre[0]), top: bestHorizEpisemas[0]}));
                         }
+=======
+                if (neume.components[it].hasOrnament('episema')) {
+                    if(neume.components[it].getOrnamentForm('episema') == "vertical"){
+                        elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));
+>>>>>>> origin/develop
                     }
                 }
             };

@@ -158,13 +158,13 @@ Toe.Model.SquareNoteNeume.prototype.neumeFromMei = function(neumeData, bb) {
             ornaments.push(new Toe.Model.Ornament("dot", {form: dotForm}));
         }
 
-        // var episemaForm = $("> episema", this).attr("form");
-        // if (episemaForm == vertical) {
-        //     ornaments.push(new Toe.Model.Ornament("episema", {form: episemaForm}));
-        // }
-        // if (episemaForm == horizontal) {
-        //     ornaments.push(new Toe.Model.Ornament("episema", {form: episemaForm}));
-        // }
+        var episemaForm = $("> episema", this).attr("form");
+        if (episemaForm == "vertical") {
+            ornaments.push(new Toe.Model.Ornament("episema", {form: episemaForm}));
+        }
+        if (episemaForm == "horizontal") {
+            ornaments.push(new Toe.Model.Ornament("episema", {form: episemaForm}));
+        }
 
         var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: ncType, ornaments: ornaments});
 
