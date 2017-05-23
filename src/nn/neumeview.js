@@ -147,7 +147,6 @@ Toe.View.NeumeView.prototype.bestHorizEpisemaPlacements = function(aSystem, nc_y
     }
 
     if (k % 2 != 0 && !isOccNote) {
-        console.log("mango");
         hEpsy.push(topPos);
     }
 
