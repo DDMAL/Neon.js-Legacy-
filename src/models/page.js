@@ -117,6 +117,15 @@ Toe.Model.Page.prototype.setPageScale = function(scale) {
 };
 
 /**
+ * Get the scaling factor of the page, relative to the original document.
+ *
+ * @methodOf Toe.Model.Page
+ */
+Toe.Model.Page.prototype.getPageScale = function(scale) {
+    return this.scale;
+};
+
+/**
  * Given coordinates, find the index of the closest system
  *
  * @methodOf Toe.Model.Page

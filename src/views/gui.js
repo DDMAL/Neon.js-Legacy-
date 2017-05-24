@@ -26,7 +26,7 @@ THE SOFTWARE.
  * @class GUI handling
  * @param {Object} guiToggles Boolean values toggling instantiation of GUI elements
  */
-Toe.View.GUI = function(apiprefix, meipath, rendEng, guiToggles) {
+Toe.View.GUI = function(apiprefix, meipath, rendEng, page, guiToggles) {
     var toggles = {
         sldr_bgImgOpacity: true,
         sldr_glyphOpacity: true,
@@ -37,6 +37,7 @@ Toe.View.GUI = function(apiprefix, meipath, rendEng, guiToggles) {
     $.extend(toggles, guiToggles);
 
     this.rendEng = rendEng;
+    this.page = page;
     this.apiprefix = apiprefix;
     this.meipath = meipath;
 
@@ -132,9 +133,9 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
 
         // create glyph opacity slider
         if (toggles.sldr_glyphOpacity) {
-            $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' + 
-                                   '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' + 
-                                   'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
+            $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' +
+                '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' +
+                'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
 
             $("#sldr_glyphOpacity").bind("change", function() {
                 var opacity = $(this).val();
@@ -145,6 +146,18 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
                 gui.rendEng.repaint();
             });
         }
+
+        // temporary code for setting global scale
+        $("#sidebar-app").append('<li>\n<label for="sldr_elementScale"><b>Element Scale (Experimental)</b>:</label>\n' +
+            '<input id="sldr_elementScale" style="width: 95%;" type="range" name="elementScale" ' +
+            'min="0.0" max="1.0" step="0.02" value="' + gui.rendEng.getGlobalScale() + '" />\n</li>');
+
+        $("#sldr_elementScale").bind("change", function() {
+            var scale = $(this).val();
+            gui.rendEng.setGlobalScale(scale);
+
+            gui.rendEng.repaint();
+        });
     }
 }
 
