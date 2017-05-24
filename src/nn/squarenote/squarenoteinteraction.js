@@ -526,7 +526,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
 
         // begin the NEUMIFICATION
         var newNeume = new Toe.Model.SquareNoteNeume({modifier: modifier});
-                        
+        
         numPunct = 0;
         var nids = new Array();
         var ulx = Number.MAX_VALUE;
@@ -591,6 +591,14 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
 
         // select the new neume
         $(newNeume).trigger("vSelectDrawing");
+
+        //if it is not a valid grouping, do not Neumify.
+        if(nView.drawing.height == 0){
+            sModel.removeElementByRef(newNeume);
+            $.each(neumes, function (oInd, o){
+               sModel.addNeume(o.eleRef);
+            });
+        }
 
         gui.rendEng.repaint();
     }
