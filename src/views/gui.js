@@ -64,7 +64,8 @@ Toe.View.GUI.prototype.setupNavBar = function() {
     if ($(nav_file_dropdown_parent).length) {
         $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li>' +
                                            '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
-                                           '<li><a id="nav_file_dropdown_getimg" href="#">Get Score Image</a></li>');
+                                           '<li><a id="nav_file_dropdown_getjpg" href="#">Get Original JPG Image</a></li>' +
+                                           '<li><a id="nav_file_dropdown_getimg" href="#">Get Current Image</a></li>');
 
         
         $("#nav_file_dropdown_revert").tooltip({animation: true,
@@ -93,6 +94,15 @@ Toe.View.GUI.prototype.setupNavBar = function() {
                                                 delay: 100});
         // set the download path of the file
         $("#nav_file_dropdown_getmei").attr("href", gui.meipath);
+
+        // JPG download
+        $("#nav_file_dropdown_getjpg").tooltip({animation: true,
+            placement: 'right',
+            title: 'Download the original image file.',
+            delay: 100});
+        // set the download path of the file
+        var fileName = gui.meipath.split(".")[0];
+        $("#nav_file_dropdown_getjpg").attr("href", fileName + ".jpg");
 
         // Document image rasterize
         $("#nav_file_dropdown_getimg").tooltip({animation: true, 
