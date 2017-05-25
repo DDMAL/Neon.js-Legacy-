@@ -367,6 +367,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
+    $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
@@ -714,6 +715,26 @@ Toe.View.SquareNoteInteraction.prototype.handleStaffLock = function(e) {
             // eleSystem.lockMovementY = false;
         })
     }
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleSelectAll = function(e) {
+    var gui = e.data.gui;
+    // deactivating the current active group
+    gui.rendEng.canvas.deactivateAll();
+
+    // collecting all the objects and setting them active
+    var objs = gui.rendEng.canvas.getObjects().map(function(o) {
+        return o.set('active', true);
+    });
+
+    // putting the objects into a group
+    var group = new fabric.Group(objs, {
+        originX: 'center',
+        originY: 'center'
+    });
+
+    // putting the group as the active group
+    gui.rendEng.canvas.setActiveGroup(group.setCoords()).renderAll();
 }
 
 /**************************************************
@@ -1986,12 +2007,13 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     // add buttons for edit commands
     if ($("#sidebar-edit").length === 0) {
         $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
-                              '<li>\n<button id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
-                              '<li>\n<div class="btn-group">\n<button id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
+                              '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                              '<li>\n<div class="btn-group">\n<button title="Find a combination for the selected neumes" id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
                               '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
                               '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
-                              '<li><button id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n</div>' +
-                              '<p>Staff Lock<input id="btn_stafflock" type="checkbox"/></p></span>');
+                              '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
+                              '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
+                              '<p>Staff Lock  <input id="btn_stafflock" type="checkbox"/></p></span>');
     }
     
     // grey out edit buttons by default
