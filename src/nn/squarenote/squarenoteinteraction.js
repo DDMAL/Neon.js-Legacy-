@@ -509,6 +509,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
                 if (!sModel) {
                     sModel = o.eleRef.system;
                 }
+                
                 if (o.eleRef.system == sModel) {
                     neumes.push(o);
                 }
