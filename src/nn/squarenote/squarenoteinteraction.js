@@ -509,7 +509,6 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
                 if (!sModel) {
                     sModel = o.eleRef.system;
                 }
-
                 if (o.eleRef.system == sModel) {
                     neumes.push(o);
                 }
@@ -521,13 +520,13 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
         }
 
         // sort the group based on x position (why fabric doesn't do this, I don't know)
-        neumes.sort(function(o1, o2) {
+        neumes.sort(function (o1, o2) {
             return o1.eleRef.zone.ulx - o2.eleRef.zone.ulx;
         });
 
         // begin the NEUMIFICATION
         var newNeume = new Toe.Model.SquareNoteNeume({modifier: modifier});
-        
+
         numPunct = 0;
         var nids = new Array();
         var ulx = Number.MAX_VALUE;
@@ -546,16 +545,12 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
             // calculate object's absolute positions from within selection group
             var left = selection.left + o.left;
             var top = selection.top + o.top;
-            
-            ulx = Math.min(ulx, left - o.currentHeight/2);
-            uly = Math.min(uly, top - o.currentHeight/2);
-            lry = Math.max(lry, top + o.currentHeight/2);
 
-            // remove the neume, we don't need it anymore
-            sModel.removeElementByRef(o.eleRef);
-            gui.rendEng.canvas.remove(o);
+            ulx = Math.min(ulx, left - o.currentHeight / 2);
+            uly = Math.min(uly, top - o.currentHeight / 2);
+            lry = Math.max(lry, top + o.currentHeight / 2);
         });
-        var lrx = ulx + numPunct*gui.punctWidth;
+        var lrx = ulx + numPunct * gui.punctWidth;
 
         // set the bounding box hint of the new neume for drawing
         var bb = [ulx, uly, lrx, lry];
@@ -574,34 +569,42 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
         var typeid = newNeume.typeid;
 
         // get note head shapes to change in underlying mei
-        var headShapes = $.map(newNeume.components, function(nc) {
+        var headShapes = $.map(newNeume.components, function (nc) {
             return nc.props.type;
         });
 
-        var data = JSON.stringify({"nids": nids.join(","), "typeid": typeid, "headShapes": headShapes, "ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
-        // call server neumify function to update MEI
-        $.post(gui.apiprefix + "/neumify", {data: data}, function(data) {
-            // set id of the new neume with generated ID from the server
-            newNeume.id = JSON.parse(data).id;
-        })
-        .error(function() {
-            gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
-        });
-
-        gui.rendEng.canvas.discardActiveGroup();
-
-        // select the new neume
-        $(newNeume).trigger("vSelectDrawing");
-
-        //if it is not a valid grouping, do not Neumify.
-        if(nView.drawing.height == 0){
-            sModel.removeElementByRef(newNeume);
-            $.each(neumes, function (oInd, o){
-               sModel.addNeume(o.eleRef);
+        if (nView.drawing.height != 0) {
+            //remove initial grouped neumes
+            $.each(neumes, function (oInd, o) {
+                sModel.removeElementByRef(o.eleRef);
+                gui.rendEng.canvas.remove(o);
             });
-        }
 
-        gui.rendEng.repaint();
+            var data = JSON.stringify({
+                "nids": nids.join(","),
+                "typeid": typeid,
+                "headShapes": headShapes,
+                "ulx": outbb[0],
+                "uly": outbb[1],
+                "lrx": outbb[2],
+                "lry": outbb[3]
+            });
+            // call server neumify function to update MEI
+            $.post(gui.apiprefix + "/neumify", {data: data}, function (data) {
+                // set id of the new neume with generated ID from the server
+                newNeume.id = JSON.parse(data).id;
+            })
+                .error(function () {
+                    gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
+                });
+
+            gui.rendEng.canvas.discardActiveGroup();
+
+            // select the new neume
+            $(newNeume).trigger("vSelectDrawing");
+
+            gui.rendEng.repaint();
+        }
     }
 }
 
@@ -934,7 +937,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                         args["beforeid"] = sNextModel.id;
                     }
                 }
-
                 // send insert command to server to change underlying MEI
                 $.post(gui.apiprefix + "/insert/neume", args, function (data) {
                         nModel.id = JSON.parse(data).id;
@@ -1839,7 +1841,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
             // Switch on element reference type.
             case Toe.Model.SquareNoteSystem:
             {
-                console.log(aObject);
                 // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
                 aObject.target.eleRef.controller.modifyZone(aObject.target.getCenterPoint().x, aObject.target.currentWidth);
 
