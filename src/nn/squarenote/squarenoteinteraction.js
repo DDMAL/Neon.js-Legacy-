@@ -2003,6 +2003,31 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
     });
+
+    Mousetrap.bind(['Ctrl+a', 'Command+a', 'meta+a'], function() {
+        $("#btn_selectall").trigger("click.edit", {gui: gui}, gui.handleSelectAll);
+        return false;
+    });
+
+    Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
+        $("#rad_punctum").click();
+        return false;
+    });
+
+    Mousetrap.bind(['d', 'Ctrl+d', 'Command+d'], function() {
+        $("#rad_division").click();
+        return false;
+    });
+
+    Mousetrap.bind(['s', 'Ctrl+s', 'Command+s'], function() {
+        $("#rad_system").click();
+        return false;
+    });
+
+    Mousetrap.bind(['c', 'Ctrl+c', 'Command+c'], function() {
+        $("#rad_clef").click();
+        return false;
+    });
 }
 
 Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDivId) {
