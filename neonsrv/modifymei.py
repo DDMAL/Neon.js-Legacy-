@@ -328,69 +328,73 @@ class ModifyDocument:
         division.addAttribute("form", type)
         self.update_or_add_zone(division, ulx, uly, lrx, lry)
 
-        before = self.mei.getElementById(before_id)
+        if (before_id is None):
+            layers = self.mei.getElementsByName("layer")
+            if len(layers):
+                layers[-1].addChild(division)
+        else:
+            before = self.mei.getElementById(str(before_id))
+            # get layer element
+            layer = before.getParent()
 
-        # get layer element
-        layer = before.getParent()
+            if layer and before:
+                layer.addChildBefore(before, division)
 
-        if layer and before:
-            layer.addChildBefore(before, division)
+                if type == "final":
+                    # if final division, close layer and staff
+                    staff = layer.getParent()
+                    section_parent = staff.getParent()
 
-            if type == "final":
-                # if final division, close layer and staff
-                staff = layer.getParent()
-                section_parent = staff.getParent()
+                    # create new staff and layer
+                    new_staff = MeiElement("staff")
+                    new_layer = MeiElement("layer")
+                    new_layer.addAttribute("n", "1")
 
-                # create new staff and layer
-                new_staff = MeiElement("staff")
-                new_layer = MeiElement("layer")
-                new_layer.addAttribute("n", "1")
-                
-                # get elements after "before element" to move
-                element_peers = before.getPeers()
-                e_ind = list(element_peers).index(before)
-                for e in element_peers[e_ind:]:
-                    # add element to the new staff/layer
-                    new_layer.addChild(e)
-                    # remove element from the current staff/layer
-                    layer.removeChild(e)
+                    # get elements after "before element" to move
+                    element_peers = before.getPeers()
+                    e_ind = list(element_peers).index(before)
+                    for e in element_peers[e_ind:]:
+                        # add element to the new staff/layer
+                        new_layer.addChild(e)
+                        # remove element from the current staff/layer
+                        layer.removeChild(e)
 
-                new_staff.addChild(new_layer)
+                    new_staff.addChild(new_layer)
 
-                # insert new staff into the document
-                staves = section_parent.getChildrenByName("staff")
-                s_ind = list(staves).index(staff)
-                if s_ind+1 < len(staves):
-                    # there are staff elements after the new staff to insert
-                    before_staff = staves[s_ind+1]
+                    # insert new staff into the document
+                    staves = section_parent.getChildrenByName("staff")
+                    s_ind = list(staves).index(staff)
+                    if s_ind+1 < len(staves):
+                        # there are staff elements after the new staff to insert
+                        before_staff = staves[s_ind+1]
 
-                    # update staff numbers staves
-                    for i, s in enumerate(staves[s_ind+1:]):
-                        s.addAttribute("n", str(s_ind+i+3))
+                        # update staff numbers staves
+                        for i, s in enumerate(staves[s_ind+1:]):
+                            s.addAttribute("n", str(s_ind+i+3))
 
-                    section_parent.addChildBefore(before_staff, new_staff)
-                else:
-                    section_parent.addChild(new_staff)
+                        section_parent.addChildBefore(before_staff, new_staff)
+                    else:
+                        section_parent.addChild(new_staff)
 
-                new_staff.addAttribute("n", str(s_ind+2))
-                
-                # insert and update staff definitions
-                staff_group = self.mei.getElementsByName("staffGrp")
-                if len(staff_group):
-                    staff_defs = staff_group[0].getChildrenByName("staffDef")
-                    if len(staff_defs) == len(staves):
-                        staff_def = MeiElement("staffDef")
-                        staff_def.addAttribute("n", str(s_ind+2))
-                        if s_ind+1 < len(staff_defs):
-                            before_staff_def = staff_defs[s_ind+1]
+                    new_staff.addAttribute("n", str(s_ind+2))
 
-                            # update staff number for all following staff defs
-                            for i, sd in enumerate(staff_defs[s_ind+1:]):
-                                sd.addAttribute("n", str(s_ind+i+3))
+                    # insert and update staff definitions
+                    staff_group = self.mei.getElementsByName("staffGrp")
+                    if len(staff_group):
+                        staff_defs = staff_group[0].getChildrenByName("staffDef")
+                        if len(staff_defs) == len(staves):
+                            staff_def = MeiElement("staffDef")
+                            staff_def.addAttribute("n", str(s_ind+2))
+                            if s_ind+1 < len(staff_defs):
+                                before_staff_def = staff_defs[s_ind+1]
 
-                            staff_group[0].addChildBefore(before_staff_def, staff_def)
-                        else:
-                            staff_group[0].addChild(staff_def)
+                                # update staff number for all following staff defs
+                                for i, sd in enumerate(staff_defs[s_ind+1:]):
+                                    sd.addAttribute("n", str(s_ind+i+3))
+
+                                staff_group[0].addChildBefore(before_staff_def, staff_def)
+                            else:
+                                staff_group[0].addChild(staff_def)
 
         result = {"id": division.getId()}
         return result

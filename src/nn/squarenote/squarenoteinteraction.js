@@ -493,6 +493,14 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
     }
 };
 
+Toe.View.SquareNoteInteraction.prototype.handleDivisionShapeChange = function(e) {
+    var gui = e.data.gui;
+    var division = e.data.division;
+    var type = e.data.type;
+
+    console.log(type);
+}
+
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
@@ -1905,6 +1913,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     }
     else if (ele instanceof Toe.Model.Division) {
         this.showInfo("Selected: " + ele.type);
+        this.insertEditDivisionSubControls();
+        this.bindEditDivisionSubControls(ele);
     }
     else if (ele instanceof Toe.Model.Custos) {
         this.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
@@ -2088,6 +2098,17 @@ Toe.View.SquareNoteInteraction.prototype.insertEditClefSubControls = function(aE
     }
 }
 
+Toe.View.SquareNoteInteraction.prototype.insertEditDivisionSubControls = function() {
+    if ($("#menu_editdivision").length == 0) {
+        $("#sidebar-edit").append('<span id="menu_editdivision"><br/><li class="nav-header">Division Type</li>\n' +
+            '<li><div class="btn-group" data-toggle="buttons-radio">\n' +
+            '<button id="edit_div_small" class="btn"> Small</button>\n' +
+            '<button id="edit_div_minor" class="btn"> Minor</button>\n' +
+            '<button id="edit_div_major" class="btn"> Major</button>\n' +
+            '<button id="edit_div_final" class="btn"> Final</button></div></li></span>');
+    }
+}
+
 Toe.View.SquareNoteInteraction.prototype.insertInsertControls = function(aParentDivId) {
     if ($("#sidebar-insert").length == 0) {
         $(aParentDivId).append('<span id="sidebar-insert"><br/><li class="divider"></li><li class="nav-header">Insert</li>\n' +
@@ -2161,6 +2182,14 @@ Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = functi
     }
 }
 
+Toe.View.SquareNoteInteraction.prototype.bindEditDivisionSubControls = function(aElement) {
+    $("#edit_div_small").bind("click.edit", {gui: this, division: aElement, type: "div_small"}, this.handleDivisionShapeChange);
+    $("#edit_div_minor").bind("click.edit", {gui: this, division: aElement, type: "div_minor"}, this.handleDivisionShapeChange);
+    $("#edit_div_major").bind("click.edit", {gui: this, division: aElement, type: "div_major"}, this.handleDivisionShapeChange);
+    $("#edit_div_final").bind("click.edit", {gui: this, division: aElement, type: "div_final"}, this.handleDivisionShapeChange);
+
+}
+
 Toe.View.SquareNoteInteraction.prototype.removeInsertSubControls = function() {
     $("#menu_insertdivision").remove();
     $("#menu_insertclef").remove();
@@ -2190,6 +2219,7 @@ Toe.View.SquareNoteInteraction.prototype.unbindInsertControls = function() {
 Toe.View.SquareNoteInteraction.prototype.removeEditSubControls = function () {
     $("#menu_editclef").remove();
     $("#menu_editpunctum").remove();
+    $("#menu_editdivision").remove();
 }
 
 Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function() {
