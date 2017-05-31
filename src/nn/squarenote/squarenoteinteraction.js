@@ -359,11 +359,11 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
     // Bind click handlers for the side-bar buttons
     $("#btn_delete").unbind("click");
-    $("#btn_neumify").unbind("click");
+    $("#group_shape").unbind("click");
     $("#btn_ungroup").unbind("click");
 
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
-    $("#btn_neumify").bind("click.edit", {gui: gui}, gui.handleNeumify);
+    $("#group_shape").bind("change", {gui: gui}, gui.handleNeumify);
     $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
@@ -496,6 +496,7 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
+    var groupType = $('#group_shape').find(':selected').attr('value');
 
     // only need to neumify if a group of objects are selected
     var selection = gui.rendEng.canvas.getActiveGroup();
@@ -509,7 +510,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
                 if (!sModel) {
                     sModel = o.eleRef.system;
                 }
-                
+
                 if (o.eleRef.system == sModel) {
                     neumes.push(o);
                 }
@@ -521,7 +522,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
         }
 
         // sort the group based on x position (why fabric doesn't do this, I don't know)
-        neumes.sort(function (o1, o2) {
+        neumes.sort(function(o1, o2) {
             return o1.eleRef.zone.ulx - o2.eleRef.zone.ulx;
         });
 
@@ -533,6 +534,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
         var ulx = Number.MAX_VALUE;
         var uly = Number.MAX_VALUE;
         var lry = Number.MIN_VALUE;
+
         $.each(neumes, function (oInd, o) {
             var nModel = o.eleRef;
 
@@ -543,7 +545,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
             // update neume ids
             nids.push(o.eleRef.id);
 
-            // calculate object's absolute positions from within selection group
+            //calculate object's absolute positions from within selection group
             var left = selection.left + o.left;
             var top = selection.top + o.top;
 
@@ -2009,15 +2011,34 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     // add buttons for edit commands
     if ($("#sidebar-edit").length === 0) {
         $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
-                              '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
-                              '<li>\n<div class="btn-group">\n<button title="Find a combination for the selected neumes" id="btn_neumify" class="btn"><i class="icon-magnet"></i> Neumify</button>\n' +
-                              '<button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
-                              '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
-                              '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
-                              '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
-                              '<p>Staff Lock  <input id="btn_stafflock" type="checkbox"/></p></span>');
+                                 '<li>\n' +
+                                '<span id="menu_group"></span>\n' +
+                                // '<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
+                                '<p> Select Grouping \n </p><select name="group_shape" id="group_shape">' +
+                                '<option id="group_distropha" value="distropha">Distropha</option>\n' +
+                                '<option id="group_tristopha" value="tristopha">Tristopha</option>\n' +
+                                '<option id="group_podatus" value="podatus">Podatus</option>\n' +
+                                '<option id="group_scandicus" value="scandicus">Scandicus</option>\n' +
+                                '<option id="group_scandicus_flexus" value="scandicus.flexus.1">Scandicus Flexus</option>\n' +
+                                '<option id="group_scandicus_subpunctis" value="scandicus.subpunctis.1">Scandicus Subpunctis</option>\n' +
+                                '<option id="group_torculus" value="torculus">Torculus</option>\n' +
+                                '<option id="group_torculus_respinus" value="torculus.respinus.1">Torculus Respinus</option>\n' +
+                                '<option id="group_podatus_subpunctis" value="podatus.subpunctis.1">Podatus Subpunctis</option>\n' +
+                                '<option id="group_podatus_subpunctis_resupinus" value="podatus.subpunctis.resupinus.1">Podatus Subpunctis Resupinus</option>\n' +
+                                '<option id="group_clivis" value="clivis">Clivis</option>\n' +
+                                '<option id="group_porrectus" value="porrectus">Porrectus</option>\n' +
+                                '<option id="group_compound" value="compound.1">Compound</option>\n' +
+                                '<option id="group_porrectus_flexus" value="porrectus.flexus">Porrectus Flexus</option>\n' +
+                                '<option id="group_porrectus_subpunctis" value="porrectus.subpunctis.1">Porrectus Subpunctis</option>\n' +
+                                '<option id="group_porrectus_subpunctis_resupinus" value="porrectus.subpunctis.resupinus.1">Porrectus Subpunctis Resupinus</option>\n' +
+                                '<option id="group_climacus" value="climacus">Climacus</option>\n' +
+                                '<option id="group_climacus_resupinus" value="climacus.resupinus.1">Climacus Resupinus</option></select>' +
+                                '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
+                                '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                                '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
+                                '<p>Staff Lock  <input id="btn_stafflock" type="checkbox"/></p></span>');
     }
-    
+
     // grey out edit buttons by default
     $('#btn_delete').toggleClass('disabled', true);
     $('#btn_neumify').toggleClass('disabled', true);
