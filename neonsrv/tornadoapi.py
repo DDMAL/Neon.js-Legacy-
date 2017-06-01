@@ -141,7 +141,7 @@ class InsertDivisionHandler(tornado.web.RequestHandler):
 
     def post(self, file):
         div_type = str(self.get_argument("type", ""))
-        before_id = str(self.get_argument("beforeid", None))
+        before_id = self.get_argument("beforeid", None)
 
         # bounding box
         lrx = str(self.get_argument("lrx", None))

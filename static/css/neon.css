@@ -28,7 +28,7 @@ input#delete{
     background-color: transparent;
     color: #000000;
     border-color: transparent;
-    font-size: 10;
+    font-size: 10px;
     padding-top: 0px;
     padding-right: 0px;
     padding-bottom: 3px;
@@ -38,4 +38,13 @@ input#delete{
 
 input#delete:hover{
     color: #c8140e
+}
+
+kbd {
+    font-size: 12px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border: 1px solid #cccbcb;
+    border-radius: 5px;
+    box-shadow: 0 2px 0 -1px #fff, 0 2px 0 #cccbcb;
 }
