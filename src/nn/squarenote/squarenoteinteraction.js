@@ -369,6 +369,105 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
 };
+Toe.View.SquareNoteInteraction.prototype.handleHorizEpisemaToggle = function(e) {
+    var gui = e.data.gui;
+    var punctum = e.data.punctum;
+
+    var hasEpisema = punctum.components[0].hasOrnament("episema");
+    var episemaForm = "horizontal";
+
+    if(hasEpisema){
+        episemaForm = punctum.components[0].getOrnamentForm("episema");
+    }
+
+    if(episemaForm == "vertical"){
+        gui.showAlert("Cannot have both horizontal and vertical episemas");
+    }
+    else {
+        if (!hasEpisema) {
+            // add a horizontal episema
+            var ornament = new Toe.Model.Ornament("episema", {form: "horizontal"});
+            punctum.components[0].addOrnament(ornament);
+        }
+        else {
+            // remove horizontal episema
+            punctum.components[0].removeOrnament("episema");
+        }
+
+        // update neume drawing
+        punctum.syncDrawing();
+
+        // get final bounding box information
+        var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        var args = {id: punctum.id, episemaform: "horizontal", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+        if (!hasEpisema) {
+            // send add dot command to server to change underlying MEI
+            $.post(gui.apiprefix + "/insert/episema", args)
+                .error(function () {
+                    gui.showAlert("Server failed to add a dot to the punctum. Client and server are not synchronized.");
+                });
+        }
+        else {
+            // send remove dot command to server to change underlying MEI
+            $.post(gui.apiprefix + "/delete/episema", args)
+                .error(function () {
+                    gui.showAlert("Server failed to remove dot from the punctum. Client and server are not synchronized.");
+                });
+        }
+
+        $(this).toggleClass("active");
+    }
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleVertEpisemaToggle = function(e) {
+    var gui = e.data.gui;
+    var punctum = e.data.punctum;
+
+    var hasEpisema = punctum.components[0].hasOrnament("episema");
+    var episemaForm = "vertical";
+
+    if(hasEpisema){
+        episemaForm = punctum.components[0].getOrnamentForm("episema");
+    }
+
+    if(episemaForm == "horizontal"){
+        gui.showAlert("Cannot have both horizontal and vertical episemas");
+    }
+    else {
+        if (!hasEpisema) {
+            // add a vertical episema
+            var ornament = new Toe.Model.Ornament("episema", {form: "vertical"});
+            punctum.components[0].addOrnament(ornament);
+        }
+        else {
+            // remove vertical episema
+            punctum.components[0].removeOrnament("episema");
+        }
+
+        // update neume drawing
+        punctum.syncDrawing();
+
+        // get final bounding box information
+        var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        var args = {id: punctum.id, episemaform: "vertical", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+        if (!hasEpisema) {
+            // send add dot command to server to change underlying MEI
+            $.post(gui.apiprefix + "/insert/episema", args)
+                .error(function () {
+                    gui.showAlert("Server failed to add a dot to the punctum. Client and server are not synchronized.");
+                });
+        }
+        else {
+            // send remove dot command to server to change underlying MEI
+            $.post(gui.apiprefix + "/delete/episema", args)
+                .error(function () {
+                    gui.showAlert("Server failed to remove dot from the punctum. Client and server are not synchronized.");
+                });
+        }
+
+        $(this).toggleClass("active");
+    }
+}
 
 Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
     var gui = e.data.gui;
@@ -2160,6 +2259,8 @@ Toe.View.SquareNoteInteraction.prototype.bindEditClefSubControls = function(aEle
 
 Toe.View.SquareNoteInteraction.prototype.unbindEditNeumeSubControls = function() {
     $("#edit_chk_dot").unbind("click");
+    $("#edit_chk_horizepisema").unbind("click");
+    $("#edit_chk_vertepisema").unbind("click");
     $("#head_punctum").unbind("click");
     $("#head_cavum").unbind("click");
     $("#head_virga").unbind("click");
@@ -2172,6 +2273,8 @@ Toe.View.SquareNoteInteraction.prototype.unbindEditSubControls = function() {
 
     // Neume sub-controls.
     $("#edit_chk_dot").unbind("click");
+    $("#edit_chk_horizepisema").unbind("click");
+    $("#edit_chk_vertepisema").unbind("click");
     $("#head_punctum").unbind("click");
     $("#head_cavum").unbind("click");
     $("#head_virga").unbind("click");
@@ -2192,12 +2295,32 @@ Toe.View.SquareNoteInteraction.prototype.bindEditNeumeSubControls = function(aEl
     $("#head_punctum_inclinatum").bind("click.edit", {gui: this, punctum: aElement, shape: "punctum_inclinatum"}, this.handleHeadShapeChange);
     $("#head_punctum_inclinatum_parvum").bind("click.edit", {gui: this, punctum: aElement, shape: "punctum_inclinatum_parvum"}, this.handleHeadShapeChange);
     $("#edit_chk_dot").bind("click.edit", {gui: this, punctum: aElement}, this.handleDotToggle);
+    $("#edit_chk_horizepisema").bind("click.edit", {gui: this, punctum: aElement}, this.handleHorizEpisemaToggle);
+    $("#edit_chk_vertepisema").bind("click.edit", {gui: this, punctum: aElement}, this.handleVertEpisemaToggle);
 }
 
 Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = function(aElement) {
     var nc = aElement.components[0];
     var hasDot = nc.hasOrnament("dot");
-    if (hasDot) {
+    var hasEpisema = nc.hasOrnament("episema");
+    var episemaForm = "null";
+
+    if(hasEpisema){
+        episemaForm = punctum.components[0].getOrnamentForm("episema");
+    }
+    if(hasEpisema && episemaForm == "horizontal"){
+        $("#edit_chk_horizepisema").toggleClass("active", true);
+    }
+    else{
+        $("#edit_chk_horizepisema").toggleClass("active", false);
+    }
+    if(hasEpisema && episemaForm == "vertical"){
+        $("#edit_chk_vertepisema").toggleClass("active", true);
+    }
+    else{
+        $("#edit_chk_vertepisema").toggleClass("active", false);
+    }
+    if (hasDot){
         $("#edit_chk_dot").toggleClass("active", true);
     }
     else {
