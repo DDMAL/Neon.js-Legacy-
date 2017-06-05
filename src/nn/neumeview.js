@@ -127,8 +127,8 @@ Toe.View.NeumeView.prototype.bestHorizEpisemaPlacements = function(aSystem, nc_y
 
     ypos = nc_y[yposInd];
 
-    // try middle first
-    var midPos = ypos - 10;
+    // // try middle first
+    var midPos = ypos - aSystem.delta_y/2;
     k = Math.round(2*(midPos - firstSpace) / aSystem.delta_y);
 
     if (k % 2 != 0) {
@@ -136,7 +136,7 @@ Toe.View.NeumeView.prototype.bestHorizEpisemaPlacements = function(aSystem, nc_y
     }
 
     // try top next
-    var topPos = ypos - aSystem.delta_y/2;
+    var topPos = ypos - aSystem.delta_y/4;
     var k = Math.round(2*(topPos - firstSpace) / aSystem.delta_y);
 
     // check there isn't a note here
@@ -148,20 +148,6 @@ Toe.View.NeumeView.prototype.bestHorizEpisemaPlacements = function(aSystem, nc_y
 
     if (k % 2 != 0 && !isOccNote) {
         hEpsy.push(topPos);
-    }
-
-    // try bottom
-    var botPos = ypos + aSystem.delta_y/2;
-    k = Math.round(2*(botPos - firstSpace) / aSystem.delta_y);
-
-    // check there isn't a note here
-    isOccNote = false;
-    if ((yposInd+1 < nc_y.length && ypos + aSystem.delta_y/2 == nc_y[yposInd+1]) || (yposInd-1 >= 0 && ypos + aSystem.delta_y/2 == nc_y[yposInd-1])) {
-        isOccNote = true;
-    }
-
-    if (k % 2 != 0 && !isOccNote) {
-        hEpsy.push(botPos);
     }
 
     return hEpsy;
