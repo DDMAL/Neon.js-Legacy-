@@ -493,14 +493,6 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
     }
 };
 
-Toe.View.SquareNoteInteraction.prototype.handleDivisionShapeChange = function(e) {
-    var gui = e.data.gui;
-    var division = e.data.division;
-    var type = e.data.type;
-
-    console.log(type);
-}
-
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
@@ -812,6 +804,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     // to not pollute the global namespace when inserting other
     // musical elements
     var updateFollowPunct = function(initial) {
+        if(!hasHorizEpisema){
+            $('#chk_vertepisema').prop('disabled', false);
+        }
+
+        if(!hasVertEpisema){
+            $('#chk_horizepisema').prop('disabled', false);
+        }
         var elements = {modify: new Array(), fixed: new Array()};
 
         var punctPos = null;
@@ -830,17 +829,18 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             }
 
             if (hasHorizEpisema) {
+                $('#chk_vertepisema').prop('disabled', true);
                 var glyphHorizEpisema = gui.rendEng.getGlyph("horizepisema");
                 var horizEpisema = glyphHorizEpisema.clone().set({left: punctPos.left, top: punctPos.top - gui.punctHeight/4, opacity: 0.6});
-                elements.modify.push(horizEpisema)
+                elements.modify.push(horizEpisema);
             }
 
             if (hasVertEpisema) {
+                $('#chk_horizepisema').prop('disabled', true);
                 var glyphVertEpisema = gui.rendEng.getGlyph("vertepisema");
                 var vertEpisema = glyphVertEpisema.clone().set({left: punctPos.left, top: punctPos.top + gui.punctHeight, opacity: 0.6});
                 elements.modify.push(vertEpisema);
             }
-
         }
 
         // create clean punctum glyph with no ornamentation
