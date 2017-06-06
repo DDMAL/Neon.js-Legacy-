@@ -36,7 +36,6 @@ Toe.View.Interaction.prototype.constructor = Toe.View.Interaction;
 // GUI Management Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Toe.View.Interaction.prototype.showInfo = function(aText) {
-    $("#info").animate({opacity: 1.0}, 100);
     $("#info > p").html(aText);
     $("#info").fadeIn(400);
 };
@@ -47,7 +46,11 @@ Toe.View.Interaction.prototype.hideInfo = function() {
 
 Toe.View.Interaction.prototype.showAlert = function(aText) {
     $("#alert > p").text(aText);
-    $("#alert").animate({opacity: 1.0}, 100);
+    $("#alert").animate({opacity: 1.0}, 400);
+};
+
+Toe.View.Interaction.prototype.hideAlert = function() {
+    $("#alert").animate({opacity: 0.0}, 400);
 };
 
 Toe.View.Interaction.prototype.deactivateCanvasObjects = function() {

@@ -56,6 +56,9 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
 
     // bind hotkeys
     this.bindHotKeys();
+
+    // binding alerts
+    this.bindAlerts();
 };
 
 Toe.View.SquareNoteInteraction.prototype = new Toe.View.Interaction();
@@ -591,6 +594,32 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
         $(this).toggleClass("active");
     }
 };
+
+Toe.View.SquareNoteInteraction.prototype.handleDivisionShapeChange = function(e) {
+    var gui = e.data.gui;
+    var division = e.data.division;
+    var type = e.data.type;
+
+    // changing the bounding box depending on
+    if (type === "div_final") {
+        if (division.zone.lrx - division.zone.ulx < gui.punctWidth - 0.01) {
+            division.zone.lrx += gui.punctWidth;
+        }
+    }
+    else {
+        division.zone.lrx = division.zone.ulx;
+    }
+
+    division.setShape(type);
+
+    // post to change the mei file
+    var outbb = gui.getOutputBoundingBox([division.zone.ulx, division.zone.uly, division.zone.lrx, division.zone.lry]);
+    var args = {id: division.id, type: type, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+    $.post(gui.apiprefix + "/update/division/shape", {data: JSON.stringify(args)})
+        .error(function() {
+            gui.showAlert("Server failed to update division shape. Client and server are not synchronized.");
+        });
+}
 
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
@@ -2029,12 +2058,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     else if (ele instanceof Toe.Model.System) {
         this.showInfo("Selected: system #" + ele.orderNumber);
     }
-
-    $('#closeinfo').click($.proxy(function (e) {
-        if($(e.target).is("closeinfo")){
-            this.hideInfo();
-        }
-    }, this))
+    
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(aObject) {
@@ -2140,6 +2164,16 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         $("#rad_clef").click();
         return false;
     });
+}
+
+Toe.View.SquareNoteInteraction.prototype.bindAlerts = function () {
+    $('#closealert').click($.proxy(function () {
+        this.hideAlert();
+    }, this))
+
+    $('#closeinfo').click($.proxy(function () {
+        this.hideInfo();
+    }, this))
 }
 
 Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDivId) {
