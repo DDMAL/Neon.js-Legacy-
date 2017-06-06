@@ -183,4 +183,21 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
         $("#btn_insert").click();
         return false;
     });
+
+    // hotkeys for quick transparency
+    Mousetrap.bind(['h'], $.proxy(function() {
+        this.rendEng.canvas.forEachObject(function(obj) {
+            obj.setOpacity(0);
+        });
+        this.rendEng.repaint();
+        return false;
+    }, this), "keydown");
+
+    Mousetrap.bind(['h'], $.proxy(function() {
+        this.rendEng.canvas.forEachObject(function(obj) {
+            obj.setOpacity(1);
+        });
+        this.rendEng.repaint();
+        return false;
+    }, this), "keyup");
 }

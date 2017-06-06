@@ -2031,7 +2031,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     if (ele instanceof Toe.Model.Neume) {
         this.showInfo("Selected: " + ele.name +
                      "<br/> Pitche(s): " +
-                     $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", "));
+                     $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", ")  + " <br/>System Number: " + ele.system.orderNumber);
 
         $('#btn_ungroup').toggleClass('disabled', false);
 
@@ -2043,7 +2043,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
         }
     }
     else if (ele instanceof Toe.Model.Clef) {
-        this.showInfo("Selected: " + ele.name);
+        this.showInfo("Selected: " + ele.name + " <br/>System Number: " + ele.system.orderNumber);
         this.insertEditClefSubControls(ele);
         this.bindEditClefSubControls(ele);
     }
@@ -2053,7 +2053,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
         this.bindEditDivisionSubControls(ele);
     }
     else if (ele instanceof Toe.Model.Custos) {
-        this.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct);
+        this.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct + " <br/>System Number: " + ele.system.orderNumber);
+        console.log(ele);
     }
     else if (ele instanceof Toe.Model.System) {
         this.showInfo("Selected: system #" + ele.orderNumber);
@@ -2164,6 +2165,7 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         $("#rad_clef").click();
         return false;
     });
+
 }
 
 Toe.View.SquareNoteInteraction.prototype.bindAlerts = function () {
