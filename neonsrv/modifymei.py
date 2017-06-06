@@ -538,6 +538,29 @@ class ModifyDocument:
             # delete the division
             division.getParent().removeChild(division)
 
+    def update_division_shape(self, id, type, ulx, uly, lrx, lry):
+        '''
+        Change the shape of a given division. Must also update
+        bounding box data since some of the divisions have
+        different shapes.
+        '''
+
+        division = self.mei.getElementById(id)
+
+        # update division shape, changing the type to the proper mei form
+        if type == "div_small":
+            div_type = "small"
+        elif type == "div_minor":
+            div_type = "minor"
+        elif type == "div_major":
+            div_type = "major"
+        elif type == "div_final":
+            div_type = "final"
+
+        division.addAttribute("form", div_type)
+
+        self.update_or_add_zone(division, ulx, uly, lrx, lry)
+
     def add_dot(self, id, form, ulx, uly, lrx, lry):
         '''
         Add a dot ornament to a given element.

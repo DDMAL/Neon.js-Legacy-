@@ -44,6 +44,10 @@ Toe.Ctrl.DivisionController = function(dModel, dView) {
         dView.renderDivision(division);
     });
 
+    $(dModel).bind("vUpdateShape", function(event, division) {
+        dView.updateShape(division);
+    });
+
     $(dModel).bind("vSelectDrawing", function(event) {
         dView.selectDrawing();
     });

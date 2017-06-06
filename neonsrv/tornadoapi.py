@@ -178,6 +178,27 @@ class MoveDivisionHandler(tornado.web.RequestHandler):
 
         self.set_status(200)
 
+class UpdateDivisionShapeHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        data = json.loads(self.get_argument("data", ""))
+        div_type = str(data["type"])
+        id = str(data["id"])
+
+        # bounding box
+        lrx = str(data["lrx"])
+        lry = str(data["lry"])
+        ulx = str(data["ulx"])
+        uly = str(data["uly"])
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        md.update_division_shape(id, div_type, ulx, uly, lrx, lry)
+        md.write_doc()
+
+        self.set_status(200)
+
 class DeleteDivisionHandler(tornado.web.RequestHandler):
 
     def post(self, file):
@@ -257,7 +278,7 @@ class MoveClefHandler(tornado.web.RequestHandler):
 
 class UpdateClefShapeHandler(tornado.web.RequestHandler):
 
-    def post(self, file):        
+    def post(self, file):
         data = json.loads(self.get_argument("data", ""))
         clef_id = str(data["id"])
 

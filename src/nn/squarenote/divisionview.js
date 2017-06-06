@@ -97,3 +97,25 @@ Toe.View.DivisionView.prototype.renderBoundingBox = function(division) {
 Toe.View.DivisionView.prototype.selectDrawing = function() {
 this.rendEng.canvas.setActiveObject(this.drawing);
 }
+
+/**
+ * To update the shape when editing division type
+ *
+ * @param division to update the shape of
+ */
+Toe.View.DivisionView.prototype.updateShape = function(division) {
+    if (!this.drawing) {
+        throw new Error("Division: update method called, but there exists no drawing to update.");
+    }
+    else {
+        // remove the old drawing
+        this.rendEng.canvas.remove(this.drawing);
+    }
+
+    this.renderDivision(division);
+
+    // select the new drawing
+    this.selectDrawing();
+
+    this.rendEng.repaint();
+}

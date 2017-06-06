@@ -41,6 +41,7 @@ rules = [
     (abs_path(r"/edit/(.*?)/insert/division"), neonsrv.tornadoapi.InsertDivisionHandler),
     (abs_path(r"/edit/(.*?)/move/division"), neonsrv.tornadoapi.MoveDivisionHandler),
     (abs_path(r"/edit/(.*?)/delete/division"), neonsrv.tornadoapi.DeleteDivisionHandler),
+    (abs_path(r"/edit/(.*?)/update/division/shape"), neonsrv.tornadoapi.UpdateDivisionShapeHandler),
     (abs_path(r"/edit/(.*?)/insert/dot"), neonsrv.tornadoapi.AddDotHandler),
     (abs_path(r"/edit/(.*?)/delete/dot"), neonsrv.tornadoapi.DeleteDotHandler),
     (abs_path(r"/edit/(.*?)/insert/clef"), neonsrv.tornadoapi.InsertClefHandler),
