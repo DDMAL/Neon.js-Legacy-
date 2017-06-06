@@ -55,6 +55,25 @@ Toe.Model.Division.prototype = new Toe.Model.Model();
 Toe.Model.Division.prototype.constructor = Toe.Model.Division;
 
 /**
+ * Sets the shape of the Division
+ *
+ * @methodOf Toe.Model.division
+ * @param {String} shape the new division shape
+ */
+Toe.Model.Division.prototype.setShape = function(shape) {
+    this.shape = shape.toLowerCase();
+    this.name = Toe.Model.Division.Type[this.shape];
+    this.type = Toe.Model.Division.Type[this.shape];
+    this.key = this.shape;
+
+    if (this.name == undefined) {
+        throw new Error("Division: unknown division shape");
+    }
+
+    $(this).trigger("vUpdateShape", [this]);
+}
+
+/**
  * Sets the bounding box of the division
  *
  * @methodOf Toe.Model.Division

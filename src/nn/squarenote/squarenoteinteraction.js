@@ -498,7 +498,25 @@ Toe.View.SquareNoteInteraction.prototype.handleDivisionShapeChange = function(e)
     var division = e.data.division;
     var type = e.data.type;
 
-    console.log(type);
+    // changing the bounding box depending on
+    if (type === "div_final") {
+        if (division.zone.lrx - division.zone.ulx < gui.punctWidth - 0.01) {
+            division.zone.lrx += gui.punctWidth;
+        }
+    }
+    else {
+        division.zone.lrx = division.zone.ulx;
+    }
+
+    division.setShape(type);
+
+    // post to change the mei file
+    var outbb = gui.getOutputBoundingBox([division.zone.ulx, division.zone.uly, division.zone.lrx, division.zone.lry]);
+    var args = {id: division.id, type: type, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+    $.post(gui.apiprefix + "/update/division/shape", {data: JSON.stringify(args)})
+        .error(function() {
+            gui.showAlert("Server failed to update division shape. Client and server are not synchronized.");
+        });
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
