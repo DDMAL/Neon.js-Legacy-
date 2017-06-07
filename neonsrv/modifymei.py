@@ -614,7 +614,6 @@ class ModifyDocument:
             if len(layers):
                 layers[-1].addChild(clef)
         else:
-            print type(before_id)
             before = self.mei.getElementById(str(before_id))
             parent = before.getParent()
 

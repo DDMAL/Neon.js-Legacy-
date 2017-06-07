@@ -56,12 +56,12 @@ Toe.View.Interaction.prototype.hideAlert = function() {
 Toe.View.Interaction.prototype.deactivateCanvasObjects = function() {
     this.rendEng.canvas.selection = false;
     this.rendEng.canvas.deactivateAll();
-    this.rendEng.canvas.HOVER_CURSOR = null;
+    this.rendEng.canvas.hoverCursor = null;
 };
 
 Toe.View.Interaction.prototype.activateCanvasObjects = function() {
     this.rendEng.canvas.selection = true;
-    this.rendEng.canvas.HOVER_CURSOR = "pointer";
+    this.rendEng.canvas.hoverCursor = "pointer";
 };
 
 Toe.View.Interaction.prototype.removeInsertControls = function() {
