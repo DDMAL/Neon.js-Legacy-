@@ -903,18 +903,17 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     if ($("#menu_insertpunctum").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/>\n' +
                                     '<p> Select Head Shape\n </p><select name="head_shape" id="head_shape">' +
-                                    '<option id="head_punctum" value="punctum">punctum</option>\n' +
-                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum">punctum inclinatum</option>\n' +
-                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum">punctum inclinatum parvum</option>\n' +
-                                    '<option id="head_cavum" value="cavum">cavum</option>\n' +
-                                    '<option id="head_virga" value="virga">virga</option>\n' +
-                                    '<option id="head_quilisma" value="quilisma">quilisma</option></select>\n' +
+                                    '<option id="head_punctum" value="punctum" data-imagesrc="/static/img/selectimages/punctum.png">Punctum</option>\n' +
+                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum" data-imagesrc="/static/img/selectimages/diamond.png">Punctum Inclinatum</option>\n' +
+                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum" data-imagesrc="/static/img/selectimages/diamond_small.png">Punctum Inclinatum Parvum</option>\n' +
+                                    '<option id="head_cavum" value="cavum" data-imagesrc="/static/img/selectimages/white_punct.png">Cavum</option>\n' +
+                                    '<option id="head_virga" value="virga" data-imagesrc="/static/img/selectimages/virga.png">Virga</option>\n' +
+                                    '<option id="head_quilisma" value="quilisma" data-imagesrc="/static/img/selectimages/quilisma.png">Quilisma</option></select>\n' +
                                     '<li class="nav-header">Ornamentation</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                     '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
                                     '<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
-                                    '<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>');
-
+                                    '<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>')
     }
 
     // ornamentation toggle flags
@@ -923,10 +922,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     var hasHorizEpisema = false;
     var hasVertEpisema = false;
 
-    //this allows users to select the value of neume from menu
-    $('#head_shape').change(function(){
-        noteType = $(this).find(':selected').attr('value');
-    })
+    // using ddslick select library for images
+    $("#head_shape").ddslick({
+        onSelected: function(data) {
+            console.log(data.selectedData.value);
+            noteType = data.selectedData.value;
+        }
+    });
 
     // keep the scope of the punctum drawing insert local
     // to not pollute the global namespace when inserting other
@@ -2054,7 +2056,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     }
     else if (ele instanceof Toe.Model.Custos) {
         this.showInfo("Selected: Custos <br/> Pitch: " + ele.pname.toUpperCase() + ele.oct + " <br/>System Number: " + ele.system.orderNumber);
-        console.log(ele);
     }
     else if (ele instanceof Toe.Model.System) {
         this.showInfo("Selected: system #" + ele.orderNumber);
