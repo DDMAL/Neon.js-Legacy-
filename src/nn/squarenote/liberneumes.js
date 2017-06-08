@@ -547,10 +547,13 @@ var drawLiberNeume = function(neume) {
         // PODATUS
         case "podatus":
             var nc_x = new Array();
-            // if punctums are right on top of each other, spread them out a bit
+            // if punctums are right on top of each other, spread them out a bit vertically
+            // they also need to be xoffset, so they are diagonal
             var yoffset = 0;
+            var xoffset = 0;
             if (Math.abs(neume.components[1].pitchDiff) == 1) {
                 yoffset = 1;
+                xoffset = (2 * ncGlyphs[0].centre[0]);
             }
 
             // first punctum
@@ -567,7 +570,7 @@ var drawLiberNeume = function(neume) {
 
             // second punctum
             nc_x.push(nc_x[0]);
-            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1] - yoffset});
+            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1] + xoffset, top: nc_y[1] - yoffset});
 
             elements.modify.push(glyphPunct2);
 
@@ -610,8 +613,10 @@ var drawLiberNeume = function(neume) {
             var nc_x = new Array();
             // if punctums are right on top of each other, spread them out a bit
             var yoffset = 0;
+            var xoffset = 0;
             if (Math.abs(neume.components[1].pitchDiff) == 1) {
                 yoffset = 1;
+                xoffset = (2 * ncGlyphs[0].centre[0]);
             }
 
             var podatus_pad = ncGlyphs[0].centre[0];
@@ -630,7 +635,7 @@ var drawLiberNeume = function(neume) {
 
             // second punctum
             nc_x.push(nc_x[0]);
-            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1], top: nc_y[1] - yoffset});
+            var glyphPunct2 = ncGlyphs[1].clone().set({left: nc_x[1] + xoffset, top: nc_y[1] - yoffset});
 
             elements.modify.push(glyphPunct2);
 
@@ -642,7 +647,7 @@ var drawLiberNeume = function(neume) {
                 }
 
                 // draw punctum inclinatum
-                var glyphdiamond = ncGlyphs[i].clone().set({left: nc_x[i], top: nc_y[i]});
+                var glyphdiamond = ncGlyphs[i].clone().set({left: nc_x[i] + xoffset, top: nc_y[i]});
                 elements.modify.push(glyphdiamond);
             }
 

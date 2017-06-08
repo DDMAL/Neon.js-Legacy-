@@ -371,6 +371,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
+
 };
 Toe.View.SquareNoteInteraction.prototype.handleHorizEpisemaToggle = function(e) {
     var gui = e.data.gui;
@@ -2209,7 +2210,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
                                 '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                                 '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
-                                '<p>Staff Lock  <input id="btn_stafflock" type="checkbox"/></p></span>');
+                                '<p>Staff Lock  <input id="btn_stafflock" type="checkbox" checked/></p></span>');
     }
 
     // grey out edit buttons by default
