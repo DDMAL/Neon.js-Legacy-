@@ -1,21 +1,118 @@
 <!doctype html>
-
-<html lang="en">
+<html lang="en-US">
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Minimal theme by pages-themes</title>
 
-  <title>Neon.JS</title>
-  <meta name="description" content="Neon.JS">
-  <meta name="author" content="SitePoint">
-
-  <link rel="stylesheet" href="css/styles.css?v=1.0">
-
-  <!--[if lt IE 9]>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
-  <![endif]-->
+    <link rel="stylesheet" href="/minimal/assets/css/style.css?v=2246632561e692e380cd60c3aaa9ae47092453c4">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 </head>
-
 <body>
-<p> HI </p>
+<div class="wrapper">
+    <header>
+        <h1>Neon - <b>N</b>eume <b>E</b>ditor <b>ON</b>line.</h1>
+        <p>Neon.js is a browser-based music notation editor written in JavaScript. The editor can be used to manipulate digitally encoded early musical scores in square-note notation.</p>
+
+
+        <p class="view"><a href="https://github.com/DDMAL/Neon.js">View the Project on GitHub <small></small></a></p>
+
+
+
+
+
+        <ul>
+            <li><a href="https://github.com/pages-themes/minimal/zipball/master">Download <strong>ZIP File</strong></a></li>
+            <li><a href="https://github.com/pages-themes/minimal/tarball/master">Download <strong>TAR Ball</strong></a></li>
+            <li><a href="https://github.com/pages-themes/minimal">View On <strong>GitHub</strong></a></li>
+        </ul>
+
+    </header>
+    <section>
+
+        <h2 id="requirements">Requirements</h2>
+
+        <ul>
+            <li>tornado: <code>pip install tornado</code></li>
+
+            <li>python bindings of the solesmesbuild branch of libmei available <a href="https://github.com/gburlet/libmei">here</a>.
+
+
+                <ul>
+                    <li>Note: this requires the boost-python library. Installation instruction can be found <a href="https://github.com/DDMAL/libmei/wiki">here</a>.</li></ul>
+            </li>
+        </ul>
+
+        <h2 id="setup">Setup</h2>
+
+        <ol>
+            <li>First, create a copy of the configuration file:  </li>
+        </ol>
+
+<pre><code>cp conf.py{.dist,}
+</code></pre>
+
+        <ol>
+            <li><p>Edit the configuration file conf.py and set MEI<em>DIRECTORY somewhere writable. Create 3 subdirectories in the MEI</em>DIRECTORY, <code>backup</code>, <code>squarenote</code>, and <code>cheironomic</code>. Backup will store the original state of uploaded MEI files, which can be reverted to using the editor interface. The other two are for storing the mei files of specific types.</p></li>
+
+            <li><p>Now compile the Neon.js code. Yes, compiling JavaScript. Weird, right?</p></li>
+        </ol>
+
+<pre><code>make dist
+</code></pre>
+
+        <p>This script downloads the latest google closure compiler and uses it to minify the Neon.js source code into the proper location.</p>
+
+        <ol>
+            <li>Now, start up the server:  </li>
+        </ol>
+
+<pre><code>python server.py [port]
+</code></pre>
+
+        <p><br />
+            If no port is provided, the default port is 8080.</p>
+
+        <p>Visit the Neon.js web application at http://localhost:[port].</p>
+
+        <h2 id="development">Development</h2>
+
+        <p>Documentation is provided by <a href="http://code.google.com/p/jsdoc-toolkit/">jsdoc-toolkit</a></p>
+
+        <p>Build docs with (java required):  </p>
+
+<pre><code>make doc
+</code></pre>
+
+        <h2 id="tests">Tests</h2>
+
+        <ol>
+            <li><p>Client testing <br />
+                We're using Qunit for unit testing. Load <code>test/neontest.html</code> in a browser to run them.</p></li>
+
+            <li><p>Server testing <br />
+                To run server tests, install <a href="https://github.com/nose-devs/nose">python-nose</a> and run <code>nosetests</code></p></li>
+        </ol>
+
+        <h2 id="license">License</h2>
+
+        <p>Neon.js is distributed under the <a href="http://en.wikipedia.org/wiki/MIT_License">MIT license</a>.</p>
+
+
+    </section>
+    <footer>
+
+        <p>This project is maintained by <a href="https://github.com/pages-themes">pages-themes</a></p>
+
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </footer>
+</div>
+<script src="/minimal/assets/js/scale.fix.js"></script>
+
+
+
 </body>
 </html>
