@@ -918,7 +918,8 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                                     '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum" data-imagesrc="/static/img/selectimages/diamond_small.png">Punctum Inclinatum Parvum</option>\n' +
                                     '<option id="head_cavum" value="cavum" data-imagesrc="/static/img/selectimages/white_punct.png">Cavum</option>\n' +
                                     '<option id="head_virga" value="virga" data-imagesrc="/static/img/selectimages/virga.png">Virga</option>\n' +
-                                    '<option id="head_quilisma" value="quilisma" data-imagesrc="/static/img/selectimages/quilisma.png">Quilisma</option></select>\n' +
+                                    '<option id="head_quilisma" value="quilisma" data-imagesrc="/static/img/selectimages/quilisma.png">Quilisma</option>\n' +
+                                    '<option id="head_custos" value="custos" data-imagesrc="/static/img/selectimages/custos.png">Custos</option></select>\n' +
                                     '<li class="nav-header">Ornamentation</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                     '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
@@ -1012,94 +1013,152 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
         // check for the pointer being in the canvas
         if (pnt.x > 0 && pnt.x < gui.rendEng.canvas.getWidth() && pnt.y > 0 && pnt.y < gui.rendEng.canvas.getHeight()) {
-            var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
-            var sModel = gui.page.getClosestSystem(coords);
+            // exception for custos
+            if (noteType == "custos"){
+                var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
+                var sModel = gui.page.getClosestSystem(coords);
 
-            // instantiate a punctum
-            var nModel = new Toe.Model.SquareNoteNeume();
+                // instantiate a custos
+                var cModel = new Toe.Model.Custos();
 
-            // calculate snapped coords
-            var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
+                // calculate snapped coords
+                var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
 
-            // update bounding box with physical position on the page
-            var ulx = snapCoords.x - gui.punctDwg.currentWidth / 2;
-            var uly = snapCoords.y - gui.punctDwg.currentHeight / 2;
-            var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
-            nModel.setBoundingBox(bb);
+                // update bounding box with physical position on the page
+                var ulx = snapCoords.x - gui.punctDwg.currentWidth / 2;
+                var uly = snapCoords.y - gui.punctDwg.currentHeight / 2;
+                var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
+                cModel.setBoundingBox(bb);
 
-            // get pitch name and octave of snapped coords of note
-            var noteInfo = sModel.calcPitchFromCoords(snapCoords);
-            if (noteInfo == null){
-                gui.showAlert("No clef placed on the staff.");
-            } //Simple check here for if theres a clef placed on the staff.
-            else {
-                var pname = noteInfo["pname"];
-                var oct = noteInfo["oct"];
-
-                //  start forming arguments for the server function call
-                var args = {pname: pname, oct: oct};
-
-                // check ornamentation toggles to add to component
-                var ornaments = new Array();
-                if (hasDot) {
-                    ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
-                    args["dotform"] = "aug";
-                }
-
-                if (hasHorizEpisema) {
-                    ornaments.push(new Toe.Model.Ornament("episema", {form: "horizontal"}));
-                    args["episemaform"] = "horizontal";
-                }
-
-                if (hasVertEpisema) {
-                     ornaments.push(new Toe.Model.Ornament("episema", {form: "vertical"}));
-                     args["episemaform"] = "vertical";
-                }
-
-                var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
-                nModel.addComponent(nc);
-
-                // instantiate neume view and controller
-                var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
-                var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
-
-                // mount neume on the system
-                var nInd = sModel.addNeume(nModel);
-
-                // if this is the first neume on a system, update the custos of the next system
-                if (nInd == 1) {
-                    var prevSystem = gui.page.getPreviousSystem(sModel);
-                    if (prevSystem) {
-                        gui.handleUpdatePrevCustos(pname, oct, prevSystem);
-                    }
-                }
-
-                // now that final bounding box is calculated from the drawing
-                // add the bounding box information to the server function arguments
-                var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
-                args["ulx"] = outbb[0];
-                args["uly"] = outbb[1];
-                args["lrx"] = outbb[2];
-                args["lry"] = outbb[3];
-
-                // get next element to insert before
-                if (nInd + 1 < sModel.elements.length) {
-                    args["beforeid"] = sModel.elements[nInd + 1].id;
-                }
+                // get pitch name and octave of snapped coords of note
+                var noteInfo = sModel.calcPitchFromCoords(snapCoords);
+                if (noteInfo == null) {
+                    gui.showAlert("No clef placed on the staff.");
+                } //Simple check here for if theres a clef placed on the staff.
                 else {
-                    // insert before the next system break (system)
-                    var sNextModel = gui.page.getNextSystem(sModel);
-                    if (sNextModel) {
-                        args["beforeid"] = sNextModel.id;
+                    var pname = noteInfo["pname"];
+                    var oct = noteInfo["oct"];
+
+                    //  start forming arguments for the server function call
+                    var args = {pname: pname, oct: oct};
+
+                    // instantiate custos view and controller
+                    var cView = new Toe.View.CustosView(gui.rendEng);
+                    var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+
+                    // mount the custos on the system
+                    sModel.setCustos(cModel);
+
+                    var outbb = gui.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+                    var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+                    // get id of the next system element
+                    var nextSystem = gui.page.getNextSystem(sModel);
+
+                    if (nextSystem) {
+                        args["beforeid"] = nextSystem.id;
                     }
-                }
-                // send insert command to server to change underlying MEI
-                $.post(gui.apiprefix + "/insert/neume", args, function (data) {
-                        nModel.id = JSON.parse(data).id;
-                    })
-                    .error(function () {
-                        gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+
+                    // update underlying MEI file
+                    $.post(gui.apiprefix + "/insert/custos", args, function(data) {
+                        cModel.id = JSON.parse(data).id;
+                    }).error(function() {
+                        gui.showAlert("Server failed to insert custos. Client and server are not synchronized.");
                     });
+                }
+            }
+            // regular neume insertion
+            else {
+                var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
+                var sModel = gui.page.getClosestSystem(coords);
+
+                // instantiate a punctum
+                var nModel = new Toe.Model.SquareNoteNeume();
+
+                // calculate snapped coords
+                var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
+
+                // update bounding box with physical position on the page
+                var ulx = snapCoords.x - gui.punctDwg.currentWidth / 2;
+                var uly = snapCoords.y - gui.punctDwg.currentHeight / 2;
+                var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
+                nModel.setBoundingBox(bb);
+
+                // get pitch name and octave of snapped coords of note
+                var noteInfo = sModel.calcPitchFromCoords(snapCoords);
+                if (noteInfo == null) {
+                    gui.showAlert("No clef placed on the staff.");
+                } //Simple check here for if theres a clef placed on the staff.
+                else {
+                    var pname = noteInfo["pname"];
+                    var oct = noteInfo["oct"];
+
+                    //  start forming arguments for the server function call
+                    var args = {pname: pname, oct: oct};
+
+                    // check ornamentation toggles to add to component
+                    var ornaments = new Array();
+                    if (hasDot) {
+                        ornaments.push(new Toe.Model.Ornament("dot", {form: "aug"}));
+                        args["dotform"] = "aug";
+                    }
+
+                    if (hasHorizEpisema) {
+                        ornaments.push(new Toe.Model.Ornament("episema", {form: "horizontal"}));
+                        args["episemaform"] = "horizontal";
+                    }
+
+                    if (hasVertEpisema) {
+                        ornaments.push(new Toe.Model.Ornament("episema", {form: "vertical"}));
+                        args["episemaform"] = "vertical";
+                    }
+
+                    var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: noteType, ornaments: ornaments});
+                    nModel.addComponent(nc);
+
+                    // instantiate neume view and controller
+                    var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+                    var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+                    // mount neume on the system
+                    var nInd = sModel.addNeume(nModel);
+
+                    // if this is the first neume on a system, update the custos of the next system
+                    if (nInd == 1) {
+                        var prevSystem = gui.page.getPreviousSystem(sModel);
+                        if (prevSystem) {
+                            gui.handleUpdatePrevCustos(pname, oct, prevSystem);
+                        }
+                    }
+
+                    // now that final bounding box is calculated from the drawing
+                    // add the bounding box information to the server function arguments
+                    var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+                    args["ulx"] = outbb[0];
+                    args["uly"] = outbb[1];
+                    args["lrx"] = outbb[2];
+                    args["lry"] = outbb[3];
+
+                    // get next element to insert before
+                    if (nInd + 1 < sModel.elements.length) {
+                        args["beforeid"] = sModel.elements[nInd + 1].id;
+                    }
+                    else {
+                        // insert before the next system break (system)
+                        var sNextModel = gui.page.getNextSystem(sModel);
+                        if (sNextModel) {
+                            args["beforeid"] = sNextModel.id;
+                        }
+                    }
+                    // send insert command to server to change underlying MEI
+                    $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                            nModel.id = JSON.parse(data).id;
+                        })
+                        .error(function () {
+                            gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+                        });
+
+                }
             }
         }
     });

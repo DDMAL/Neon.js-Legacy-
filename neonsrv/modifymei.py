@@ -690,13 +690,17 @@ class ModifyDocument:
             custos.addAttribute("oct", oct)
 
         # insert the custos
-        before = self.mei.getElementById(before_id)
+        if before_id is None:
+            # get last layer
+            layers = self.mei.getElementsByName("layer")
+            if len(layers):
+                layers[-1].addChild(custos)
+        else:
+            before = self.mei.getElementById(str(before_id))
+            parent = before.getParent()
 
-        # get layer element
-        parent = before.getParent()
-
-        if parent and before:
-            parent.addChildBefore(before, custos)
+            if parent and before:
+                parent.addChildBefore(before, custos)
 
         # update the bounding box
         self.update_or_add_zone(custos, ulx, uly, lrx, lry)

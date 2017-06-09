@@ -342,7 +342,7 @@ class InsertCustosHandler(tornado.web.RequestHandler):
     def post(self, file):
         pname = str(self.get_argument("pname", ""))
         oct = str(self.get_argument("oct", ""))
-        before_id = str(self.get_argument("beforeid", None))
+        before_id = self.get_argument("beforeid", None)
 
         # bounding box
         ulx = str(self.get_argument("ulx", None))
