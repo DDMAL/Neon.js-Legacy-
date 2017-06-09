@@ -227,9 +227,11 @@ Toe.Model.Page.prototype.removeSystem = function(aSystem) {
 
     // We may have to adjust the system numbers.
     var othersAdjusted = [];
+    // If the system to remove is the last system on the page
     if (aSystem.orderNumber == this.systems.length) {
         this.systems.pop();
     }
+    // Otherwise we have to get all the systems after & shift their order numbers
     else {
         for (var i = aSystem.orderNumber; i < this.systems.length; i++) {
             this.systems[i].setOrderNumber(parseInt(this.systems[i].orderNumber, 10) - 1);

@@ -926,7 +926,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     // using ddslick select library for images
     $("#head_shape").ddslick({
         onSelected: function(data) {
-            console.log(data.selectedData.value);
             noteType = data.selectedData.value;
         }
     });
@@ -1386,7 +1385,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
 
         // POST system break.
         function postSystemBreak() {
-
             // Create arguments.
             var createSystemBreakArguments = {ordernumber: system.orderNumber, systemid: system.systemId};
             if (nextSystem != null) {
@@ -1397,7 +1395,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
             $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
                 system.setID(JSON.parse(data).id);
                 while (nextSystem != null) {
-                    gui.postSystemBreakEdit(nextSystem.id, nextSystem.orderNumber);
+                    gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
                     nextSystem = gui.page.getNextSystem(nextSystem);
                 }
             })
