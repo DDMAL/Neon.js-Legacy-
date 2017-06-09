@@ -361,10 +361,15 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     });
 
     // Bind click handlers for the side-bar buttons
+
+    // Unbinding first to avoid stacking
     $("#btn_delete").unbind("click");
     $("#group_shape").unbind("change");
     $("#btn_ungroup").unbind("click");
+    $("#btn_stafflock").unbind("click");
+    $("#btn_selectall").unbind("click");
 
+    // Linking the buttons to their respective functions
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#group_shape").bind("change", {gui: gui}, gui.handleNeumify);
     $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
@@ -839,18 +844,22 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleStaffLock = function(e) {
     var gui = e.data.gui;
-    myArray = gui.rendEng.canvas.getObjects("system");
+    allObjects = gui.rendEng.canvas.getObjects();
     if ($("#btn_stafflock").is(":checked")){
-        myArray.map( function (eleSystem) {
-            eleSystem.selectable = false;
+        allObjects.map( function (ele) {
+            if (ele.eleRef instanceof Toe.Model.System) {
+                ele.selectable = false;
+            }
             // TODO: System locations are not updating when moved so notes dont update properly
             // eleSystem.lockMovementX = true;
             // eleSystem.lockMovementY = true;
         })
     }
     else{
-        myArray.map( function (eleSystem) {
-            eleSystem.selectable = true;
+        allObjects.map( function (ele) {
+            if (ele.eleRef instanceof Toe.Model.System) {
+                ele.selectable = true;
+            }
             // TODO: System locations are not updating when moved so notes dont update properly
             // eleSystem.lockMovementX = false;
             // eleSystem.lockMovementY = false;
@@ -2166,6 +2175,10 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
+    Mousetrap.bind(['l'], function() {
+        $("#btn_stafflock").click();
+        return false;
+    });
 }
 
 Toe.View.SquareNoteInteraction.prototype.bindAlerts = function () {
