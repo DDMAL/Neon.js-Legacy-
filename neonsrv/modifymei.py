@@ -561,6 +561,42 @@ class ModifyDocument:
 
         self.update_or_add_zone(division, ulx, uly, lrx, lry)
 
+
+    def add_episema(self, id, form, ulx, uly, lrx, lry):
+        '''
+        Add a episema ornament to a given element.
+        '''
+
+        punctum = self.mei.getElementById(id)
+        # check that a neume with one note is given
+        notes = punctum.getDescendantsByName("note")
+        if punctum.getName() == "neume" and len(notes) == 1:
+            if len(notes):
+                # if a dot does not already exist on the note
+                if len(notes[0].getChildrenByName("episema")) == 0:
+                    episema = MeiElement("episema")
+                    episema.addAttribute("form", form)
+                    notes[0].addChild(episema)
+
+            self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
+
+    def delete_episema(self, id, ulx, uly, lrx, lry):
+        '''
+        Remove a episema ornament to a given element.
+        '''
+
+        punctum = self.mei.getElementById(id)
+        # check that a punctum element was provided
+        if punctum.getName() == "neume":
+            note = punctum.getDescendantsByName("note")
+            if len(note):
+                episema = note[0].getChildrenByName("episema")
+                # if a episema exists
+                if len(episema) == 1:
+                    note[0].removeChild(episema[0])
+
+            self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
+
     def add_dot(self, id, form, ulx, uly, lrx, lry):
         '''
         Add a dot ornament to a given element.

@@ -2409,8 +2409,10 @@ Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = functi
     var hasEpisema = nc.hasOrnament("episema");
     var episemaForm = "null";
 
+    var selection = this.rendEng.canvas.getActiveObject();
+
     if(hasEpisema){
-        episemaForm = punctum.components[0].getOrnamentForm("episema");
+        episemaForm = selection.eleRef.components[0].getOrnamentForm("episema");
     }
     if(hasEpisema && episemaForm == "horizontal"){
         $("#edit_chk_horizepisema").toggleClass("active", true);
