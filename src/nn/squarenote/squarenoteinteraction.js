@@ -1017,18 +1017,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             if (noteType == "custos"){
                 var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
                 var sModel = gui.page.getClosestSystem(coords);
-
-                // instantiate a custos
-                var cModel = new Toe.Model.Custos();
-
+                
                 // calculate snapped coords
                 var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
-
-                // update bounding box with physical position on the page
-                var ulx = snapCoords.x - gui.punctDwg.currentWidth / 2;
-                var uly = snapCoords.y - gui.punctDwg.currentHeight / 2;
-                var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
-                cModel.setBoundingBox(bb);
 
                 // get pitch name and octave of snapped coords of note
                 var noteInfo = sModel.calcPitchFromCoords(snapCoords);
@@ -1038,6 +1029,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                 else {
                     var pname = noteInfo["pname"];
                     var oct = noteInfo["oct"];
+
+                    // instantiate a custos
+                    var cModel = new Toe.Model.Custos(pname, oct);
+
+                    // update bounding box with physical position on the page
+                    var ulx = snapCoords.x - gui.punctDwg.currentWidth / 2;
+                    var uly = snapCoords.y - gui.punctDwg.currentHeight / 2;
+                    var bb = [ulx, uly, ulx + gui.punctDwg.currentWidth, uly + gui.punctDwg.currentHeight];
+                    cModel.setBoundingBox(bb);
 
                     //  start forming arguments for the server function call
                     var args = {pname: pname, oct: oct};
