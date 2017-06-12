@@ -164,7 +164,7 @@ var drawLiberNeume = function(neume) {
                 // get best spot for one dot
                 if(neume.components[0].getOrnamentForm('episema') == "horizontal") {
                     var bestHorizEpisemas = this.bestHorizEpisemaPlacements(system, nc_y, 0);
-                    elements.modify.push(glyphHorizEpisemas.clone().set({left: glyphPunct.left + (2 * ncGlyphs[0].centre[0]) * 0.1, top: bestHorizEpisemas[0]}));
+                    elements.modify.push(glyphHorizEpisema.clone().set({left: glyphPunct.left + (2 * ncGlyphs[0].centre[0]) * 0.1, top: bestHorizEpisemas[0]}));
                 }
                 if(neume.components[0].getOrnamentForm('episema') == "vertical"){
                     elements.modify.push(glyphVertEpisema.clone().set({left: glyphPunct.left - 2, top: glyphPunct.top + (3*ncGlyphs[0].centre[0])}));

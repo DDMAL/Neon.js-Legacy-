@@ -212,6 +212,45 @@ class DeleteDivisionHandler(tornado.web.RequestHandler):
 
         self.set_status(200)
 
+class AddEpisemaHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        id = str(self.get_argument("id", ""))
+        episema_form = str(self.get_argument("episemaform", ""))
+
+        # Bounding box
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        md.add_episema(id, episema_form, ulx, uly, lrx, lry)
+        md.write_doc()
+
+        self.set_status(200)
+
+class DeleteEpisemaHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        id = str(self.get_argument("id", ""))
+
+        # Bounding box
+        ulx = str(self.get_argument("ulx", None))
+        uly = str(self.get_argument("uly", None))
+        lrx = str(self.get_argument("lrx", None))
+        lry = str(self.get_argument("lry", None))
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        md.delete_episema(id, ulx, uly, lrx, lry)
+        md.write_doc()
+
+        self.set_status(200)
+
 class AddDotHandler(tornado.web.RequestHandler):
 
     def post(self, file):  

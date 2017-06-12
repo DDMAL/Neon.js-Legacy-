@@ -371,8 +371,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
     // Linking the buttons to their respective functions
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
-    $("#group_shape").bind("change", {gui: gui}, gui.handleNeumify);
-    $("#btn_neumify_liquescence").bind("click.edit", {gui: gui, modifier: "alt"}, gui.handleNeumify);
+    $("#group_shape").bind("change", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
@@ -2135,7 +2134,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(
     this.removeEditSubControls();
     $('#btn_delete').toggleClass('disabled', true);
     $('#group_shape').prop('disabled', true);
-    $('#btn_neumify_liquescence').toggleClass('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
 }
 
@@ -2170,11 +2168,9 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
 
     if (toNeumify < 2) {
         $('#group_shape').prop('disabled', true);
-        $('#btn_neumify_liquescence').toggleClass('disabled', true);
     }
     else {
         $('#group_shape').prop('disabled', false);
-        $('#btn_neumify_liquescence').toggleClass('disabled', false);
     }
 
     if (toUngroup > 0) {
@@ -2256,17 +2252,18 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
         $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
                                  '<li>\n' +
                                 '<span id="menu_group"></span>\n' +
-                                //'<ul class="dropdown-menu"><li><a id="btn_neumify_liquescence">liquescence</a></li></ul></li>\n' +
                                 '<select name="group_shape" id="group_shape">' +
                                 '<option value="null" selected="selected"> Select Grouping </option>\n' +
                                 '<option id="group_distropha" value="Distropha">Distropha</option>\n' +
                                 '<option id="group_tristopha" value="Tristropha">Tristropha</option>\n' +
                                 '<option id="group_clivis" value="Clivis">Clivis</option>\n' +
+                                '<option id="group_cephalicus" value="Cephalicus">Cephalicus</option>\n' +
                                 '<option id="group_climacus" value="Climacus">Climacus</option>\n' +
                                 '<option id="group_climacus_resupinus" value="Climacus Resupinus">Climacus Resupinus</option>\n' +
                                 '<option id="group_podatus" value="Podatus">Podatus</option>\n' +
                                 '<option id="group_podatus_subpunctis" value="Podatus Subpunctis">Podatus Subpunctis</option>\n' +
                                 '<option id="group_podatus_subpunctis_resupinus" value="Podatus Subpunctis Resupinus">Podatus Subpunctis Resupinus</option>\n' +
+                                '<option id="group_epiphonus" value="Epiphonus">Epiphonus</option>\n' +
                                 '<option id="group_scandicus" value="Scandicus">Scandicus</option>\n' +
                                 '<option id="group_scandicus_flexus" value="Scandicus Flexus">Scandicus Flexus</option>\n' +
                                 '<option id="group_scandicus_subpunctis" value="Scandicus Subpunctis">Scandicus Subpunctis</option>\n' +
@@ -2286,7 +2283,6 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     // grey out edit buttons by default
     $('#btn_delete').toggleClass('disabled', true);
     $('#group_shape').prop('disabled', true);
-    $('#btn_neumify_liquescence').toggleClass('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
 
 }
@@ -2413,8 +2409,10 @@ Toe.View.SquareNoteInteraction.prototype.initializeEditNeumeSubControls = functi
     var hasEpisema = nc.hasOrnament("episema");
     var episemaForm = "null";
 
+    var selection = this.rendEng.canvas.getActiveObject();
+
     if(hasEpisema){
-        episemaForm = punctum.components[0].getOrnamentForm("episema");
+        episemaForm = selection.eleRef.components[0].getOrnamentForm("episema");
     }
     if(hasEpisema && episemaForm == "horizontal"){
         $("#edit_chk_horizepisema").toggleClass("active", true);
