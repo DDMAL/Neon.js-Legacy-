@@ -1016,15 +1016,21 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             if (noteType == "custos"){
                 var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
                 var sModel = gui.page.getClosestSystem(coords);
+                custos = sModel.custos;
                 
                 // calculate snapped coords
                 var snapCoords = sModel.getSystemSnapCoordinates(coords, gui.punctDwg.currentWidth);
 
                 // get pitch name and octave of snapped coords of note
                 var noteInfo = sModel.calcPitchFromCoords(snapCoords);
+                // simple check here for if theres a clef placed on the staff.
                 if (noteInfo == null) {
                     gui.showAlert("No clef placed on the staff.");
-                } //Simple check here for if theres a clef placed on the staff.
+                }
+                // simple check here to see if theres a custos already placed on the staff
+                else if (custos) {
+                    gui.showAlert("Custos already placed on staff.");
+                }
                 else {
                     var pname = noteInfo["pname"];
                     var oct = noteInfo["oct"];
