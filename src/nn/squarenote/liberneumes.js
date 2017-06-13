@@ -1368,7 +1368,6 @@ var drawLiberNeume = function(neume) {
             var nc_x = new Array();
             // draw podatuses
             for (var i = 0; i < numNC - 1; i += 2) {
-                console.log("poop");
                 // if punctums are right on top of each other, spread them out a bit
                 yoffset = 0;
                 xoffset = 0;

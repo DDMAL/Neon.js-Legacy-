@@ -371,7 +371,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
     // Linking the buttons to their respective functions
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
-    $("#group_shape").bind("change", {gui: gui, modifier: "alt"}, gui.handleNeumify);
+    $("#group_shape").bind("change", {gui: gui, modifier: ""}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
@@ -630,6 +630,10 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
     var groupType = $('#group_shape').find(':selected').attr('value');
+    // check for liquisence
+    if (groupType == "Epiphonus" || groupType == "Cephalicus") {
+        modifier = "alt";
+    }
 
     // only need to neumify if a group of objects are selected
     var selection = gui.rendEng.canvas.getActiveGroup();
