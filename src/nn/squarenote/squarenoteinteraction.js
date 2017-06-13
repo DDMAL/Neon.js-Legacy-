@@ -933,6 +933,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     // ornamentation toggle flags
     var hasDot = false;
     var noteType = "punctum";
+    var typeName = "punctum";
     var hasHorizEpisema = false;
     var hasVertEpisema = false;
 
@@ -940,6 +941,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     $("#head_shape").ddslick({
         onSelected: function(data) {
             noteType = data.selectedData.value;
+            typeName = data.selectedData.text;
         }
     });
 
@@ -1159,6 +1161,19 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                             args["beforeid"] = sNextModel.id;
                         }
                     }
+
+                    // Differentiate between different punctums
+                    if(typeName == "Punctum Inclinatum"){
+                        args["inclinatum"] = true;
+                    }
+                    else if(typeName == "Punctum Inclinatum Parvum"){
+                        args["deminutus"] = true;
+                        args["inclinatum"] = true;
+                    }
+
+                    //Get name of element
+                    args["name"] = nModel.typeid;
+
                     // send insert command to server to change underlying MEI
                     $.post(gui.apiprefix + "/insert/neume", args, function (data) {
                             nModel.id = JSON.parse(data).id;
@@ -1166,7 +1181,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                         .error(function () {
                             gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
                         });
-
                 }
             }
         }

@@ -13,11 +13,15 @@ import conf
 class InsertNeumeHandler(tornado.web.RequestHandler):
 
     def post(self, file):
+        name = str(self.get_argument("name", ""))
+        inclinatum = self.get_argument("inclinatum", None)
+        deminutus = self.get_argument("deminutus", None)
         before_id = self.get_argument("beforeid", None)
         pname = str(self.get_argument("pname", ""))
         oct = str(self.get_argument("oct", ""))
         dot_form = self.get_argument("dotform", None)
         episema_form = self.get_argument("episemaform", None)
+        id = self.get_argument("id", None)
 
         # Bounding box
         lrx = str(self.get_argument("lrx", None))
@@ -28,7 +32,7 @@ class InsertNeumeHandler(tornado.web.RequestHandler):
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
         md = ModifyDocument(fname)
-        result = md.insert_punctum(before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry)
+        result = md.insert_punctum(name, inclinatum, deminutus, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry)
         md.write_doc()
 
         self.write(json.dumps(result))

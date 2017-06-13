@@ -20,7 +20,7 @@ class ModifyDocument:
 
         XmlExport.write(self.mei, filename)
 
-    def insert_punctum(self, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):
+    def insert_punctum(self, name, inclinatum, deminutus, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):
         '''
         Insert a punctum before the given element. There is one case where
         there is no element to insert before, when there is no subsequent staff.
@@ -30,12 +30,21 @@ class ModifyDocument:
 
         # create the punctum
         punctum = MeiElement("neume")
-        punctum.addAttribute("name", "punctum")
         nc = MeiElement("nc")
         note = MeiElement("note")
+
+        if name:
+            punctum.addAttribute("name", name)
+
         if pname and oct:
             note.addAttribute("pname", pname)
             note.addAttribute("oct", oct)
+
+        if inclinatum is not None:
+            nc.addAttribute("inclinatum", str(inclinatum))
+
+        if deminutus is not None:
+            nc.addAttribute("deminutus", str(deminutus))
 
         # add ornamentation
         if dot_form is not None:
