@@ -370,6 +370,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_selectall").unbind("click");
 
     // Linking the buttons to their respective functions
+    $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#group_shape").bind("change", {gui: gui, modifier: "alt"}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
@@ -2060,6 +2061,22 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     gui.deleteActiveSelection(e.data.gui);
 };
 
+Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
+    var gui = e.data.gui;
+    // move undo mei file to working directory
+    console.log("here");
+    $.post(gui.apiprefix + "/undo", function(data) {
+        // when the backup file has been restored, reload the page
+        window.location.reload();
+    })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to restore undo MEI file.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+};
+
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
 
     // Check if aObject is a group
@@ -2289,6 +2306,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<option id="group_porrectus_subpunctis_resupinus" value="Porrectus Subpunctis Resupinus">Porrectus Subpunctis Resupinus</option>\n' +
                                 '<option id="group_compound" value="Compound">Compound</option></select>' +
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
+                                '<li><button title="Undo" id="btn_undo" class="btn"> Undo</button></li>\n</div>' +
                                 '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                                 '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
                                 '<p>Staff Lock  <input id="btn_stafflock" type="checkbox" checked/></p></span>');

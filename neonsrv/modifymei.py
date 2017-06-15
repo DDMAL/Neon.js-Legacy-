@@ -1,3 +1,4 @@
+import os
 from pymei import MeiElement, MeiAttribute, XmlImport, XmlExport
 
 class ModifyDocument:
@@ -18,6 +19,29 @@ class ModifyDocument:
         else:
             filename = self.filename
 
+        filename_split_initial = os.path.split(filename)
+        filename_dir, mei_filename = filename_split_initial
+
+        filename_split = os.path.split(filename_dir)
+        filename_split_beg, filename_split_end = filename_split
+        undo_path = filename_split_beg + "/undo/"
+
+        file_list = [f for f in os.listdir(undo_path)
+                        if os.path.isfile(os.path.join(undo_path, f))]
+
+        file_num = 1 + len(file_list)
+
+        mei_filename_split = os.path.splitext(mei_filename)
+        mei_name, mei_ext = mei_filename_split
+
+        if(file_num > 50):
+            file_num = 50
+            os.remove(undo_path + mei_name + '_1' + mei_ext)
+            file_list.pop(0)
+            for idx, f in enumerate(file_list):
+                os.rename(undo_path + f, undo_path + mei_name + '_' + str(idx + 1) + mei_ext)
+
+        XmlExport.write(self.mei, undo_path + mei_name + '_' + str(file_num) + mei_ext)
         XmlExport.write(self.mei, filename)
 
     def insert_punctum(self, name, inclinatum, deminutus, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):

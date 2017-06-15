@@ -58,10 +58,13 @@ class RootHandler(tornado.web.RequestHandler):
         mei_root_directory = os.path.abspath(conf.MEI_DIRECTORY)
         mei_directory = os.path.join(mei_root_directory, document_type)
         mei_directory_backup = os.path.join(mei_root_directory, "backup")
+        mei_directory_undo = os.path.join(mei_root_directory, "undo")
         errors = ""
         mei_fn = ""
         if len(mei):
             mei_fn = mei[0]["filename"]
+            mei_fn_split = os.path.splitext(mei_fn)
+            mei_zero, mei_ext = mei_fn_split
             contents = mei[0]["body"]
             # TODO: Figure out how to validate MEI files properly using pymei
             try:
@@ -78,6 +81,10 @@ class RootHandler(tornado.web.RequestHandler):
                     fp = open(os.path.join(mei_directory_backup, mei_fn), "w")
                     fp.write(contents)
                     fp.close()
+                    fp = open(os.path.join(mei_directory_undo, mei_zero + '_1' + mei_ext), "w")
+                    fp.write(contents)
+                    fp.close()
+
             except Exception, e:
                 errors = "invalid mei file"
 
@@ -182,3 +189,26 @@ class FileRevertHandler(tornado.web.RequestHandler):
         if meibackup:
             shutil.copy(meibackup, meiworking)
 
+class FileUndoHandler(tornado.web.RequestHandler):
+    def post(self, documentType, filename):
+        '''
+        Move the given filename from the undo directory to the
+        working directory. Overwrites changes made by the editor!
+        '''
+        mei_directory = os.path.join(os.path.abspath(conf.MEI_DIRECTORY), documentType)
+        meiworking = os.path.join(mei_directory, filename + ".mei")
+        mei_directory_undo = os.path.join(conf.MEI_DIRECTORY, "undo")
+
+        file_list = [f for f in os.listdir(mei_directory_undo)
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+        list_length = len(file_list)
+
+        if list_length > 1:
+            meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
+            meiundo = os.path.join(mei_directory_undo, filename + "_" + str(list_length - 1) + ".mei")
+
+            if meiundo:
+                shutil.copy(meiundo, meiworking)
+
+            os.remove(meicurrent)
