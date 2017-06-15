@@ -366,6 +366,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_delete").unbind("click");
     $("#group_shape").unbind("change");
     $("#btn_ungroup").unbind("click");
+    $("#btn_mergesystems").unbind("click");
     $("#btn_stafflock").unbind("click");
     $("#btn_selectall").unbind("click");
 
@@ -373,6 +374,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#group_shape").bind("change", {gui: gui, modifier: ""}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
+    $("#btn_mergesystems").bind("click.edit", {gui: gui}, gui.handleMergeSystems);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
 
@@ -843,6 +845,125 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
     gui.rendEng.canvas.discardActiveObject();
     gui.rendEng.canvas.discardActiveGroup();
     gui.rendEng.repaint();
+}
+
+Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
+    var gui = e.data.gui;
+
+    // first we need to store both of the systems into a single array
+    var activeGroupObjects = gui.rendEng.canvas.getActiveGroup().objects;
+    var systems = new Array();
+    $.each(activeGroupObjects, function(index, ele) {
+        if (ele.eleRef instanceof Toe.Model.System) {
+            systems.push(ele);
+        }
+    });
+
+    // helper function for deleting systems
+    var adjustedSystemBreakArray = [];
+    var deleteSystem = function(aDrawing) {
+        var systemElementReference = aDrawing.eleRef;
+        var returnedArray = gui.page.removeSystem(systemElementReference);
+        adjustedSystemBreakArray.concat(returnedArray);
+        gui.rendEng.canvas.remove(aDrawing);
+    };
+
+    // we need to determine which system to delete (the empty one!), and take the values from it
+    var elementStorage;
+    var emptyZone;
+    var fullZone;
+    var arraySystemID = new Array();
+    var arraySystemBreakID = new Array();
+    var newOrderNumber = Math.min(systems[0].eleRef.orderNumber, systems[1].eleRef.orderNumber);
+
+    $.each(systems, function (index, ele) {
+        if (ele.eleRef.elements.length != 0) {
+            elementStorage = ele.eleRef.elements;
+            fullZone = ele.eleRef.zone;
+        }
+        else {
+            emptyZone = ele.eleRef.zone;
+        }
+        arraySystemID.push(ele.eleRef.systemId);
+        arraySystemBreakID.push(ele.eleRef.id);
+    });
+
+    if(!elementStorage){
+        gui.showAlert("Neither system is empty, merge cannot be done");
+        return;
+    }
+
+    // more stuff for deleting the system! adjusting system breaks after the deleted
+    deleteSystem(systems[0]);
+    deleteSystem(systems[1]);
+    gui.postSystemDelete(arraySystemID);
+    gui.postSystemBreakDelete(arraySystemBreakID);
+
+    if (adjustedSystemBreakArray.length > 0) {
+        var uniqueAdjustedSystemBreakArray = [];
+        $.each(adjustedSystemBreakArray, function(i, el){
+            if($.inArray(el, uniqueAdjustedSystemBreakArray) === -1) uniqueAdjustedSystemBreakArray.push(el);
+        });
+
+        // Remove each.
+        for (var i = 0; i < adjustedSystemBreakArray.length; i++) {
+            gui.postSystemBreakEditOrder(adjustedSystemBreakArray[i].id, adjustedSystemBreakArray[i].orderNumber);
+        }
+    }
+
+    // creating a new system with the proper dimensions and replacing the elements and fixing their bb
+    newUlx = Math.min(emptyZone.ulx, fullZone.ulx);
+    newLrx = Math.max(emptyZone.lrx, fullZone.lrx);
+    newUly = Math.round( (emptyZone.uly + fullZone.uly) /2 );
+    newLry = Math.round( (emptyZone.lry + fullZone.lry) /2 );
+    var newBB = gui.getOutputBoundingBox([newUlx, newUly, newLrx, newLry]);
+
+    var system = new Toe.Model.SquareNoteSystem([newUlx, newUly, newLrx, newLry]);
+    var systemView = new Toe.View.SystemView(gui.rendEng);
+    var systemController = new Toe.Ctrl.SystemController(system, systemView);
+
+    // We also have to adjust the associated system break order number.  Then, we can add it to the page.
+    // This MIGHT have an impact on systems after it.
+    system.setOrderNumber(newOrderNumber);
+    // system.elements = elementStorage;
+    gui.page.addSystem(system);
+    gui.updateInsertSystemSubControls();
+    var nextSystem = gui.page.getNextSystem(system);
+
+    var createSystemArguments = {pageid: gui.page.getID(), ulx: newBB[0], uly: newBB[1], lrx: newBB[2], lry: newBB[3]};
+
+    // POST system, then cascade into other POSTs.
+    $.post(gui.apiprefix + "/insert/system", createSystemArguments, function(data) {
+            system.setSystemID(JSON.parse(data).id);
+            postSystemBreak();
+        })
+        .error(function() {
+            gui.showAlert("Server failed to insert system.  Client and server are not synchronized.");
+        });
+
+    // POST system break.
+    function postSystemBreak() {
+        // Create arguments.
+        var createSystemBreakArguments = {ordernumber: system.orderNumber, systemid: system.systemId};
+        if (nextSystem != null) {
+            createSystemBreakArguments.nextsbid = nextSystem.id;
+        }
+
+        // Do POST.  If we had to reorder system breaks, POST those, too.
+        $.post(gui.apiprefix + "/insert/systembreak", createSystemBreakArguments, function(data) {
+                system.setID(JSON.parse(data).id);
+                while (nextSystem != null) {
+                    gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
+                    nextSystem = gui.page.getNextSystem(nextSystem);
+                }
+            })
+            .error(function() {
+                gui.showAlert("Server failed to insert system break.  Client and server are not synchronized.");
+            });
+    }
+
+    // have to post all the elements on the array or it won't be saved
+    gui.postElementsFromMerge(gui, fullZone, [newUlx, newUly, newLrx, newLry], elementStorage);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleStaffLock = function(e) {
@@ -2030,8 +2151,8 @@ Toe.View.SquareNoteInteraction.prototype.postSystemDelete = function(aSystemIdAr
     });
 }
 
-Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSystemBreadIdArray) {
-    $.post(this.apiprefix + "/delete/systembreak", {sbids: aSystemBreadIdArray.join(",")})
+Toe.View.SquareNoteInteraction.prototype.postSystemBreakDelete = function(aSystemBreakIdArray) {
+    $.post(this.apiprefix + "/delete/systembreak", {sbids: aSystemBreakIdArray.join(",")})
     .error(function() {
         gui.showAlert("Server failed to delete system break.  Client and server are not synchronized.");
     });
@@ -2048,6 +2169,13 @@ Toe.View.SquareNoteInteraction.prototype.postModifySystemZone = function(aSystem
     });
 }
 
+Toe.View.SquareNoteInteraction.prototype.postElementsFromMerge = function(gui, oldBB, newBB, elementArray) {
+    console.log(gui);
+    console.log(oldBB);
+    console.log(newBB);
+    console.log(elementArray);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event Handler Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2057,7 +2185,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
-
     // Check if aObject is a group
     if (aObject.target.hasOwnProperty('eleRef')) {
         switch (aObject.target.eleRef.constructor) {
@@ -2112,7 +2239,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
                      $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", ")  + " <br/>System Number: " + ele.system.orderNumber);
 
         $('#btn_ungroup').toggleClass('disabled', false);
-
+        console.log(ele);
         // Setup the neume sub-controls if we selected an editable neume.
         if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
             this.insertEditNeumeSubControls();
@@ -2135,6 +2262,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     }
     else if (ele instanceof Toe.Model.System) {
         this.showInfo("Selected: system #" + ele.orderNumber);
+        console.log(ele);
     }
     
 }
@@ -2145,17 +2273,17 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(
     $('#btn_delete').toggleClass('disabled', true);
     $('#group_shape').prop('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
+    $('#btn_mergesystems').toggleClass('disabled', true);
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(aObject) {
-
     var selection = aObject.target;
     selection.hasControls = false;
     selection.borderColor = 'rgba(102,153,255,1.0)';
-
     // disable/enable buttons
     var toNeumify = 0;
     var toUngroup = 0;
+    var toMerge = 0;
     var sModel = null;
     $.each(selection.getObjects(), function (oInd, o) {
         // don't draw a selection border around each object in the selection
@@ -2171,6 +2299,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
             if (o.eleRef.system == sModel) {
                 toNeumify++;
             }
+        }
+
+        if (o.eleRef instanceof Toe.Model.System) {
+            toMerge++;
         }
     });
 
@@ -2188,6 +2320,10 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
     }
     else {
         $('#btn_ungroup').toggleClass('disabled', true);
+    }
+
+    if (toMerge == 2) {
+        $('#btn_mergesystems').toggleClass('disabled', false);
     }
 }
 
@@ -2212,6 +2348,11 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
 
     Mousetrap.bind(['u', 'Ctrl+u', 'Command+u'], function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
+        return false;
+    });
+
+    Mousetrap.bind(['m'], function() {
+        $("#btn_mergesystems").trigger('click.edit', {gui:gui}, gui.handleMergeSystems);
         return false;
     });
 
@@ -2285,6 +2426,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<option id="group_porrectus_subpunctis_resupinus" value="Porrectus Subpunctis Resupinus">Porrectus Subpunctis Resupinus</option>\n' +
                                 '<option id="group_compound" value="Compound">Compound</option></select>' +
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
+                                '<li><button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
                                 '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                                 '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
                                 '<p>Staff Lock  <input id="btn_stafflock" type="checkbox" checked/></p></span>');
@@ -2294,6 +2436,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     $('#btn_delete').toggleClass('disabled', true);
     $('#group_shape').prop('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
+    $('#btn_mergesystems').toggleClass('disabled', true);
 
 }
 
