@@ -63,6 +63,10 @@ Toe.Ctrl.ClefController = function(cModel, cView) {
         cView.updateSystemPosition(clef);
     });
 
+    $(cModel).bind("vEraseDrawing", function(event) {
+        cView.eraseDrawing();
+    });
+
     $(cModel).bind("vSelectDrawing", function(event) {
         cView.selectDrawing();
     });

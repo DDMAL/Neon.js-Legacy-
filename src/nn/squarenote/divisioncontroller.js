@@ -48,6 +48,10 @@ Toe.Ctrl.DivisionController = function(dModel, dView) {
         dView.updateShape(division);
     });
 
+    $(dModel).bind("vEraseDrawing", function(event) {
+        dView.eraseDrawing();
+    });
+
     $(dModel).bind("vSelectDrawing", function(event) {
         dView.selectDrawing();
     });

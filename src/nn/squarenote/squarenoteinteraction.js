@@ -95,269 +95,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         // get delta of the mouse movement
         var delta_x = gui.downCoords.x - upCoords.x;
         var delta_y = gui.downCoords.y - upCoords.y;
-        // don't perform dragging action if the mouse doesn't move
-        if (!gui.objMoving) {
-            return;
-        }
-        
-        // if something is selected we need to do some housekeeping
-        // check for single selection
-        var selection = gui.rendEng.canvas.getActiveObject();
-        if (!selection) {
-            // check for group selection
-            selection = gui.rendEng.canvas.getActiveGroup();
-        }
-
-        if (selection) {
-            var elements = new Array();
-            if (selection.eleRef) {
-                elements.push(selection);
-            }
-            else {
-                $.each(selection.objects, function(ind, el) {
-                    elements.push(el);
-                });
-            }
-
-            $.each(elements, function(ind, element) {
-                var ele = element.eleRef;
-
-                if (ele instanceof Toe.Model.Clef) {
-                    // this is a clef
-                    var left = element.left;
-                    var top = element.top;
-                    if (elements.length > 1) {
-                        // calculate object's absolute positions from within selection group
-                        left = selection.left + element.left;
-                        top = selection.top + element.top;
-                    }
-
-                    // snap release position to line/space
-                    var snappedCoords = ele.system.getSystemSnapCoordinates({x: left, y: top}, null, {ignoreEle: ele});
-
-                    // TODO clefs moving to different systems?
-
-                    // get system position of snapped coordinates
-                    var systemPos = -Math.round((snappedCoords.y - ele.system.zone.uly) / (ele.system.delta_y/2));
-
-                    ele.setSystemPosition(systemPos);
-
-                    var neumesOnSystem = ele.system.getPitchedElements({neumes: true, custos: false});
-                    if (neumesOnSystem.length > 0 && ele.system.getActingClefByEle(neumesOnSystem[0]) == ele) {
-                        // if the shift of the clef has affected the first neume on this system
-                        // update the custos on the previous system
-                        var prevSystem = gui.page.getPreviousSystem(ele.system);
-                        if (prevSystem) {
-                            var newPname = neumesOnSystem[0].components[0].pname;
-                            var newOct = neumesOnSystem[0].components[0].oct;
-                            gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
-                        }
-                    }
-
-                    // gather new pitch information of affected pitched elements
-                    var pitchInfo = $.map(ele.system.getPitchedElements({clef: ele}), function(e) {
-                        if (e instanceof Toe.Model.Neume) {
-                            var pitchInfo = new Array();
-                            $.each(e.components, function(nInd, n) {
-                                pitchInfo.push({pname: n.pname, oct: n.oct});
-                            });
-                            return {id: e.id, noteInfo: pitchInfo};
-                        }
-                        else if (e instanceof Toe.Model.Custos) {
-                            // the custos has been vertically moved
-                            // update the custos bounding box information in the model
-                            // do not need to update pitch name & octave since this does not change
-                            var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
-                            $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
-                            .error(function() {
-                                gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
-                            });
-                        }
-                    });
-
-                    // convert systemPos to staffLine format used in MEI attribute
-                    var systemLine = ele.system.props.numLines + (ele.props.systemPos/2);
-                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
-                    var args = {id: ele.id, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
-
-                    // send pitch shift command to server to change underlying MEI
-                    $.post(gui.apiprefix + "/move/clef", {data: JSON.stringify(args)})
-                    .error(function() {
-                        gui.showAlert("Server failed to move clef. Client and server are not synchronized.");
-                    });
-                }
-                else if (ele instanceof Toe.Model.Neume) {
-                    // we have a neume, this is a pitch shift
-                    var left = element.left;
-                    var top = element.top;
-                    if (elements.length > 1) {
-                        // calculate object's absolute positions from within selection group
-                        left = selection.left + element.left;
-                        top = selection.top + element.top;
-                    }
-
-                    // get y position of first neume component
-                    var nc_y = ele.system.zone.uly - ele.rootSystemPos*ele.system.delta_y/2;
-                    var finalCoords = {x: left, y: nc_y - delta_y};
-
-                    var sModel = gui.page.getClosestSystem(finalCoords);
-                    
-                    // snap to system
-                    var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
-
-                    var newRootSystemPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
-
-                    // construct bounding box hint for the new drawing: bounding box changes when dot is repositioned
-                    var ulx = snapCoords.x-(element.currentWidth/2);
-                    var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
-                    var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
-                    ele.setBoundingBox(bb);
-
-                    var oldRootSystemPos = ele.rootSystemPos;
-                    // derive pitch name and octave of notes in the neume on the appropriate system
-                    $.each(ele.components, function(ncInd, nc) {
-                        var noteInfo = sModel.calcPitchFromCoords({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
-                        nc.setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
-                    });
-
-                    // remove the old neume
-                    $(ele).trigger("vEraseDrawing");
-                    ele.system.removeElementByRef(ele);
-     
-                    // mount the new neume on the most appropriate system
-                    var nInd = sModel.addNeume(ele);
-                    if (elements.length == 1) {
-                        $(ele).trigger("vSelectDrawing");
-                    }
-
-                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
-                    var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
-                    if (oldRootSystemPos != newRootSystemPos) {
-                        // this is a pitch shift
-                        args.pitchInfo = new Array();
-                        $.each(ele.components, function(ncInd, nc) {
-                            args.pitchInfo.push({"pname": nc.pname, "oct": nc.oct});
-                        });
-
-                        // if this element is the first neume on the system
-                        if (ele == sModel.elements[1]) {
-                            var prevSystem = gui.page.getPreviousSystem(sModel);
-                            if (prevSystem) {
-                                var cPname = ele.components[0].pname;
-                                var cOct = ele.components[0].oct;
-                                gui.handleUpdatePrevCustos(cPname, cOct, prevSystem);
-                            }
-                        }
-                    }
-                    else {
-                        args.pitchInfo = null
-                    }
-
-                    // get next element to insert before
-                    if (nInd + 1 < sModel.elements.length) {
-                        args["beforeid"] = sModel.elements[nInd+1].id;
-                    }
-                    else {
-                        // insert before the next system break (system)
-                        var sNextModel = gui.page.getNextSystem(sModel);
-                        args["beforeid"] = sNextModel.id;
-                    }
-
-                    // send pitch shift command to server to change underlying MEI
-                    $.post(gui.apiprefix + "/move/neume", {data: JSON.stringify(args)})
-                    .error(function() {
-                        gui.showAlert("Server failed to move neume. Client and server are not synchronized.");
-                    });
-                }
-                else if (ele instanceof Toe.Model.Division) {
-                    // this is a division
-                    var left = element.left;
-                    var top = element.top;
-                    if (elements.length > 1) {
-                        // calculate object's absolute positions from within selection group
-                        left += selection.left;
-                        top += selection.top;
-                    }
-
-                    var finalCoords = {x: left, y: top};
-                    
-                    // get closest system
-                    var system = gui.page.getClosestSystem(finalCoords);
-
-                    var snapCoords = system.getSystemSnapCoordinates(finalCoords, element.currentWidth, {x: true, y: false});
-
-                    // get vertical snap coordinates for the appropriate system
-                    switch (ele.type) {
-                        case Toe.Model.Division.Type.div_small:
-                            snapCoords.y = system.zone.uly;
-                            break;
-                        case Toe.Model.Division.Type.div_minor:
-                            snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
-                            break;
-                        case Toe.Model.Division.Type.div_major:
-                            snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
-                            break;
-                        case Toe.Model.Division.Type.div_final:
-                            snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
-                            break;
-                    }
-
-                    // remove division from the previous system representation
-                    ele.system.removeElementByRef(ele);
-                    gui.rendEng.canvas.remove(element);
-                    gui.rendEng.repaint();
-
-                    // set bounding box hint 
-                    var ulx = snapCoords.x - element.currentWidth/2;
-                    var uly = snapCoords.y - element.currentHeight/2;
-                    var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
-                    ele.setBoundingBox(bb);
-
-                    // get id of note to move before
-                    var dInd = system.addDivision(ele);
-                    if (elements.length == 1) {
-                        ele.selectDrawing();
-                    }
-
-                    var beforeid = null;
-                    if (dInd + 1 < system.elements.length) {
-                        beforeid = system.elements[dInd+1].id;
-                    }
-                    else {
-                        // insert before the next system break
-                        var sNextModel = gui.page.getNextSystem(system);
-                        beforeid = sNextModel.id;
-                    }
-
-                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
-                    var data = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], beforeid: beforeid};
-
-                    // send move command to the server to change underlying MEI
-                    $.post(gui.apiprefix + "/move/division", data)
-                    .error(function() {
-                        gui.showAlert("Server failed to move division. Client and server are not synchronized.");
-                    });
-                }
-                else if (ele instanceof Toe.Model.Custos) {
-                    var left = element.left;
-                    var top = element.top;
-
-                    // only need to reset position if part of a selection with multiple elements
-                    // since single selection move disabling is handled by the lockMovementX/Y parameters.
-                    if (elements.length > 1) {
-                        // return the custos to the original position
-                        element.left = left + delta_x;
-                        element.top = top + delta_y;
-                    }
-                }
-            });
-            if (elements.length > 1) {
-                gui.rendEng.canvas.discardActiveGroup();
-            }
-            gui.rendEng.repaint();
-        }
-        // we're all done moving
-        gui.objMoving = false;
+        gui.handleObjectsMoved(delta_x, delta_y, gui)
     });
 
     // Bind click handlers for the side-bar buttons
@@ -847,10 +585,19 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
     gui.rendEng.repaint();
 }
 
+/* handleMergeSystems
+ *
+ * 1. Putting both systems into an array
+ * 2. Take values from the two systems, including elements and which one is empty
+ * 3. Creating a new system and adding elements
+ * 4. Helper function for deleting systems
+ * 5. Deleting the old systems
+ */
+
 Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
     var gui = e.data.gui;
 
-    // first we need to store both of the systems into a single array
+    // 1. first we need to store both of the systems into a single array
     var activeGroupObjects = gui.rendEng.canvas.getActiveGroup().objects;
     var systems = new Array();
     $.each(activeGroupObjects, function(index, ele) {
@@ -859,27 +606,20 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
         }
     });
 
-    // helper function for deleting systems
-    var adjustedSystemBreakArray = [];
-    var deleteSystem = function(aDrawing) {
-        var systemElementReference = aDrawing.eleRef;
-        var returnedArray = gui.page.removeSystem(systemElementReference);
-        adjustedSystemBreakArray.concat(returnedArray);
-        gui.rendEng.canvas.remove(aDrawing);
-    };
-
-    // we need to determine which system to delete (the empty one!), and take the values from it
+    // 2. we need to determine which system to delete (the empty one!), and take the values from it
     var elementStorage;
     var emptyZone;
     var fullZone;
     var arraySystemID = new Array();
     var arraySystemBreakID = new Array();
+    var fullSystemIndex;
     var newOrderNumber = Math.min(systems[0].eleRef.orderNumber, systems[1].eleRef.orderNumber);
 
     $.each(systems, function (index, ele) {
         if (ele.eleRef.elements.length != 0) {
             elementStorage = ele.eleRef.elements;
             fullZone = ele.eleRef.zone;
+            fullSystemIndex = index;
         }
         else {
             emptyZone = ele.eleRef.zone;
@@ -893,25 +633,7 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
         return;
     }
 
-    // more stuff for deleting the system! adjusting system breaks after the deleted
-    deleteSystem(systems[0]);
-    deleteSystem(systems[1]);
-    gui.postSystemDelete(arraySystemID);
-    gui.postSystemBreakDelete(arraySystemBreakID);
-
-    if (adjustedSystemBreakArray.length > 0) {
-        var uniqueAdjustedSystemBreakArray = [];
-        $.each(adjustedSystemBreakArray, function(i, el){
-            if($.inArray(el, uniqueAdjustedSystemBreakArray) === -1) uniqueAdjustedSystemBreakArray.push(el);
-        });
-
-        // Remove each.
-        for (var i = 0; i < adjustedSystemBreakArray.length; i++) {
-            gui.postSystemBreakEditOrder(adjustedSystemBreakArray[i].id, adjustedSystemBreakArray[i].orderNumber);
-        }
-    }
-
-    // creating a new system with the proper dimensions and replacing the elements and fixing their bb
+    // 3. creating a new system with the proper dimensions and replacing the elements and fixing their bb
     newUlx = Math.min(emptyZone.ulx, fullZone.ulx);
     newLrx = Math.max(emptyZone.lrx, fullZone.lrx);
     newUly = Math.round( (emptyZone.uly + fullZone.uly) /2 );
@@ -922,10 +644,46 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
     var systemView = new Toe.View.SystemView(gui.rendEng);
     var systemController = new Toe.Ctrl.SystemController(system, systemView);
 
+    var delta_y = fullZone.uly - newUly
+    // mounting all the elements onto the new system
+    $.each(elementStorage, function (index, ele) {
+        // shifting the BB according to the difference in merging systems
+        var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly + delta_y, ele.zone.lrx, ele.zone.lry  + delta_y]);
+        var args = {ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+        if (ele instanceof Toe.Model.Clef) {
+            system.addClef(ele)
+        }
+        if (ele instanceof Toe.Model.Neume) {
+            // First, the code for rendering on screen
+            system.addNeume(ele)
+
+            // Preparing arguments for post
+            args["pname"] = ele.components[0].pname;
+            args["oct"] = ele.components[0].oct;
+            args["dotform"] = null;
+            args["episemaform"] = null;
+
+            // Posting to the MEI
+            $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                    
+                    ele.id = JSON.parse(data).id;
+                })
+                .error(function () {
+                    gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+                });
+        }
+        if (ele instanceof Toe.Model.Custos) {
+            console.log("custing");
+        }
+        if (ele instanceof Toe.Model.Division) {
+            console.log("diving")
+        }
+    });
+
     // We also have to adjust the associated system break order number.  Then, we can add it to the page.
     // This MIGHT have an impact on systems after it.
     system.setOrderNumber(newOrderNumber);
-    // system.elements = elementStorage;
     gui.page.addSystem(system);
     gui.updateInsertSystemSubControls();
     var nextSystem = gui.page.getNextSystem(system);
@@ -956,14 +714,76 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
                     gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
                     nextSystem = gui.page.getNextSystem(nextSystem);
                 }
+                finishMerge();
             })
             .error(function() {
                 gui.showAlert("Server failed to insert system break.  Client and server are not synchronized.");
             });
     }
 
-    // have to post all the elements on the array or it won't be saved
-    gui.postElementsFromMerge(gui, fullZone, [newUlx, newUly, newLrx, newLry], elementStorage);
+    // 4. helper function for deleting systems
+    var adjustedSystemBreakArray = [];
+    var deleteSystem = function(aSystem) {
+        var systemElementReference = aSystem.eleRef;
+        var returnedArray = gui.page.removeSystem(systemElementReference);
+        adjustedSystemBreakArray.concat(returnedArray);
+        gui.rendEng.canvas.remove(aSystem);
+
+        console.log(adjustedSystemBreakArray);
+        if (adjustedSystemBreakArray.length > 0) {
+            var uniqueAdjustedSystemBreakArray = [];
+            $.each(adjustedSystemBreakArray, function(i, el){
+                if($.inArray(el, uniqueAdjustedSystemBreakArray) === -1) uniqueAdjustedSystemBreakArray.push(el);
+            });
+
+            // Remove each.
+            for (var i = 0; i < adjustedSystemBreakArray.length; i++) {
+                gui.postSystemBreakEditOrder(adjustedSystemBreakArray[i].id, adjustedSystemBreakArray[i].orderNumber);
+            }
+        }
+
+        gui.postSystemDelete(new Array(systemElementReference.systemId));
+        gui.postSystemBreakDelete(new Array(systemElementReference.id));
+    };
+
+    // 5. code for actually deleting the system! + adjusting system breaks after the deleted
+    var finishMerge = function () {
+        for (var i = systems[fullSystemIndex].eleRef.elements.length-1; i >= 0; i--) {
+            // we must delete elements from the mei
+            if (systems[fullSystemIndex].eleRef.elements[i] instanceof Toe.Model.Clef) {
+                var info = [{id: systems[fullSystemIndex].eleRef.elements[i].id, pitchInfo: null}];
+                $.post(gui.apiprefix + "/delete/clef", {data: JSON.stringify(info)})
+                    .error(function() {
+                        gui.showAlert("Server failed to delete clef. Client and server are not synchronized.");
+                    });
+            }
+            else if (systems[fullSystemIndex].eleRef.elements[i] instanceof Toe.Model.Neume) {
+                $.post(gui.apiprefix + "/delete/neume",  {ids: systems[fullSystemIndex].eleRef.elements[i].id})
+                    .error(function() {
+                        gui.showAlert("Server failed to delete neume. Client and server are not synchronized.");
+                    });
+            }
+            else if (systems[fullSystemIndex].eleRef.elements[i] instanceof Toe.Model.Division) {
+                $.post(gui.apiprefix + "/delete/division", {ids: systems[fullSystemIndex].eleRef.elements[i].id})
+                    .error(function() {
+                        gui.showAlert("Server failed to delete division. Client and server are not synchronized.");
+                    });
+            }
+            else if (systems[fullSystemIndex].eleRef.elements[i] instanceof Toe.Model.Custos) {
+                $.post(gui.apiprefix + "/delete/custos", {ids: systems[fullSystemIndex].eleRef.elements[i].id})
+                    .error(function() {
+                        gui.showAlert("Server failed to delete custos. Client and server are not synchronized.");
+                    });
+            }
+
+            // we delete the elements from fabric
+            systems[fullSystemIndex].eleRef.removeElementByRef(systems[fullSystemIndex].eleRef.elements[i]);
+            gui.rendEng.canvas.remove(systems[fullSystemIndex].eleRef.elements[i]);
+
+        }
+        deleteSystem(systems[0]);
+        deleteSystem(systems[1]);
+    }
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleStaffLock = function(e) {
@@ -1215,7 +1035,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                 nModel.setBoundingBox(bb);
 
                 // get pitch name and octave of snapped coords of note
-                var noteInfo = sModel.calcPitchFromCoords(snapCoords);
+                var  noteInfo = sModel.calcPitchFromCoords(snapCoords);
                 if (noteInfo == null) {
                     gui.showAlert("No clef placed on the staff.");
                 } //Simple check here for if theres a clef placed on the staff.
@@ -1701,7 +1521,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                 // update the custos on the previous system
                 var prevSystem = gui.page.getPreviousSystem(system);
                 if (prevSystem) {
-                    var newPname = neumesOnSystem[0].components[0].pname;
+                    var newPname = neumesOnSystem[0].components[0].pname;8
                     var newOct = neumesOnSystem[0].components[0].oct;
                     gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
                 }
@@ -2169,13 +1989,6 @@ Toe.View.SquareNoteInteraction.prototype.postModifySystemZone = function(aSystem
     });
 }
 
-Toe.View.SquareNoteInteraction.prototype.postElementsFromMerge = function(gui, oldBB, newBB, elementArray) {
-    console.log(gui);
-    console.log(oldBB);
-    console.log(newBB);
-    console.log(elementArray);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Event Handler Methods
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2183,6 +1996,277 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     var gui = e.data.gui;
     gui.deleteActiveSelection(e.data.gui);
 };
+
+Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, delta_y, gui, elementArray) {
+    // don't perform dragging action if the mouse doesn't move
+    if (!gui.objMoving) {
+        return;
+    }
+
+    // if elements are not passed as parameters, this is from active selection.
+    // check for single selection
+    if (!elementArray) {
+        var selection = gui.rendEng.canvas.getActiveObject();
+        if (!selection) {
+            // check for group selection
+            selection = gui.rendEng.canvas.getActiveGroup();
+        }
+    }
+    else {
+        selection = elementArray;
+    }
+
+    if (selection) {
+        var elements = new Array();
+        if (selection.eleRef) {
+            elements.push(selection);
+        }
+        else {
+            $.each(selection.objects, function(ind, el) {
+                elements.push(el);
+            });
+        }
+
+        $.each(elements, function(ind, element) {
+            var ele = element.eleRef;
+
+            if (ele instanceof Toe.Model.Clef) {
+                // this is a clef
+                var left = element.left;
+                var top = element.top;
+                if (elements.length > 1) {
+                    // calculate object's absolute positions from within selection group
+                    left = selection.left + element.left;
+                    top = selection.top + element.top;
+                }
+
+                // snap release position to line/space
+                var snappedCoords = ele.system.getSystemSnapCoordinates({x: left, y: top}, null, {ignoreEle: ele});
+
+                // TODO clefs moving to different systems?
+
+                // get system position of snapped coordinates
+                var systemPos = -Math.round((snappedCoords.y - ele.system.zone.uly) / (ele.system.delta_y/2));
+
+                ele.setSystemPosition(systemPos);
+
+                var neumesOnSystem = ele.system.getPitchedElements({neumes: true, custos: false});
+                if (neumesOnSystem.length > 0 && ele.system.getActingClefByEle(neumesOnSystem[0]) == ele) {
+                    // if the shift of the clef has affected the first neume on this system
+                    // update the custos on the previous system
+                    var prevSystem = gui.page.getPreviousSystem(ele.system);
+                    if (prevSystem) {
+                        var newPname = neumesOnSystem[0].components[0].pname;
+                        var newOct = neumesOnSystem[0].components[0].oct;
+                        gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
+                    }
+                }
+
+                // gather new pitch information of affected pitched elements
+                var pitchInfo = $.map(ele.system.getPitchedElements({clef: ele}), function(e) {
+                    if (e instanceof Toe.Model.Neume) {
+                        var pitchInfo = new Array();
+                        $.each(e.components, function(nInd, n) {
+                            pitchInfo.push({pname: n.pname, oct: n.oct});
+                        });
+                        return {id: e.id, noteInfo: pitchInfo};
+                    }
+                    else if (e instanceof Toe.Model.Custos) {
+                        // the custos has been vertically moved
+                        // update the custos bounding box information in the model
+                        // do not need to update pitch name & octave since this does not change
+                        var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                        $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
+                            .error(function() {
+                                gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
+                            });
+                    }
+                });
+
+                // convert systemPos to staffLine format used in MEI attribute
+                var systemLine = ele.system.props.numLines + (ele.props.systemPos/2);
+                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                var args = {id: ele.id, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
+
+                // send pitch shift command to server to change underlying MEI
+                $.post(gui.apiprefix + "/move/clef", {data: JSON.stringify(args)})
+                    .error(function() {
+                        gui.showAlert("Server failed to move clef. Client and server are not synchronized.");
+                    });
+            }
+            else if (ele instanceof Toe.Model.Neume) {
+                // we have a neume, this is a pitch shift
+                var left = element.left;
+                var top = element.top;
+                if (elements.length > 1) {
+                    // calculate object's absolute positions from within selection group
+                    left = selection.left + element.left;
+                    top = selection.top + element.top;
+                }
+
+                // get y position of first neume component
+                var nc_y = ele.system.zone.uly - ele.rootSystemPos*ele.system.delta_y/2;
+                var finalCoords = {x: left, y: nc_y - delta_y};
+
+                var sModel = gui.page.getClosestSystem(finalCoords);
+
+                // snap to system
+                var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
+
+                var newRootSystemPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
+
+                // construct bounding box hint for the new drawing: bounding box changes when dot is repositioned
+                var ulx = snapCoords.x-(element.currentWidth/2);
+                var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
+                var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
+                ele.setBoundingBox(bb);
+
+                var oldRootSystemPos = ele.rootSystemPos;
+                // derive pitch name and octave of notes in the neume on the appropriate system
+                $.each(ele.components, function(ncInd, nc) {
+                    var noteInfo = sModel.calcPitchFromCoords({x: snapCoords.x, y: snapCoords.y - (sModel.delta_y/2 * nc.pitchDiff)});
+                    nc.setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
+                });
+
+                // remove the old neume
+                $(ele).trigger("vEraseDrawing");
+                ele.system.removeElementByRef(ele);
+
+                // mount the new neume on the most appropriate system
+                var nInd = sModel.addNeume(ele);
+                if (elements.length == 1) {
+                    $(ele).trigger("vSelectDrawing");
+                }
+
+                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+                if (oldRootSystemPos != newRootSystemPos) {
+                    // this is a pitch shift
+                    args.pitchInfo = new Array();
+                    $.each(ele.components, function(ncInd, nc) {
+                        args.pitchInfo.push({"pname": nc.pname, "oct": nc.oct});
+                    });
+
+                    // if this element is the first neume on the system
+                    if (ele == sModel.elements[1]) {
+                        var prevSystem = gui.page.getPreviousSystem(sModel);
+                        if (prevSystem) {
+                            var cPname = ele.components[0].pname;
+                            var cOct = ele.components[0].oct;
+                            gui.handleUpdatePrevCustos(cPname, cOct, prevSystem);
+                        }
+                    }
+                }
+                else {
+                    args.pitchInfo = null
+                }
+
+                // get next element to insert before
+                if (nInd + 1 < sModel.elements.length) {
+                    args["beforeid"] = sModel.elements[nInd+1].id;
+                }
+                else {
+                    // insert before the next system break (system)
+                    var sNextModel = gui.page.getNextSystem(sModel);
+                    args["beforeid"] = sNextModel.id;
+                }
+
+                // send pitch shift command to server to change underlying MEI
+                $.post(gui.apiprefix + "/move/neume", {data: JSON.stringify(args)})
+                    .error(function() {
+                        gui.showAlert("Server failed to move neume. Client and server are not synchronized.");
+                    });
+            }
+            else if (ele instanceof Toe.Model.Division) {
+                // this is a division
+                var left = element.left;
+                var top = element.top;
+                if (elements.length > 1) {
+                    // calculate object's absolute positions from within selection group
+                    left += selection.left;
+                    top += selection.top;
+                }
+
+                var finalCoords = {x: left, y: top};
+
+                // get closest system
+                var system = gui.page.getClosestSystem(finalCoords);
+
+                var snapCoords = system.getSystemSnapCoordinates(finalCoords, element.currentWidth, {x: true, y: false});
+
+                // get vertical snap coordinates for the appropriate system
+                switch (ele.type) {
+                    case Toe.Model.Division.Type.div_small:
+                        snapCoords.y = system.zone.uly;
+                        break;
+                    case Toe.Model.Division.Type.div_minor:
+                        snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
+                        break;
+                    case Toe.Model.Division.Type.div_major:
+                        snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
+                        break;
+                    case Toe.Model.Division.Type.div_final:
+                        snapCoords.y = system.zone.uly + (system.zone.lry - system.zone.uly)/2;
+                        break;
+                }
+
+                // remove division from the previous system representation
+                ele.system.removeElementByRef(ele);
+                gui.rendEng.canvas.remove(element);
+                gui.rendEng.repaint();
+
+                // set bounding box hint
+                var ulx = snapCoords.x - element.currentWidth/2;
+                var uly = snapCoords.y - element.currentHeight/2;
+                var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
+                ele.setBoundingBox(bb);
+
+                // get id of note to move before
+                var dInd = system.addDivision(ele);
+                if (elements.length == 1) {
+                    ele.selectDrawing();
+                }
+
+                var beforeid = null;
+                if (dInd + 1 < system.elements.length) {
+                    beforeid = system.elements[dInd+1].id;
+                }
+                else {
+                    // insert before the next system break
+                    var sNextModel = gui.page.getNextSystem(system);
+                    beforeid = sNextModel.id;
+                }
+
+                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                var data = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], beforeid: beforeid};
+
+                // send move command to the server to change underlying MEI
+                $.post(gui.apiprefix + "/move/division", data)
+                    .error(function() {
+                        gui.showAlert("Server failed to move division. Client and server are not synchronized.");
+                    });
+            }
+            else if (ele instanceof Toe.Model.Custos) {
+                var left = element.left;
+                var top = element.top;
+
+                // only need to reset position if part of a selection with multiple elements
+                // since single selection move disabling is handled by the lockMovementX/Y parameters.
+                if (elements.length > 1) {
+                    // return the custos to the original position
+                    element.left = left + delta_x;
+                    element.top = top + delta_y;
+                }
+            }
+        });
+        if (elements.length > 1) {
+            gui.rendEng.canvas.discardActiveGroup();
+        }
+        gui.rendEng.repaint();
+    }
+    // we're all done moving
+    gui.objMoving = false;
+}
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
     // Check if aObject is a group
@@ -2239,7 +2323,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
                      $.map(ele.components, function(nc) { return nc.pname.toUpperCase() + nc.oct; }).join(", ")  + " <br/>System Number: " + ele.system.orderNumber);
 
         $('#btn_ungroup').toggleClass('disabled', false);
-        console.log(ele);
         // Setup the neume sub-controls if we selected an editable neume.
         if (ele.typeid == "punctum" || ele.typeid == "cavum" || ele.typeid == "virga") {
             this.insertEditNeumeSubControls();
@@ -2262,7 +2345,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     }
     else if (ele instanceof Toe.Model.System) {
         this.showInfo("Selected: system #" + ele.orderNumber);
-        console.log(ele);
     }
     
 }

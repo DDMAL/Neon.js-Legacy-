@@ -95,7 +95,19 @@ Toe.View.DivisionView.prototype.renderBoundingBox = function(division) {
 }
 
 Toe.View.DivisionView.prototype.selectDrawing = function() {
-this.rendEng.canvas.setActiveObject(this.drawing);
+    this.rendEng.canvas.setActiveObject(this.drawing);
+}
+
+Toe.View.DivisionView.prototype.eraseDrawing = function() {
+    if (this.drawing) {
+        this.rendEng.canvas.remove(this.drawing);
+    }
+    if (this.ledgerLines) {
+        this.rendEng.canvas.remove(this.ledgerLines);
+        this.ledgerLines = null;
+    }
+
+    this.rendEng.repaint();
 }
 
 /**
