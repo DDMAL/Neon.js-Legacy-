@@ -145,6 +145,18 @@ Toe.View.ClefView.prototype.updateSystemPosition = function(clef) {
     $(clef).trigger("mUpdateBoundingBox", this.drawing);
 }
 
+Toe.View.ClefView.prototype.eraseDrawing = function() {
+    if (this.drawing) {
+        this.rendEng.canvas.remove(this.drawing);
+    }
+    if (this.ledgerLines) {
+        this.rendEng.canvas.remove(this.ledgerLines);
+        this.ledgerLines = null;
+    }
+
+    this.rendEng.repaint();
+}
+
 /**
  * Selects the clef on the drawing surface.
  *
