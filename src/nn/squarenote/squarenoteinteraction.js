@@ -461,6 +461,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
         if (newNeume.name != groupType) {
             gui.showAlert("Not a valid grouping. Click on 'Help' to access Grouping Glossary.");
             sModel.removeElementByRef(newNeume);
+            $("#group_shape").val("null");
         }
         else if (nView.drawing.height != 0) {
             //remove initial grouped neumes
