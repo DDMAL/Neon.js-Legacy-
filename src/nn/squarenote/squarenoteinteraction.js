@@ -589,7 +589,8 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
  *
  * 1. Putting both systems into an array
  * 2. Take values from the two systems, including elements and which one is empty
- * 3. Creating a new system and adding elements
+ * 3. Creating a new system
+ * 3a. Adding elements
  * 4. Helper function for deleting systems
  * 5. Deleting the old systems
  */
@@ -644,43 +645,6 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
     var systemView = new Toe.View.SystemView(gui.rendEng);
     var systemController = new Toe.Ctrl.SystemController(system, systemView);
 
-    var delta_y = fullZone.uly - newUly
-    // mounting all the elements onto the new system
-    $.each(elementStorage, function (index, ele) {
-        // shifting the BB according to the difference in merging systems
-        var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly + delta_y, ele.zone.lrx, ele.zone.lry  + delta_y]);
-        var args = {ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
-
-        if (ele instanceof Toe.Model.Clef) {
-            system.addClef(ele)
-        }
-        if (ele instanceof Toe.Model.Neume) {
-            // First, the code for rendering on screen
-            system.addNeume(ele)
-
-            // Preparing arguments for post
-            args["pname"] = ele.components[0].pname;
-            args["oct"] = ele.components[0].oct;
-            args["dotform"] = null;
-            args["episemaform"] = null;
-
-            // Posting to the MEI
-            $.post(gui.apiprefix + "/insert/neume", args, function (data) {
-                    
-                    ele.id = JSON.parse(data).id;
-                })
-                .error(function () {
-                    gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
-                });
-        }
-        if (ele instanceof Toe.Model.Custos) {
-            console.log("custing");
-        }
-        if (ele instanceof Toe.Model.Division) {
-            console.log("diving")
-        }
-    });
-
     // We also have to adjust the associated system break order number.  Then, we can add it to the page.
     // This MIGHT have an impact on systems after it.
     system.setOrderNumber(newOrderNumber);
@@ -688,9 +652,9 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
     gui.updateInsertSystemSubControls();
     var nextSystem = gui.page.getNextSystem(system);
 
+    // POST system, then cascade into other POSTs.
     var createSystemArguments = {pageid: gui.page.getID(), ulx: newBB[0], uly: newBB[1], lrx: newBB[2], lry: newBB[3]};
 
-    // POST system, then cascade into other POSTs.
     $.post(gui.apiprefix + "/insert/system", createSystemArguments, function(data) {
             system.setSystemID(JSON.parse(data).id);
             postSystemBreak();
@@ -714,6 +678,7 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
                     gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
                     nextSystem = gui.page.getNextSystem(nextSystem);
                 }
+                mountElements();
                 finishMerge();
             })
             .error(function() {
@@ -721,15 +686,166 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
             });
     }
 
+    // 3a. mounting all the elements onto the new system
+    var mountElements = function () {
+        var delta_y = fullZone.uly - newUly
+        $.each(elementStorage, function (index, ele) {
+            // shifting the BB according to the difference in merging systems
+            var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly + delta_y, ele.zone.lrx, ele.zone.lry  + delta_y]);
+            var args = {ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+            if (ele instanceof Toe.Model.Clef) {
+                // creating clef to post to new system
+                var cModel = new Toe.Model.Clef(ele.shape, ele.props.systemPos);
+                cModel.setBoundingBox(outbb);
+
+                // instantiate clef view and controller
+                var cView = new Toe.View.ClefView(gui.rendEng);
+                var cCtrl = new Toe.Ctrl.ClefController(cModel, cView);
+
+                // mount clef on the system
+                var nInd = system.addClef(cModel);
+
+                var systemLine = system.props.numLines + ele.props.systemPos / 2;
+
+                args["shape"] = ele.shape;
+                args["line"] = systemLine;
+
+                // get next element to insert before
+                if (nInd + 1 < system.elements.length) {
+                    args["beforeid"] = system.elements[nInd + 1].id;
+                }
+                else {
+                    // insert before the next system break
+                    var sNextModel = gui.page.getNextSystem(system);
+                    if (sNextModel) {
+                        args["beforeid"] = sNextModel.id;
+                    }
+                }
+
+                // send insert clef command to the server to change underlying MEI
+                $.post(gui.apiprefix + "/insert/clef", args, function (data) {
+                        cModel.id = JSON.parse(data).id;
+                    })
+                    .error(function () {
+                        gui.showAlert("Server failed to insert clef. Client and server are not synchronized.");
+                    });
+            }
+            if (ele instanceof Toe.Model.Neume) {
+                // creating neume to post to new system
+                for (var i = 0; i < ele.components.length; i++) {
+                    var nModel = new Toe.Model.SquareNoteNeume();
+                    var pname = ele.components[i].pname;
+                    var oct = ele.components[i].oct;
+
+                    var delta_x = (ele.zone.lrx - ele.zone.ulx) / ele.components.length;
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx + (i*delta_x), ele.zone.uly + delta_y, ele.zone.lrx + (i*delta_x), ele.zone.lry  + delta_y]);
+                    var args = {ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+
+                    args["pname"] = pname;
+                    args["oct"] = oct;
+
+                    // TODO: get these ornaments to transfer properly, look at insert punctum code
+                    // var ornaments = new Array();
+                    // args["dotform"] = null;
+                    // args["episemaform"] = null;
+
+                    var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: ele.components[0].props.type});
+                    nModel.addComponent(nc);
+
+                    // instantiate neume view and controller
+                    var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+                    var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+                    // mount neume on system
+                    nInd = system.addNeume(nModel);
+
+                    var sNextModel = gui.page.getNextSystem(system);
+                    if (sNextModel) {
+                        args["beforeid"] = sNextModel.id;
+                    }
+
+                    // Posting to the MEI
+                    $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                            nModel.id = JSON.parse(data).id;
+                        })
+                        .error(function () {
+                            gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+                        });
+                }
+
+            }
+            if (ele instanceof Toe.Model.Custos) {
+                var pname = ele.pname;
+                var oct = ele.oct;
+
+                var cModel = new Toe.Model.Custos(pname, oct);
+
+                args["pname"] = pname;
+                args["oct"] = oct;
+
+                cModel.setBoundingBox(outbb);
+
+                // instantiate custos view and controller
+                var cView = new Toe.View.CustosView(gui.rendEng);
+                var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+
+                // mount the custos on the system
+                system.setCustos(cModel);
+
+                args["id"] = cModel.id
+                // get id of the next system element
+                var nextSystem = gui.page.getNextSystem(system);
+
+                if (nextSystem) {
+                    args["beforeid"] = nextSystem.id;
+                }
+
+                // update underlying MEI file
+                $.post(gui.apiprefix + "/insert/custos", args, function(data) {
+                    cModel.id = JSON.parse(data).id;
+                }).error(function() {
+                    gui.showAlert("Server failed to insert custos. Client and server are not synchronized.");
+                });
+            }
+            if (ele instanceof Toe.Model.Division) {
+                // creating division to post to new system
+                var division = new Toe.Model.Division(ele.key);
+                division.setBoundingBox(outbb);
+
+                // instantiate division view and controller
+                var dView = new Toe.View.DivisionView(gui.rendEng);
+                var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
+
+                var nInd = system.addDivision(division);
+
+                args["type"] = ele.key.slice(4)
+
+                var sNextModel = gui.page.getNextSystem(system);
+                if(sNextModel) {
+                    args["beforeid"] = sNextModel.id;
+                }
+
+                // send insert division command to server to change underlying MEI
+                $.post(gui.apiprefix + "/insert/division", args, function (data) {
+                        division.id = JSON.parse(data).id;
+                    })
+                    .error(function () {
+                        gui.showAlert("Server failed to insert division. Client and server are not synchronized.");
+                    });
+            }
+        });
+    }
+
     // 4. helper function for deleting systems
     var adjustedSystemBreakArray = [];
     var deleteSystem = function(aSystem) {
         var systemElementReference = aSystem.eleRef;
         var returnedArray = gui.page.removeSystem(systemElementReference);
-        adjustedSystemBreakArray.concat(returnedArray);
+
+        adjustedSystemBreakArray = adjustedSystemBreakArray.concat(returnedArray);
         gui.rendEng.canvas.remove(aSystem);
 
-        console.log(adjustedSystemBreakArray);
         if (adjustedSystemBreakArray.length > 0) {
             var uniqueAdjustedSystemBreakArray = [];
             $.each(adjustedSystemBreakArray, function(i, el){
