@@ -59,6 +59,9 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
 
     // binding alerts
     this.bindAlerts();
+
+    //empty old undo files
+    this.handleDeleteUndos(this);
 };
 
 Toe.View.SquareNoteInteraction.prototype = new Toe.View.Interaction();
@@ -109,6 +112,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_selectall").unbind("click");
 
     // Linking the buttons to their respective functions
+    $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
+    $("#btn_refresh").bind("click.edit", {gui: gui}, gui.handleRefresh);
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#group_shape").bind("change", {gui: gui, modifier: ""}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
@@ -2127,6 +2132,33 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     gui.deleteActiveSelection(e.data.gui);
 };
 
+Toe.View.SquareNoteInteraction.prototype.handleRefresh = function() {
+        window.location.reload();
+    };
+
+Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
+    // delete files in undo folder
+    $.post(gui.apiprefix + "/delete")
+        .error(function() {
+            gui.showAlert("Server failed to delete undos. Client and server are not synchronized.");
+        });
+};
+
+Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
+    var gui = e.data.gui;
+    // move undo mei file to working directory
+    $.post(gui.apiprefix + "/undo", function() {
+        // when the backup file has been restored, reload the page
+        window.location.reload();
+    })
+        .error(function() {
+            // show alert to user
+            // replace text with error message
+            $("#alert > p").text("Server failed to restore undo MEI file.");
+            $("#alert").animate({opacity: 1.0}, 100);
+        });
+};
+
 Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, delta_y, gui, elementArray) {
     // don't perform dragging action if the mouse doesn't move
     if (!gui.objMoving) {
@@ -2639,7 +2671,9 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<option id="group_compound" value="Compound">Compound</option></select>' +
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button></li>\n' +
                                 '<li><button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
+                                '<li><button title="Undo" id="btn_undo" class="btn"> Undo</button></li>\n</div>' +
                                 '<li>\n<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                                '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button></li>\n</div>' +
                                 '<li><button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
                                 '<p>Staff Lock  <input id="btn_stafflock" type="checkbox" checked/></p></span>');
     }

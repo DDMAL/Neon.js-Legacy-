@@ -3,7 +3,7 @@ import mimetypes
 import os
 import shutil
 
-from pymei import XmlImport
+from pymei import XmlImport, XmlExport
 
 import tornado.web
 
@@ -62,6 +62,8 @@ class RootHandler(tornado.web.RequestHandler):
         mei_fn = ""
         if len(mei):
             mei_fn = mei[0]["filename"]
+            mei_fn_split = os.path.splitext(mei_fn)
+            mei_zero, mei_ext = mei_fn_split
             contents = mei[0]["body"]
             # TODO: Figure out how to validate MEI files properly using pymei
             try:
@@ -78,6 +80,7 @@ class RootHandler(tornado.web.RequestHandler):
                     fp = open(os.path.join(mei_directory_backup, mei_fn), "w")
                     fp.write(contents)
                     fp.close()
+
             except Exception, e:
                 errors = "invalid mei file"
 
@@ -115,6 +118,33 @@ class SquareNoteEditorHandler(tornado.web.RequestHandler):
         page = page[:page.rfind(".")]
         imagepath = conf.PROD_IMAGE_PATH.replace("PAGE", page)
         self.render(conf.get_neonHtmlFileName(square=True), page=page, debug=dstr, prefix=conf.get_prefix(), imagepath=imagepath)
+
+class DeleteUndosHandler(tornado.web.RequestHandler):
+    def post(self, documentType, filename):
+
+        mei_directory = os.path.join(os.path.abspath(conf.MEI_DIRECTORY), documentType)
+        meiworking = os.path.join(mei_directory, filename + ".mei")
+        mei_directory_undo = os.path.join(conf.MEI_DIRECTORY, "undo")
+
+        file_list = [f for f in os.listdir(mei_directory_undo)
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+        if len(file_list) != 0:
+            undofile = file_list[0];
+            undofilename, ext = undofile.split("_");
+
+            if filename != undofilename:
+                for f in file_list:
+                    os.remove(mei_directory_undo + "/" + f)
+
+        file_list = [f for f in os.listdir(mei_directory_undo)
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+        if len(file_list) == 0:
+            meiundo = os.path.join(mei_directory_undo, filename + "_" + str(1) + ".mei")
+
+            if meiundo:
+                shutil.copy(meiworking, meiundo)
 
 class StafflessEditorHandler(tornado.web.RequestHandler):
     def get(self, page):
@@ -182,3 +212,26 @@ class FileRevertHandler(tornado.web.RequestHandler):
         if meibackup:
             shutil.copy(meibackup, meiworking)
 
+class FileUndoHandler(tornado.web.RequestHandler):
+    def post(self, documentType, filename):
+        '''
+        Move the given filename from the undo directory to the
+        working directory. Overwrites changes made by the editor!
+        '''
+        mei_directory = os.path.join(os.path.abspath(conf.MEI_DIRECTORY), documentType)
+        meiworking = os.path.join(mei_directory, filename + ".mei")
+        mei_directory_undo = os.path.join(conf.MEI_DIRECTORY, "undo")
+
+        file_list = [f for f in os.listdir(mei_directory_undo)
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+        list_length = len(file_list)
+
+        if list_length > 1:
+            meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
+            meiundo = os.path.join(mei_directory_undo, filename + "_" + str(list_length - 1) + ".mei")
+
+            if meiundo:
+                shutil.copy(meiundo, meiworking)
+
+            os.remove(meicurrent)
