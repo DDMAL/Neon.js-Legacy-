@@ -750,6 +750,7 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
 
                     args["pname"] = pname;
                     args["oct"] = oct;
+                    args["name"] = ele.name;
 
                     // TODO: get these ornaments to transfer properly, look at insert punctum code
                     // var ornaments = new Array();
