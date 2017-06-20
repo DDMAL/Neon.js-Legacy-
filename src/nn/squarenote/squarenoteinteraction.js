@@ -483,6 +483,7 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
             $.post(gui.apiprefix + "/neumify", {data: data}, function (data) {
                 // set id of the new neume with generated ID from the server
                 newNeume.id = JSON.parse(data).id;
+                gui.hideAlert();
             })
                 .error(function () {
                     gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
