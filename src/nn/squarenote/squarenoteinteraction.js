@@ -2624,6 +2624,14 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
 
     Mousetrap.bind(['c', 'Ctrl+c', 'Command+c'], function() {
         $("#rad_clef").click();
+        $("#edit_rad_c").click();
+        $("#rad_doh").click();
+        return false;
+    });
+
+    Mousetrap.bind(['f'], function() {
+        $("#edit_rad_f").click();
+        $("#rad_fah").click();
         return false;
     });
 
