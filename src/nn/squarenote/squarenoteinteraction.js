@@ -2168,6 +2168,40 @@ Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
         });
 };
 
+Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) {
+    gui = this;
+
+    selection = gui.rendEng.canvas.getActiveObject();
+
+    if (selection) {
+        console.log(selection);
+        switch(direction) {
+            case "up":
+                gui.objMoving = true;
+                gui.handleObjectsMoved(0, selection.eleRef.system.delta_y/2, gui, selection);
+                break;
+            case "down":
+                gui.objMoving = true;
+                gui.handleObjectsMoved(0, -selection.eleRef.system.delta_y/2, gui, selection);
+                break;
+            case "left":
+                gui.objMoving = true;
+                gui.handleObjectsMoved(-selection.width, 0, gui, selection);
+                break;
+            case "right":
+                gui.objMoving = true;
+                gui.handleObjectsMoved(selection.height, 0, gui, selection);
+                break;
+            default:
+                this.showAlert("wuh woh");
+        }
+    }
+    else {
+        gui.showAlert("Can't move: Selection is not a single object or no active selection");
+    }
+}
+
+
 Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, delta_y, gui, elementArray) {
     // don't perform dragging action if the mouse doesn't move
     if (!gui.objMoving) {
@@ -2267,6 +2301,7 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
             }
             else if (ele instanceof Toe.Model.Neume) {
                 // we have a neume, this is a pitch shift
+
                 var left = element.left;
                 var top = element.top;
                 if (elements.length > 1) {
@@ -2611,7 +2646,7 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
 
     Mousetrap.bind(['Ctrl+a', 'Command+a', 'meta+a'], function() {
         $("#btn_selectall").trigger("click.edit", {gui: gui}, gui.handleSelectAll);
-        return false;
+        return false;2486
     });
 
     Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
@@ -2644,6 +2679,27 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
 
     Mousetrap.bind(['l'], function() {
         $("#btn_stafflock").click();
+        return false;
+    });
+
+    // Hotkeys for moving objects
+    Mousetrap.bind(['up'], function () {
+        gui.handleArrowKeys("up");
+        return false;
+    });
+
+    Mousetrap.bind(['down'], function () {
+        gui.handleArrowKeys("down");
+        return false;
+    });
+
+    Mousetrap.bind(['left'], function () {
+        gui.handleArrowKeys("left");
+        return false;
+    });
+
+    Mousetrap.bind(['right'], function () {
+        gui.handleArrowKeys("right");
         return false;
     });
 }
