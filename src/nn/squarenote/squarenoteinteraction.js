@@ -907,6 +907,7 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
         }
         deleteSystem(systems[0]);
         deleteSystem(systems[1]);
+        gui.showAlert("The changes you've made require a refresh to appear.");
     }
 }
 
@@ -1663,6 +1664,11 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                     var newOct = neumesOnSystem[0].components[0].oct;
                     gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
                 }
+            }
+
+            // If this is the first clef on the system tell the user to refresh
+            if (system.elements.length == 1) {
+                gui.showAlert("The changes you've made require a refresh to appear.");
             }
 
             // gather new pitch information of affected pitched elements
