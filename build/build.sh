@@ -10,7 +10,7 @@ then
 fi
 
 echo "Compiling Neon.js with google closure ..."
-java -jar *.jar --js ../src/{neon.js,toe.js,model.js,controller.js,view.js,glyph.js,renderengine.js,clef*.js,gui.js,ornament.js,page*.js,system*.js,../static/js/support/searchtree.min.js,nn/interaction.js,nn/nc.js,nn/neume*.js,nn/squarenote/custos*.js,nn/squarenote/division*.js,nn/squarenote/liberneumes.js,nn/squarenote/salzinneneumes.js,nn/squarenote/squarenote*.js,nn/cheironomic/cheironomic*.js,nn/cheironomic/hartkerneumes.js} --js_output_file ../static/js/neon.min.js
+java -jar *.jar --js ../src/{neon.js,toe.js,models/model.js,controllers/controller.js,views/view.js,models/glyph.js,views/renderengine.js,clef*.js,views/gui.js,models/ornament.js,page*.js,system*.js,../static/js/support/searchtree.min.js,nn/interaction.js,nn/nc.js,nn/neume*.js,nn/squarenote/custos*.js,nn/squarenote/division*.js,nn/squarenote/liberneumes.js,nn/squarenote/salzinneneumes.js,nn/squarenote/squarenote*.js,nn/cheironomic/cheironomic*.js,nn/cheironomic/hartkerneumes.js} --js_output_file ../static/js/neon.min.js
 #../src/{*.js,nn/*.js,nn/squarenote/*.js,nn/cheironomic/*.js} --js_output_file ../static/js/neon.min.js
 if [ -a ../static/js/neon.min.js ]; then
     echo "Built to static/js/neon.min.js"
