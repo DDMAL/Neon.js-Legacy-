@@ -123,15 +123,17 @@
                                     <td><input type="file" name="mei_img"></td>
                                 </tr>
                                 <tr>
-                                    <td>Document type: 
-                                        <select name="document_type">
-                                            {% for d in document_types %}
-                                                {% if d != "backup" %}
-                                                    <option value="{{d}}">{{d}}</option>
-                                                {% end %}
-                                            {% end %}
-                                        </select>
-                                    </td>
+                                    <!--<td>Document type: -->
+                                        <!--<select name="document_type">-->
+                                            <!--{% for d in document_types %}-->
+                                                <!--{% if d != "backup" %}-->
+                                                    <!--{% if d != "undo" %}-->
+                                                        <!--<option value="{{d}}">{{d}}</option>-->
+                                                    <!--{% end %}-->
+                                                <!--{% end %}-->
+                                            <!--{% end %}-->
+                                        <!--</select>-->
+                                    <!--</td>-->
                                 </tr>
                                 <tr>
                                     <td><input class="btn btn-primary" type="submit" name="submit" value="Upload"></td>

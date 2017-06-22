@@ -54,7 +54,7 @@ class RootHandler(tornado.web.RequestHandler):
     def post(self, request):
         mei = self.request.files.get("mei", [])
         mei_img = self.request.files.get("mei_img", [])
-        document_type = self.get_argument("document_type")
+        document_type = "squarenote"
         mei_root_directory = os.path.abspath(conf.MEI_DIRECTORY)
         mei_directory = os.path.join(mei_root_directory, document_type)
         mei_directory_backup = os.path.join(mei_root_directory, "backup")
