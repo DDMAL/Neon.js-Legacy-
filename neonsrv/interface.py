@@ -130,12 +130,8 @@ class DeleteUndosHandler(tornado.web.RequestHandler):
                      if os.path.isfile(os.path.join(mei_directory_undo, f))]
 
         if len(file_list) != 0:
-            undofile = file_list[0];
-            undofilename, ext = undofile.split("_");
-
-            if filename != undofilename:
-                for f in file_list:
-                    os.remove(mei_directory_undo + "/" + f)
+            for f in file_list:
+                os.remove(mei_directory_undo + "/" + f)
 
         file_list = [f for f in os.listdir(mei_directory_undo)
                      if os.path.isfile(os.path.join(mei_directory_undo, f))]
