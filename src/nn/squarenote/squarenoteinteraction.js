@@ -39,8 +39,20 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
     // bounding box estimation in neumify and ungroup
     // and insert ornamentation spacing.
     var punctGlyph = rendEng.getGlyph("punctum").clone();
-    this.punctWidth = punctGlyph.width*rendEng.getGlobalScale();
-    this.punctHeight = punctGlyph.height*rendEng.getGlobalScale();
+    var globalScale = rendEng.getGlobalScale();
+    this.punctWidth = punctGlyph.width*globalScale;
+    this.punctHeight = punctGlyph.height*globalScale;
+
+    // increasing the punctum size if the global scale is below a certain threshhold
+    if (globalScale < 0.06) {
+        console.log("Scale is low, increasing punctum padding size");
+        var objs = rendEng.canvas.getObjects();
+        $.each(objs, function (ind, ele) {
+            if (ele.eleRef instanceof Toe.Model.Neume) {
+                ele.padding = 2;
+            }
+        })
+    }
 
     this.objMoving = false;
 
@@ -2361,6 +2373,7 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                 ele.system.removeElementByRef(ele);
 
                 // mount the new neume on the most appropriate system
+                ele.padding = 2;
                 var nInd = sModel.addNeume(ele);
                 if (elements.length == 1) {
                     $(ele).trigger("vSelectDrawing");
@@ -2491,6 +2504,18 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
             gui.rendEng.canvas.discardActiveGroup();
         }
         gui.rendEng.repaint();
+    }
+
+    // increasing the punctum size if the global scale is below a certain threshhold
+    // TODO: Optimize for just the moved punctum
+    if (gui.rendEng.getGlobalScale() < 0.06) {
+        console.log("pls work");
+        var objs = gui.rendEng.canvas.getObjects();
+        $.each(objs, function (ind, ele) {
+            if (ele.eleRef instanceof Toe.Model.Neume) {
+                ele.padding = 2;
+            }
+        })
     }
     // we're all done moving
     gui.objMoving = false;
