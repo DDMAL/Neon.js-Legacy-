@@ -2170,11 +2170,11 @@ Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) {
     gui = this;
-
     selection = gui.rendEng.canvas.getActiveObject();
+    var isGroup = false;
 
+    // for handling single object movement
     if (selection) {
-        console.log(selection);
         switch(direction) {
             case "up":
                 gui.objMoving = true;
@@ -2184,20 +2184,42 @@ Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) 
                 gui.objMoving = true;
                 gui.handleObjectsMoved(0, -selection.eleRef.system.delta_y/2, gui, selection);
                 break;
-            case "left":
-                gui.objMoving = true;
-                gui.handleObjectsMoved(-selection.width, 0, gui, selection);
-                break;
-            case "right":
-                gui.objMoving = true;
-                gui.handleObjectsMoved(selection.height, 0, gui, selection);
-                break;
             default:
                 this.showAlert("wuh woh");
         }
     }
-    else {
-        gui.showAlert("Can't move: Selection is not a single object or no active selection");
+
+    // For handling group movement
+    else if (!selection) {
+        // check for group selection
+        selection = gui.rendEng.canvas.getActiveGroup();
+        if (selection && selection.objects.length > 0) {
+            isGroup = true;
+        }
+    }
+
+    if (isGroup) {
+        console.log(selection);
+        var storage = new fabric.Group(selection.objects, {
+            left: selection.left,
+            right: selection.right,
+            hasBorders: true,
+            borderColor: "rgba(102,153,255,1.0)"
+        });
+        switch(direction) {
+            case "up":
+                gui.objMoving = true;
+                gui.handleObjectsMoved(0, selection.objects[0].eleRef.system.delta_y/2, gui, selection);
+                break;
+            case "down":
+                gui.objMoving = true;
+                gui.handleObjectsMoved(0, -selection.objects[0].eleRef.system.delta_y/2, gui, selection);
+                break;
+            default:
+                this.showAlert("wuh woh");
+        }
+        console.log(storage);
+        gui.rendEng.canvas.setActiveGroup(storage);
     }
 }
 
@@ -2690,16 +2712,6 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
 
     Mousetrap.bind(['down'], function () {
         gui.handleArrowKeys("down");
-        return false;
-    });
-
-    Mousetrap.bind(['left'], function () {
-        gui.handleArrowKeys("left");
-        return false;
-    });
-
-    Mousetrap.bind(['right'], function () {
-        gui.handleArrowKeys("right");
         return false;
     });
 }
