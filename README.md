@@ -22,7 +22,7 @@ Setup
 cp conf.py{.dist,}
 ```
 
-2. Edit the configuration file conf.py and set MEI_DIRECTORY somewhere writable. Create 4 subdirectories in the MEI_DIRECTORY, `undo`, `backup`, `squarenote`, and `cheironomic`. Backup will store the original state of uploaded MEI files, which can be reverted to using the editor interface. Undo is for the undo feature. The other two are for storing the mei files of specific types.
+2. Edit the configuration file conf.py and set MEI_DIRECTORY somewhere writable. Create 4 subdirectories in the MEI_DIRECTORY, `undo`, `backup`, and `squarenote`. Backup will store the original state of uploaded MEI files, which can be reverted to using the editor interface. Undo is for the undo feature. The other two are for storing the mei files of specific types.
 
 3. Now compile the Neon.js code. Yes, compiling JavaScript. Weird, right?
 ```
