@@ -127,7 +127,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
     $("#btn_refresh").bind("click.edit", {gui: gui}, gui.handleRefresh);
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
-    $("#group_shape").bind("change", {gui: gui, modifier: ""}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_mergesystems").bind("click.edit", {gui: gui}, gui.handleMergeSystems);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
@@ -2211,7 +2210,6 @@ Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) 
     }
 
     if (isGroup) {
-        console.log(selection);
         var storage = new fabric.Group(selection.objects, {
             left: selection.left,
             right: selection.right,
@@ -2230,7 +2228,6 @@ Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) 
             default:
                 this.showAlert("wuh woh");
         }
-        console.log(storage);
         gui.rendEng.canvas.setActiveGroup(storage);
     }
 }
@@ -2509,7 +2506,6 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
     // increasing the punctum size if the global scale is below a certain threshhold
     // TODO: Optimize for just the moved punctum
     if (gui.rendEng.getGlobalScale() < 0.06) {
-        console.log("pls work");
         var objs = gui.rendEng.canvas.getObjects();
         $.each(objs, function (ind, ele) {
             if (ele.eleRef instanceof Toe.Model.Neume) {
@@ -2606,7 +2602,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(
     this.hideInfo();
     this.removeEditSubControls();
     $('#btn_delete').toggleClass('disabled', true);
-    $('#group_shape').prop('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
     $('#btn_mergesystems').toggleClass('disabled', true);
 }
@@ -2620,6 +2615,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
     var toUngroup = 0;
     var toMerge = 0;
     var sModel = null;
+
+    // Setting the correct variables for which UI to enable
     $.each(selection.getObjects(), function (oInd, o) {
         // don't draw a selection border around each object in the selection
         o.borderColor = 'rgba(0,0,0,0)';
@@ -2643,13 +2640,40 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
 
     $('#btn_delete').toggleClass('disabled', false);
 
+    // UI code for grouping
     if (toNeumify < 2) {
-        $('#group_shape').prop('disabled', true);
+        $("#menu_editpunctum").remove();
     }
     else {
-        $('#group_shape').prop('disabled', false);
+        if ($("#menu_editpunctum").length == 0) {
+            $("#sidebar-edit").append('<span id="menu_editpunctum"><select name="group_shape" id="group_shape">' +
+                '<option value="null" selected="selected"> Select Grouping </option>\n' +
+                '<option id="group_distropha" value="Distropha">Distropha</option>\n' +
+                '<option id="group_tristopha" value="Tristropha">Tristropha</option>\n' +
+                '<option id="group_clivis" value="Clivis">Clivis</option>\n' +
+                '<option id="group_cephalicus" value="Cephalicus">Cephalicus</option>\n' +
+                '<option id="group_climacus" value="Climacus">Climacus</option>\n' +
+                '<option id="group_climacus_resupinus" value="Climacus Resupinus">Climacus Resupinus</option>\n' +
+                '<option id="group_podatus" value="Podatus">Podatus</option>\n' +
+                '<option id="group_podatus_subpunctis" value="Podatus Subpunctis">Podatus Subpunctis</option>\n' +
+                '<option id="group_podatus_subpunctis_resupinus" value="Podatus Subpunctis Resupinus">Podatus Subpunctis Resupinus</option>\n' +
+                '<option id="group_epiphonus" value="Epiphonus">Epiphonus</option>\n' +
+                '<option id="group_scandicus" value="Scandicus">Scandicus</option>\n' +
+                '<option id="group_scandicus_flexus" value="Scandicus Flexus">Scandicus Flexus</option>\n' +
+                '<option id="group_scandicus_subpunctis" value="Scandicus Subpunctis">Scandicus Subpunctis</option>\n' +
+                '<option id="group_torculus" value="Torculus">Torculus</option>\n' +
+                '<option id="group_torculus_respinus" value="Torculus Resupinus">Torculus Resupinus</option>\n' +
+                '<option id="group_porrectus" value="Porrectus">Porrectus</option>\n' +
+                '<option id="group_porrectus_flexus" value="Porrectus Flexus">Porrectus Flexus</option>\n' +
+                '<option id="group_porrectus_subpunctis" value="Porrectus Subpunctis">Porrectus Subpunctis</option>\n' +
+                '<option id="group_porrectus_subpunctis_resupinus" value="Porrectus Subpunctis Resupinus">Porrectus Subpunctis Resupinus</option>\n' +
+                '<option id="group_compound" value="Compound">Compound</option></select></span>');
+        }
+
+        $("#group_shape").bind("change", {gui: this, modifier: ""}, this.handleNeumify);
     }
 
+    // UI code activation for ungropuing
     if (toUngroup > 0) {
         $('#btn_ungroup').toggleClass('disabled', false);
     }
@@ -2657,6 +2681,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
         $('#btn_ungroup').toggleClass('disabled', true);
     }
 
+    // UI Code for merge systems
     if (toMerge == 2) {
         $('#btn_mergesystems').toggleClass('disabled', false);
     }
@@ -2755,30 +2780,6 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     // add buttons for edit commands
     if ($("#sidebar-edit").length === 0) {
         $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
-                                 '<li>\n' +
-                                '<span id="menu_group"></span>\n' +
-                                '<select name="group_shape" id="group_shape">' +
-                                '<option value="null" selected="selected"> Select Grouping </option>\n' +
-                                '<option id="group_distropha" value="Distropha">Distropha</option>\n' +
-                                '<option id="group_tristopha" value="Tristropha">Tristropha</option>\n' +
-                                '<option id="group_clivis" value="Clivis">Clivis</option>\n' +
-                                '<option id="group_cephalicus" value="Cephalicus">Cephalicus</option>\n' +
-                                '<option id="group_climacus" value="Climacus">Climacus</option>\n' +
-                                '<option id="group_climacus_resupinus" value="Climacus Resupinus">Climacus Resupinus</option>\n' +
-                                '<option id="group_podatus" value="Podatus">Podatus</option>\n' +
-                                '<option id="group_podatus_subpunctis" value="Podatus Subpunctis">Podatus Subpunctis</option>\n' +
-                                '<option id="group_podatus_subpunctis_resupinus" value="Podatus Subpunctis Resupinus">Podatus Subpunctis Resupinus</option>\n' +
-                                '<option id="group_epiphonus" value="Epiphonus">Epiphonus</option>\n' +
-                                '<option id="group_scandicus" value="Scandicus">Scandicus</option>\n' +
-                                '<option id="group_scandicus_flexus" value="Scandicus Flexus">Scandicus Flexus</option>\n' +
-                                '<option id="group_scandicus_subpunctis" value="Scandicus Subpunctis">Scandicus Subpunctis</option>\n' +
-                                '<option id="group_torculus" value="Torculus">Torculus</option>\n' +
-                                '<option id="group_torculus_respinus" value="Torculus Resupinus">Torculus Resupinus</option>\n' +
-                                '<option id="group_porrectus" value="Porrectus">Porrectus</option>\n' +
-                                '<option id="group_porrectus_flexus" value="Porrectus Flexus">Porrectus Flexus</option>\n' +
-                                '<option id="group_porrectus_subpunctis" value="Porrectus Subpunctis">Porrectus Subpunctis</option>\n' +
-                                '<option id="group_porrectus_subpunctis_resupinus" value="Porrectus Subpunctis Resupinus">Porrectus Subpunctis Resupinus</option>\n' +
-                                '<option id="group_compound" value="Compound">Compound</option></select>' +
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button>' +
                                 '<button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
                                 '<li><button title="Undo" id="btn_undo" class="btn"> Undo</button>' +
@@ -2790,7 +2791,6 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
 
     // grey out edit buttons by default
     $('#btn_delete').toggleClass('disabled', true);
-    $('#group_shape').prop('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
     $('#btn_mergesystems').toggleClass('disabled', true);
 
@@ -2798,21 +2798,21 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
 
 Toe.View.SquareNoteInteraction.prototype.insertEditNeumeSubControls = function() {
     if ($("#menu_editpunctum").length == 0) {
-        $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Ornamentation</li>\n' +
-                                  '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
-                                  '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
-                                  '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
-                                  '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' + 
-                                  '<br/><li class="nav-header">Attributes</li>\n' +
-                                  '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' + 
-                                  'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' + 
+        $("#sidebar-edit").append('<span id="menu_editpunctum"><br/><li class="nav-header">Change Neume Type</li>' +
+                                  '<li><div class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown">\n' +
+                                  'Head shape <span class="caret"></span></a><ul class="dropdown-menu">\n' +
                                   '<li><a id="head_punctum">punctum</a></li>\n' +
                                   '<li><a id="head_punctum_inclinatum">punctum inclinatum</a></li>\n' +
                                   '<li><a id="head_punctum_inclinatum_parvum">punctum inclinatum parvum</a></li>\n' +
                                   '<li><a id="head_cavum">cavum</a></li>\n' +
                                   '<li><a id="head_virga">virga</a></li>\n' +
-                                  '<li><a id="head_quilisma">quilisma</a></li>\n' +
-                                  '</ul></div></span>');
+                                  '<li><a id="head_quilisma">quilisma</a></li></div>\n' +
+                                  '<li class="nav-header">Ornamentation</li>\n' +
+                                  '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
+                                  '<button id="edit_chk_dot" class="btn">&#149; Dot</button>\n' +
+                                  '<button id="edit_chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
+                                  '<button id="edit_chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li>\n' +
+                                  '</ul></span>');
     }
 }
 
