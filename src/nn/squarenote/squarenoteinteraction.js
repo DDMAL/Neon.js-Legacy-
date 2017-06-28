@@ -1148,7 +1148,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             }
             // regular neume insertion
             else {
-                console.log(gui);
                 var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
                 var sModel = gui.page.getClosestSystem(coords);
 
@@ -2212,8 +2211,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
                 if (sNextModel) {
                     args["beforeid"] = sNextModel.id;
                 }
-                $(nModel).trigger("vSelectDrawing");
-                gui.rendEng.repaint();
 
                 // Posting to the MEI
                 $.post(gui.apiprefix + "/insert/neume", args, function (data) {
@@ -2284,7 +2281,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
                     });
             }
         });
-        //window.location.reload();
     }
 };
 
@@ -2895,7 +2891,8 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button>' +
                                 '<button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
                                 '<li><button title="Undo" id="btn_undo" class="btn"> Undo</button>' +
-                                '<li><button title="Duplicate" id="btn_duplicate" class="btn"> Duplicate</button>' +
+                                // duplicate is unfinished functionality. Uncomment and refer to handleDuplicate() to continue working on it.
+                                // '<li><button title="Duplicate" id="btn_duplicate" class="btn"> Duplicate</button>' +
                                 '<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
                                 '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
