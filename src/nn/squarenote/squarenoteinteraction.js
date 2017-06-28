@@ -105,6 +105,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
     // Unbinding first to avoid stacking
     $("#btn_delete").unbind("click");
+    $("#btn_duplicate").unbind("click");
     $("#group_shape").unbind("change");
     $("#btn_ungroup").unbind("click");
     $("#btn_mergesystems").unbind("click");
@@ -115,6 +116,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
     $("#btn_refresh").bind("click.edit", {gui: gui}, gui.handleRefresh);
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
+    $("#btn_duplicate").bind("click.edit", {gui: gui}, gui.handleDuplicate);
     $("#group_shape").bind("change", {gui: gui, modifier: ""}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_mergesystems").bind("click.edit", {gui: gui}, gui.handleMergeSystems);
@@ -1146,6 +1148,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             }
             // regular neume insertion
             else {
+                console.log(gui);
                 var coords = {x: gui.punctDwg.left, y: gui.punctDwg.top};
                 var sModel = gui.page.getClosestSystem(coords);
 
@@ -2141,6 +2144,150 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     gui.deleteActiveSelection(e.data.gui);
 };
 
+Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
+    var gui = e.data.gui;
+
+    var selection = gui.rendEng.canvas.getActiveGroup();
+    if(!selection) {
+       var selection =  gui.rendEng.canvas.getActiveObject();
+    }
+
+    if (selection) {
+        var elements = new Array();
+        if (selection.eleRef) {
+            elements.push(selection);
+        }
+        else {
+            $.each(selection.objects, function(ind, el) {
+                elements.push(el);
+            });
+        }
+        $.each(elements, function (oInd, o) {
+            var ele =  o.eleRef;
+            var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+            var args = {ulx: outbb[0] + 30, uly: outbb[1], lrx: outbb[2] + 30, lry: outbb[3]};
+            var sModel = ele.system;
+
+            if (ele instanceof Toe.Model.Neume) {
+                //creating neume to post to new system
+                var nModel = new Toe.Model.SquareNoteNeume();
+
+                // TODO: get these ornaments to transfer properly, look at insert punctum code
+                // var ornaments = new Array();
+                // args["dotform"] = null;
+                // args["episemaform"] = null;
+                var pname = ele.components[0].pname;
+                var oct = ele.components[0].oct;
+
+                args["pname"] = pname;
+                args["oct"] = oct;
+                args["name"] = ele.name;
+
+                nModel.setBoundingBox(outbb);
+
+                var nc = new Toe.Model.SquareNoteNeumeComponent(pname, oct, {type: ele.components[0].props.type});
+                nModel.addComponent(nc);
+
+                // instantiate neume view and controller
+                var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+                var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
+
+                nModel.name = ele.name;
+                nModel.rootSystemPos = ele.rootSystemPos;
+                nModel.system = ele.system;
+                nModel.typeid = ele.typeid;
+                nModel.zone = {ulx: outbb[0] + (gui.punctWidth * 2), uly: outbb[1], lrx: outbb[2] + (gui.punctWidth * 2), lry: outbb[3]};
+
+                // mount neume on system
+                var nInd = ele.system.addNeume(nModel);
+
+                if (nInd == 1) {
+                    var prevSystem = gui.page.getPreviousSystem(sModel);
+                    if (prevSystem) {
+                        gui.handleUpdatePrevCustos(pname, oct, prevSystem);
+                    }
+                }
+
+                var sNextModel = gui.page.getNextSystem(ele.system);
+                if (sNextModel) {
+                    args["beforeid"] = sNextModel.id;
+                }
+                $(nModel).trigger("vSelectDrawing");
+                gui.rendEng.repaint();
+
+                // Posting to the MEI
+                $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                    nModel.id = JSON.parse(data).id;
+                })
+                    .error(function () {
+                        gui.showAlert("Server failed to insert neume. Client and server are not synchronized.");
+                    });
+            }
+            if (ele instanceof Toe.Model.Custos) {
+                var pname = ele.pname;
+                var oct = ele.oct;
+
+                var cModel = new Toe.Model.Custos(pname, oct);
+
+                args["pname"] = pname;
+                args["oct"] = oct;
+
+                cModel.setBoundingBox(outbb);
+
+                // instantiate custos view and controller
+                var cView = new Toe.View.CustosView(gui.rendEng);
+                var cCtrl = new Toe.Ctrl.CustosController(cModel, cView);
+
+                // mount the custos on the system
+                ele.system.setCustos(cModel);
+
+                args["id"] = cModel.id
+                // get id of the next system element
+                var nextSystem = gui.page.getNextSystem(ele.system);
+
+                if (nextSystem) {
+                    args["beforeid"] = nextSystem.id;
+                }
+
+                // update underlying MEI file
+                $.post(gui.apiprefix + "/insert/custos", args, function(data) {
+                    cModel.id = JSON.parse(data).id;
+                }).error(function() {
+                    gui.showAlert("Server failed to insert custos. Client and server are not synchronized.");
+                });
+            }
+            if (ele instanceof Toe.Model.Division) {
+                console.log(ele.key);
+                // creating division to post to new system
+                var division = new Toe.Model.Division(ele.key);
+                division.setBoundingBox(outbb);
+
+                // instantiate division view and controller
+                var dView = new Toe.View.DivisionView(gui.rendEng);
+                var dCtrl = new Toe.Ctrl.DivisionController(division, dView);
+
+                var nInd = ele.system.addDivision(division);
+
+                args["type"] = ele.key.slice(4);
+
+                var sNextModel = gui.page.getNextSystem(ele.system);
+                if(sNextModel) {
+                    args["beforeid"] = sNextModel.id;
+                }
+
+                // send insert division command to server to change underlying MEI
+                $.post(gui.apiprefix + "/insert/division", args, function (data) {
+                    division.id = JSON.parse(data).id;
+                })
+                    .error(function () {
+                        gui.showAlert("Server failed to insert division. Client and server are not synchronized.");
+                    });
+            }
+        });
+        //window.location.reload();
+    }
+};
+
 Toe.View.SquareNoteInteraction.prototype.handleRefresh = function() {
         window.location.reload();
     };
@@ -2520,6 +2667,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectSelected = function(aO
     this.removeEditSubControls();
 
     $('#btn_delete').toggleClass('disabled', false);
+    $('#btn_duplicate').toggleClass('disabled', false);
 
     var selection = this.rendEng.canvas.getActiveObject();
     var ele = selection.eleRef;
@@ -2559,6 +2707,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(
     this.hideInfo();
     this.removeEditSubControls();
     $('#btn_delete').toggleClass('disabled', true);
+    $('#btn_duplicate').toggleClass('disabled', true);
     $('#group_shape').prop('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
     $('#btn_mergesystems').toggleClass('disabled', true);
@@ -2595,6 +2744,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(
     });
 
     $('#btn_delete').toggleClass('disabled', false);
+    $('#btn_duplicate').toggleClass('disabled', false);
 
     if (toNeumify < 2) {
         $('#group_shape').prop('disabled', true);
@@ -2745,6 +2895,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button>' +
                                 '<button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
                                 '<li><button title="Undo" id="btn_undo" class="btn"> Undo</button>' +
+                                '<li><button title="Duplicate" id="btn_duplicate" class="btn"> Duplicate</button>' +
                                 '<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
                                 '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
@@ -2754,6 +2905,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
     // grey out edit buttons by default
     $('#btn_delete').toggleClass('disabled', true);
     $('#group_shape').prop('disabled', true);
+    $('#btn_duplicate').toggleClass('disabled', true);
     $('#btn_ungroup').toggleClass('disabled', true);
     $('#btn_mergesystems').toggleClass('disabled', true);
 
@@ -2948,6 +3100,7 @@ Toe.View.SquareNoteInteraction.prototype.removeEditSubControls = function () {
 
 Toe.View.SquareNoteInteraction.prototype.unbindEditControls = function() {
     $("#btn_delete").unbind("click.edit");
+    $("#btn_duplicate").unbind("click.edit");
     $("#group_shape").unbind("change");
 }
 
