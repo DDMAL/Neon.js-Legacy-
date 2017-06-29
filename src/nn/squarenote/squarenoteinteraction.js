@@ -2143,6 +2143,9 @@ Toe.View.SquareNoteInteraction.prototype.handleDelete = function(e) {
     gui.deleteActiveSelection(e.data.gui);
 };
 
+// TODO: Make duplication functional
+// Duplicate works if you refresh the page but this interferes with the undo functionality. ALso need to add
+// functionality for ornaments.
 Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
     var gui = e.data.gui;
 
