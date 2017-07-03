@@ -157,17 +157,18 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
             });
         }
 
-        // temporary code for setting global scale
-        $("#sidebar-app").append('<li>\n<label for="sldr_elementScale"><b>Element Scale (Experimental)</b>:</label>\n' +
-            '<input id="sldr_elementScale" style="width: 95%;" type="range" name="elementScale" ' +
-            'min="0.0" max="1.0" step="0.02" value="' + gui.rendEng.getGlobalScale() + '" />\n</li>');
-
-        $("#sldr_elementScale").bind("change", function() {
-            var scale = $(this).val();
-            gui.rendEng.setGlobalScale(scale);
-
-            gui.rendEng.repaint();
-        });
+        // TODO: finish global scale
+        // this is the beginning of the implementation of changing he scale. Uncomment to continue development.
+        // $("#sidebar-app").append('<li>\n<label for="sldr_elementScale"><b>Element Scale (Experimental)</b>:</label>\n' +
+        //     '<input id="sldr_elementScale" style="width: 95%;" type="range" name="elementScale" ' +
+        //     'min="0.0" max="1.0" step="0.02" value="' + gui.rendEng.getGlobalScale() + '" />\n</li>');
+        //
+        // $("#sldr_elementScale").bind("change", function() {
+        //     var scale = $(this).val();
+        //     gui.rendEng.setGlobalScale(scale);
+        //
+        //     gui.rendEng.repaint();
+        // });
     }
 }
 
