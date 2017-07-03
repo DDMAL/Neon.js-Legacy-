@@ -2287,9 +2287,16 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
     }
 };
 
-Toe.View.SquareNoteInteraction.prototype.handleRefresh = function() {
-        window.location.reload();
-    };
+Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e) {
+    var gui = e.data.gui;
+    console.log(gui);
+    var canvas = gui.rendEng.canvas;
+    //window.location.reload();
+    var ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0, canvas.width, canvas.height);
+    canvas.renderAll();
+
+};
 
 Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
     // delete files in undo folder
