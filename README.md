@@ -22,7 +22,7 @@ Setup
 cp conf.py{.dist,}
 ```
 
-2. Edit the configuration file conf.py and set MEI_DIRECTORY somewhere writable. Create 4 subdirectories in the MEI_DIRECTORY, `undo`, `backup`, and `squarenote`. Backup will store the original state of uploaded MEI files, which can be reverted to using the editor interface. Undo is for the undo feature. The other two are for storing the mei files of specific types.
+2. Edit the configuration file conf.py and set MEI_DIRECTORY somewhere writable. Create 3 subdirectories in the MEI_DIRECTORY, `undo`, `backup`, and `squarenote`. Backup will store the original state of uploaded MEI files, which can be reverted to using the editor interface. Undo is for the undo feature. Squarenote is for storing the mei files of specific types.
 
 3. Now compile the Neon.js code. Yes, compiling JavaScript. Weird, right?
 ```
@@ -37,6 +37,13 @@ python server.py [port]
 If no port is provided, the default port is 8080.
 
 Visit the Neon.js web application at http://localhost:[port].
+
+Usage
+-----
+
+Make sure to checkout the built-in tutorial to familiarize yourself with Neon.js, which can be accessed from the homepage.
+
+For more detailed information on all our functionality, please check our wiki pages at https://github.com/DDMAL/Neon.js/wiki
 
 Development
 -----------
