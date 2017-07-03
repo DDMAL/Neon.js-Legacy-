@@ -1017,14 +1017,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     var hasHorizEpisema = false;
     var hasVertEpisema = false;
 
-    // using ddslick select library for images
-    $("#head_shape").ddslick({
-        onSelected: function(data) {
-            noteType = data.selectedData.value;
-            typeName = data.selectedData.text;
-        }
-    });
-
     // keep the scope of the punctum drawing insert local
     // to not pollute the global namespace when inserting other
     // musical elements
@@ -1039,7 +1031,34 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         var elements = {modify: new Array(), fixed: new Array()};
 
         var punctPos = null;
-        var punctGlyph = gui.rendEng.getGlyph("plus");
+
+        if (typeName == "Punctum"){
+            var punctGlyph = gui.rendEng.getGlyph("punctum");
+        }
+
+        else if(typeName == "Punctum Inclinatum"){
+            var punctGlyph = gui.rendEng.getGlyph("diamond");
+        }
+
+        else if(typeName == "Punctum Inclinatum"){
+            var punctGlyph = gui.rendEng.getGlyph("diamond_small");
+        }
+
+        else if(typeName == "Cavum"){
+            var punctGlyph = gui.rendEng.getGlyph("whitepunct");
+        }
+
+        else if(typeName == "Virga"){
+            var punctGlyph = gui.rendEng.getGlyph("punctum");
+        }
+
+        else if(typeName == "Quilisma"){
+            var punctGlyph = gui.rendEng.getGlyph("quilisma");
+        }
+
+        else if(typeName == "Custos"){
+            var punctGlyph = gui.rendEng.getGlyph("custos");
+        }
         if (initial) {
             // draw the punctum off the screen, initially
             var punctPos = {left: -50, top: -50};
@@ -1081,8 +1100,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         gui.punctDwg = gui.rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0]; 
     };
 
+    // using ddslick select library for images
+    $("#head_shape").ddslick({
+        onSelected: function(data) {
+            noteType = data.selectedData.value;
+            typeName = data.selectedData.text;
+            updateFollowPunct(true);
+        }
+    });
     // put the punctum off the screen for now
-    updateFollowPunct(true);
 
     // render transparent punctum at pointer location
     gui.rendEng.canvas.observe('mouse:move', function(e) {
