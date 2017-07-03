@@ -255,7 +255,7 @@ THE SOFTWARE.
             // Return early if this element already has a plugin instance
             if (element.data('neon'))
             {
-                return;
+                element.empty();
             }
 
             // pass options to plugin constructor

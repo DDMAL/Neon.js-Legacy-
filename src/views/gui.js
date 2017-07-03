@@ -126,7 +126,7 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
     var gui = this;
 
     // create container for appearance sliders
-    if (toggles.sldr_bgImgOpacity || toggles.sldr_glyphOpacity) {
+    if ($("#sidebar-app").length == 0) {
         $(parentDivId).prepend('<span id="sidebar-app"><li class="nav-header">Appearance</li>\n</span>');
 
         // create background image opacity slider
@@ -180,7 +180,7 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
     });
 
     // insert mode hotkey
-    Mousetrap.bind(['r', 'Ctrl+r', 'Command+r'], function() {
+    Mousetrap.bind(['q', 'Ctrl+q', 'Command+q'], function() {
         $("#btn_insert").click();
         return false;
     });

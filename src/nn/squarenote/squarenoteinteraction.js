@@ -123,6 +123,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_mergesystems").unbind("click");
     $("#btn_stafflock").unbind("click");
     $("#btn_selectall").unbind("click");
+    $("#btn_refresh").unbind("click");
 
     // Linking the buttons to their respective functions
     $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
@@ -2327,12 +2328,19 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e) {
     var gui = e.data.gui;
-    console.log(gui);
-    var canvas = gui.rendEng.canvas;
-    //window.location.reload();
-    var ctx = canvas.getContext("2d");
-    ctx.clearRect(0,0, canvas.width, canvas.height);
-    canvas.renderAll();
+
+    apiprefix = gui.apiprefix;
+    cutprefix = apiprefix.slice(5);
+
+    $('#neon-wrapper').neon({
+        glyphpath: "/static/img/neumes_concat.svg",
+        meipath: "/file" + cutprefix + ".mei",
+        bgimgpath: "/file" + cutprefix + ".jpg",
+        bgimgopacity: 0.5,
+        documentType: "liber",
+        apiprefix: apiprefix,
+        width: 1200 // enforce width
+    });
 
 };
 
@@ -2942,6 +2950,12 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         $("#btn_stafflock").click();
         return false;
     });
+
+    Mousetrap.bind(['meta+r'], function() {
+        $("#btn_refresh").click();
+        return false;
+    });
+
 
     // Hotkeys for moving objects
     Mousetrap.bind(['up'], function () {
