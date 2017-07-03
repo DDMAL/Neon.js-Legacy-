@@ -2718,7 +2718,7 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
 
     Mousetrap.bind(['Ctrl+a', 'Command+a', 'meta+a'], function() {
         $("#btn_selectall").trigger("click.edit", {gui: gui}, gui.handleSelectAll);
-        return false;2486
+        return false;
     });
 
     Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
@@ -2743,6 +2743,11 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
+    Mousetrap.bind(['Ctrl+z', 'Command+z', 'meta+z'], function() {
+        $("#btn_undo").click();
+        return false;
+    });
+
     Mousetrap.bind(['f'], function() {
         $("#edit_rad_f").click();
         $("#rad_fah").click();
@@ -2764,6 +2769,17 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         gui.handleArrowKeys("down");
         return false;
     });
+
+    Mousetrap.bind(['tab'], function() {
+        if($("#btn_insert").hasClass("active")){
+            $("#btn_edit").click();
+        }
+        else {
+            $("#btn_insert").click();
+        }
+
+        return false;
+    })
 }
 
 Toe.View.SquareNoteInteraction.prototype.bindAlerts = function () {

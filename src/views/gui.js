@@ -173,13 +173,13 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
 
 Toe.View.GUI.prototype.bindHotkeys = function() {
     // edit mode hotkey
-    Mousetrap.bind(['e', 'Ctrl+e', 'Command+e'], function() {
+    Mousetrap.bind(['esc', 'e', 'Ctrl+e', 'Command+e'], function() {
         $("#btn_edit").click();
         return false;
     });
 
     // insert mode hotkey
-    Mousetrap.bind(['i', 'Ctrl+i', 'Command+i'], function() {
+    Mousetrap.bind(['r', 'Ctrl+r', 'Command+r'], function() {
         $("#btn_insert").click();
         return false;
     });
@@ -200,4 +200,5 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
         this.rendEng.repaint();
         return false;
     }, this), "keyup");
+
 }
