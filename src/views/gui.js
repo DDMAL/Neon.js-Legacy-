@@ -61,6 +61,7 @@ Toe.View.GUI.prototype.setupNavBar = function() {
 
     var nav_file_dropdown_parent = "#nav_file_dropdown";
     // check if the file menu is included in the template (avoid including bootstrap.js if possible)
+    $(nav_file_dropdown_parent).children("li").remove();
     if ($(nav_file_dropdown_parent).length) {
         $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li>' +
                                            '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
