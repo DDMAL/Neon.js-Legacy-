@@ -922,7 +922,8 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
         }
         deleteSystem(systems[0]);
         deleteSystem(systems[1]);
-        gui.showAlert("The changes you've made require a refresh to appear.");
+        gui.showInfo("Merging Systems, this may take a minute!")
+        gui.handleRefresh(e);
     }
 }
 
@@ -1606,6 +1607,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
 
 Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     var gui = e.data.gui;
+    var passingE = e;
     gui.unbindEventHandlers();
     gui.removeInsertSubControls();
 
@@ -1709,7 +1711,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
 
             // If this is the first clef on the system tell the user to refresh
             if (system.elements.length == 1) {
-                gui.showAlert("The changes you've made require a refresh to appear.");
+                gui.showInfo("The changes you've made required a refresh to appear.");
             }
 
             // gather new pitch information of affected pitched elements
@@ -1742,6 +1744,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             // send insert clef command to the server to change underlying MEI
             $.post(gui.apiprefix + "/insert/clef", args, function (data) {
                     clef.id = JSON.parse(data).id;
+                    gui.handleRefresh(passingE);
                 })
                 .error(function () {
                     gui.showAlert("Server failed to insert clef. Client and server are not synchronized.");
@@ -2898,7 +2901,7 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
-    Mousetrap.bind(['u', 'Ctrl+u', 'Command+u'], function() {
+    Mousetrap.bind(['u'], function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
     });
@@ -2908,34 +2911,35 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
-    Mousetrap.bind(['Ctrl+a', 'Command+a', 'meta+a'], function() {
+    Mousetrap.bind(['meta+a'], function() {
         $("#btn_selectall").trigger("click.edit", {gui: gui}, gui.handleSelectAll);
         return false;
     });
 
-    Mousetrap.bind(['n', 'Ctrl+n', 'Command+n'], function() {
+    Mousetrap.bind(['n'], function() {
         $("#rad_punctum").click();
         return false;
     });
 
-    Mousetrap.bind(['d', 'Ctrl+d', 'Command+d'], function() {
+    Mousetrap.bind(['d'], function() {
         $("#rad_division").click();
         return false;
     });
 
-    Mousetrap.bind(['s', 'Ctrl+s', 'Command+s'], function() {
+    Mousetrap.bind(['s'], function() {
         $("#rad_system").click();
         return false;
     });
 
-    Mousetrap.bind(['c', 'Ctrl+c', 'Command+c'], function() {
+    Mousetrap.bind(['c'], function() {
         $("#rad_clef").click();
+        $("#rad_clef").trigger('click.insert', {gui:gui}, gui.handleInsertClef);
         $("#edit_rad_c").click();
         $("#rad_doh").click();
         return false;
     });
 
-    Mousetrap.bind(['Ctrl+z', 'Command+z', 'meta+z'], function() {
+    Mousetrap.bind(['meta+z'], function() {
         $("#btn_undo").click();
         return false;
     });
