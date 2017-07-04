@@ -117,6 +117,12 @@
 <path d="M31,208.5c16.667-7,37-10.5,61-10.5c22.666,0,42.334,3.5,59,10.5s27.334,10.5,32,10.5V38
 	C171,12,140.666-1,92-1C42-1,11.333,12,0,38v181C4,219,14.333,215.5,31,208.5z"/>
 </svg>
+<svg version="1.1" id="virga" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	  width="183px" height="220px" viewBox="0 0 640 640" enable-background="new 0 0 183 210.889" xml:space="preserve">
+<path d="M92 199C114.67 199 134.33 202.5 151 209.5C167.67 216.5 178.33 220 183 220C183 201.9 183 57.1 183 39C171
+	 13 140.67 0 92 0C42 0 11.33 13 0 39C0 57.1 0 201.9 0 220C4 220 14.33 216.5 31 209.5C47.67 202.5 68 199 92 199Z"></path>
+<path d="M173.31 45.91L183 45.91L183 568.37L173.31 568.37L173.31 45.91Z"></path>
+</svg>
 <svg version="1.1" id="quilisma" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="183px" height="210.889px" viewBox="0 0 183 210.889" enable-background="new 0 0 183 210.889" xml:space="preserve">
 <path d="M6,154c0,42.667,10.667,61.333,32,56c8-1.333,12.333-10,13-26s4.333-24,11-24s11.333,6.333,14,19

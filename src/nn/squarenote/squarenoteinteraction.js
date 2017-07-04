@@ -1050,7 +1050,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         }
 
         else if(typeName == "Virga"){
-            var punctGlyph = gui.rendEng.getGlyph("punctum");
+            var punctGlyph = gui.rendEng.getGlyph("virga");
         }
 
         else if(typeName == "Quilisma"){
