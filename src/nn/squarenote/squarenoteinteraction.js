@@ -73,7 +73,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
     this.bindAlerts();
 
     //empty old undo files
-    this.handleDeleteUndos(this);
+    window.onload = $.proxy(function() {this.handleDeleteUndos(this);}, this);
 };
 
 Toe.View.SquareNoteInteraction.prototype = new Toe.View.Interaction();
@@ -124,6 +124,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_stafflock").unbind("click");
     $("#btn_selectall").unbind("click");
     $("#btn_refresh").unbind("click");
+    $("#btn_undo").unbind("click");
 
     // Linking the buttons to their respective functions
     $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
@@ -923,7 +924,8 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
         deleteSystem(systems[0]);
         deleteSystem(systems[1]);
         gui.showInfo("Merging Systems, this may take a minute!")
-        gui.handleRefresh(e);
+        var call = "merge";
+        gui.handleRefresh(e, call);
     }
 }
 
@@ -2329,9 +2331,12 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
     }
 };
 
-Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e) {
+Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
     var gui = e.data.gui;
 
+    if(call){
+        gui.handleDeleteUndos(gui);
+    }
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
 
@@ -2357,10 +2362,11 @@ Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
 
 Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
     var gui = e.data.gui;
+
     // move undo mei file to working directory
     $.post(gui.apiprefix + "/undo", function() {
         // when the backup file has been restored, reload the page
-        window.location.reload();
+        gui.handleRefresh(e);
     })
         .error(function() {
             // show alert to user
