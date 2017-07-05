@@ -2357,6 +2357,7 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
         width: 1200 // enforce width
     });
 
+    $("#btn_stafflock").prop("checked", true);
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
