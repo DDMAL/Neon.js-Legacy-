@@ -1651,6 +1651,9 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
     // handle the actual insertion
     gui.rendEng.canvas.observe("mouse:up", function(e) {
         var pnt = gui.rendEng.canvas.getPointer(e.e);
+
+        var autoRefresh = false;
+
         // check for the pointer being in the canvas
         if (pnt.x > 0 && pnt.x < gui.rendEng.canvas.getWidth() && pnt.y > 0 && pnt.y < gui.rendEng.canvas.getHeight()) {
             // get coords
@@ -1713,6 +1716,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
 
             // If this is the first clef on the system tell the user to refresh
             if (system.elements.length == 1) {
+                autoRefresh = true;
                 gui.showInfo("The changes you've made required a refresh to appear.");
             }
 
@@ -1746,7 +1750,10 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             // send insert clef command to the server to change underlying MEI
             $.post(gui.apiprefix + "/insert/clef", args, function (data) {
                     clef.id = JSON.parse(data).id;
-                    gui.handleRefresh(passingE);
+                    if (autoRefresh) {
+                        gui.handleRefresh(passingE);
+
+                    }
                 })
                 .error(function () {
                     gui.showAlert("Server failed to insert clef. Client and server are not synchronized.");

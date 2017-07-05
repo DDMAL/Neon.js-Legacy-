@@ -27,6 +27,8 @@ THE SOFTWARE.
  * @extends Toe.Model.Page
  */
 Toe.Model.SquareNotePage = function(documentType) {
+    this.systems = new Array();
+
     this.documentType = documentType;
 };
 
