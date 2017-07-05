@@ -1285,8 +1285,10 @@ var drawLiberNeume = function(neume) {
 
             // if punctums are right on top of each other, spread them out a bit
             yoffset = 0;
+            xoffset = 0;
             if (Math.abs(neume.components[3].pitchDiff - neume.components[2].pitchDiff) == 1) {
                 yoffset = 1
+                xoffset = (2 * ncGlyphs[0].centre[0]);
             }
 
             // draw line connecting swoosh and podatus
@@ -1306,7 +1308,7 @@ var drawLiberNeume = function(neume) {
 
             // second punctum
             nc_x.push(nc_x[0]);
-            var glyphPunct2 = ncGlyphs[3].clone().set({left: nc_x[1], top: nc_y[3] - yoffset});
+            var glyphPunct2 = ncGlyphs[3].clone().set({left: nc_x[1] + xoffset, top: nc_y[3] - yoffset});
             elements.modify.push(glyphPunct2);
 
             // render dots for everything after the swoosh
