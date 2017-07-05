@@ -1537,7 +1537,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
     // Create the drawing.
     gui.systemDrawing = null;
     var numberOfLines = widestSystem.props.numLines;
-    var width = widestSystem.getWidth();
+    var width = widestSystem.getWidth()/6;
     var deltaY = widestSystem.delta_y;
     var elements = {fixed: new Array(), modify: new Array()};
     for (var li = 0; li < numberOfLines; li++) {
