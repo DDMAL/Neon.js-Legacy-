@@ -2419,7 +2419,7 @@ Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) 
             left: selection.left,
             right: selection.right,
             hasBorders: true,
-            borderColor: "rgba(102,153,255,1.0)"
+            borderColor: "red"
         });
         switch(direction) {
             case "up":
@@ -2817,7 +2817,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCleared = function(
 Toe.View.SquareNoteInteraction.prototype.handleEventSelectionCreated = function(aObject) {
     var selection = aObject.target;
     selection.hasControls = false;
-    selection.borderColor = 'rgba(102,153,255,1.0)';
+    selection.borderColor = 'red';
     // disable/enable buttons
     var toNeumify = 0;
     var toUngroup = 0;

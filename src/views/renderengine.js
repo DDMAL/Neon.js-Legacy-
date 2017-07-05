@@ -227,7 +227,7 @@ Toe.View.RenderEngine.prototype.draw = function(elements, options) {
         val.lockUniScaling = opts.lockUniScaling;
         val.lockMovementX = opts.lockMovementX;
         val.lockMovementY = opts.lockMovementY;
-        val.borderColor = 'rgba(102,153,255,1.0)';
+        val.borderColor = 'red';
         val.opacity = opts.opacity;
         val.eleRef = opts.eleRef; // important: attaches element reference to fabric group
     });
