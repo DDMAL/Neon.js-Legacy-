@@ -1599,6 +1599,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
                     gui.postSystemBreakEditOrder(nextSystem.id, nextSystem.orderNumber);
                     nextSystem = gui.page.getNextSystem(nextSystem);
                 }
+                $("#btn_edit").click();
             })
             .error(function() {
                 gui.showAlert("Server failed to insert system break.  Client and server are not synchronized.");
