@@ -653,7 +653,7 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
     });
 
     if(!elementStorage){
-        gui.showAlert("Neither system is empty, merge cannot be done");
+        gui.showAlert("Merge cannot be done. System is missing a clef or neither system is empty.");
         return;
     }
 
