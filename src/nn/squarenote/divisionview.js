@@ -80,7 +80,7 @@ Toe.View.DivisionView.prototype.renderDivision = function(division) {
             break;
     }
     
-	this.drawing = this.rendEng.draw(elements, {group: true, selectable: division.props.interact, eleRef: division})[0];
+	this.drawing = this.rendEng.draw(elements, {group: true, selectable: division.props.interact, lockMovementY: true, eleRef: division})[0];
 }
 
 /**

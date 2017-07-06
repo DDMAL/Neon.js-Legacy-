@@ -2691,16 +2691,74 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                     });
             }
             else if (ele instanceof Toe.Model.Custos) {
+                // we have a custos, this is a pitch shift
+
                 var left = element.left;
                 var top = element.top;
-
-                // only need to reset position if part of a selection with multiple elements
-                // since single selection move disabling is handled by the lockMovementX/Y parameters.
                 if (elements.length > 1) {
-                    // return the custos to the original position
-                    element.left = left + delta_x;
-                    element.top = top + delta_y;
+                    // calculate object's absolute positions from within selection group
+                    left = selection.left + element.left;
+                    top = selection.top + element.top;
                 }
+
+                // get y position of first neume component
+                var nc_y = ele.system.zone.uly - ele.rootSystemPos*ele.system.delta_y/2;
+                var finalCoords = {x: left, y: nc_y - delta_y};
+
+                var sModel = gui.page.getClosestSystem(finalCoords);
+
+                // snap to system
+                var snapCoords = sModel.getSystemSnapCoordinates(finalCoords, element.currentWidth, {ignoreEle: ele});
+
+                var newRootSystemPos = Math.round((sModel.zone.uly - snapCoords.y) / (sModel.delta_y/2));
+                // construct bounding box, hint for the new drawing: bounding box changes when dot is repositioned
+                var ulx = snapCoords.x-(element.currentWidth/2);
+                var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
+                var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
+                ele.setBoundingBox(bb);
+
+                var oldRootSystemPos = ele.rootSystemPos;
+                // derive pitch name and octave of notes in the neume on the appropriate system
+                var noteInfo = sModel.calcPitchFromCoords({x: snapCoords.x, y: snapCoords.y});
+                ele.setRootNote(noteInfo["pname"], noteInfo["oct"]);
+
+                // remove the old neume
+                $(ele).trigger("vEraseDrawing");
+                ele.system.removeElementByRef(ele);
+
+                // mount the new neume on the most appropriate system
+                ele.padding = 2;
+                var nInd = sModel.setCustos(ele);
+                if (elements.length == 1) {
+                    $(ele).trigger("vSelectDrawing");
+                }
+
+                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
+                if (oldRootSystemPos != newRootSystemPos) {
+                    // this is a pitch shift
+                    args["pname"] = ele.pname;
+                    args["oct"] = ele.oct;
+                }
+                else {
+                    args.pitchInfo = null
+                }
+
+                // get next element to insert before
+                if (nInd + 1 < sModel.elements.length) {
+                    args["beforeid"] = sModel.elements[nInd+1].id;
+                }
+                else {
+                    // insert before the next system break (system)
+                    var sNextModel = gui.page.getNextSystem(sModel);
+                    args["beforeid"] = sNextModel.id;
+                }
+
+                // send pitch shift command to server to change underlying MEI
+                $.post(gui.apiprefix + "/move/custos", args)
+                    .error(function() {
+                        gui.showAlert("Server failed to move neume. Client and server are not synchronized.");
+                    });
             }
         });
         if (elements.length > 1) {

@@ -80,7 +80,7 @@ Toe.View.CustosView.prototype.renderCustos = function(custos) {
     var custosDwg = glyphCustos.clone().set({left: nc_x, top: custos_y - glyphCustos.centre[1]/2});
 
     this.drawLedgerLines(custos.rootSystemPos, nc_x, 4*glyphCustos.centre[0], system);
-	this.drawing = this.rendEng.draw({fixed: [], modify: [custosDwg]}, {selectable: custos.props.interact, group: true, lockMovementX: true, lockMovementY: true, eleRef: custos})[0];
+	this.drawing = this.rendEng.draw({fixed: [], modify: [custosDwg]}, {selectable: true, group: true, lockMovementX: true, lockMovementY: false, eleRef: custos})[0];
 }
 
 /**
