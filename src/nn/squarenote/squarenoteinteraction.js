@@ -125,12 +125,14 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_selectall").unbind("click");
     $("#btn_refresh").unbind("click");
     $("#btn_undo").unbind("click");
+    $("#btn_quickgroup").unbind("quick");
 
     // Linking the buttons to their respective functions
     $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
     $("#btn_refresh").bind("click.edit", {gui: gui}, gui.handleRefresh);
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#btn_duplicate").bind("click.edit", {gui: gui}, gui.handleDuplicate);
+    $("#btn_quickgroup").bind("click.edit", {gui: gui, modifier: ""}, gui.handleQuickNeumify);
     $("#group_shape").bind("change", {gui: gui, modifier: ""}, gui.handleNeumify);
     $("#btn_ungroup").bind("click.edit", {gui: gui}, gui.handleUngroup);
     $("#btn_mergesystems").bind("click.edit", {gui: gui}, gui.handleMergeSystems);
@@ -387,6 +389,126 @@ Toe.View.SquareNoteInteraction.prototype.handleDivisionShapeChange = function(e)
         });
 }
 
+Toe.View.SquareNoteInteraction.prototype.handleQuickNeumify = function(e) {
+    var gui = e.data.gui;
+    var modifier = e.data.modifier;
+
+    // only need to neumify if a group of objects are selected
+    var selection = gui.rendEng.canvas.getActiveGroup();
+    if (selection) {
+        // there is something selected
+        // make sure there are at least 2 neumes on the same system to work with
+        var neumes = new Array();
+        var sModel = null;
+        $.each(selection.getObjects(), function (oInd, o) {
+            if (o.eleRef instanceof Toe.Model.Neume) {
+                if (!sModel) {
+                    sModel = o.eleRef.system;
+                }
+
+                if (o.eleRef.system == sModel) {
+                    neumes.push(o);
+                }
+            }
+        });
+
+        if (neumes.length < 2) {
+            return;
+        }
+
+        // sort the group based on x position (why fabric doesn't do this, I don't know)
+        neumes.sort(function(o1, o2) {
+            return o1.eleRef.zone.ulx - o2.eleRef.zone.ulx;
+        });
+
+        // begin the NEUMIFICATION
+        var newNeume = new Toe.Model.SquareNoteNeume({modifier: modifier});
+
+        numPunct = 0;
+        var nids = new Array();
+        var ulx = Number.MAX_VALUE;
+        var uly = Number.MAX_VALUE;
+        var lry = Number.MIN_VALUE;
+
+        $.each(neumes, function (oInd, o) {
+            var nModel = o.eleRef;
+
+            // grab underlying notes
+            $.merge(newNeume.components, o.eleRef.components);
+            numPunct += o.eleRef.components.length;
+
+            // update neume ids
+            nids.push(o.eleRef.id);
+
+            //calculate object's absolute positions from within selection group
+            var left = selection.left + o.left;
+            var top = selection.top + o.top;
+
+            ulx = Math.min(ulx, left - o.currentHeight / 2);
+            uly = Math.min(uly, top - o.currentHeight / 2);
+            lry = Math.max(lry, top + o.currentHeight / 2);
+        });
+        var lrx = ulx + numPunct * gui.punctWidth;
+
+        // set the bounding box hint of the new neume for drawing
+        var bb = [ulx, uly, lrx, lry];
+        newNeume.setBoundingBox(bb);
+
+        // instantiate neume view and controller
+        var nView = new Toe.View.NeumeView(gui.rendEng, gui.page.documentType);
+        var nCtrl = new Toe.Ctrl.NeumeController(newNeume, nView);
+
+        // render the new neume
+        sModel.addNeume(newNeume);
+
+        // get final bounding box information
+        var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+
+        var typeid = newNeume.typeid;
+
+        // get note head shapes to change in underlying mei
+        var headShapes = $.map(newNeume.components, function (nc) {
+            return nc.props.type;
+        });
+
+        if (nView.drawing.height != 0) {
+            //remove initial grouped neumes
+            $.each(neumes, function (oInd, o) {
+                sModel.removeElementByRef(o.eleRef);
+                gui.rendEng.canvas.remove(o);
+            });
+
+            var data = JSON.stringify({
+                "nids": nids.join(","),
+                "typeid": typeid,
+                "headShapes": headShapes,
+                "ulx": outbb[0],
+                "uly": outbb[1],
+                "lrx": outbb[2],
+                "lry": outbb[3]
+            });
+            // call server neumify function to update MEI
+            $.post(gui.apiprefix + "/neumify", {data: data}, function (data) {
+                // set id of the new neume with generated ID from the server
+                newNeume.id = JSON.parse(data).id;
+                gui.hideAlert();
+            })
+                .error(function () {
+                    gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
+                });
+
+            gui.rendEng.canvas.discardActiveGroup();
+
+            // select the new neume
+            $(newNeume).trigger("vSelectDrawing");
+
+            gui.rendEng.repaint();
+        }
+        else {
+            gui.showAlert("Not a valid grouping. Click on 'Help' to access groupings glossary or select grouping from dropdown.");
+        }
+    }
+}
 Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
     var gui = e.data.gui;
     var modifier = e.data.modifier;
@@ -1747,16 +1869,17 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                 }
             });
 
-            // send insert clef command to the server to change underlying MEI
-            $.post(gui.apiprefix + "/insert/clef", args, function (data) {
-                    clef.id = JSON.parse(data).id;
-                    if (autoRefresh) {
-                        gui.handleRefresh(passingE);
+            var data = JSON.stringify(args);
 
-                    }
-                })
+            // call server neumify function to update MEI
+            $.post(gui.apiprefix + "/insert/clef", {data: data}, function (data) {
+                clef.id = JSON.parse(data).id;
+                if (autoRefresh) {
+                    gui.handleRefresh(passingE);
+                }
+            })
                 .error(function () {
-                    gui.showAlert("Server failed to insert clef. Client and server are not synchronized.");
+                    gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
                 });
         }
     });
@@ -2915,6 +3038,11 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
+    Mousetrap.bind(['g'], function() {
+        $("#btn_quickgroup").trigger('click.edit', {gui:gui, modifier: ""}, gui.handleQuickNeumify);
+        return false;
+    });
+
     Mousetrap.bind(['u'], function() {
         $("#btn_ungroup").trigger('click.edit', {gui:gui}, gui.handleUngroup);
         return false;
@@ -3014,7 +3142,8 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
         $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button>' +
                                 '<button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
-                                '<li><button title="Undo" id="btn_undo" class="btn"> Undo</button>' +
+                                '<li><button title="Undo" id="btn_undo" class="hide"> Undo</button>' +
+                                '<li><button title="Group" id="btn_quickgroup" class="hide" >Group</button>' +
                                 // duplicate is unfinished functionality. Uncomment and refer to handleDuplicate() to continue working on it.
                                 // '<li><button title="Duplicate" id="btn_duplicate" class="btn"> Duplicate</button>' +
                                 '<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
