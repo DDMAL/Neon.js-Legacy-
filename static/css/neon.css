@@ -18,6 +18,10 @@ body {
     margin-left: 420px;
 }
 
+.hide{
+    visibility:hidden;
+}
+
 form#delete-mei {
     display: inline-block;
     margin: 0;

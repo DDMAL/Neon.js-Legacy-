@@ -344,16 +344,20 @@ class UpdateClefShapeHandler(tornado.web.RequestHandler):
 class InsertClefHandler(tornado.web.RequestHandler):
 
     def post(self, file):
-        shape = str(self.get_argument("shape", "")).upper()
-        line = str(self.get_argument("line", ""))
-        before_id = self.get_argument("beforeid", None)
-        pitchInfo = str(self.get_argument("pitchInfo", ""))
+        data = json.loads(self.get_argument("data", ""))
+        shape = str(data["shape"])
+        line = str(data["line"])
+        before_id = str(data["beforeid"])
+        pitchInfo = data["pitchInfo"]
 
         # bounding box
-        lrx = str(self.get_argument("lrx", None))
-        lry = str(self.get_argument("lry", None))
-        ulx = str(self.get_argument("ulx", None))
-        uly = str(self.get_argument("uly", None))
+        try:
+            lrx = str(data["lrx"])
+            lry = str(data["lry"])
+            ulx = str(data["ulx"])
+            uly = str(data["uly"])
+        except KeyError:
+            ulx = uly = lrx = lry = None
 
         mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
         fname = os.path.join(mei_directory, file)
