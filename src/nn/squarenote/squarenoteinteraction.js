@@ -1869,16 +1869,17 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                 }
             });
 
-            // send insert clef command to the server to change underlying MEI
-            $.post(gui.apiprefix + "/insert/clef", args, function (data) {
-                    clef.id = JSON.parse(data).id;
-                    if (autoRefresh) {
-                        gui.handleRefresh(passingE);
+            var data = JSON.stringify(args);
 
-                    }
-                })
+            // call server neumify function to update MEI
+            $.post(gui.apiprefix + "/insert/clef", {data: data}, function (data) {
+                clef.id = JSON.parse(data).id;
+                if (autoRefresh) {
+                    gui.handleRefresh(passingE);
+                }
+            })
                 .error(function () {
-                    gui.showAlert("Server failed to insert clef. Client and server are not synchronized.");
+                    gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
                 });
         }
     });
