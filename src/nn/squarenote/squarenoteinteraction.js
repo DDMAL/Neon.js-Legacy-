@@ -1789,8 +1789,15 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             // get closest system to insert onto
             var system = gui.page.getClosestSystem(coords);
 
+            var snapCoords;
+
             // calculate snapped coordinates on the system
-            var snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
+            if(system.elements[0] instanceof Toe.Model.Clef && coords.x > system.zone.ulx){
+                snapCoords = coords;
+            }
+            else{
+                snapCoords = system.getSystemSnapCoordinates(coords, gui.clefDwg.currentWidth);
+            }
 
             var systemPos = Math.round((system.zone.uly - snapCoords.y) / (system.delta_y / 2));
 
@@ -1837,7 +1844,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             }
 
             // If this is the first clef on the system tell the user to refresh
-            if (system.elements.length == 1) {
+            if (system.elements[0] == clef) {
                 autoRefresh = true;
                 gui.showInfo("The changes you've made required a refresh to appear.");
             }
