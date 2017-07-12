@@ -8,3 +8,4 @@ docs/*
 app_env/*
 MEI_DIRECTORY/*
 tutorial.mei
+/static/js/support/all.js

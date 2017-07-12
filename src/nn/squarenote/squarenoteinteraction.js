@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) {
+Toe.View.SquareNoteInteraction = function(rendEng, scaling, page, apiprefix, guiToggles) {
     Toe.View.Interaction.call(this, rendEng, page, apiprefix, guiToggles);
     var toggles = {
         initMode: "edit"
@@ -28,6 +28,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
 
     $.extend(toggles, guiToggles);
 
+    this.scaling = scaling;
     // these are variables holding pointers to the drawings
     // that follow around the pointer in insert mode.
     this.punctDwg = null;
@@ -39,20 +40,14 @@ Toe.View.SquareNoteInteraction = function(rendEng, page, apiprefix, guiToggles) 
     // bounding box estimation in neumify and ungroup
     // and insert ornamentation spacing.
     var punctGlyph = rendEng.getGlyph("punctum").clone();
-    var globalScale = rendEng.getGlobalScale();
-    this.punctWidth = punctGlyph.width*globalScale;
-    this.punctHeight = punctGlyph.height*globalScale;
+    this.globalScale = rendEng.getGlobalScale();
+    this.pageScale = page.scale;
+    this.punctWidth = punctGlyph.width*page.scale;
+    this.punctHeight = punctGlyph.height*page.scale;
+    
+    //Setting it to either true or false
+    this.lowScale = scaling[6];
 
-    // increasing the punctum size if the global scale is below a certain threshhold
-    if (globalScale < 0.06) {
-        console.log("Scale is low, increasing punctum padding size");
-        var objs = rendEng.canvas.getObjects();
-        $.each(objs, function (ind, ele) {
-            if (ele.eleRef instanceof Toe.Model.Neume) {
-                ele.padding = 2;
-            }
-        })
-    }
 
     this.objMoving = false;
 
@@ -140,6 +135,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
 
 };
+
 Toe.View.SquareNoteInteraction.prototype.handleHorizEpisemaToggle = function(e) {
     var gui = e.data.gui;
     var punctum = e.data.punctum;
@@ -169,7 +165,12 @@ Toe.View.SquareNoteInteraction.prototype.handleHorizEpisemaToggle = function(e) 
         punctum.syncDrawing();
 
         // get final bounding box information
-        var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        }
         var args = {id: punctum.id, episemaform: "horizontal", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         if (!hasEpisema) {
             // send add dot command to server to change underlying MEI
@@ -219,7 +220,12 @@ Toe.View.SquareNoteInteraction.prototype.handleVertEpisemaToggle = function(e) {
         punctum.syncDrawing();
 
         // get final bounding box information
-        var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+        }
         var args = {id: punctum.id, episemaform: "vertical", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
         if (!hasEpisema) {
             // send add dot command to server to change underlying MEI
@@ -259,7 +265,12 @@ Toe.View.SquareNoteInteraction.prototype.handleDotToggle = function(e) {
     punctum.syncDrawing();
 
     // get final bounding box information
-    var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    if (gui.lowScale) {
+        var outbb = gui.getLowScaleBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    }
+    else {
+        var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    }
     var args = {id: punctum.id, dotform: "aug", ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
     if (!hasDot) {
         // send add dot command to server to change underlying MEI
@@ -299,8 +310,12 @@ Toe.View.SquareNoteInteraction.prototype.handleHeadShapeChange = function(e) {
 
     // update drawing
     punctum.syncDrawing();
-
-    var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    if (gui.lowScale) {
+        var outbb = gui.getLowScaleBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    }
+    else {
+        var outbb = gui.getOutputBoundingBox([punctum.zone.ulx, punctum.zone.uly, punctum.zone.lrx, punctum.zone.lry]);
+    }
     var args = {id: punctum.id, shape: shape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
     // send change head command to server to change underlying MEI
@@ -342,15 +357,24 @@ Toe.View.SquareNoteInteraction.prototype.handleClefShapeChange = function(e) {
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                if (gui.lowScale) {
+                    var outbb = gui.getLowScaleBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                }
+                else {
+                    var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                }
                 $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
                     gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
                 });
             }
         });
-
-        var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+        }
         var args = {id: clef.id, shape: cShape, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
         // send pitch shift command to server to change underlying MEI
@@ -381,7 +405,12 @@ Toe.View.SquareNoteInteraction.prototype.handleDivisionShapeChange = function(e)
     division.setShape(type);
 
     // post to change the mei file
-    var outbb = gui.getOutputBoundingBox([division.zone.ulx, division.zone.uly, division.zone.lrx, division.zone.lry]);
+    if (gui.lowScale) {
+        var outbb = gui.getLowScaleBoundingBox([division.zone.ulx, division.zone.uly, division.zone.lrx, division.zone.lry]);
+    }
+    else {
+        var outbb = gui.getOutputBoundingBox([division.zone.ulx, division.zone.uly, division.zone.lrx, division.zone.lry]);
+    }
     var args = {id: division.id, type: type, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
     $.post(gui.apiprefix + "/update/division/shape", {data: JSON.stringify(args)})
         .error(function() {
@@ -462,7 +491,12 @@ Toe.View.SquareNoteInteraction.prototype.handleQuickNeumify = function(e) {
         sModel.addNeume(newNeume);
 
         // get final bounding box information
-        var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+        }
 
         var typeid = newNeume.typeid;
 
@@ -587,7 +621,12 @@ Toe.View.SquareNoteInteraction.prototype.handleNeumify = function(e) {
         sModel.addNeume(newNeume);
 
         // get final bounding box information
-        var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([newNeume.zone.ulx, newNeume.zone.uly, newNeume.zone.lrx, newNeume.zone.lry]);
+        }
 
         var typeid = newNeume.typeid;
 
@@ -696,7 +735,12 @@ Toe.View.SquareNoteInteraction.prototype.handleUngroup = function(e) {
             o.eleRef.system.addNeume(newPunct);
 
             // get final bounding box information
-            var outbb = gui.getOutputBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
+            if (gui.lowScale) {
+                var outbb = gui.getLowScaleBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
+            }
+            else {
+                var outbb = gui.getOutputBoundingBox([newPunct.zone.ulx, newPunct.zone.uly, newPunct.zone.lrx, newPunct.zone.lry]);
+            }
             punctBoxes.push({"ulx": outbb[0], "uly": outbb[1], "lrx": outbb[2], "lry": outbb[3]});
 
             punctums.push(newPunct);
@@ -784,7 +828,13 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
     newLrx = Math.max(emptyZone.lrx, fullZone.lrx);
     newUly = Math.round( (emptyZone.uly + fullZone.uly) /2 );
     newLry = Math.round( (emptyZone.lry + fullZone.lry) /2 );
-    var newBB = gui.getOutputBoundingBox([newUlx, newUly, newLrx, newLry]);
+
+    if (gui.lowScale) {
+        var newBB = gui.getLowScaleBoundingBox([newUlx, newUly, newLrx, newLry]);
+    }
+    else {
+        var newBB = gui.getOutputBoundingBox([newUlx, newUly, newLrx, newLry]);
+    }
 
     var system = new Toe.Model.SquareNoteSystem([newUlx, newUly, newLrx, newLry]);
     var systemView = new Toe.View.SystemView(gui.rendEng);
@@ -836,7 +886,12 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
         var delta_y = fullZone.uly - newUly
         $.each(elementStorage, function (index, ele) {
             // shifting the BB according to the difference in merging systems
-            var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly + delta_y, ele.zone.lrx, ele.zone.lry  + delta_y]);
+            if (gui.lowScale) {
+                var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx, ele.zone.uly + delta_y, ele.zone.lrx, ele.zone.lry  + delta_y]);
+            }
+            else {
+                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly + delta_y, ele.zone.lrx, ele.zone.lry  + delta_y]);
+            }
             var args = {ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
             if (ele instanceof Toe.Model.Clef) {
@@ -867,9 +922,11 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
                         args["beforeid"] = sNextModel.id;
                     }
                 }
+                args["pitchInfo"] = null;
+                var data = JSON.stringify(args);
 
                 // send insert clef command to the server to change underlying MEI
-                $.post(gui.apiprefix + "/insert/clef", args, function (data) {
+                $.post(gui.apiprefix + "/insert/clef", {data: data}, function (data) {
                         cModel.id = JSON.parse(data).id;
                     })
                     .error(function () {
@@ -884,7 +941,12 @@ Toe.View.SquareNoteInteraction.prototype.handleMergeSystems = function(e) {
                     var oct = ele.components[i].oct;
 
                     var delta_x = (ele.zone.lrx - ele.zone.ulx) / ele.components.length;
-                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx + (i*delta_x), ele.zone.uly + delta_y, ele.zone.lrx + (i*delta_x), ele.zone.lry  + delta_y]);
+                    if (gui.lowScale) {
+                        var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx + (i*delta_x), ele.zone.uly + delta_y, ele.zone.lrx + (i*delta_x), ele.zone.lry  + delta_y]);
+                    }
+                    else {
+                        var outbb = gui.getOutputBoundingBox([ele.zone.ulx + (i*delta_x), ele.zone.uly + delta_y, ele.zone.lrx + (i*delta_x), ele.zone.lry  + delta_y]);
+                    }
                     var args = {ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
                     args["pname"] = pname;
@@ -1223,7 +1285,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
         }
 
         // replace with new punctum drawing
-        gui.punctDwg = gui.rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0]; 
+        gui.punctDwg = gui.rendEng.draw(elements, {group: true, selectable: false, repaint: true})[0];
     };
 
     // using ddslick select library for images
@@ -1292,7 +1354,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                     // mount the custos on the system
                     sModel.setCustos(cModel);
 
-                    var outbb = gui.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+                    if (gui.lowScale) {
+                        var outbb = gui.getLowScaleBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+                    }
+                    else {
+                        var outbb = gui.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+                    }
                     var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
                     // get id of the next system element
@@ -1329,6 +1396,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
                 // get pitch name and octave of snapped coords of note
                 var  noteInfo = sModel.calcPitchFromCoords(snapCoords);
+
                 if (noteInfo == null) {
                     gui.showAlert("No clef placed on the staff.");
                 } //Simple check here for if theres a clef placed on the staff.
@@ -1376,7 +1444,13 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
                     // now that final bounding box is calculated from the drawing
                     // add the bounding box information to the server function arguments
-                    var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+                    if (gui.lowScale) {
+                        var outbb = gui.getLowScaleBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+                    }
+                    else {
+                        var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
+                    }
+                    console.log(outbb);
                     args["ulx"] = outbb[0];
                     args["uly"] = outbb[1];
                     args["lrx"] = outbb[2];
@@ -1581,7 +1655,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertDivision = function(e) {
             // mount division on the system
             var nInd = system.addDivision(division);
 
-            var outbb = gui.getOutputBoundingBox(bb);
+            if (gui.lowScale) {
+                var outbb = gui.getLowScaleBoundingBox(bb);
+            }
+            else {
+                var outbb = gui.getOutputBoundingBox(bb);
+            }
             var args = {type: division.key.slice(4), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
             // get next element to insert before
             if (nInd + 1 < system.elements.length) {
@@ -1694,7 +1773,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
         var nextSystem = gui.page.getNextSystem(system);
 
         // Create arguments for our first POST.
-        var outbb = gui.getOutputBoundingBox([system.zone.ulx, system.zone.uly, system.zone.lrx, system.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([system.zone.ulx, system.zone.uly, system.zone.lrx, system.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([system.zone.ulx, system.zone.uly, system.zone.lrx, system.zone.lry]);
+        }
         var createSystemArguments = {pageid: gui.page.getID(), ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
         // POST system, then cascade into other POSTs.
@@ -1811,7 +1895,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             var nInd = system.addClef(clef);
 
             var systemLine = system.props.numLines + systemPos / 2;
-            var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+            if (gui.lowScale) {
+                var outbb = gui.getLowScaleBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+            }
+            else {
+                var outbb = gui.getOutputBoundingBox([clef.zone.ulx, clef.zone.uly, clef.zone.lrx, clef.zone.lry]);
+            }
             var args = {shape: cShape, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
             // get next element to insert before
             if (nInd + 1 < system.elements.length) {
@@ -1856,7 +1945,12 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                     // the custos has been vertically moved
                     // update the custos bounding box information in the model
                     // do not need to update pitch name & octave since this does not change
-                    var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    if (gui.lowScale) {
+                        var outbb = gui.getLowScaleBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    }
+                    else {
+                        var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    }
                     $.post(gui.apiprefix + "/move/custos", {
                             id: e.id,
                             ulx: outbb[0],
@@ -1942,7 +2036,12 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         // get acting clef for the custos 
         var actingClef = prevSystem.getActingClefByEle(custos);
         custos.setRootSystemPos(prevSystem.calcSystemPosFromPitch(pname, oct, actingClef));
-        var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+        }
         $.post(this.apiprefix + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
         .error(function() {
             gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
@@ -1964,8 +2063,12 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
 
         // mount the custos on the system
         prevSystem.setCustos(cModel);
-
-        var outbb = this.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+        if (gui.lowScale) {
+            var outbb = gui.getLowScaleBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+        }
+        else {
+            var outbb = gui.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+        }
         var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
         // get id of the next system element
@@ -2037,7 +2140,12 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                     // the custos has been vertically moved
                     // update the custos bounding box information in the model
                     // do not need to update pitch name & octave since this does not change
-                    var outbb = aGui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    if (gui.lowScale) {
+                        var outbb = gui.getLowScaleBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    }
+                    else {
+                        var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    }
                     $.post(aGui.apiprefix + "/move/custos", {
                         id: e.id,
                         ulx: outbb[0],
@@ -2104,7 +2212,12 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                var outbb = aGui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+                if (gui.lowScale) {
+                    var outbb = gui.getLowScaleBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+                }
+                else {
+                    var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+                }
                 $.post(aGui.apiprefix + "/move/custos",
                       {id: custos.id, pname: newPname, oct: newOct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                 .error(function() {
@@ -2341,7 +2454,12 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
         }
         $.each(elements, function (oInd, o) {
             var ele =  o.eleRef;
-            var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+            if (gui.lowScale) {
+                var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+            }
+            else {
+                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+            }
             var args = {ulx: outbb[0] + 30, uly: outbb[1], lrx: outbb[2] + 30, lry: outbb[3]};
             var sModel = ele.system;
 
@@ -2640,7 +2758,12 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                         // the custos has been vertically moved
                         // update the custos bounding box information in the model
                         // do not need to update pitch name & octave since this does not change
-                        var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                        if (gui.lowScale) {
+                            var outbb = gui.getLowScaleBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                        }
+                        else {
+                            var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                        }
                         $.post(gui.apiprefix + "/move/custos", {id: e.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
                             .error(function() {
                                 gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
@@ -2650,7 +2773,12 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
 
                 // convert systemPos to staffLine format used in MEI attribute
                 var systemLine = ele.system.props.numLines + (ele.props.systemPos/2);
-                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                if (gui.lowScale) {
+                    var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
+                else {
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
                 var args = {id: ele.id, line: systemLine, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], pitchInfo: pitchInfo};
 
                 // send pitch shift command to server to change underlying MEI
@@ -2685,6 +2813,7 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                 var ulx = snapCoords.x-(element.currentWidth/2);
                 var uly = top-(element.currentHeight/2)-(finalCoords.y-snapCoords.y);
                 var bb = [ulx, uly, ulx + element.currentWidth, uly + element.currentHeight];
+
                 ele.setBoundingBox(bb);
 
                 var oldRootSystemPos = ele.rootSystemPos;
@@ -2694,18 +2823,24 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                     nc.setPitchInfo(noteInfo["pname"], noteInfo["oct"]);
                 });
 
+
                 // remove the old neume
                 $(ele).trigger("vEraseDrawing");
                 ele.system.removeElementByRef(ele);
-
                 // mount the new neume on the most appropriate system
                 ele.padding = 2;
+
                 var nInd = sModel.addNeume(ele);
                 if (elements.length == 1) {
                     $(ele).trigger("vSelectDrawing");
                 }
 
-                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                if (gui.lowScale) {
+                    var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
+                else {
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
                 var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
                 if (oldRootSystemPos != newRootSystemPos) {
                     // this is a pitch shift
@@ -2804,7 +2939,12 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                     beforeid = sNextModel.id;
                 }
 
-                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                if (gui.lowScale) {
+                    var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
+                else {
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
                 var data = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3], beforeid: beforeid};
 
                 // send move command to the server to change underlying MEI
@@ -2856,7 +2996,12 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
                     $(ele).trigger("vSelectDrawing");
                 }
 
-                var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                if (gui.lowScale) {
+                    var outbb = gui.getLowScaleBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
+                else {
+                    var outbb = gui.getOutputBoundingBox([ele.zone.ulx, ele.zone.uly, ele.zone.lrx, ele.zone.lry]);
+                }
                 var args = {id: ele.id, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
                 if (oldRootSystemPos != newRootSystemPos) {
                     // this is a pitch shift
@@ -2888,17 +3033,6 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
             gui.rendEng.canvas.discardActiveGroup();
         }
         gui.rendEng.repaint();
-    }
-
-    // increasing the punctum size if the global scale is below a certain threshhold
-    // TODO: Optimize for just the moved punctum
-    if (gui.rendEng.getGlobalScale() < 0.06) {
-        var objs = gui.rendEng.canvas.getObjects();
-        $.each(objs, function (ind, ele) {
-            if (ele.eleRef instanceof Toe.Model.Neume) {
-                ele.padding = 2;
-            }
-        })
     }
     // we're all done moving
     gui.objMoving = false;
@@ -3086,6 +3220,17 @@ Toe.View.SquareNoteInteraction.prototype.getOutputBoundingBox = function(bb) {
     return $.map(bb, function(b) {
         return Math.round(b/gui.page.scale);
     });
+}
+
+Toe.View.SquareNoteInteraction.prototype.getLowScaleBoundingBox = function(bb) {
+    gui = this;
+    //The formula is as follows as ulx as an example:
+    // ( (obj.ulx / xFactor) + scaling.ulx ) / page.scale
+    var ulx = Math.round(( (bb[0]/gui.scaling[4]) + gui.scaling[0] ) / gui.pageScale);
+    var uly = Math.round(( (bb[1]/gui.scaling[5]) + gui.scaling[1] ) / gui.pageScale);
+    var lrx = Math.round(( (bb[2]/gui.scaling[4]) + gui.scaling[0] ) / gui.pageScale);
+    var lry = Math.round(( (bb[3]/gui.scaling[5]) + gui.scaling[1] ) / gui.pageScale);
+    return [ulx, uly, lrx, lry];
 }
 
 Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {

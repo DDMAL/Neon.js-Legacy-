@@ -690,7 +690,8 @@ class ModifyDocument:
                 parent.addChildBefore(before, clef)
 
         self.update_or_add_zone(clef, ulx, uly, lrx, lry)
-        self.update_pitched_elements(pitch_info)
+        if pitch_info:
+            self.update_pitched_elements(pitch_info)
 
         result = {"id": clef.getId()}
         return result

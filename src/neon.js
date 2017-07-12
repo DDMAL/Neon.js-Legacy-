@@ -178,7 +178,6 @@ THE SOFTWARE.
                 // derive canvas dimensions from mei facs
                 canvasDims = page.calcDimensions($(mei).find("zone"));
             }
-
             // calculate scale based on width, maintaining aspect ratio
             page.setPageScale(settings.width/canvasDims[0]);
             page.setDimensions(Math.round(canvasDims[0]), Math.round(canvasDims[1]));
@@ -191,11 +190,7 @@ THE SOFTWARE.
             elem.prepend(canvas);
 
             var canvasOpts = {renderOnAddition: false};
-            if (settings.bgimgpath) {
-                $.extend(canvasOpts, {backgroundImage: settings.bgimgpath,
-                                      backgroundImageOpacity: settings.bgimgopacity,
-                                      backgroundImageStretch: true});
-            }
+
             rendEng.setCanvas(new fabric.Canvas(settings.canvasid, canvasOpts));
 
             if (Toe.debug) {
@@ -221,6 +216,51 @@ THE SOFTWARE.
             if (mei) {
                 page.loadMei(mei, rendEng);
             }
+            
+            //For Scaling small images
+            var scaling = getBounds(rendEng, page);
+
+            //Scaling:
+            //[0] - [3] = bounds of the zoom to scale to, minmax of ulx uly lrx lry
+            //[4], [5] = xFactor, yFactor
+            //[6] = boolean on whether to scale or not
+            
+            if (rendEng.getGlobalScale() < 0.06) {
+                scaling[6] = true;
+                //Background Image
+                fabric.Image.fromURL("http://localhost:8080" + settings.bgimgpath, function(oImg) {
+                    var scaleFactor = settings.width/canvasDims[0];
+                    oImg.scaleX = scaleFactor * scaling[4];
+                    oImg.scaleY = scaleFactor * scaling[5];
+                    oImg.left = ( (oImg.width * scaleFactor * scaling[4]) / 2 ) - scaling[0] * scaling[4];
+                    oImg.top = ( (oImg.height * scaleFactor * scaling[5]) / 2 ) - scaling[1] * scaling[5];
+                    oImg.selectable = false;
+                    oImg.opacity = 0.5;
+
+                    rendEng.canvas.add(oImg);
+                    oImg.sendToBack();
+                    rendEng.canvas.renderAll();
+                });
+
+                //Fabric elements
+                objectScale(rendEng, scaling);
+            }
+            //Regular background image loading
+            else {
+                scaling[6] = false;
+                fabric.Image.fromURL("http://localhost:8080" + settings.bgimgpath, function(oImg) {
+                    var scaleFactor = settings.width/canvasDims[0];
+                    oImg.scale(scaleFactor);
+                    oImg.left = ( (oImg.width * scaleFactor) / 2 );
+                    oImg.top = ( (oImg.height * scaleFactor) / 2 );
+                    oImg.selectable = false;
+                    oImg.opacity = 0.5;
+
+                    rendEng.canvas.add(oImg);
+                    oImg.sendToBack();
+                    rendEng.canvas.renderAll();
+                });
+            }
 
             // instantiate appropriate GUI elements
             var gui = new Toe.View.GUI(settings.apiprefix, settings.meipath, rendEng, page,
@@ -231,7 +271,7 @@ THE SOFTWARE.
             switch (settings.documentType) {
                 case "liber":
                 case "salzinnes":
-                    var interaction = new Toe.View.SquareNoteInteraction(rendEng, page, settings.apiprefix);
+                    var interaction = new Toe.View.SquareNoteInteraction(rendEng, scaling, page, settings.apiprefix);
                     break;
                 case "stgallen":
                     var interaction = new Toe.View.CheironomicInteraction(rendEng, page, settings.apiprefix);
@@ -245,6 +285,79 @@ THE SOFTWARE.
         // Call the init function when this object is created.
         init();
     };
+
+    var getBounds = function(rendEng, page) {
+        // Get all the systems and get the right bb values
+        var ulx = 2000;
+        var uly = 2000;
+        var lrx = 0;
+        var lry = 0;
+
+        //TODO: Optimize this comparison function somehow?
+        var objects = rendEng.canvas.getObjects();
+
+        objects.map(function(o) {
+            if (o.eleRef) {
+                var zone = o.eleRef.zone;
+                if (zone.ulx < ulx) ulx = zone.ulx;
+                if (zone.uly < uly) uly = zone.uly;
+                if (zone.lrx > lrx) lrx = zone.lrx;
+                if (zone.lry > lry) lry = zone.lry;
+            }
+        });
+
+        //Math lol
+        var xFactor = rendEng.canvas.getWidth() / ( (lrx - ulx));
+        var yFactor = rendEng.canvas.getHeight() / ( (lry - uly));
+
+        return [ulx, uly, lrx, lry, xFactor, yFactor];
+    }
+
+    var objectScale = function(rendEng, scaling) {
+        var ulx = scaling[0];
+        var uly = scaling[1];
+        var lrx = scaling[2];
+        var lry = scaling[3];
+        var xFactor = scaling[4];
+        var yFactor = scaling[5];
+
+        var objects = rendEng.canvas.getObjects();
+        //Code for scaling
+        for (var i in objects) {
+            var scaleX = objects[i].scaleX;
+            var scaleY = objects[i].scaleY;
+            var left = objects[i].left;
+            var top = objects[i].top;
+
+            var tempScaleX = scaleX * xFactor;
+            var tempScaleY = scaleY * yFactor;
+            var tempLeft = left * xFactor - (ulx * xFactor);
+            var tempTop = top * yFactor - (uly * yFactor);
+
+            objects[i].scaleX = tempScaleX;
+            objects[i].scaleY = tempScaleY;
+            objects[i].left = tempLeft;
+            objects[i].top = tempTop;
+
+            //Code for zones
+            if (objects[i].eleRef) {
+                objects[i].eleRef.zone.ulx = objects[i].eleRef.zone.ulx * xFactor - (xFactor * ulx);
+                objects[i].eleRef.zone.uly = objects[i].eleRef.zone.uly * yFactor - (yFactor * uly);
+                objects[i].eleRef.zone.lrx = objects[i].eleRef.zone.lrx * xFactor - (xFactor * ulx);
+                objects[i].eleRef.zone.lry = objects[i].eleRef.zone.lry * yFactor - (yFactor * uly);
+            }
+
+            //Calculating global scale + changing delta_y of each system
+            if (objects[i].eleRef instanceof Toe.Model.SquareNoteSystem) {
+                rendEng.calcScaleFromSystem(objects[i].eleRef, {overwrite: true});
+                objects[i].delta_y = Math.abs(objects[i].eleRef.zone.lry - objects[i].eleRef.zone.uly) / 3;
+                objects[i].eleRef.delta_y = Math.abs(objects[i].eleRef.zone.lry - objects[i].eleRef.zone.uly) / 3;
+            }
+            objects[i].setCoords();
+        }
+        rendEng.canvas.renderAll();
+        rendEng.canvas.calcOffset();
+    }
 
     $.fn.neon = function(options)
     {

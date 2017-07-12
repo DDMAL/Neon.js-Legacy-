@@ -28,7 +28,7 @@ THE SOFTWARE.
  */
 Toe.View.RenderEngine = function(options) {
     this.options = {
-        globScale: 0.08
+        globScale: 1
     };
 
     $.extend(this.options, options);
@@ -60,11 +60,12 @@ Toe.View.RenderEngine.prototype.setGlyphs = function(glyphs) {
 }
 
 Toe.View.RenderEngine.prototype.setGlobalScale = function(scale) {
+    var prevScale = this.options.globScale;
 	this.options.globScale = scale;
 
 	// update glyph dimension caches
 	$.each(this.glyphs, function(it, el) {
-		el.centre = [el.centre[0]*scale, el.centre[1]*scale];
+		el.centre = [(el.centre[0]/prevScale)*scale, (el.centre[1]/prevScale)*scale];
 	});
 }
 

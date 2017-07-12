@@ -200,7 +200,7 @@ Toe.Model.System.prototype.getActingClefByEle = function(element) {
 
 Toe.Model.System.prototype.getActingClefByCoords = function(coords) {
     // look backwards from end of element list for first clef
-    for (var i = this.elements.length; i >= 0; i--) {
+    for (var i = (this.elements.length - 1); i >= 0; i--) {
         var e = this.elements[i];
         if (e instanceof Toe.Model.Clef && coords.x > e.zone.lrx) {
             return e;

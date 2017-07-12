@@ -181,7 +181,7 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
     });
 
     // insert mode hotkey
-    Mousetrap.bind(['q', 'Ctrl+q', 'Command+q'], function() {
+    Mousetrap.bind(['q'], function() {
         $("#btn_insert").click();
         return false;
     });
@@ -189,7 +189,9 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
     // hotkeys for quick transparency
     Mousetrap.bind(['h'], $.proxy(function() {
         this.rendEng.canvas.forEachObject(function(obj) {
-            obj.setOpacity(0);
+            if(obj.eleRef){
+                obj.setOpacity(0);
+            }
         });
         this.rendEng.repaint();
         return false;
@@ -197,7 +199,9 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
 
     Mousetrap.bind(['h'], $.proxy(function() {
         this.rendEng.canvas.forEachObject(function(obj) {
-            obj.setOpacity(1);
+            if(obj.eleRef){
+                obj.setOpacity(1);
+            }
         });
         this.rendEng.repaint();
         return false;

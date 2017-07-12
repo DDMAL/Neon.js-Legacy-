@@ -6427,7 +6427,7 @@ fabric.Shadow = fabric.util.createClass(/** @scope fabric.Shadow.prototype */ {
       this.fire('before:render');
 
       if (this.clipTo) {
-        fabric.util.clipCanvas(this, canvasToDrawOn);
+        fabric.util.clipContext(this, canvasToDrawOn);
       }
 
       if (this.backgroundColor) {
