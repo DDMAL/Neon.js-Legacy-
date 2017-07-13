@@ -42,8 +42,8 @@ Toe.View.SquareNoteInteraction = function(rendEng, scaling, page, apiprefix, gui
     var punctGlyph = rendEng.getGlyph("punctum").clone();
     this.globalScale = rendEng.getGlobalScale();
     this.pageScale = page.scale;
-    this.punctWidth = punctGlyph.width*page.scale;
-    this.punctHeight = punctGlyph.height*page.scale;
+    this.punctWidth = punctGlyph.width*this.globalScale;
+    this.punctHeight = punctGlyph.height*this.globalScale;
     
     //Setting it to either true or false
     this.lowScale = scaling[6];
