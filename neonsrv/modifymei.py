@@ -39,10 +39,17 @@ class ModifyDocument:
             os.remove(undo_path + mei_name + '_1' + mei_ext)
             file_list.pop(0)
             for idx, f in enumerate(file_list):
-                os.rename(undo_path + f, undo_path + mei_name + '_' + str(idx + 1) + mei_ext)
+                if(idx < 9):
+                    os.rename(undo_path + f, undo_path + mei_name + '_0' + str(idx + 1) + mei_ext)
+                else:
+                    os.rename(undo_path + f, undo_path + mei_name + '_' + str(idx + 1) + mei_ext)
 
-        XmlExport.write(self.mei, undo_path + mei_name + '_' + str(file_num) + mei_ext)
-        XmlExport.write(self.mei, filename)
+        if (file_num < 10):
+            XmlExport.write(self.mei, undo_path + mei_name + '_0' + str(file_num) + mei_ext)
+            XmlExport.write(self.mei, filename)
+        else:
+            XmlExport.write(self.mei, undo_path + mei_name + '_' + str(file_num) + mei_ext)
+            XmlExport.write(self.mei, filename)
 
     def insert_punctum(self, name, inclinatum, deminutus, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):
         '''
