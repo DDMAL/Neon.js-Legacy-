@@ -40,7 +40,8 @@ THE SOFTWARE.
             origwidth: null,
             origheight: null,
             documentType: "liber",
-            width: 1000
+            width: 1000,
+            zoom: false
         };
 
         var settings = $.extend({}, defaults, options);
@@ -224,8 +225,8 @@ THE SOFTWARE.
             //[0] - [3] = bounds of the zoom to scale to, minmax of ulx uly lrx lry
             //[4], [5] = xFactor, yFactor
             //[6] = boolean on whether to scale or not
-            
-            if (rendEng.getGlobalScale() < 0.06) {
+
+            if (settings.zoom) {
                 scaling[6] = true;
                 //Background Image
                 fabric.Image.fromURL("http://localhost:8080" + settings.bgimgpath, function(oImg) {

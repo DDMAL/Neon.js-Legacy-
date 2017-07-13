@@ -120,7 +120,8 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_selectall").unbind("click");
     $("#btn_refresh").unbind("click");
     $("#btn_undo").unbind("click");
-    $("#btn_quickgroup").unbind("quick");
+    $("#btn_quickgroup").unbind("click");
+    $("#btn_zoom").unbind("click");
 
     // Linking the buttons to their respective functions
     $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
@@ -133,6 +134,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_mergesystems").bind("click.edit", {gui: gui}, gui.handleMergeSystems);
     $("#btn_stafflock").bind("click.edit", {gui: gui}, gui.handleStaffLock);
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
+    $("#btn_zoom").bind("click.edit", {gui: gui}, gui.handleZoom);
 
 };
 
@@ -2589,15 +2591,68 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
 
-    $('#neon-wrapper').neon({
-        glyphpath: "/static/img/neumes_concat.svg",
-        meipath: "/file" + cutprefix + ".mei",
-        bgimgpath: "/file" + cutprefix + ".jpg",
-        bgimgopacity: 0.5,
-        documentType: "liber",
-        apiprefix: apiprefix,
-        width: 1200 // enforce width
+    if (gui.scaling[6]) {
+        $('#neon-wrapper').neon({
+            glyphpath: "/static/img/neumes_concat.svg",
+            meipath: "/file" + cutprefix + ".mei",
+            bgimgpath: "/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: true
     });
+    }
+    else {
+        $('#neon-wrapper').neon({
+            glyphpath: "/static/img/neumes_concat.svg",
+            meipath: "/file" + cutprefix + ".mei",
+            bgimgpath: "/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: false
+        });
+    }
+
+
+    $("#btn_stafflock").prop("checked", true);
+};
+
+Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
+    var gui = e.data.gui;
+
+    if(call){
+        gui.handleDeleteUndos(gui);
+    }
+    apiprefix = gui.apiprefix;
+    cutprefix = apiprefix.slice(5);
+
+    if (gui.scaling[6]) {
+        $('#neon-wrapper').neon({
+            glyphpath: "/static/img/neumes_concat.svg",
+            meipath: "/file" + cutprefix + ".mei",
+            bgimgpath: "/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: false
+    });
+    }
+    else {
+        $('#neon-wrapper').neon({
+            glyphpath: "/static/img/neumes_concat.svg",
+            meipath: "/file" + cutprefix + ".mei",
+            bgimgpath: "/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: true
+    });
+    }
 
     $("#btn_stafflock").prop("checked", true);
 };
@@ -3277,6 +3332,11 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
+    Mousetrap.bind(['z'], function() {
+        $("#btn_zoom").click();
+        return false;
+    });
+
     Mousetrap.bind(['c'], function() {
         $("#rad_clef").click();
         $("#rad_clef").trigger('click.insert', {gui:gui}, gui.handleInsertClef);
@@ -3346,13 +3406,14 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
         $(aParentDivId).append('<span id="sidebar-edit"><br/><li class="divider"></li><li class="nav-header">Edit</li>\n' +
                                 '<li><button title="Ungroup the selected neume combination" id="btn_ungroup" class="btn"><i class="icon-share"></i> Ungroup</button>' +
                                 '<button title="Merge systems (if one is empty)" id="btn_mergesystems" class="btn"></i> Merge Systems</button></li>\n' +
-                                '<li><button title="Undo" id="btn_undo" class="hide"> Undo</button>' +
                                 '<li><button title="Group" id="btn_quickgroup" class="hide" >Group</button>' +
                                 // duplicate is unfinished functionality. Uncomment and refer to handleDuplicate() to continue working on it.
                                 // '<li><button title="Duplicate" id="btn_duplicate" class="btn"> Duplicate</button>' +
-                                '<button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>\n</li>\n' +
+                                '<li><button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>' +
+                                '<button title="Undo" id="btn_undo" class="btn"> Undo</button></li>\n' +
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
-                                '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n</div>' +
+                                '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n' +
+                                '<li><button title="Zoom in and out of the canvas" id="btn_zoom" class="btn">Zoom</button></li></div>' +
                                 '<p>Staff Lock  <input id="btn_stafflock" type="checkbox" checked/></p></span>');
     }
 
