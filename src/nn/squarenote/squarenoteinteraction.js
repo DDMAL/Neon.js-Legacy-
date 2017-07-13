@@ -3110,13 +3110,20 @@ Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aO
                 // Fabric uses the center of the object to calc. position.  We don't, so we adjust accordingly.
                 aObject.target.eleRef.controller.modifyZone(aObject.target.getCenterPoint().x, aObject.target.currentWidth);
 
+                if (this.scaling[6]) {
+                    var outbb = this.getLowScaleBoundingBox([aObject.target.eleRef.zone.ulx, aObject.target.eleRef.zone.uly, aObject.target.eleRef.zone.lrx, aObject.target.eleRef.zone.lry]);
+                }
+                else {
+                    var outbb = this.getOutputBoundingBox([aObject.target.eleRef.zone.ulx, aObject.target.eleRef.zone.uly, aObject.target.eleRef.zone.lrx, aObject.target.eleRef.zone.lry]);
+                }
+
                 // Make call to server.
                 this.postModifySystemZone(aObject.target.eleRef.systemId,
-                    Math.floor(aObject.target.eleRef.zone.ulx / this.page.scale),
-                    Math.floor(aObject.target.eleRef.zone.uly / this.page.scale),
-                    Math.floor(aObject.target.eleRef.zone.lrx / this.page.scale),
-                    Math.floor(aObject.target.eleRef.zone.lry / this.page.scale));
-
+                    Math.floor(outbb[0]),
+                    Math.floor(outbb[1]),
+                    Math.floor(outbb[2]),
+                    Math.floor(outbb[3])
+                );
                 // Get the elements that became loose from the system.  Group them and delete.
                 var looseElements = aObject.target.eleRef.getLooseElements();
                 if (looseElements.length > 0) {
