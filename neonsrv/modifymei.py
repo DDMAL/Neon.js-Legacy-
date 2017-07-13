@@ -36,7 +36,7 @@ class ModifyDocument:
 
         if(file_num > 50):
             file_num = 50
-            os.remove(undo_path + mei_name + '_1' + mei_ext)
+            os.remove(undo_path + mei_name + '_01' + mei_ext)
             file_list.pop(0)
             for idx, f in enumerate(file_list):
                 if(idx < 9):
