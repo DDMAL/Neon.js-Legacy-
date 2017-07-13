@@ -137,7 +137,7 @@ class DeleteUndosHandler(tornado.web.RequestHandler):
                      if os.path.isfile(os.path.join(mei_directory_undo, f))]
 
         if len(file_list) == 0:
-            meiundo = os.path.join(mei_directory_undo, filename + "_" + str(1) + ".mei")
+            meiundo = os.path.join(mei_directory_undo, filename + "_0" + str(1) + ".mei")
 
             if meiundo:
                 shutil.copy(meiworking, meiundo)
