@@ -1230,7 +1230,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
             var punctGlyph = gui.rendEng.getGlyph("diamond");
         }
 
-        else if(typeName == "Punctum Inclinatum"){
+        else if(typeName == "Punctum Inclinatum Parvum"){
             var punctGlyph = gui.rendEng.getGlyph("diamond_small");
         }
 
@@ -1452,7 +1452,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
                     else {
                         var outbb = gui.getOutputBoundingBox([nModel.zone.ulx, nModel.zone.uly, nModel.zone.lrx, nModel.zone.lry]);
                     }
-                    console.log(outbb);
+                    
                     args["ulx"] = outbb[0];
                     args["uly"] = outbb[1];
                     args["lrx"] = outbb[2];
