@@ -224,8 +224,15 @@ class FileUndoHandler(tornado.web.RequestHandler):
         list_length = len(file_list)
 
         if list_length > 1:
-            meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
-            meiundo = os.path.join(mei_directory_undo, filename + "_" + str(list_length - 1) + ".mei")
+            if list_length < 10:
+                meicurrent = os.path.join(mei_directory_undo, filename + "_0" + str(list_length) + ".mei")
+                meiundo = os.path.join(mei_directory_undo, filename + "_0" + str(list_length - 1) + ".mei")
+            elif list_length == 10:
+                meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
+                meiundo = os.path.join(mei_directory_undo, filename + "_0" + str(list_length - 1) + ".mei")
+            else:
+                meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
+                meiundo = os.path.join(mei_directory_undo, filename + "_" + str(list_length - 1) + ".mei")
 
             if meiundo:
                 shutil.copy(meiundo, meiworking)

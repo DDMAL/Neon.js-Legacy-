@@ -3353,7 +3353,7 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
     });
 
     Mousetrap.bind(['meta+z'], function() {
-        $("#btn_undo").click();
+        $("#btn_undo").trigger('click.edit', {gui:gui}, gui.handleUndo);
         return false;
     });
 
