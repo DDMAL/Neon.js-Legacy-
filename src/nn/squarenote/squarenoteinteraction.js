@@ -89,13 +89,31 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     gui.removeEditSubControls();
 
     // Listen for object events.
-    gui.rendEng.canvas.observe('object:modified', function(aObject) {gui.handleEventObjectModified(aObject);});
+    gui.rendEng.canvas.observe('object:modified', function(aObject) {gui.handleEventObjectModified(gui, aObject);});
     gui.rendEng.canvas.observe('object:moving', function(e) {gui.objMoving = true;});
-    gui.rendEng.canvas.observe('object:selected', function(aObject) {gui.handleEventObjectSelected(aObject);});
+    gui.rendEng.canvas.observe('object:selected', function(aObject) {
+        var e = aObject.e;
+        if(e && e.shiftKey){
+            gui.rendEng.canvas.deactivateAll();
+            gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
+        }
+        else{
+            gui.handleEventObjectSelected(aObject);
+        }
+    });
 
     // Listen for selection events.
     gui.rendEng.canvas.observe('selection:cleared', function(aObject) { gui.handleEventSelectionCleared(aObject);});
-    gui.rendEng.canvas.observe('selection:created', function(aObject) { gui.handleEventSelectionCreated(aObject);});
+    gui.rendEng.canvas.observe('selection:created', function(aObject) {
+        var e = aObject.e;
+        if(e && e.shiftKey){
+            gui.rendEng.canvas.deactivateAll();
+            gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
+        }
+        else{
+            gui.handleEventSelectionCreated(aObject);
+        }
+    });
 
     // Listen for mouse events.
     gui.rendEng.canvas.observe('mouse:down', function(e) {gui.downCoords = gui.rendEng.canvas.getPointer(e.e);});
@@ -3100,9 +3118,23 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
     gui.objMoving = false;
 }
 
-Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(aObject) {
+Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(gui, aObject) {
     // Check if aObject is a group
-    if (aObject.target.hasOwnProperty('eleRef')) {
+    var objects = aObject.target.objects;
+    var lenObjects = objects.length;
+    var ctr = 0;
+    $.each(objects, function(idx, obj){
+        if(!(obj.eleRef instanceof Toe.Model.SquareNoteSystem)){
+            ctr++;
+        }
+    });
+
+    if (lenObjects == ctr){
+        gui.rendEng.canvas.deactivateAll();
+        gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
+    }
+
+    else if (aObject.target.hasOwnProperty('eleRef')) {
         switch (aObject.target.eleRef.constructor) {
             // Switch on element reference type.
             case Toe.Model.SquareNoteSystem:
