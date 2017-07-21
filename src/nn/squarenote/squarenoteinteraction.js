@@ -89,7 +89,12 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     gui.removeEditSubControls();
 
     // Listen for object events.
-    gui.rendEng.canvas.observe('object:modified', function(aObject) {gui.handleEventObjectModified(gui, aObject);});
+    gui.rendEng.canvas.observe('object:modified', function(aObject) {
+        console.log(aObject);
+        if(!(aObject.target.eleRef)) {
+            gui.handleEventObjectModified(gui, aObject);
+        }
+    });
     gui.rendEng.canvas.observe('object:moving', function(e) {gui.objMoving = true;});
     gui.rendEng.canvas.observe('object:selected', function(aObject) {
         var e = aObject.e;
