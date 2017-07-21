@@ -1997,7 +1997,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             $.post(gui.apiprefix + "/insert/clef", {data: data}, function (data) {
                 clef.id = JSON.parse(data).id;
                 if (autoRefresh) {
-                    gui.handleRefresh(passingE);
+                    gui.handleRefresh(passingE, call);
                 }
             })
                 .error(function () {
@@ -2063,11 +2063,11 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
         // get acting clef for the custos 
         var actingClef = prevSystem.getActingClefByEle(custos);
         custos.setRootSystemPos(prevSystem.calcSystemPosFromPitch(pname, oct, actingClef));
-        if (gui.lowScale) {
-            var outbb = gui.getLowScaleBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+        if (this.lowScale) {
+            var outbb = this.getLowScaleBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
         }
         else {
-            var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+            var outbb = this.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
         }
         $.post(this.apiprefix + "/move/custos", {id: custos.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]})
         .error(function() {
@@ -2090,11 +2090,11 @@ Toe.View.SquareNoteInteraction.prototype.handleUpdatePrevCustos = function(pname
 
         // mount the custos on the system
         prevSystem.setCustos(cModel);
-        if (gui.lowScale) {
-            var outbb = gui.getLowScaleBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+        if (this.lowScale) {
+            var outbb = this.getLowScaleBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
         }
         else {
-            var outbb = gui.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
+            var outbb = this.getOutputBoundingBox([cModel.zone.ulx, cModel.zone.uly, cModel.zone.lrx, cModel.zone.lry]);
         }
         var args = {id: cModel.id, pname: pname, oct: oct, ulx: outbb[0], uly: outbb[1], lrx: outbb[2], lry: outbb[3]};
 
@@ -2167,11 +2167,11 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                     // the custos has been vertically moved
                     // update the custos bounding box information in the model
                     // do not need to update pitch name & octave since this does not change
-                    if (gui.lowScale) {
-                        var outbb = gui.getLowScaleBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                    if (aGui.lowScale) {
+                        var outbb = aGui.getLowScaleBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
                     }
                     else {
-                        var outbb = gui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
+                        var outbb = aGui.getOutputBoundingBox([e.zone.ulx, e.zone.uly, e.zone.lrx, e.zone.lry]);
                     }
                     $.post(aGui.apiprefix + "/move/custos", {
                         id: e.id,
@@ -2181,7 +2181,7 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                         lry: outbb[3]
                     })
                         .error(function () {
-                            gui.showAlert("Server failed to move custos. Client and server are not synchronized.");
+                            aGui.showAlert("Server failed to move custos. Client and server are not synchronized.");
                         });
                 }
             });
@@ -2239,8 +2239,8 @@ Toe.View.SquareNoteInteraction.prototype.deleteActiveSelection = function(aGui) 
                 // the custos has been vertically moved
                 // update the custos bounding box information in the model
                 // do not need to update pitch name & octave since this does not change
-                if (gui.lowScale) {
-                    var outbb = gui.getLowScaleBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
+                if (aGui.lowScale) {
+                    var outbb = aGui.getLowScaleBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
                 }
                 else {
                     var outbb = gui.getOutputBoundingBox([custos.zone.ulx, custos.zone.uly, custos.zone.lrx, custos.zone.lry]);
