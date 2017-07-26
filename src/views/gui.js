@@ -125,6 +125,7 @@ Toe.View.GUI.prototype.setupNavBar = function() {
 Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
     // cache instance variable
     var gui = this;
+    var elements = gui.rendEng.canvas.getObjects();
 
     // create container for appearance sliders
     if ($("#sidebar-app").length == 0) {
@@ -137,7 +138,9 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
                                    'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li>');
 
             $("#sldr_bgImgOpacity").bind("change", function() {
-                gui.rendEng.canvas.backgroundImageOpacity = $(this).val();
+                if(elements[0]._element){
+                    elements[0].opacity = $(this).val();
+                }
                 gui.rendEng.repaint();
             });
         }
@@ -151,7 +154,9 @@ Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
             $("#sldr_glyphOpacity").bind("change", function() {
                 var opacity = $(this).val();
                 gui.rendEng.canvas.forEachObject(function(obj) {
-                    obj.setOpacity(opacity);
+                    if(obj.eleRef){
+                        obj.setOpacity(opacity);
+                    }
                 });
 
                 gui.rendEng.repaint();
