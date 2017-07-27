@@ -11,15 +11,16 @@ import conf
 
 class RootHandler(tornado.web.RequestHandler):
     def get_files(self, document_type):
-        root_dir = os.path.abspath(conf.MEI_DIRECTORY)
-        mei_dir = os.path.join(root_dir, document_type)
+        if(document_type != "cheironomic"):
+            root_dir = os.path.abspath(conf.MEI_DIRECTORY)
+            mei_dir = os.path.join(root_dir, document_type)
 
-        # only list mei files (not jpeg)
-        meiFiles = []
-        for f in os.listdir(mei_dir):
-            if f.endswith(".mei"):
-                meiFiles.append(f)
-        return meiFiles
+            # only list mei files (not jpeg)
+            meiFiles = []
+            for f in os.listdir(mei_dir):
+                if f.endswith(".mei"):
+                    meiFiles.append(f)
+            return meiFiles
 
     def get_document_types(self):
         mei_dir = os.path.abspath(conf.MEI_DIRECTORY)
@@ -46,7 +47,7 @@ class RootHandler(tornado.web.RequestHandler):
         elif url == "demo.html":
             self.render(url, 
                     squarenotefiles=self.get_files('squarenote'), 
-                    stafflessfiles=self.get_files('cheironomic'),
+                    # stafflessfiles=self.get_files('cheironomic'),
                     document_types=self.get_document_types(),
                     errors="", 
                     prefix=conf.get_prefix())
@@ -103,7 +104,7 @@ class RootHandler(tornado.web.RequestHandler):
 
         self.render("demo.html",
                     squarenotefiles=self.get_files('squarenote'), 
-                    stafflessfiles=self.get_files('cheironomic'),
+                    # stafflessfiles=self.get_files('cheironomic'),
                     document_types=self.get_document_types(),
                     errors=errors, 
                     prefix=conf.get_prefix())
