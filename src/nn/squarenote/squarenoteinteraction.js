@@ -90,7 +90,6 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
 
     // Listen for object events.
     gui.rendEng.canvas.observe('object:modified', function(aObject) {
-        console.log(aObject);
         if(!(aObject.target.eleRef)) {
             gui.handleEventObjectModified(gui, aObject);
         }
@@ -2002,7 +2001,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             $.post(gui.apiprefix + "/insert/clef", {data: data}, function (data) {
                 clef.id = JSON.parse(data).id;
                 if (autoRefresh) {
-                    gui.handleRefresh(passingE, call);
+                    gui.handleRefresh(passingE);
                 }
             })
                 .error(function () {
@@ -2582,7 +2581,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
                 });
             }
             if (ele instanceof Toe.Model.Division) {
-                console.log(ele.key);
                 // creating division to post to new system
                 var division = new Toe.Model.Division(ele.key);
                 division.setBoundingBox(outbb);
