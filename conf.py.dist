@@ -1,0 +1,36 @@
+# String: path where neon will read/write MEI files from.
+MEI_DIRECTORY = ""
+
+# String: the absolute path to where this app will sit on a server. e.g. "/" or "/neon"
+APP_ROOT = "/"
+
+# Boolean: Tornado server debug
+DEBUG = True
+
+# Boolean: Demo or production status
+DEMO = True
+
+# Boolean: If true, working on either the demo or the production; if false, serving either
+DEBUG_NEON = True
+
+# String: Image path for Neon to look for images with the filename (with no extension) replaced by "PAGE"
+PROD_IMAGE_PATH = APP_ROOT + '/file/PAGE.jpg'
+
+def get_prefix():
+    return APP_ROOT.rstrip("/")
+
+def get_neonHtmlFileName(square):
+	url_string = "neon"
+
+	if DEMO:
+		if square:
+			url_string += "_square"
+		else:
+			url_string += "_staffless"
+
+	if DEBUG_NEON:
+		url_string += "_devel"
+	else:
+		url_string += "_prod"
+
+	return url_string + ".html"

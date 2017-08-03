@@ -1,0 +1,163 @@
+<html>
+<head>
+    <title>Neon.js</title>
+    <link rel="stylesheet" href="{{static_url("css/neon.css")}}" type="text/css" />
+
+    <link href="{{static_url("css/bootstrap.min.css")}}" rel="stylesheet">
+    <link href="{{static_url("css/bootstrap-responsive.min.css")}}" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <![endif]-->
+
+    <!-- EXTERNALS -->
+    <script src="{{static_url("js/support/jquery.min.js")}}" type="text/javascript"></script>
+    <script src="{{static_url("js/support/bootstrap.min.js")}}" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">Neon.js</a>
+          <div class="nav-collapse">
+            <p class="navbar-text pull-right"><a href="#developersModal" data-toggle="modal">Developers</a> | <a href="http://ddmal.music.mcgill.ca/">DDMAL</a></p>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Developers Information Modal -->
+    <div class="modal fade" id="developersModal">
+      <div class="modal-header">
+        <button class="close" data-dismiss="modal"><i class="icon-remove"></i></button>
+        <h3>Developers</h3>
+      </div>
+      <div class="modal-body">
+        <p>Gregory Burlet</p>
+        <p>Alastair Porter</p>
+        <hr/>
+        <p>View <a href="http://github.com/ddmal/neon.js">source code</a></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span7">
+                <div class="hero-unit">
+                    <div class="row-fluid">
+                        <div class="span12">
+                            Neon.js is a web-based music notation editor for early music scores. Upload an image of a music score and a corresponding MEI file that describes the position of neumes on the page and then edit the digital score. Changes made within the editor will be reflected in the underlying MEI file.
+                            <hr/>
+                        </div>
+                    </div>
+                    <div class="row-fluid">
+                        <div class="span12">
+                            <h2>Tutorial</h2>
+                            Test out the editor using our tutorial! Supplementary instructions can be found at <a href="https://github.com/DDMAL/Neon.js/wiki/Tutorial">this link.</a>
+                            <ul>
+                                {% for f in squarenotefiles %}
+                                    {% if f == "tutorial.mei" %}
+                                        <a href="{{prefix}}/editor/{{f}}">Click here to start!</a>
+                                    {% end %}
+                                {% end %}
+                            </ul>
+
+                            <hr/>
+
+                            <h2>Score Selection</h2>
+                            Choose a page of music in square-note notation to view or edit
+                            <ul>
+                            {% for f in squarenotefiles %}
+                                {% if f != "blank_test.mei" %}
+                                     <li><a href="{{prefix}}/editor/{{f}}">{{ f }}</a>
+                                         <form action="{{prefix}}/delete/{{f}}" method=post class=delete-mei id="delete-mei">
+                                             <input type=hidden value="{{ f }}" name="mei_to_delete"></input>
+                                             <input id="delete" type=submit value="X"></input>
+                                     </form>
+                                     </li>
+                                {% end %}
+                            {% end %}
+                            </ul>
+
+                            <hr/>
+
+                            <!-- <h2>Staffless Neume Demo (alpha)</h2>
+                            Choose a page of music from the St. Gallen manuscript to view or edit
+                            <ul>
+                            {#{% for f in stafflessfiles %}
+                                <li><a href="{{prefix}}/stafflesseditor/{{f}}">{{ f }}</a></li>
+                            {% end %}#}
+                            </ul>
+
+                            <hr/> -->
+
+                            <h2>Score Upload</h2>
+                            Upload a symbolic music file (.mei) and an image of the page of music
+                            <br/><br/>
+                            {% if errors %}
+                            <span style="color:red">{{errors}}</span>
+                            {% end %}
+                            
+                            <form method="post" enctype="multipart/form-data">
+                            <table>
+                                <tr>
+                                    <td>Upload an mei file</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="file" name="mei"></td>
+                                </tr>
+                                <tr>
+                                    <td>Upload an image file</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="file" name="mei_img"></td>
+                                </tr>
+                                <tr>
+                                    <!--<td>Document type: -->
+                                        <!--<select name="document_type">-->
+                                            <!--{% for d in document_types %}-->
+                                                <!--{% if d != "backup" %}-->
+                                                    <!--{% if d != "undo" %}-->
+                                                        <!--<option value="{{d}}">{{d}}</option>-->
+                                                    <!--{% end %}-->
+                                                <!--{% end %}-->
+                                            <!--{% end %}-->
+                                        <!--</select>-->
+                                    <!--</td>-->
+                                </tr>
+                                <tr>
+                                    <td><input class="btn btn-primary" type="submit" name="submit" value="Upload"></td>
+                                </tr>
+                            </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="span5"></div>
+        </div>
+
+        <hr>
+
+        <div class="row-fluid">
+            <div class="span12">
+                <footer>
+                     <p>&copy; 2012 McGill University | Schulich School of Music | DDMAL</p>
+                </footer>
+            </div>
+        </div>
+
+    </div><!--/.fluid-container-->
+
+</body>
+</html>

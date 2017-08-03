@@ -1,0 +1,54 @@
+body {
+    padding-bottom: 40px;
+    padding-top: 60px;
+}
+
+.sidebar-nav-fixed {
+    position: fixed;
+    left: 20px;
+    top: 60px;
+    width: 400px;
+}
+
+.sidebar-inner {
+    padding-bottom: 5px;
+}
+
+.row-fluid > .span-fixed-sidebar {
+    margin-left: 420px;
+}
+
+.hide{
+    visibility:hidden;
+}
+
+form#delete-mei {
+    display: inline-block;
+    margin: 0;
+}
+
+input#delete{
+    /* change these properties to whatever you want */
+    background-color: transparent;
+    color: #000000;
+    border-color: transparent;
+    font-size: 10px;
+    padding-top: 0px;
+    padding-right: 0px;
+    padding-bottom: 3px;
+    padding-left: 0px;
+    margin-bottom: 0px;
+}
+
+input#delete:hover{
+    color: #c8140e
+}
+
+kbd {
+    font-size: 12px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border: 1px solid #cccbcb;
+    border-radius: 5px;
+    box-shadow: 0 2px 0 -1px #fff, 0 2px 0 #cccbcb;
+}
