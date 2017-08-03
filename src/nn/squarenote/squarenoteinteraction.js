@@ -99,7 +99,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         var e = aObject.e;
         if(e && e.shiftKey){
             gui.rendEng.canvas.deactivateAll();
-            gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
+            gui.showAlert("Cannot use shift-click for more than two neumes. Drag select instead.");
         }
         else{
             gui.handleEventObjectSelected(aObject);
@@ -112,7 +112,7 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
         var e = aObject.e;
         if(e && e.shiftKey){
             gui.rendEng.canvas.deactivateAll();
-            gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
+            gui.showAlert("Cannot use shift-click for more than two neumes. Drag select instead.");
         }
         else{
             gui.handleEventSelectionCreated(aObject);
@@ -3122,22 +3122,8 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(gui, aObject) {
-    // Check if aObject is a group
-    var objects = aObject.target.objects;
-    var lenObjects = objects.length;
-    var ctr = 0;
-    $.each(objects, function(idx, obj){
-        if(!(obj.eleRef instanceof Toe.Model.SquareNoteSystem)){
-            ctr++;
-        }
-    });
 
-    if (lenObjects == ctr){
-        gui.rendEng.canvas.deactivateAll();
-        gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
-    }
-
-    else if (aObject.target.hasOwnProperty('eleRef')) {
+    if (aObject.target.hasOwnProperty('eleRef')) {
         switch (aObject.target.eleRef.constructor) {
             // Switch on element reference type.
             case Toe.Model.SquareNoteSystem:
