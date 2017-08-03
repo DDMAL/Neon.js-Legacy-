@@ -11,17 +11,16 @@ import conf
 
 class RootHandler(tornado.web.RequestHandler):
     def get_files(self, document_type):
+        if(document_type != "cheironomic"):
+            root_dir = os.path.abspath(conf.MEI_DIRECTORY)
+            mei_dir = os.path.join(root_dir, document_type)
 
-	if(document_type != "cheironomic"):
-		root_dir = os.path.abspath(conf.MEI_DIRECTORY)
-		mei_dir = os.path.join(root_dir, document_type)
-
-		# only list mei files (not jpeg)
-		meiFiles = []
-		for f in os.listdir(mei_dir):
-		    if f.endswith(".mei"):
-		        meiFiles.append(f)
-        	return meiFiles
+            # only list mei files (not jpeg)
+            meiFiles = []
+            for f in os.listdir(mei_dir):
+                if f.endswith(".mei"):
+                    meiFiles.append(f)
+            return meiFiles
 
     def get_document_types(self):
         mei_dir = os.path.abspath(conf.MEI_DIRECTORY)
@@ -69,7 +68,8 @@ class RootHandler(tornado.web.RequestHandler):
             contents = mei[0]["body"]
             # TODO: Figure out how to validate MEI files properly using pymei
             try:
-                mei = documentFromFile.documentFromText(contents)
+		mei = documentFromFile.documentFromText(contents)
+
             # if not mei_fn.endswith('.mei'):
             #     errors = "not in mei file format"
                 if os.path.exists(os.path.join(mei_directory, mei_fn)):

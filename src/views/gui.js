@@ -43,8 +43,10 @@ Toe.View.GUI = function(apiprefix, meipath, rendEng, page, guiToggles) {
 
     this.setupNavBar();
 
-    var parentDivId = "#gui-sidebar";
-    this.setupSideBar(parentDivId, toggles);
+    //TODO: Implement glyoh opacity and backround image opacity sliders
+    // var parentDivId = "#gui-sidebar";
+    // this.setupSideBar(parentDivId, toggles);
+
 
     this.bindHotkeys();
 }
@@ -122,61 +124,62 @@ Toe.View.GUI.prototype.setupNavBar = function() {
     }
 }
 
-Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
-    // cache instance variable
-    var gui = this;
-    var elements = gui.rendEng.canvas.getObjects();
-
-    // create container for appearance sliders
-    if ($("#sidebar-app").length == 0) {
-        $(parentDivId).prepend('<span id="sidebar-app"><li class="nav-header">Appearance</li>\n</span>');
-
-        // create background image opacity slider
-        if (toggles.sldr_bgImgOpacity) {
-            $("#sidebar-app").append('<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n' +
-                                   '<input id="sldr_bgImgOpacity" style="width: 95%;" type="range" name="bgImgOpacity" ' +
-                                   'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li>');
-
-            $("#sldr_bgImgOpacity").bind("change", function() {
-                if(elements[0]._element){
-                    elements[0].opacity = $(this).val();
-                }
-                gui.rendEng.repaint();
-            });
-        }
-
-        // create glyph opacity slider
-        if (toggles.sldr_glyphOpacity) {
-            $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' +
-                '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' +
-                'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
-
-            $("#sldr_glyphOpacity").bind("change", function() {
-                var opacity = $(this).val();
-                gui.rendEng.canvas.forEachObject(function(obj) {
-                    if(obj.eleRef){
-                        obj.setOpacity(opacity);
-                    }
-                });
-
-                gui.rendEng.repaint();
-            });
-        }
-
-        // TODO: finish global scale
-        // this is the beginning of the implementation of changing he scale. Uncomment to continue development.
-        // $("#sidebar-app").append('<li>\n<label for="sldr_elementScale"><b>Element Scale (Experimental)</b>:</label>\n' +
-        //     '<input id="sldr_elementScale" style="width: 95%;" type="range" name="elementScale" ' +
-        //     'min="0.0" max="1.0" step="0.02" value="' + gui.rendEng.getGlobalScale() + '" />\n</li>');
-        //
-        // $("#sldr_elementScale").bind("change", function() {
-        //     var scale = $(this).val();
-        //     gui.rendEng.setGlobalScale(scale);
-        //
-        //     gui.rendEng.repaint();
-        // });
-    }
-}
+// //TODO: GLyoh and BkrdImage opacity sliders
+// Toe.View.GUI.prototype.setupSideBar = function(parentDivId, toggles) {
+//     // cache instance variable
+//     var gui = this;
+//     var elements = gui.rendEng.canvas.getObjects();
+//
+//     // create container for appearance sliders
+//     if ($("#sidebar-app").length == 0) {
+//         $(parentDivId).prepend('<span id="sidebar-app"><li class="nav-header">Appearance</li>\n</span>');
+//
+//         // create background image opacity slider
+//         if (toggles.sldr_bgImgOpacity) {
+//             $("#sidebar-app").append('<li>\n<label for="sldr_bgImgOpacity"><b>Image Opacity</b>:</label>\n' +
+//                                    '<input id="sldr_bgImgOpacity" style="width: 95%;" type="range" name="bgImgOpacity" ' +
+//                                    'min="0.0" max="1.0" step="0.05" value="' + toggles.initBgImgOpacity + '" />\n</li>');
+//
+//             $("#sldr_bgImgOpacity").bind("change", function() {
+//                 if(elements[0]._element){
+//                     elements[0].opacity = $(this).val();
+//                 }
+//                 gui.rendEng.repaint();
+//             });
+//         }
+//
+//         // create glyph opacity slider
+//         if (toggles.sldr_glyphOpacity) {
+//             $("#sidebar-app").append('<li>\n<label for="sldr_glyphOpacity"><b>Glyph Opacity</b>:</label>\n' +
+//                 '<input id="sldr_glyphOpacity" style="width: 95%;" type="range" name="glyphOpacity" ' +
+//                 'min="0.0" max="1.0" step="0.05" value="' + toggles.initGlyphOpacity + '" />\n</li>');
+//
+//             $("#sldr_glyphOpacity").bind("change", function() {
+//                 var opacity = $(this).val();
+//                 gui.rendEng.canvas.forEachObject(function(obj) {
+//                     if(obj.eleRef){
+//                         obj.setOpacity(opacity);
+//                     }
+//                 });
+//
+//                 gui.rendEng.repaint();
+//             });
+//         }
+//
+//         //TODO: finish global scale
+//         //this is the beginning of the implementation of changing he scale. Uncomment to continue development.
+//         // $("#sidebar-app").append('<li>\n<label for="sldr_elementScale"><b>Element Scale (Experimental)</b>:</label>\n' +
+//         //     '<input id="sldr_elementScale" style="width: 95%;" type="range" name="elementScale" ' +
+//         //     'min="0.0" max="1.0" step="0.02" value="' + gui.rendEng.getGlobalScale() + '" />\n</li>');
+//         //
+//         // $("#sldr_elementScale").bind("change", function() {
+//         //     var scale = $(this).val();
+//         //     gui.rendEng.setGlobalScale(scale);
+//         //
+//         //     gui.rendEng.repaint();
+//         // });
+//     }
+//}
 
 Toe.View.GUI.prototype.bindHotkeys = function() {
     // edit mode hotkey
@@ -195,6 +198,9 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
     Mousetrap.bind(['h'], $.proxy(function() {
         this.rendEng.canvas.forEachObject(function(obj) {
             if(obj.eleRef){
+                if (obj.eleRef.view.ledgerLines) {
+                    obj.eleRef.view.ledgerLines.setOpacity(0);
+                }
                 obj.setOpacity(0);
             }
         });
@@ -204,7 +210,10 @@ Toe.View.GUI.prototype.bindHotkeys = function() {
 
     Mousetrap.bind(['h'], $.proxy(function() {
         this.rendEng.canvas.forEachObject(function(obj) {
-            if(obj.eleRef){
+            if(obj.eleRef) {
+                if (obj.eleRef.view.ledgerLines) {
+                    obj.eleRef.view.ledgerLines.setOpacity(1);
+                }
                 obj.setOpacity(1);
             }
         });
