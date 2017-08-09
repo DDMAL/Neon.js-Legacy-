@@ -1,11 +1,15 @@
 import os
-from pymei import MeiElement, MeiAttribute, documentFromFile, documentToFile
+
+from pymei import MeiElement, MeiAttribute, MeiDocument, documentFromFile, documentToFile, documentFromText
+from pymei.exceptions import MeiException, NoVersionFoundException
 
 class ModifyDocument:
     
     def __init__(self, filename):
-        self.mei = documentFromFile.read(filename + ".mei")
-        self.filename = filename + ".mei"
+        newfile = filename + ".mei"
+        importResult = documentFromFile(str(newfile), False)
+        self.mei = importResult.getMeiDocument()
+        self.filename = newfile
 
     def write_doc(self, **kwargs):
         '''
@@ -26,7 +30,7 @@ class ModifyDocument:
         filename_split_beg, filename_split_end = filename_split
         undo_path = filename_split_beg + "/undo/"
 
-        file_list = [f for f in os.listdir(undo_path)
+        file_list = [f for f in  os.listdir(undo_path)
                         if os.path.isfile(os.path.join(undo_path, f))]
 
         file_num = 1 + len(file_list)
@@ -45,11 +49,11 @@ class ModifyDocument:
                     os.rename(undo_path + f, undo_path + mei_name + '_' + str(idx + 1) + mei_ext)
 
         if (file_num < 10):
-            documentToFile.write(self.mei, undo_path + mei_name + '_0' + str(file_num) + mei_ext)
-            documentToFile.write(self.mei, filename)
+            documentToFile(self.mei, str(undo_path + mei_name + '_0' + str(file_num) + mei_ext))
+            documentToFile(self.mei, str(filename))
         else:
-            documentToFile.write(self.mei, undo_path + mei_name + '_' + str(file_num) + mei_ext)
-            documentToFile.write(self.mei, filename)
+            documentToFile(self.mei, str(undo_path + mei_name + '_' + str(file_num) + mei_ext))
+            documentToFile(self.mei, str(filename))
 
     def insert_punctum(self, name, inclinatum, deminutus, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):
         '''

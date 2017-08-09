@@ -3,7 +3,8 @@ import mimetypes
 import os
 import shutil
 
-from pymei import documentFromFile, documentToFile
+from pymei import documentFromFile, documentToFile, documentFromText
+from pymei.exceptions import MeiException, NoVersionFoundException 
 
 import tornado.web
 
@@ -68,23 +69,21 @@ class RootHandler(tornado.web.RequestHandler):
             contents = mei[0]["body"]
             # TODO: Figure out how to validate MEI files properly using pymei
             try:
-		mei = documentFromFile.documentFromText(contents)
+                mei = documentFromText(contents, False)
+            except MeiException, e:
+                errors = str(e) + "invalid mei file"
 
             # if not mei_fn.endswith('.mei'):
             #     errors = "not in mei file format"
-                if os.path.exists(os.path.join(mei_directory, mei_fn)):
-                    errors = "mei file already exists"
-                else:
-                    # write to working directory and backup
-                    fp = open(os.path.join(mei_directory, mei_fn), "w")
+            if os.path.exists(os.path.join(mei_directory, mei_fn)):
+                errors = "mei file already exists"
+            else:
+                # write to working directory and backup
+                with open(os.path.join(mei_directory, mei_fn), 'w') as fp:
                     fp.write(contents)
-                    fp.close()
-                    fp = open(os.path.join(mei_directory_backup, mei_fn), "w")
-                    fp.write(contents)
-                    fp.close()
 
-            except Exception, e:
-                errors = "invalid mei file"
+                with open(os.path.join(mei_directory_backup, mei_fn), "w") as fp:
+                    fp.write(contents)
 
         if len(mei_img):
             # derive image filename from mei filename
@@ -97,11 +96,10 @@ class RootHandler(tornado.web.RequestHandler):
                 if os.path.exists(os.path.join(mei_directory, img_fn)):
                     errors += "image file already exists"
                 else:
-                    fp = open(os.path.join(mei_directory, img_fn), "w")
-                    fp.write(img_contents)
-                    fp.close()
-            except Exception, e:
-                errors += "invalid image file"
+                    with open(os.path.join(mei_directory, img_fn), "w") as fp:
+                        fp.write(img_contents)
+            except IOError, e:
+                errors = string(e) + "invalid image file"
 
         self.render("demo.html",
                     squarenotefiles=self.get_files('squarenote'), 

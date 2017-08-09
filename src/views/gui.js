@@ -47,7 +47,6 @@ Toe.View.GUI = function(apiprefix, meipath, rendEng, page, guiToggles) {
     // var parentDivId = "#gui-sidebar";
     // this.setupSideBar(parentDivId, toggles);
 
-
     this.bindHotkeys();
 }
 

@@ -2001,11 +2001,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
             $.post(gui.apiprefix + "/insert/clef", {data: data}, function (data) {
                 clef.id = JSON.parse(data).id;
                 if (autoRefresh) {
-<<<<<<< HEAD
-                    gui.handleRefresh(passingE, call);
-=======
                     gui.handleRefresh(passingE);
->>>>>>> origin/develop
                 }
             })
                 .error(function () {
@@ -2585,10 +2581,6 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
                 });
             }
             if (ele instanceof Toe.Model.Division) {
-<<<<<<< HEAD
-                console.log(ele.key);
-=======
->>>>>>> origin/develop
                 // creating division to post to new system
                 var division = new Toe.Model.Division(ele.key);
                 division.setBoundingBox(outbb);
@@ -3130,27 +3122,8 @@ Toe.View.SquareNoteInteraction.prototype.handleObjectsMoved = function(delta_x, 
 }
 
 Toe.View.SquareNoteInteraction.prototype.handleEventObjectModified = function(gui, aObject) {
-<<<<<<< HEAD
-    // Check if aObject is a group
-    var objects = aObject.target.objects;
-    var lenObjects = objects.length;
-    var ctr = 0;
-    $.each(objects, function(idx, obj){
-        if(!(obj.eleRef instanceof Toe.Model.SquareNoteSystem)){
-            ctr++;
-        }
-    });
-
-    if (lenObjects == ctr){
-        gui.rendEng.canvas.deactivateAll();
-        gui.showAlert("Cannot use shift-click to select neumes. Drag select instead.");
-    }
-
-    else if (aObject.target.hasOwnProperty('eleRef')) {
-=======
 
     if (aObject.target.hasOwnProperty('eleRef')) {
->>>>>>> origin/develop
         switch (aObject.target.eleRef.constructor) {
             // Switch on element reference type.
             case Toe.Model.SquareNoteSystem:
