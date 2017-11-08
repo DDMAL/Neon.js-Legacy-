@@ -116,7 +116,6 @@ THE SOFTWARE.
         var handleBackgroundImage = function() {
             console.log("loading background image ...");
             var dfd = $.Deferred();
-
             if (settings.bgimgpath && !settings.origwidth && !settings.origheight) {
                 fabric.Image.fromURL(settings.bgimgpath, function(img) {
                     settings.origwidth = img.width;
@@ -159,17 +158,17 @@ THE SOFTWARE.
         // handler for when asynchronous calls have been completed
         var loadSuccess = function() {
             // create page with specific document type
-            var page;
+            var page = new Toe.Model.SquareNotePage("salzinnes");
             
-            switch (settings.documentType) {
-                case "liber":
-                case "salzinnes":
-                    page = new Toe.Model.SquareNotePage(settings.documentType);
-                    break;
-                case "stgallen":
-                    page = new Toe.Model.CheironomicPage(settings.documentType);
-                    break;
-            }
+            // switch (settings.documentType) {
+            //     case "liber":
+            //     case "salzinnes":
+            //         page = new Toe.Model.SquareNotePage(settings.documentType);
+            //         break;
+            //     case "stgallen":
+            //         page = new Toe.Model.CheironomicPage(settings.documentType);
+            //         break;
+            // }
 
             // add canvas element to the element tied to the jQuery plugin
             var canvas = $("<canvas>").attr("id", settings.canvasid);
@@ -229,7 +228,7 @@ THE SOFTWARE.
             if (settings.zoom) {
                 scaling[6] = true;
                 //Background Image
-                fabric.Image.fromURL("http://localhost:8080" + settings.bgimgpath, function(oImg) {
+                fabric.Image.fromURL(settings.bgimgpath, function(oImg) {
                     var scaleFactor = settings.width/canvasDims[0];
                     oImg.scaleX = scaleFactor * scaling[4];
                     oImg.scaleY = scaleFactor * scaling[5];
@@ -249,7 +248,7 @@ THE SOFTWARE.
             //Regular background image loading
             else {
                 scaling[6] = false;
-                fabric.Image.fromURL("http://localhost:8080" + settings.bgimgpath, function(oImg) {
+                fabric.Image.fromURL(settings.bgimgpath, function(oImg) {
                     var scaleFactor = settings.width/canvasDims[0];
                     oImg.scale(scaleFactor);
                     oImg.left = ( (oImg.width * scaleFactor) / 2 );

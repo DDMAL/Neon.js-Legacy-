@@ -1,0 +1,6 @@
+- mimetype: text/plain
+  description: Plain text
+  extension: txt
+- mimetype: image/jpg
+  description: JPEG image
+  extension: jpg

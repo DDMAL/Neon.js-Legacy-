@@ -1951,7 +1951,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                 // update the custos on the previous system
                 var prevSystem = gui.page.getPreviousSystem(system);
                 if (prevSystem) {
-                    var newPname = neumesOnSystem[0].components[0].pname;8
+                    var newPname = neumesOnSystem[0].components[0].pname;
                     var newOct = neumesOnSystem[0].components[0].oct;
                     gui.handleUpdatePrevCustos(newPname, newOct, prevSystem);
                 }
@@ -2616,34 +2616,25 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
     if(call){
         gui.handleDeleteUndos(gui);
     }
+    
+
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
-
-    if (gui.scaling[6]) {
-        $('#neon-wrapper').neon({
-            glyphpath: "/static/img/neumes_concat.svg",
-            meipath: "/file" + cutprefix + ".mei",
-            bgimgpath: "/file" + cutprefix + ".jpg",
-            bgimgopacity: 0.5,
-            documentType: "liber",
-            apiprefix: apiprefix,
-            width: 1200, // enforce width
-            zoom: true
+    console.log("Apiprefic: " + apiprefix);
+    console.log("cutprefic: " + cutprefix);
+    var zoom = gui.scaling[6];
+    var self_url = location.href.split('#')[0];
+    $('#neon-wrapper').neon({
+        //glyphpath: "/static/img/neumes_concat.svg",
+        glyphpath: self_url + "static/img/neumes_concat.svg",
+        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+        bgimgopacity: 0.5,
+        documentType: "liber",
+        apiprefix: apiprefix,
+        width: 1200, // enforce width
+        zoom: zoom
     });
-    }
-    else {
-        $('#neon-wrapper').neon({
-            glyphpath: "/static/img/neumes_concat.svg",
-            meipath: "/file" + cutprefix + ".mei",
-            bgimgpath: "/file" + cutprefix + ".jpg",
-            bgimgopacity: 0.5,
-            documentType: "liber",
-            apiprefix: apiprefix,
-            width: 1200, // enforce width
-            zoom: false
-        });
-    }
-
 
     $("#btn_stafflock").prop("checked", true);
 };
@@ -2654,6 +2645,7 @@ Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
     if(call){
         gui.handleDeleteUndos(gui);
     }
+
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
 
@@ -2687,7 +2679,7 @@ Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
 
 Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
     // delete files in undo folder
-    $.post(gui.apiprefix + "/delete")
+    $.post(gui.apiprefix + "/deleteundo")
         .error(function() {
             gui.showAlert("Server failed to delete undos. Client and server are not synchronized.");
         });
@@ -3449,7 +3441,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
                                 '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n' +
                                 '<li><button title="Zoom in and out of the canvas" id="btn_zoom" class="btn">Zoom</button></li></div>' +
-                                '<p>Staff Lock  <input id="btn_stafflock" type="checkbox" checked/></p></span>');
+                                '<p>Staff Lock  </input id="btn_stafflock" type="checkbox" checked></p></span>');
     }
 
     // grey out edit buttons by default
@@ -3658,7 +3650,7 @@ Toe.View.SquareNoteInteraction.prototype.insertInsertSystemSubControls = functio
     if ($("#menu_insertsystem").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertsystem"><br/>\n<li class="nav-header">System Number</li>\n' +
                                     '<p>Choose which system number to create. (Existing systems will be shifted upwards in number)</p>' +
-                                    '<li><div><input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +
+                                    '<li><div></input id="system_number_slider" type="range" min="1" max="1" step="1" value="1">' +
                                     '<output id="system_number"></output></div></li></span>');
         $("#system_number_slider").change(function() {$('#system_number').html(this.value);}).change();
     }

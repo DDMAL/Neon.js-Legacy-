@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Neon.js | Editing</title>
+    
+    <link rel="stylesheet" href='css/bootstrap.min.css' />
+    <link rel="stylesheet" href='css/bootstrap-responsive.min.css' />
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" href='css/neon.css' />
+
+    <!-- EXTERNALS -->
+    <script src="js/support/jquery.min.js"></script>
+    <script src="js/support/bootstrap.min.js"></script>
+    <script src="js/support/fabric.min.js"></script>
+    <script src="js/support/moustrap.min.js"></script>
+    <script src="js/neon.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var self_url = location.href.split('#')[0];
+        // derive background image name from mei
+        $('#neon-w rapper').neon({
+          debug: false,
+          glyphpath: self_url + "img/neumes_concat.svg",
+          meipath: "{{ MEI }}",
+          bgimgpath: "{{ background_img }}",
+          bgimgopacity: 0.0,
+          apiprefix: self_url.slice(0, -1),   //remove trailing '/'
+          documentType: "liber",
+          width: 1000 // enforce width
+        });
+
+        $('#save-to-rodan').click(function (e) {
+          $.post(self_url + 'save', {}, function (data) {
+            window.close();    // return to rodan
+          });
+        });
+    });
+    </script>
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a class="brand" href="/">Neon.js</a>
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">File <b class="caret"></b></a>
+            <ul id="nav_file_dropdown" class="dropdown-menu">
+            </ul>
+          </li>
+          <li><a href="#" id="save-to-rodan">Save</a></li>
+        </ul>
+        <p class="navbar-text pull-right"><a href="#developersModal" data-toggle="modal">Developers</a> | <a href="http://ddmal.music.mcgill.ca/">DDMAL</a></p>
+      </div><!--/.nav-collapse -->
+    </div>
+  </div>
+</div>
+
+<!-- Developers Information Modal -->
+<div class="modal fade" id="developersModal">
+  <div class="modal-header">
+    <button class="close" data-dismiss="modal"><i class="icon-remove"></i></button>
+    <h3>Developers</h3>
+  </div>
+  <div class="modal-body">
+    <p>Gregory Burlet</p>
+    <p>Alastair Porter</p>
+    <hr/>
+    <p>View <a href="http://github.com/ddmal/neon.js">source code</a></p>
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn" data-dismiss="modal">Close</a>
+  </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span3">
+            <div class="row-fluid">
+                <div class="span12">
+                    <div class="sidebar-nav-fixed">
+                        <div class="sidebar-inner">
+                            <h1>Editing</h1>
+                        </div>
+                        <div class="sidebar-inner">
+                            <div id="neon-sidebar-nav" class="well">
+                                <ul id="gui-sidebar" class="nav nav-list">
+                                <li class="nav-header">Mode</li>
+                                <li>
+                                    <div class="btn-group" data-toggle="buttons-radio">
+                                        <button id="btn_insert" class="btn btn-primary"><i class="icon-plus icon-white"></i> Insert</button>
+                                        <button id="btn_edit" class="btn btn-primary"><i class="icon-pencil icon-white"></i> Edit</button>
+                                    </div>
+                                </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="sidebar-inner">
+                            <div id="info" class="alert alert-block fade">
+                                <button class="close" data-dismiss="alert">&times;</button>
+                                <h4 class="alert-heading">Information</h4>
+                                <p>message</p>
+                            </div>
+                        </div>
+                        <div class="sidebar-nav">
+                            <div id="alert" class="alert alert-block alert-error fade">
+                                <button class="close" data-dismiss="alert">&times;</button>
+                                <h4 class="alert-heading">Oh snap! An error occured!</h4>
+                                <p>message</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="span9 span-fixed-sidebar">
+            <div id="neon-wrapper"></div>
+        </div>
+  </div>
+
+  <hr>
+
+  <div class="row-fluid">
+      <div class="span12">
+          <footer>
+              <p>&copy; 2012 McGill University | Schulich School of Music | DDMAL</p>
+          </footer>
+      </div>
+  </div>
+
+</div><!--/.fluid-container-->
+
+</body>
+</html>

@@ -60,67 +60,82 @@ Toe.View.GUI.prototype.constructor = Toe.View.GUI;
 Toe.View.GUI.prototype.setupNavBar = function() {
     var gui = this;
 
+    var filename = gui.meipath.replace(/^.*[\\\/]/, '');
+   
     var nav_file_dropdown_parent = "#nav_file_dropdown";
     // check if the file menu is included in the template (avoid including bootstrap.js if possible)
     $(nav_file_dropdown_parent).children("li").remove();
     if ($(nav_file_dropdown_parent).length) {
-        $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li>' +
-                                           '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
-                                           '<li><a id="nav_file_dropdown_getjpg" href="#">Get Original JPG Image</a></li>' +
-                                           '<li><a id="nav_file_dropdown_getimg" href="#">Get Current Image</a></li>');
+        if(filename != "original_file.mei.working"){
+            $(nav_file_dropdown_parent).append('<li><a id="nav_file_dropdown_revert" href="#">Revert</a></li><li class="divider"></li>' +
+                                               '<li><a id="nav_file_dropdown_getmei" href="#">Get MEI</a></li>' +
+                                               '<li><a id="nav_file_dropdown_getjpg" href="#">Get Original JPG Image</a></li>' +
+                                               '<li><a id="nav_file_dropdown_getimg" href="#">Get Current Image</a></li>');
 
-        
-        $("#nav_file_dropdown_revert").tooltip({animation: true,
-                                                placement: 'right', 
-                                                title: 'Revert the current MEI file to the original version. ' +
-                                                       'Warning: this will revert all changes made in the editor.', 
-                                                delay: 100});
-        $("#nav_file_dropdown_revert").click(function() {
-            // move backup mei file to working directory
-            $.post(gui.apiprefix + "/revert", function(data) {
-                // when the backup file has been restored, reload the page
-                window.location.reload();
-            })
-            .error(function() {
-                // show alert to user
-                // replace text with error message
-                $("#alert > p").text("Server failed to restore backup MEI file.");
-                $("#alert").animate({opacity: 1.0}, 100);
+            
+            $("#nav_file_dropdown_revert").tooltip({animation: true,
+                                                    placement: 'right', 
+                                                    title: 'Revert the current MEI file to the original version. ' +
+                                                           'Warning: this will revert all changes made in the editor.', 
+                                                    delay: 100});
+            $("#nav_file_dropdown_revert").click(function() {
+                // move backup mei file to working directory
+                $.post(gui.apiprefix + "/revert", function(data) {
+                    // when the backup file has been restored, reload the page
+                    window.location.reload();
+                })
+                .error(function() {
+                    // show alert to user
+                    // replace text with error message
+                    $("#alert > p").text("Server failed to restore backup MEI file.");
+                    $("#alert").animate({opacity: 1.0}, 100);
+                });
             });
-        });
 
-        // MEI download
-        $("#nav_file_dropdown_getmei").tooltip({animation: true, 
-                                                placement: 'right', 
-                                                title: 'View the MEI file of the document being edited.',
-                                                delay: 100});
-        // set the download path of the file
-        $("#nav_file_dropdown_getmei").attr("href", gui.meipath);
+            // MEI download
+            $("#nav_file_dropdown_getmei").tooltip({animation: true, 
+                                                    placement: 'right', 
+                                                    title: 'View the MEI file of the document being edited.',
+                                                    delay: 100});
+            // set the download path of the file
+            $("#nav_file_dropdown_getmei").attr("href", gui.meipath);
 
-        // JPG download
-        $("#nav_file_dropdown_getjpg").tooltip({animation: true,
-            placement: 'right',
-            title: 'Download the original image file.',
-            delay: 100});
-        // set the download path of the file
-        var fileName = gui.meipath.split(".")[0];
-        $("#nav_file_dropdown_getjpg").attr("href", fileName + ".jpg");
+            // JPG download
+            $("#nav_file_dropdown_getjpg").tooltip({animation: true,
+                placement: 'right',
+                title: 'Download the original image file.',
+                delay: 100});
+            // set the download path of the file
+            var fileName = gui.meipath.split(".")[0];
+            $("#nav_file_dropdown_getjpg").attr("href", fileName + ".jpg");
 
-        // Document image rasterize
-        $("#nav_file_dropdown_getimg").tooltip({animation: true, 
-                                                placement: 'right', 
-                                                title: 'Download an image of the document being edited.',
-                                                delay: 100});
-        $("#nav_file_dropdown_getimg").click(function() {
-            if (!fabric.Canvas.supports('toDataURL')) {
-                // show alert to user
-                $("#alert > p").text("The browser you are using does not support this feature.");
-            }
-            else {
-                window.open(gui.rendEng.canvas.toDataURL('png'));
-            }
-        });
+            // Document image rasterize
+            $("#nav_file_dropdown_getimg").tooltip({animation: true, 
+                                                    placement: 'right', 
+                                                    title: 'Download an image of the document being edited.',
+                                                    delay: 100});
+            $("#nav_file_dropdown_getimg").click(function() {
+                if (!fabric.Canvas.supports('toDataURL')) {
+                    // show alert to user
+                    $("#alert > p").text("The browser you are using does not support this feature.");
+                }
+                else {
+                    window.open(gui.rendEng.canvas.toDataURL('png'));
+                }
+            });
+        }
+        else{
+            $(nav_file_dropdown_parent).append('<li><a href="#" id="save-to-rodan">Save</a></li>');
+
+            $('#save-to-rodan').click(function (e) {
+                $.post(self_url + 'save', {}, function (data) {
+                window.location = "about:blank"; // return to rodan
+                });
+            });
+
+        }
     }
+    
 }
 
 // //TODO: GLyoh and BkrdImage opacity sliders

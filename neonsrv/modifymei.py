@@ -1,4 +1,15 @@
+ # class os:
+#     class path(object):
+#         @staticmethod
+#         def abspath(*a, **k):
+#             return None
+#         @staticmethod
+#         def join(_, working_mei_file):
+            # return working_mei_file
 import os
+
+class conf:
+   MEI_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static/MEI_DIRECTORY"))
 
 from pymei import MeiElement, MeiAttribute, MeiDocument, documentFromFile, documentToFile, documentFromText
 from pymei.exceptions import MeiException, NoVersionFoundException
@@ -6,7 +17,7 @@ from pymei.exceptions import MeiException, NoVersionFoundException
 class ModifyDocument:
     
     def __init__(self, filename):
-        newfile = filename + ".mei"
+        newfile = filename
         importResult = documentFromFile(str(newfile), False)
         self.mei = importResult.getMeiDocument()
         self.filename = newfile
@@ -19,16 +30,26 @@ class ModifyDocument:
         '''
 
         if 'filename' in kwargs:
-            filename = kwargs['filename']
+            filename = kwargs['filename'] 
         else:
             filename = self.filename
 
         filename_split_initial = os.path.split(filename)
         filename_dir, mei_filename = filename_split_initial
 
+        in_demo = (mei_filename != "original_file.mei.working")
+        if in_demo:
+            undo_path = conf.MEI_DIRECTORY + "/undo/"
+        else:
+            undo_path = os.path.join(filename_dir, "undo/")
+        
+        if not os.path.exists(undo_path):
+            os.mkdir(undo_path)
+        
+    
         filename_split = os.path.split(filename_dir)
         filename_split_beg, filename_split_end = filename_split
-        undo_path = filename_split_beg + "/undo/"
+
 
         file_list = [f for f in  os.listdir(undo_path)
                         if os.path.isfile(os.path.join(undo_path, f))]
@@ -99,6 +120,7 @@ class ModifyDocument:
         self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
         # perform the insertion
+        
         if before_id is None:
             # get last layer
             layers = self.mei.getElementsByName("layer")
@@ -172,7 +194,6 @@ class ModifyDocument:
         Update bounding box, if it has changed.
         Update neume name, if the new head shape changes the name.
         """
-
         neume = self.mei.getElementById(id)
         
         nc = neume.getChildrenByName("nc")[0]

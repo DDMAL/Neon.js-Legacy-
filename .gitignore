@@ -5,6 +5,7 @@ static/js/*.js
 docs/*
 *.swp
 *.swo
+*.jar
 app_env/*
 MEI_DIRECTORY/*
 tutorial.mei

@@ -1,11 +1,35 @@
+
+#############################
+# Begin addition -- Ling-Xiao Yang
+#
+# Mock several classes and functions to let the original code work with Rodan,
+# as I don't want to modify the code.
+############################
 import os
 
-from modifymei import ModifyDocument
+class conf:
+   MEI_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static/MEI_DIRECTORY"))
+class tornado:
+    class web:
+        class RequestHandler(object):
+            def __init__(self, user_input):
+                self.user_input = user_input
+                self.response_content = ''
+            def get_argument(self, name, default=None):
+                return self.user_input.get(name, default)
+            def write(self, content):
+                self.response_content = content
+            def set_status(self, status):
+                pass
 
-import tornado.web
+
+#############################
+# End addition -- Ling-Xiao Yang
+#############################
+from modifymei import ModifyDocument
+import shutil
 import json
 
-import conf
 
 #####################################################
 #              NEUME HANDLER CLASSES                #
@@ -538,3 +562,92 @@ class UpdateSystemZoneHandler(tornado.web.RequestHandler):
         md.write_doc()
 
         self.set_status(200)
+
+class FileUndoHandler(tornado.web.RequestHandler):
+    def post(self, filename):
+        '''
+        Move the given filename from the undo directory to the
+        working directory. Overwrites changes made by the editor!
+        '''
+
+        mei_directory = os.path.join(os.path.abspath(conf.MEI_DIRECTORY))
+        meiworking = os.path.join(mei_directory, filename)
+        mei_directory_undo = mei_directory + "/undo"
+
+        file_list = [f for f in os.listdir(mei_directory_undo)
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+        list_length = len(file_list)
+
+        filename_split_initial = os.path.split(filename)
+        filename_dir, mei_filename = filename_split_initial
+
+        in_demo = (mei_filename != "original_file.mei.working")
+        if in_demo:
+            mei_directory_undo = conf.MEI_DIRECTORY + "/undo/"
+        else:
+            mei_directory_undo = os.path.join(filename_dir, "undo/")
+
+    
+        # if list_length > 1:
+        #     if list_length < 10:
+        #         meicurrent = os.path.join(mei_directory_undo, mei_filename + "_0" + str(list_length))
+        #         meiundo = os.path.join(mei_directory_undo, mei_filename + "_0" + str(list_length - 1))
+        #     elif list_length == 10:
+        #         meicurrent = os.path.join(mei_directory_undo, mei_filename + "_" + str(list_length))
+        #         meiundo = os.path.join(mei_directory_undo, mei_filename + "_0" + str(list_length - 1))
+        #     else:
+        #         meicurrent = os.path.join(mei_directory_undo, mei_filename + "_" + str(list_length))
+        #         meiundo = os.path.join(mei_directory_undo, mei_filename + "_" + str(list_length - 1))
+
+        #     if meiundo:
+        #         shutil.copy(meiundo, meiworking)
+
+        #     os.remove(meicurrent)
+
+        # else:
+        if list_length > 1:
+            if list_length < 10:
+                meicurrent = os.path.join(mei_directory_undo, filename + "_0" + str(list_length) + ".mei")
+                meiundo = os.path.join(mei_directory_undo, filename + "_0" + str(list_length - 1) + ".mei")
+            elif list_length == 10:
+                meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
+                meiundo = os.path.join(mei_directory_undo, filename + "_0" + str(list_length - 1) + ".mei")
+            else:
+                meicurrent = os.path.join(mei_directory_undo, filename + "_" + str(list_length) + ".mei")
+                meiundo = os.path.join(mei_directory_undo, filename + "_" + str(list_length - 1) + ".mei")
+
+            if meiundo:
+                shutil.copy(meiundo, meiworking)
+
+            os.remove(meicurrent)
+
+class DeleteUndosHandler(tornado.web.RequestHandler):
+    def post(self, filename):
+        mei_directory = os.path.join(os.path.abspath(conf.MEI_DIRECTORY))
+        meiworking = os.path.join(mei_directory, filename)
+        mei_directory_undo = mei_directory + "/undo"
+
+        file_list = [f for f in os.listdir(mei_directory_undo)
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+        if len(file_list) != 0:
+            for f in file_list:
+                os.remove(mei_directory_undo + "/" + f)
+
+        file_list = [f for f in os.listdir(mei_directory_undo) 
+                     if os.path.isfile(os.path.join(mei_directory_undo, f))]
+
+
+        if len(file_list) == 0:
+            filename_split_initial = os.path.split(filename)
+            filename_dir, mei_filename = filename_split_initial
+
+            if mei_filename == "original_file.mei.working":
+                meiundo = mei_directory_undo + "/" + mei_filename +"_0" + str(1)
+
+            else:
+                meiundo = os.path.join(mei_directory_undo, filename + "_0" + str(1))
+
+            if meiundo:
+                shutil.copy(meiworking, meiundo)
