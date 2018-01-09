@@ -579,6 +579,8 @@ class FileUndoHandler(tornado.web.RequestHandler):
 
         list_length = len(file_list)
 
+        print list_length
+
         filename_split_initial = os.path.split(filename)
         filename_dir, mei_filename = filename_split_initial
 
@@ -587,6 +589,7 @@ class FileUndoHandler(tornado.web.RequestHandler):
             mei_directory_undo = conf.MEI_DIRECTORY + "/undo/"
         else:
             mei_directory_undo = os.path.join(filename_dir, "undo/")
+            print mei_directory_undo
 
     
         # if list_length > 1:

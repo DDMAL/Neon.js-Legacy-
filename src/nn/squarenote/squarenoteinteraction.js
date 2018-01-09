@@ -1204,24 +1204,27 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     gui.unbindEventHandlers();
     gui.removeInsertSubControls();
 
+    var self_url = location.href.split('#')[0];
+    console.log(self_url);
+
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/>\n' +
                                     '<p> Select Head Shape\n </p><select name="head_shape" id="head_shape">' +
-                                    '<option id="head_punctum" value="punctum" data-imagesrc="/static/img/selectimages/punctum.png">Punctum</option>\n' +
-                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum" data-imagesrc="/static/img/selectimages/diamond.png">Punctum Inclinatum</option>\n' +
-                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum" data-imagesrc="/static/img/selectimages/diamond_small.png">Punctum Inclinatum Parvum</option>\n' +
-                                    '<option id="head_cavum" value="cavum" data-imagesrc="/static/img/selectimages/white_punct.png">Cavum</option>\n' +
-                                    '<option id="head_virga" value="virga" data-imagesrc="/static/img/selectimages/virga.png">Virga</option>\n' +
-                                    '<option id="head_quilisma" value="quilisma" data-imagesrc="/static/img/selectimages/quilisma.png">Quilisma</option>\n' +
-                                    '<option id="head_custos" value="custos" data-imagesrc="/static/img/selectimages/custos.png">Custos</option></select>\n' +
+                                    '<option id="head_punctum" value="punctum" data-imagesrc= self_url + "/img/selectimages/punctum.png">Punctum</option>\n' +
+                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum" data-imagesrc=self_url + "/img/selectimages/diamond.png">Punctum Inclinatum</option>\n' +
+                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum" data-imagesrc=self_url + "/img/selectimages/diamond_small.png">Punctum Inclinatum Parvum</option>\n' +
+                                    '<option id="head_cavum" value="cavum" data-imagesrc=self_url + "/img/selectimages/white_punct.png">Cavum</option>\n' +
+                                    '<option id="head_virga" value="virga" data-imagesrc=self_url + "/img/selectimages/virga.png">Virga</option>\n' +
+                                    '<option id="head_quilisma" value="quilisma" data-imagesrc=self_url + "/img/selectimages/quilisma.png">Quilisma</option>\n' +
+                                    '<option id="head_custos" value="custos" data-imagesrc=self_url + "/img/selectimages/custos.png">Custos</option></select>\n' +
                                     '<li class="nav-header">Ornamentation</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                     '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
                                     '<button id="chk_horizepisema" class="btn"><i class="icon-resize-horizontal"></i> Episema</button>\n' +
                                     '<button id="chk_vertepisema" class="btn"><i class="icon-resize-vertical"></i> Episema</button>\n</div></li></span>')
     }
-
+    
     // ornamentation toggle flags
     var hasDot = false;
     var noteType = "punctum";
@@ -1506,6 +1509,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
                     // send insert command to server to change underlying MEI
                     $.post(gui.apiprefix + "/insert/neume", args, function (data) {
+                        console.log(data);
                             nModel.id = JSON.parse(data).id;
                         })
                         .error(function () {
@@ -2620,20 +2624,31 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
 
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
-    console.log("Apiprefic: " + apiprefix);
-    console.log("cutprefic: " + cutprefix);
-    var zoom = gui.scaling[6];
+    // console.log("Apiprefic: " + apiprefix);
+    // console.log("cutprefic: " + cutprefix);
+    //var zoom = gui.scaling[6];
+
     var self_url = location.href.split('#')[0];
-    $('#neon-wrapper').neon({
-        //glyphpath: "/static/img/neumes_concat.svg",
-        glyphpath: self_url + "static/img/neumes_concat.svg",
+    $(gui.scaling[6]).neon({
+        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
         meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
         bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
         bgimgopacity: 0.5,
         documentType: "liber",
         apiprefix: apiprefix,
         width: 1200, // enforce width
-        zoom: zoom
+        zoom: true
+    });
+
+    $('#neon-wrapper').neon({
+        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+        bgimgopacity: 0.5,
+        documentType: "liber",
+        apiprefix: apiprefix,
+        width: 1200, // enforce width
+        zoom: false
     });
 
     $("#btn_stafflock").prop("checked", true);
@@ -2641,6 +2656,7 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
 
 Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
     var gui = e.data.gui;
+    console.log(gui);
 
     if(call){
         gui.handleDeleteUndos(gui);
@@ -2648,31 +2664,29 @@ Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
 
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
+    var self_url = location.href.split('#')[0];
 
-    if (gui.scaling[6]) {
-        $('#neon-wrapper').neon({
-            glyphpath: "/static/img/neumes_concat.svg",
-            meipath: "/file" + cutprefix + ".mei",
-            bgimgpath: "/file" + cutprefix + ".jpg",
-            bgimgopacity: 0.5,
-            documentType: "liber",
-            apiprefix: apiprefix,
-            width: 1200, // enforce width
-            zoom: false
+    $(gui.scaling[6]).neon({
+        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+        bgimgopacity: 0.5,
+        documentType: "liber",
+        apiprefix: apiprefix,
+        width: 1200, // enforce width
+        zoom: true
     });
-    }
-    else {
-        $('#neon-wrapper').neon({
-            glyphpath: "/static/img/neumes_concat.svg",
-            meipath: "/file" + cutprefix + ".mei",
-            bgimgpath: "/file" + cutprefix + ".jpg",
-            bgimgopacity: 0.5,
-            documentType: "liber",
-            apiprefix: apiprefix,
-            width: 1200, // enforce width
-            zoom: true
+
+    $('#neon-wrapper').neon({
+        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+        bgimgopacity: 0.5,
+        documentType: "liber",
+        apiprefix: apiprefix,
+        width: 1200, // enforce width
+        zoom: false
     });
-    }
 
     $("#btn_stafflock").prop("checked", true);
 };
@@ -3441,7 +3455,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
                                 '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n' +
                                 '<li><button title="Zoom in and out of the canvas" id="btn_zoom" class="btn">Zoom</button></li></div>' +
-                                '<p>Staff Lock  </input id="btn_stafflock" type="checkbox" checked></p></span>');
+                                '<p><input id="btn_stafflock" type="checkbox" value=checked>Staff Lock</p></span>');
     }
 
     // grey out edit buttons by default

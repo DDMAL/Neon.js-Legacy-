@@ -786,6 +786,7 @@ Toe.View.CheironomicInteraction.prototype.handleInsertPunctum = function(e) {
     // to not pollute the global namespace when inserting other
     // musical elements
     var updateFollowPunct = function(initial) {
+        console.log(initial);
         var elements = {modify: new Array(), fixed: new Array()};
 
         var punctPos = null;
