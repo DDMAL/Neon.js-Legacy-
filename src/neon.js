@@ -42,7 +42,8 @@ THE SOFTWARE.
             documentType: "liber",
             width: 1000,
             zoom: false,
-            address: ""
+            //address: ""
+            //address: ""
         };
 
         var settings = $.extend({}, defaults, options);
@@ -230,7 +231,7 @@ THE SOFTWARE.
             if (settings.zoom) {
                 scaling[6] = true;
                 //Background Image
-                fabric.Image.fromURL(settings.address + settings.bgimgpath, function(oImg) {
+                fabric.Image.fromURL("http://132.206.14.124:8080" + settings.bgimgpath, function(oImg) {
                     var scaleFactor = settings.width/canvasDims[0];
                     oImg.scaleX = scaleFactor * scaling[4];
                     oImg.scaleY = scaleFactor * scaling[5];
@@ -250,7 +251,7 @@ THE SOFTWARE.
             //Regular background image loading
             else {
                 scaling[6] = false;
-                fabric.Image.fromURL(settings.address + settings.bgimgpath, function(oImg) {
+                fabric.Image.fromURL("http://132.206.14.124:8080" + settings.bgimgpath, function(oImg) {
                     var scaleFactor = settings.width/canvasDims[0];
                     oImg.scale(scaleFactor);
                     oImg.left = ( (oImg.width * scaleFactor) / 2 );
