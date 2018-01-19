@@ -347,7 +347,10 @@ class InsertClefHandler(tornado.web.RequestHandler):
         data = json.loads(self.get_argument("data", ""))
         shape = str(data["shape"])
         line = str(data["line"])
-        before_id = str(data["beforeid"])
+        if hasattr(data, "beforeid"):
+            before_id = str(data["beforeid"])
+        else:
+            before_id = None
         pitchInfo = data["pitchInfo"]
 
         # bounding box
