@@ -541,3 +541,20 @@ class UpdateSystemZoneHandler(tornado.web.RequestHandler):
         md.write_doc()
 
         self.set_status(200)
+
+class InsertPageHandler(tornado.web.RequestHandler):
+
+    def post(self, file):
+        data = json.loads(self.get_argument("data", ""))
+        n = str(data["n"])
+
+        mei_directory = os.path.abspath(conf.MEI_DIRECTORY)
+        fname = os.path.join(mei_directory, file)
+        md = ModifyDocument(fname)
+        result = md.insert_page(n)
+        md.write_doc()
+
+        self.write(json.dumps(result))
+
+        self.set_status(200)
+

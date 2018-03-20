@@ -672,6 +672,16 @@ class ModifyDocument:
 
             self.update_or_add_zone(punctum, ulx, uly, lrx, lry)
 
+    def insert_page(self, n):
+        page = MeiElement("page")
+        page.addAttribute("n", n)
+
+        layer = self.mei.getElementsByName("layer")
+        layer[-1].addChild(page)
+
+        result = {"id": page.getId()}
+        return result
+
     def insert_clef(self, line, shape, pitch_info, before_id, ulx, uly, lrx, lry):
         '''
         Insert a doh or fah clef, with a given bounding box.
@@ -743,6 +753,7 @@ class ModifyDocument:
         element.
         clef_data: [{id, pitch_info}, ...]
         '''
+
 
         for c in clef_data:
             clef = self.mei.getElementById(str(c["id"]))

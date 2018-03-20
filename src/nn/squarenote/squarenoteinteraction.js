@@ -158,6 +158,16 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_selectall").bind("click.edit", {gui: gui}, gui.handleSelectAll);
     $("#btn_zoom").bind("click.edit", {gui: gui}, gui.handleZoom);
 
+    var pg_id = gui.page.id;
+    var args = {n: "1"};
+    var data = JSON.stringify(args);
+
+    if(!pg_id){
+        $.post(gui.apiprefix + "/insert/page", {data: data}, function (data){
+            gui.page.id = JSON.parse(data).id;
+        })
+    }
+
 };
 
 Toe.View.SquareNoteInteraction.prototype.handleHorizEpisemaToggle = function(e) {
@@ -1754,6 +1764,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertSystem = function(e) {
 
     // Get the widest system and use its dimensions.  If there is no widest system, forget it!
     var widestSystem = gui.page.getWidestSystem();
+
     if (widestSystem == null) {
         // TODO: Maybe add some default values if there are no systems in the document yet
         return;
@@ -2005,7 +2016,7 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertClef = function(e) {
                 }
             })
                 .error(function () {
-                    gui.showAlert("Server failed to neumify selected neumes. Client and server are not synchronized.");
+                    gui.showAlert("Server failed to insert page. Client and server are not synchronized.");
                 });
         }
     });

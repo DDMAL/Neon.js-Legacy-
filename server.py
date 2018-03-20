@@ -61,6 +61,7 @@ rules = [
     (abs_path(r"/edit/(.*?)/delete/systembreak"), neonsrv.tornadoapi.DeleteSystemBreakHandler),
     (abs_path(r"/edit/(.*?)/delete/system"), neonsrv.tornadoapi.DeleteSystemHandler),
     (abs_path(r"/edit/(.*?)/update/system/zone"), neonsrv.tornadoapi.UpdateSystemZoneHandler),
+    (abs_path(r"/edit/(.*?)/insert/page"), neonsrv.tornadoapi.InsertPageHandler),
     (abs_path(r"\/?(.*?)"), neonsrv.interface.RootHandler)
 ]
 
