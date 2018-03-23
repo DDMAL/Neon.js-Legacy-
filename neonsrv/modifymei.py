@@ -859,10 +859,11 @@ class ModifyDocument:
 
         for id in ids:
             system = self.mei.getElementById(id)
-            # remove the bounding box data
-            self.remove_zone(system)
-            # remove the system from the document
-            system.getParent().removeChild(system)
+            if system:
+                # remove the bounding box data
+                self.remove_zone(system)
+                # remove the system from the document
+                system.getParent().removeChild(system)
 
     def delete_system_break(self, ids):
         '''
