@@ -8,8 +8,8 @@
             # return working_mei_file
 import os
 
-class conf:
-   MEI_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static/MEI_DIRECTORY"))
+# class conf:
+#    MEI_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "../MEI_DIRECTORY"))
 
 from pymei import MeiElement, MeiAttribute, MeiDocument, documentFromFile, documentToFile, documentFromText
 from pymei.exceptions import MeiException, NoVersionFoundException
@@ -34,47 +34,52 @@ class ModifyDocument:
         else:
             filename = self.filename
 
-        filename_split_initial = os.path.split(filename)
-        filename_dir, mei_filename = filename_split_initial
 
-        in_demo = (mei_filename != "original_file.mei.working")
-        if in_demo:
-            undo_path = conf.MEI_DIRECTORY + "/undo/"
-        else:
-            undo_path = os.path.join(filename_dir, "undo/")
-        
-        if not os.path.exists(undo_path):
-            os.mkdir(undo_path)
-        
-    
-        filename_split = os.path.split(filename_dir)
-        filename_split_beg, filename_split_end = filename_split
+        status = documentToFile(self.mei, str(filename))
+        if not status:
+            raise RuntimeError("Failed to save MEI file.")
 
+        # filename_split_initial = os.path.split(filename)
+        # filename_dir, mei_filename = filename_split_initial
 
-        file_list = [f for f in  os.listdir(undo_path)
-                        if os.path.isfile(os.path.join(undo_path, f))]
-
-        file_num = 1 + len(file_list)
-
-        mei_filename_split = os.path.splitext(mei_filename)
-        mei_name, mei_ext = mei_filename_split
-
-        if(file_num > 50):
-            file_num = 50
-            os.remove(undo_path + mei_name + '_01' + mei_ext)
-            file_list.pop(0)
-            for idx, f in enumerate(file_list):
-                if(idx < 9):
-                    os.rename(undo_path + f, undo_path + mei_name + '_0' + str(idx + 1) + mei_ext)
-                else:
-                    os.rename(undo_path + f, undo_path + mei_name + '_' + str(idx + 1) + mei_ext)
-
-        if (file_num < 10):
-            documentToFile(self.mei, str(undo_path + mei_name + '_0' + str(file_num) + mei_ext))
-            documentToFile(self.mei, str(filename))
-        else:
-            documentToFile(self.mei, str(undo_path + mei_name + '_' + str(file_num) + mei_ext))
-            documentToFile(self.mei, str(filename))
+        # in_demo = (mei_filename != "original_file.mei.working")
+        # if in_demo:
+        #     undo_path = conf.MEI_DIRECTORY + "/undo/"
+        # else:
+        #     undo_path = os.path.join(filename_dir, "undo/")
+        #
+        # if not os.path.exists(undo_path):
+        #     os.mkdir(undo_path)
+        #
+        #
+        # filename_split = os.path.split(filename_dir)
+        # filename_split_beg, filename_split_end = filename_split
+        #
+        #
+        # file_list = [f for f in  os.listdir(undo_path)
+        #                 if os.path.isfile(os.path.join(undo_path, f))]
+        #
+        # file_num = 1 + len(file_list)
+        #
+        # mei_filename_split = os.path.splitext(mei_filename)
+        # mei_name, mei_ext = mei_filename_split
+        #
+        # if(file_num > 50):
+        #     file_num = 50
+        #     os.remove(undo_path + mei_name + '_01' + mei_ext)
+        #     file_list.pop(0)
+        #     for idx, f in enumerate(file_list):
+        #         if(idx < 9):
+        #             os.rename(undo_path + f, undo_path + mei_name + '_0' + str(idx + 1) + mei_ext)
+        #         else:
+        #             os.rename(undo_path + f, undo_path + mei_name + '_' + str(idx + 1) + mei_ext)
+        #
+        # if (file_num < 10):
+        #     documentToFile(self.mei, str(undo_path + mei_name + '_0' + str(file_num) + mei_ext))
+        #     documentToFile(self.mei, str(filename))
+        # else:
+        #     documentToFile(self.mei, str(undo_path + mei_name + '_' + str(file_num) + mei_ext))
+        #     documentToFile(self.mei, str(filename))
 
     def insert_punctum(self, name, inclinatum, deminutus, before_id, pname, oct, dot_form, episema_form, ulx, uly, lrx, lry):
         '''
@@ -950,11 +955,11 @@ class ModifyDocument:
         Remove the bounding box information of the deleted element
         from the document
         '''
-
-        facs_id = element.getAttribute("facs")
-        if facs_id:
-            zone = self.mei.getElementById(facs_id.getValue())
-            zone.getParent().removeChild(zone)
+        if(element):
+            facs_id = element.getAttribute("facs")
+            if facs_id:
+                zone = self.mei.getElementById(facs_id.getValue())
+                zone.getParent().removeChild(zone)
 
     def update_pitched_elements(self, pitch_info):
         for ele in pitch_info:

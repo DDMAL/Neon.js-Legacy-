@@ -68,7 +68,7 @@ Toe.View.SquareNoteInteraction = function(rendEng, scaling, page, apiprefix, gui
     this.bindAlerts();
 
     //empty old undo files
-    window.onload = $.proxy(function() {this.handleDeleteUndos(this);}, this);
+    //window.onload = $.proxy(function() {this.handleDeleteUndos(this);}, this);
 };
 
 Toe.View.SquareNoteInteraction.prototype = new Toe.View.Interaction();
@@ -141,12 +141,12 @@ Toe.View.SquareNoteInteraction.prototype.handleEdit = function(e) {
     $("#btn_stafflock").unbind("click");
     $("#btn_selectall").unbind("click");
     $("#btn_refresh").unbind("click");
-    $("#btn_undo").unbind("click");
+    //$("#btn_undo").unbind("click");
     $("#btn_quickgroup").unbind("click");
     $("#btn_zoom").unbind("click");
 
     // Linking the buttons to their respective functions
-    $("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
+    //$("#btn_undo").bind("click.edit", {gui: gui}, gui.handleUndo);
     $("#btn_refresh").bind("click.edit", {gui: gui}, gui.handleRefresh);
     $("#btn_delete").bind("click.edit", {gui: gui}, gui.handleDelete);
     $("#btn_duplicate").bind("click.edit", {gui: gui}, gui.handleDuplicate);
@@ -1205,19 +1205,18 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
     gui.removeInsertSubControls();
 
     var self_url = location.href.split('#')[0];
-    console.log(self_url);
 
     // add ornamentation toggles
     if ($("#menu_insertpunctum").length == 0) {
         $("#sidebar-insert").append('<span id="menu_insertpunctum"><br/>\n' +
                                     '<p> Select Head Shape\n </p><select name="head_shape" id="head_shape">' +
-                                    '<option id="head_punctum" value="punctum" data-imagesrc= self_url + "/img/selectimages/punctum.png">Punctum</option>\n' +
-                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum" data-imagesrc=self_url + "/img/selectimages/diamond.png">Punctum Inclinatum</option>\n' +
-                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum" data-imagesrc=self_url + "/img/selectimages/diamond_small.png">Punctum Inclinatum Parvum</option>\n' +
-                                    '<option id="head_cavum" value="cavum" data-imagesrc=self_url + "/img/selectimages/white_punct.png">Cavum</option>\n' +
-                                    '<option id="head_virga" value="virga" data-imagesrc=self_url + "/img/selectimages/virga.png">Virga</option>\n' +
-                                    '<option id="head_quilisma" value="quilisma" data-imagesrc=self_url + "/img/selectimages/quilisma.png">Quilisma</option>\n' +
-                                    '<option id="head_custos" value="custos" data-imagesrc=self_url + "/img/selectimages/custos.png">Custos</option></select>\n' +
+                                    '<option id="head_punctum" value="punctum" data-imagesrc=' + self_url + 'img/selectimages/punctum.png">Punctum</option>\n' +
+                                    '<option id="head_punctum_inclinatum" value="punctum_inclinatum" data-imagesrc=' + self_url + 'img/selectimages/diamond.png">Punctum Inclinatum</option>\n' +
+                                    '<option id="head_punctum_inclinatum_parvum" value="punctum_inclinatum_parvum" data-imagesrc=' + self_url + 'img/selectimages/diamond_small.png">Punctum Inclinatum Parvum</option>\n' +
+                                    '<option id="head_cavum" value="cavum" data-imagesrc=' + self_url + 'img/selectimages/white_punct.png">Cavum</option>\n' +
+                                    '<option id="head_virga" value="virga" data-imagesrc=' + self_url + 'img/selectimages/virga.png">Virga</option>\n' +
+                                    '<option id="head_quilisma" value="quilisma" data-imagesrc=' + self_url + 'img/selectimages/quilisma.png">Quilisma</option>\n' +
+                                    '<option id="head_custos" value="custos" data-imagesrc=' + self_url + 'img/selectimages/custos.png">Custos</option></select>\n' +
                                     '<li class="nav-header">Ornamentation</li>\n' +
                                     '<li><div class="btn-group" data-toggle="buttons-checkbox">\n' +
                                     '<button id="chk_dot" class="btn">&#149; Dot</button>\n' +
@@ -1509,7 +1508,6 @@ Toe.View.SquareNoteInteraction.prototype.handleInsertPunctum = function(e) {
 
                     // send insert command to server to change underlying MEI
                     $.post(gui.apiprefix + "/insert/neume", args, function (data) {
-                        console.log(data);
                             nModel.id = JSON.parse(data).id;
                         })
                         .error(function () {
@@ -2617,9 +2615,9 @@ Toe.View.SquareNoteInteraction.prototype.handleDuplicate = function(e) {
 Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
     var gui = e.data.gui;
 
-    if(call){
-        gui.handleDeleteUndos(gui);
-    }
+    // if(call){
+    //     gui.handleDeleteUndos(gui);
+    // }
     
 
     apiprefix = gui.apiprefix;
@@ -2658,9 +2656,9 @@ Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
     var gui = e.data.gui;
     console.log(gui);
 
-    if(call){
-        gui.handleDeleteUndos(gui);
-    }
+    // if(call){
+    //     gui.handleDeleteUndos(gui);
+    // }
 
     apiprefix = gui.apiprefix;
     cutprefix = apiprefix.slice(5);
@@ -2691,29 +2689,29 @@ Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
     $("#btn_stafflock").prop("checked", true);
 };
 
-Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
-    // delete files in undo folder
-    $.post(gui.apiprefix + "/deleteundo")
-        .error(function() {
-            gui.showAlert("Server failed to delete undos. Client and server are not synchronized.");
-        });
-};
-
-Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
-    var gui = e.data.gui;
-
-    // move undo mei file to working directory
-    $.post(gui.apiprefix + "/undo", function() {
-        // when the backup file has been restored, reload the page
-        gui.handleRefresh(e);
-    })
-        .error(function() {
-            // show alert to user
-            // replace text with error message
-            $("#alert > p").text("Server failed to restore undo MEI file.");
-            $("#alert").animate({opacity: 1.0}, 100);
-        });
-};
+// Toe.View.SquareNoteInteraction.prototype.handleDeleteUndos = function(gui) {
+//     // delete files in undo folder
+//     $.post(gui.apiprefix + "/deleteundo")
+//         .error(function() {
+//             gui.showAlert("Server failed to delete undos. Client and server are not synchronized.");
+//         });
+// };
+//
+// Toe.View.SquareNoteInteraction.prototype.handleUndo = function(e) {
+//     var gui = e.data.gui;
+//
+//     // move undo mei file to working directory
+//     $.post(gui.apiprefix + "/undo", function() {
+//         // when the backup file has been restored, reload the page
+//         gui.handleRefresh(e);
+//     })
+//         .error(function() {
+//             // show alert to user
+//             // replace text with error message
+//             $("#alert > p").text("Server failed to restore undo MEI file.");
+//             $("#alert").animate({opacity: 1.0}, 100);
+//         });
+// };
 
 Toe.View.SquareNoteInteraction.prototype.handleArrowKeys = function (direction) {
     gui = this;
@@ -3386,10 +3384,10 @@ Toe.View.SquareNoteInteraction.prototype.bindHotKeys = function() {
         return false;
     });
 
-    Mousetrap.bind(['meta+z'], function() {
-        $("#btn_undo").trigger('click.edit', {gui:gui}, gui.handleUndo);
-        return false;
-    });
+    // Mousetrap.bind(['meta+z'], function() {
+    //     $("#btn_undo").trigger('click.edit', {gui:gui}, gui.handleUndo);
+    //     return false;
+    // });
 
     Mousetrap.bind(['f'], function() {
         $("#edit_rad_f").click();
@@ -3451,7 +3449,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 // duplicate is unfinished functionality. Uncomment and refer to handleDuplicate() to continue working on it.
                                 // '<li><button title="Duplicate" id="btn_duplicate" class="btn"> Duplicate</button>' +
                                 '<li><button title="Delete the selected neume" id="btn_delete" class="btn"><i class="icon-remove"></i> Delete</button>' +
-                                '<button title="Undo" id="btn_undo" class="btn"> Undo</button></li>\n' +
+                                //'<button title="Undo" id="btn_undo" class="btn"> Undo</button></li>\n' +
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
                                 '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n' +
                                 '<li><button title="Zoom in and out of the canvas" id="btn_zoom" class="btn">Zoom</button></li></div>' +

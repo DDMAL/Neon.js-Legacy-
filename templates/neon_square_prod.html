@@ -80,7 +80,6 @@
 
     $(document).ready(function() {
         var self_url = location.href.split('#')[0];
-        console.log(self_url);
         // derive background image name from mei
         $('#neon-wrapper').neon({
           debug: false,
@@ -92,6 +91,12 @@
           documentType: "liber",
           width: 1000 // enforce width
         });
+
+    $('#save-to-rodan').click(function (e) {
+        $.post(document.URL.split('#')[0] + 'save', {}, function (data) {
+            window.close();    // return to rodan
+        });
+    });
 
     });
     </script>
@@ -114,7 +119,7 @@
                 <ul id="nav_file_dropdown" class="dropdown-menu">
                 </ul> 
            </li>
-          <!-- <li><a href="#" id="save-to-rodan">Save</a></li> -->
+           <li><a href="#" id="save-to-rodan">Save</a></li>
         </ul>
         <p class="navbar-text pull-right"><a href="#hotkeysModal" data-toggle="modal">Hotkey Glossary</a> | <a href="https://github.com/DDMAL/Neon.js/wiki" data-toggle="modal">Help</a> | <a href="#developersModal" data-toggle="modal">Developers</a> | <a href="http://ddmal.music.mcgill.ca/">DDMAL</a></p>
       </div><!--/.nav-collapse -->

@@ -2,11 +2,9 @@ import os, shutil
 from tempfile import mkstemp
 from rodan.jobs.base import RodanTask
 from django.conf import settings
+from django.template.loader import get_template
 
 from neonsrv import tornadoapi
-
-class conf:
-    MEI_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static/MEI_DIRECTORY"))
 
 class Neon(RodanTask):
     name = 'neon'
@@ -84,8 +82,8 @@ class Neon(RodanTask):
         ("delete/systembreak", tornadoapi.DeleteSystemBreakHandler), 
         ("delete/system", tornadoapi.DeleteSystemHandler),
         ("update/system/zone", tornadoapi.UpdateSystemZoneHandler),
-        ("undo", tornadoapi.FileUndoHandler),
-        ("deleteundo", tornadoapi.DeleteUndosHandler),
+        # ("undo", tornadoapi.FileUndoHandler),
+        # ("deleteundo", tornadoapi.DeleteUndosHandler),
     )
     def validate_my_user_input(self, inputs, settings, user_input):
     	request_url = getattr(self, 'url', None)

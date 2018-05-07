@@ -8,9 +8,6 @@ from pymei.exceptions import MeiException, NoVersionFoundException
 
 import tornado.web
 
-class conf:
-    MEI_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "../static/MEI_DIRECTORY"))
-
 class RootHandler(tornado.web.RequestHandler):
     def get_files(self, document_type):
         if(document_type != "cheironomic"):

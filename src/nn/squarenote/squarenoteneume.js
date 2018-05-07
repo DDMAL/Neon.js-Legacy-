@@ -102,12 +102,16 @@ Toe.Model.SquareNoteNeume.prototype.setRootSystemPos = function(aSystemPos) {
  * @param {jQuery wrapped element set} facs the MEI facs data for the provided neume
  */
 Toe.Model.SquareNoteNeume.prototype.neumeFromMei = function(neumeData, bb) {
+    //console.log($(neumeData).attr("name"));
     // check the DOM element is in fact a neume
     if (neumeData.nodeName.toLowerCase() != "neume") {
         throw new Error("neumeFromMei: invalid neume data");
     }
 
     this.id = $(neumeData).attr("xml:id");
+    if(!($(neumeData).attr("name"))){
+        $(neumeData).attr("name", "punctum");
+    }
     var nName = $(neumeData).attr("name").toLowerCase();
     // perform neume -> neume & modifier transformations
     // For example, in the current MEI neumes module, cephalicus and epiphonus are their
