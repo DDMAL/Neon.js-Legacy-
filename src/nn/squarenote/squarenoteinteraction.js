@@ -3453,7 +3453,7 @@ Toe.View.SquareNoteInteraction.prototype.insertEditControls = function(aParentDi
                                 '<li><button title="refresh canvas" id="btn_refresh" class="btn"> Refresh</button>' +
                                 '<button title="Select all elements on the page" id="btn_selectall" class="btn"> Select All</button></li>\n' +
                                 '<li><button title="Zoom in and out of the canvas" id="btn_zoom" class="btn">Zoom</button></li></div>' +
-                                '<p><input id="btn_stafflock" type="checkbox" value=checked>Staff Lock</p></span>');
+                                '<p><input id="btn_stafflock" type="checkbox" checked>Staff Lock</p></span>');
     }
 
     // grey out edit buttons by default
