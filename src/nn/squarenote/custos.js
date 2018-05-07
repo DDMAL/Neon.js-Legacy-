@@ -63,7 +63,9 @@ Toe.Model.Custos.prototype.constructor = Toe.Model.Custos;
  * @param {Array} bb [ulx, uly, lrx, lry]
  */
 Toe.Model.Custos.prototype.setBoundingBox = function(bb) {
-    if(!Toe.validBoundingBox(bb)) {
+    var isNotNaN = bb[0] && bb[1] && bb[2] && bb[3];
+
+    if(!Toe.validBoundingBox(bb) && isNotNaN) {
         throw new Error("Division: invalid bounding box");
     }
 

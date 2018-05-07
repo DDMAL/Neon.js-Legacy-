@@ -7,6 +7,7 @@ docs/*
 *.swo
 *.jar
 app_env/*
-MEI_DIRECTORY/*
 tutorial.mei
+MEI_DIRECTORY/*
 /static/js/support/all.js
+

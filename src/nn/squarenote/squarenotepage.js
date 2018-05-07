@@ -45,6 +45,7 @@ Toe.Model.SquareNotePage.prototype.constructor = Toe.SquareNotePage;
  * @param {Toe.View.RenderEngine} rendEng the rendering engine
  */
 Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
+    var apiprefix = rendEng.canvas.cacheCanvasEl.baseURI;
     // cache page reference
     var page = this;
 
@@ -159,8 +160,20 @@ Toe.Model.SquareNotePage.prototype.loadMei = function(mei, rendEng) {
             var nView = new Toe.View.NeumeView(rendEng, page.documentType);
             var nCtrl = new Toe.Ctrl.NeumeController(nModel, nView);
 
-            // mount neume on the system
-            sModel.addNeume(nModel);
+            var ulx = nModel.zone.ulx;
+            var uly = nModel.zone.uly;
+            var lrx = nModel.zone.lrx;
+            var lry = nModel.zone.lry;
+
+            if (ulx && uly && lrx && lry){
+                // mount neume on the system
+                sModel.addNeume(nModel);
+            }
+            else{
+                $.post(apiprefix + "delete/neume",  {ids: nModel.id})
+            }
+
+
         });
 
         // load all divisions in the system

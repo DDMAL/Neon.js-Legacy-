@@ -104,8 +104,10 @@ Toe.Model.Neume.prototype.setSystem = function(aSystem) {
  * @param {Array} bb [ulx, uly, lrx, lry]
  */
 Toe.Model.Neume.prototype.setBoundingBox = function(bb) {
-    if(!Toe.validBoundingBox(bb)) {
-        throw new Error("Neume: invalid bounding box");
+    var isNotNaN = bb[0] && bb[1] && bb[2] && bb[3];
+
+    if(!Toe.validBoundingBox(bb) && isNotNaN) {
+            throw new Error("Neume: invalid bounding box");
     }
 
     bb = $.map(bb, Math.round);
