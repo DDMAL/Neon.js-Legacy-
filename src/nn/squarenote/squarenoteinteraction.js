@@ -2618,36 +2618,36 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
     // if(call){
     //     gui.handleDeleteUndos(gui);
     // }
-    
 
     apiprefix = gui.apiprefix;
     //cutprefix = apiprefix.slice(5);
-    // console.log("Apiprefic: " + apiprefix);
-    // console.log("cutprefic: " + cutprefix);
     //var zoom = gui.scaling[6];
 
     var self_url = location.href.split('#')[0];
-    $(gui.scaling[6]).neon({
-        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
-        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
-        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
-        bgimgopacity: 0.5,
-        documentType: "liber",
-        apiprefix: apiprefix,
-        width: 1200, // enforce width
-        zoom: true
-    });
-
-    $('#neon-wrapper').neon({
-        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
-        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
-        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
-        bgimgopacity: 0.5,
-        documentType: "liber",
-        apiprefix: apiprefix,
-        width: 1200, // enforce width
-        zoom: false
-    });
+    if (gui.scaling[6]) {
+        $('#neon-wrapper').neon({
+            glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+            meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+            bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: true
+        });
+    }
+    else {
+        $('#neon-wrapper').neon({
+            glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+            meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+            bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: false
+        });
+    }
 
     $("#btn_stafflock").prop("checked", true);
 };
