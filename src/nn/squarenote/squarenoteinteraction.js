@@ -2621,7 +2621,7 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
     
 
     apiprefix = gui.apiprefix;
-    cutprefix = apiprefix.slice(5);
+    //cutprefix = apiprefix.slice(5);
     // console.log("Apiprefic: " + apiprefix);
     // console.log("cutprefic: " + cutprefix);
     //var zoom = gui.scaling[6];
@@ -2654,7 +2654,6 @@ Toe.View.SquareNoteInteraction.prototype.handleRefresh = function(e, call) {
 
 Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
     var gui = e.data.gui;
-    console.log(gui);
 
     // if(call){
     //     gui.handleDeleteUndos(gui);
@@ -2664,27 +2663,30 @@ Toe.View.SquareNoteInteraction.prototype.handleZoom = function(e, call) {
     cutprefix = apiprefix.slice(5);
     var self_url = location.href.split('#')[0];
 
-    $(gui.scaling[6]).neon({
-        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
-        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
-        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
-        bgimgopacity: 0.5,
-        documentType: "liber",
-        apiprefix: apiprefix,
-        width: 1200, // enforce width
-        zoom: true
-    });
-
-    $('#neon-wrapper').neon({
-        glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
-        meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
-        bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
-        bgimgopacity: 0.5,
-        documentType: "liber",
-        apiprefix: apiprefix,
-        width: 1200, // enforce width
-        zoom: false
-    });
+    if (gui.scaling[6]) {
+        $('#neon-wrapper').neon({
+            glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+            meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+            bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: false
+        });
+    }
+    else {
+        $('#neon-wrapper').neon({
+            glyphpath: self_url + "img/neumes_concat.svg", //glyphpath: "/static/img/neumes_concat.svg,
+            meipath: TEMP_meipath, //"/file" + cutprefix + ".mei",
+            bgimgpath: TEMP_bgimgpath, //"/file" + cutprefix + ".jpg",
+            bgimgopacity: 0.5,
+            documentType: "liber",
+            apiprefix: apiprefix,
+            width: 1200, // enforce width
+            zoom: true
+        });
+    }
 
     $("#btn_stafflock").prop("checked", true);
 };
