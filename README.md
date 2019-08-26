@@ -1,3 +1,5 @@
+**This repository has been archived and is no longer maintained. You may be looking for [Neon](https://github.com/DDMAL/Neon).**
+
 Neon.js
 =======
 
